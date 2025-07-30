@@ -1,8 +1,66 @@
 {
+  "api_info": {
+    "version": "1.0",
+    "last_updated": "2024-01-01"
+  },
+  "home": {
+    "slides": [],
+    "channels": [],
+    "actors": [],
+    "genres": [
+      {
+        "id": 1,
+        "title": "Action",
+        "posters": []
+      },
+      {
+        "id": 2,
+        "title": "Comedy",
+        "posters": []
+      },
+      {
+        "id": 3,
+        "title": "Drama",
+        "posters": []
+      }
+    ]
+  },
+  "genres": [
+    {
+      "id": 1,
+      "title": "Action",
+      "posters": []
+    },
+    {
+      "id": 2,
+      "title": "Comedy", 
+      "posters": []
+    },
+    {
+      "id": 3,
+      "title": "Drama",
+      "posters": []
+    }
+  ],
   "movies": [
     {
       "id": 1,
       "title": "Big Buck Bunny",
+      "type": "movie",
+      "year": "2008",
+      "rating": 7.5,
+      "imdb": "7.5",
+      "description": "A large and lovable rabbit deals with three tiny bullies.",
+      "genres": [
+        {
+          "id": 1,
+          "title": "Action"
+        },
+        {
+          "id": 2, 
+          "title": "Comedy"
+        }
+      ],
       "sources": [
         {
           "id": 1,
@@ -25,6 +83,34 @@
           "premium": "false",
           "external": false,
           "url": "http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4"
+        }
+      ]
+    },
+    {
+      "id": 2,
+      "title": "Sample Series Episode 1",
+      "type": "series",
+      "year": "2023",
+      "rating": 8.2,
+      "imdb": "8.2",
+      "description": "First episode of a sample series.",
+      "genres": [
+        {
+          "id": 3,
+          "title": "Drama"
+        }
+      ],
+      "sources": [
+        {
+          "id": 3,
+          "type": "video",
+          "title": "Episode 1 - 1080p",
+          "quality": "1080p",
+          "size": "500MB", 
+          "kind": "both",
+          "premium": "false",
+          "external": false,
+          "url": "http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ElephantsDream.mp4"
         }
       ]
     }
