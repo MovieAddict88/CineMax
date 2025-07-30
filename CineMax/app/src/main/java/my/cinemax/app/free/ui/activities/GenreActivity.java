@@ -217,149 +217,171 @@ public class GenreActivity extends AppCompatActivity {
                 if (response.isSuccessful() && response.body() != null) {
                     my.cinemax.app.free.entity.JsonApiResponse apiResponse = response.body();
                     
-                    if (apiResponse.getMovies() != null && apiResponse.getMovies().size() > 0) {
-                        List<Poster> filteredPosters = new ArrayList<>();
-                        
-                        // Filter content by the selected genre
+                    Log.d("GenreActivity", "API Response received successfully");
+                    Log.d("GenreActivity", "Total movies in response: " + (apiResponse.getMovies() != null ? apiResponse.getMovies().size() : "null"));
+                    Log.d("GenreActivity", "Total channels in response: " + (apiResponse.getChannels() != null ? apiResponse.getChannels().size() : "null"));
+                    Log.d("GenreActivity", "Looking for genre: " + (genre != null ? genre.getTitle() + " (ID: " + genre.getId() + ")" : "null"));
+
+                    // Clear existing data
+                    posterArrayList.clear();
+                    int foundMovies = 0;
+                    int foundChannels = 0;
+
+                    // Filter movies by the selected genre
+                    if (apiResponse.getMovies() != null && !apiResponse.getMovies().isEmpty()) {
                         for (Poster poster : apiResponse.getMovies()) {
                             boolean matchesGenre = false;
                             
-                            Log.d("GenreActivity", "Checking poster: " + (poster != null ? poster.getTitle() : "null"));
-                            Log.d("GenreActivity", "Looking for genre ID: " + (genre != null ? genre.getId() : "null genre"));
+                            Log.d("GenreActivity", "Checking movie: " + (poster != null ? poster.getTitle() : "null"));
                             
                             // Check if poster has the selected genre
                             if (poster != null && poster.getGenres() != null && !poster.getGenres().isEmpty()) {
-                                Log.d("GenreActivity", "Poster has " + poster.getGenres().size() + " genres");
-                                
+                                Log.d("GenreActivity", "Movie has " + poster.getGenres().size() + " genres");
                                 for (my.cinemax.app.free.entity.Genre posterGenre : poster.getGenres()) {
-                                    if (posterGenre != null && posterGenre.getId() != null) {
-                                        Log.d("GenreActivity", "Poster genre ID: " + posterGenre.getId() + ", title: " + posterGenre.getTitle());
+                                    if (posterGenre != null) {
+                                        Log.d("GenreActivity", "Movie genre: " + posterGenre.getTitle() + " (ID: " + posterGenre.getId() + ")");
                                         
-                                        if (genre != null && genre.getId() != null && 
-                                            posterGenre.getId().equals(genre.getId())) {
-                                            Log.d("GenreActivity", "MATCH FOUND! Poster '" + poster.getTitle() + "' matches genre '" + genre.getTitle() + "'");
+                                        // Match by both ID and title for better compatibility
+                                        if (genre != null && 
+                                            ((posterGenre.getId() != null && genre.getId() != null && posterGenre.getId().equals(genre.getId())) ||
+                                             (posterGenre.getTitle() != null && genre.getTitle() != null && 
+                                              posterGenre.getTitle().equalsIgnoreCase(genre.getTitle())))) {
                                             matchesGenre = true;
+                                            Log.d("GenreActivity", "✓ Genre match found for movie: " + poster.getTitle());
                                             break;
                                         }
-                                    } else {
-                                        Log.w("GenreActivity", "Poster genre is null or has null ID");
                                     }
                                 }
                             } else {
-                                Log.w("GenreActivity", "Poster is null or has no genres");
-                            }
-                            
-                            // Special handling for special genre IDs
-                            if (!matchesGenre && genre != null && genre.getId() != null) {
-                                // Handle special cases where genre ID might be 0 or negative
-                                if (genre.getId() == 0) {
-                                    Log.d("GenreActivity", "Genre ID is 0, showing all content");
-                                    // Show all content if genre ID is 0
-                                    matchesGenre = true;
-                                } else if (genre.getId() == -1) {
-                                    Log.d("GenreActivity", "Genre ID is -1, showing top rated content");
-                                    // Top rated content
-                                    matchesGenre = true;
-                                } else if (genre.getId() == -2) {
-                                    Log.d("GenreActivity", "Genre ID is -2, showing my list content");
-                                    // My list content
-                                    matchesGenre = true;
-                                }
+                                Log.d("GenreActivity", "Movie has no genres or null genres");
                             }
                             
                             if (matchesGenre) {
-                                Log.d("GenreActivity", "Adding poster to filtered list: " + poster.getTitle());
-                                filteredPosters.add(poster);
-                            } else {
-                                Log.d("GenreActivity", "Poster '" + (poster != null ? poster.getTitle() : "null") + "' does not match genre");
-                            }
-                        }
-                        
-                        Log.d("GenreActivity", "Total filtered posters: " + filteredPosters.size());
-                        
-                        // Apply sorting
-                        if (SelectedOrder != null) {
-                            switch (SelectedOrder) {
-                                case "created":
-                                    // Keep original order (newest first)
-                                    break;
-                                case "rating":
-                                    Collections.sort(filteredPosters, new Comparator<Poster>() {
-                                        @Override
-                                        public int compare(Poster p1, Poster p2) {
-                                            Float rating1 = p1.getRating();
-                                            Float rating2 = p2.getRating();
-                                            if (rating1 == null) rating1 = 0f;
-                                            if (rating2 == null) rating2 = 0f;
-                                            return rating2.compareTo(rating1); // Descending
-                                        }
-                                    });
-                                    break;
-                                case "year":
-                                    Collections.sort(filteredPosters, new Comparator<Poster>() {
-                                        @Override
-                                        public int compare(Poster p1, Poster p2) {
-                                            String year1 = p1.getYear();
-                                            String year2 = p2.getYear();
-                                            if (year1 == null) year1 = "0";
-                                            if (year2 == null) year2 = "0";
-                                            return year2.compareTo(year1); // Descending
-                                        }
-                                    });
-                                    break;
-                                case "name":
-                                    Collections.sort(filteredPosters, new Comparator<Poster>() {
-                                        @Override
-                                        public int compare(Poster p1, Poster p2) {
-                                            String title1 = p1.getTitle();
-                                            String title2 = p2.getTitle();
-                                            if (title1 == null) title1 = "";
-                                            if (title2 == null) title2 = "";
-                                            return title1.compareToIgnoreCase(title2); // Ascending
-                                        }
-                                    });
-                                    break;
-                            }
-                        }
-                        
-                        if (!filteredPosters.isEmpty()) {
-                            for (Poster poster : filteredPosters) {
                                 posterArrayList.add(poster);
-                                
-                                if (native_ads_enabled) {
-                                    item++;
-                                    if (item == lines_beetween_ads) {
-                                        item = 0;
-                                        if (prefManager.getString("ADMIN_NATIVE_TYPE").equals("FACEBOOK")) {
-                                            posterArrayList.add(new Poster().setTypeView(4));
-                                        } else if (prefManager.getString("ADMIN_NATIVE_TYPE").equals("ADMOB")) {
-                                            posterArrayList.add(new Poster().setTypeView(5));
-                                        } else if (prefManager.getString("ADMIN_NATIVE_TYPE").equals("BOTH")) {
-                                            if (type_ads == 0) {
-                                                posterArrayList.add(new Poster().setTypeView(4));
-                                                type_ads = 1;
-                                            } else if (type_ads == 1) {
-                                                posterArrayList.add(new Poster().setTypeView(5));
-                                                type_ads = 0;
-                                            }
+                                foundMovies++;
+                            }
+                        }
+                    }
+
+                    // Filter channels/series by the selected genre
+                    if (apiResponse.getChannels() != null && !apiResponse.getChannels().isEmpty()) {
+                        for (Poster channel : apiResponse.getChannels()) {
+                            boolean matchesGenre = false;
+                            
+                            Log.d("GenreActivity", "Checking channel: " + (channel != null ? channel.getTitle() : "null"));
+                            
+                            // Check if channel has the selected genre
+                            if (channel != null && channel.getGenres() != null && !channel.getGenres().isEmpty()) {
+                                Log.d("GenreActivity", "Channel has " + channel.getGenres().size() + " genres");
+                                for (my.cinemax.app.free.entity.Genre channelGenre : channel.getGenres()) {
+                                    if (channelGenre != null) {
+                                        Log.d("GenreActivity", "Channel genre: " + channelGenre.getTitle() + " (ID: " + channelGenre.getId() + ")");
+                                        
+                                        // Match by both ID and title for better compatibility
+                                        if (genre != null && 
+                                            ((channelGenre.getId() != null && genre.getId() != null && channelGenre.getId().equals(genre.getId())) ||
+                                             (channelGenre.getTitle() != null && genre.getTitle() != null && 
+                                              channelGenre.getTitle().equalsIgnoreCase(genre.getTitle())))) {
+                                            matchesGenre = true;
+                                            Log.d("GenreActivity", "✓ Genre match found for channel: " + channel.getTitle());
+                                            break;
                                         }
                                     }
                                 }
+                            } else {
+                                Log.d("GenreActivity", "Channel has no genres or null genres");
                             }
-                            linear_layout_layout_error.setVisibility(View.GONE);
-                            recycler_view_activity_genre.setVisibility(View.VISIBLE);
-                            image_view_empty_list.setVisibility(View.GONE);
                             
-                            adapter.notifyDataSetChanged();
-                            page++;
-                            loading = true;
-                        } else {
-                            if (page == 0) {
-                                linear_layout_layout_error.setVisibility(View.GONE);
-                                recycler_view_activity_genre.setVisibility(View.GONE);
-                                image_view_empty_list.setVisibility(View.VISIBLE);
+                            if (matchesGenre) {
+                                posterArrayList.add(channel);
+                                foundChannels++;
                             }
                         }
+                    }
+
+                    Log.d("GenreActivity", "Genre filtering complete. Found " + foundMovies + " movies and " + foundChannels + " channels");
+                    Log.d("GenreActivity", "Total items in posterList: " + posterArrayList.size());
+                    
+                    // Apply sorting
+                    if (SelectedOrder != null) {
+                        switch (SelectedOrder) {
+                            case "created":
+                                // Keep original order (newest first)
+                                break;
+                            case "rating":
+                                Collections.sort(posterArrayList, new Comparator<Poster>() {
+                                    @Override
+                                    public int compare(Poster p1, Poster p2) {
+                                        Float rating1 = p1.getRating();
+                                        Float rating2 = p2.getRating();
+                                        if (rating1 == null) rating1 = 0f;
+                                        if (rating2 == null) rating2 = 0f;
+                                        return rating2.compareTo(rating1); // Descending
+                                    }
+                                });
+                                break;
+                            case "year":
+                                Collections.sort(posterArrayList, new Comparator<Poster>() {
+                                    @Override
+                                    public int compare(Poster p1, Poster p2) {
+                                        String year1 = p1.getYear();
+                                        String year2 = p2.getYear();
+                                        if (year1 == null) year1 = "0";
+                                        if (year2 == null) year2 = "0";
+                                        return year2.compareTo(year1); // Descending
+                                    }
+                                });
+                                break;
+                            case "name":
+                                Collections.sort(posterArrayList, new Comparator<Poster>() {
+                                    @Override
+                                    public int compare(Poster p1, Poster p2) {
+                                        String title1 = p1.getTitle();
+                                        String title2 = p2.getTitle();
+                                        if (title1 == null) title1 = "";
+                                        if (title2 == null) title2 = "";
+                                        return title1.compareToIgnoreCase(title2); // Ascending
+                                    }
+                                });
+                                break;
+                        }
+                    }
+                    
+                                         if (!posterArrayList.isEmpty()) {
+                         // Add native ads between content if enabled
+                         if (native_ads_enabled) {
+                             List<Poster> tempList = new ArrayList<>(posterArrayList);
+                             posterArrayList.clear();
+                             
+                             for (int i = 0; i < tempList.size(); i++) {
+                                 posterArrayList.add(tempList.get(i));
+                                 
+                                 item++;
+                                 if (item == lines_beetween_ads && i < tempList.size() - 1) {
+                                     item = 0;
+                                     if (prefManager.getString("ADMIN_NATIVE_TYPE").equals("FACEBOOK")) {
+                                         posterArrayList.add(new Poster().setTypeView(4));
+                                     } else if (prefManager.getString("ADMIN_NATIVE_TYPE").equals("ADMOB")) {
+                                         posterArrayList.add(new Poster().setTypeView(5));
+                                     } else if (prefManager.getString("ADMIN_NATIVE_TYPE").equals("BOTH")) {
+                                         if (type_ads == 0) {
+                                             posterArrayList.add(new Poster().setTypeView(4));
+                                             type_ads = 1;
+                                         } else if (type_ads == 1) {
+                                             posterArrayList.add(new Poster().setTypeView(5));
+                                             type_ads = 0;
+                                         }
+                                     }
+                                 }
+                             }
+                         }
+                        linear_layout_layout_error.setVisibility(View.GONE);
+                        recycler_view_activity_genre.setVisibility(View.VISIBLE);
+                        image_view_empty_list.setVisibility(View.GONE);
+                        
+                        adapter.notifyDataSetChanged();
+                        page++;
+                        loading = true;
                     } else {
                         if (page == 0) {
                             linear_layout_layout_error.setVisibility(View.GONE);

@@ -234,27 +234,11 @@ public interface apiRest {
     // ===== NEW JSON API ENDPOINTS =====
     // These endpoints will fetch data from your GitHub JSON file
     
-    // Updated to use a working GitHub repository with movie data
-    @GET("mikeleguedes/json-movie-list/master/movies/2023/big-buck-bunny.json")
+    // Updated to use the correct raw GitHub URL
+    @GET("MovieAddict88/movie-api/refs/heads/main/free_movie_api.json")
     Call<JsonApiResponse> getJsonApiData();
     
     @GET("ads_config.json")
-    Call<JsonApiResponse> getAdsConfig();
-    
-    @GET("free_movie_api.json")
-    Call<JsonApiResponse> getHomeDataFromJson();
-    
-    @GET("free_movie_api.json")
-    Call<JsonApiResponse> getMoviesFromJson();
-    
-    @GET("free_movie_api.json")
-    Call<JsonApiResponse> getChannelsFromJson();
-    
-    @GET("free_movie_api.json")
-    Call<JsonApiResponse> getActorsFromJson();
-    
-    @GET("free_movie_api.json")
-    Call<JsonApiResponse> getGenresFromJson();
-
+    Call<my.cinemax.app.free.entity.AdsEntity> getAdsData();
 }
 
