@@ -88,13 +88,9 @@ public class MyListActivity extends AppCompatActivity {
         // Load user's saved list from local storage
         PrefManager prf = new PrefManager(MyListActivity.this.getApplicationContext());
         
-        // Get saved movie/series IDs from SharedPreferences
-        String savedMoviesIds = prf.getString("MY_LIST_MOVIES");
-        String savedChannelsIds = prf.getString("MY_LIST_CHANNELS");
-        
-        // Handle empty strings for safety
-        if (savedMoviesIds == null) savedMoviesIds = "";
-        if (savedChannelsIds == null) savedChannelsIds = "";
+        // Get saved movie/series IDs from SharedPreferences - make them final
+        final String savedMoviesIds = prf.getString("MY_LIST_MOVIES") != null ? prf.getString("MY_LIST_MOVIES") : "";
+        final String savedChannelsIds = prf.getString("MY_LIST_CHANNELS") != null ? prf.getString("MY_LIST_CHANNELS") : "";
         
         // Load data from GitHub JSON API
         apiClient.getJsonApiData(new retrofit2.Callback<my.cinemax.app.free.entity.JsonApiResponse>() {
