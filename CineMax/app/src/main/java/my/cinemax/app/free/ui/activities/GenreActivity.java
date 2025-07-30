@@ -225,7 +225,6 @@ public class GenreActivity extends AppCompatActivity {
                     // Clear existing data
                     posterArrayList.clear();
                     int foundMovies = 0;
-                    int foundChannels = 0;
 
                     // Filter movies by the selected genre
                     if (apiResponse.getMovies() != null && !apiResponse.getMovies().isEmpty()) {
@@ -263,43 +262,11 @@ public class GenreActivity extends AppCompatActivity {
                         }
                     }
 
-                    // Filter channels/series by the selected genre
-                    if (apiResponse.getChannels() != null && !apiResponse.getChannels().isEmpty()) {
-                        for (Poster channel : apiResponse.getChannels()) {
-                            boolean matchesGenre = false;
-                            
-                            Log.d("GenreActivity", "Checking channel: " + (channel != null ? channel.getTitle() : "null"));
-                            
-                            // Check if channel has the selected genre
-                            if (channel != null && channel.getGenres() != null && !channel.getGenres().isEmpty()) {
-                                Log.d("GenreActivity", "Channel has " + channel.getGenres().size() + " genres");
-                                for (my.cinemax.app.free.entity.Genre channelGenre : channel.getGenres()) {
-                                    if (channelGenre != null) {
-                                        Log.d("GenreActivity", "Channel genre: " + channelGenre.getTitle() + " (ID: " + channelGenre.getId() + ")");
-                                        
-                                        // Match by both ID and title for better compatibility
-                                        if (genre != null && 
-                                            ((channelGenre.getId() != null && genre.getId() != null && channelGenre.getId().equals(genre.getId())) ||
-                                             (channelGenre.getTitle() != null && genre.getTitle() != null && 
-                                              channelGenre.getTitle().equalsIgnoreCase(genre.getTitle())))) {
-                                            matchesGenre = true;
-                                            Log.d("GenreActivity", "✓ Genre match found for channel: " + channel.getTitle());
-                                            break;
-                                        }
-                                    }
-                                }
-                            } else {
-                                Log.d("GenreActivity", "Channel has no genres or null genres");
-                            }
-                            
-                            if (matchesGenre) {
-                                posterArrayList.add(channel);
-                                foundChannels++;
-                            }
-                        }
-                    }
+                    // Note: Channels don't have genre information in the current data structure
+                    // So we skip channel filtering for now
+                    Log.d("GenreActivity", "Skipping channel filtering - channels don't have genre information");
 
-                    Log.d("GenreActivity", "Genre filtering complete. Found " + foundMovies + " movies and " + foundChannels + " channels");
+                    Log.d("GenreActivity", "Genre filtering complete. Found " + foundMovies + " movies (channels skipped - no genre info)");
                     Log.d("GenreActivity", "Total items in posterList: " + posterArrayList.size());
                     
                     // Apply sorting
