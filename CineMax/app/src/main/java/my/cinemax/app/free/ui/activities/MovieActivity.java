@@ -378,7 +378,6 @@ public class MovieActivity extends AppCompatActivity {
             }
         }
     }
-    }
 
     private void getRandomMovies() {
         String genres_list = "";
