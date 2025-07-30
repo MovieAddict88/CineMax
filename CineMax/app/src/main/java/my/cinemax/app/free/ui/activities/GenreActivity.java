@@ -29,6 +29,8 @@ import my.cinemax.app.free.Provider.PrefManager;
 import my.cinemax.app.free.R;
 import my.cinemax.app.free.api.apiClient;
 import my.cinemax.app.free.api.apiRest;
+import my.cinemax.app.free.entity.Category;
+import my.cinemax.app.free.entity.Channel;
 import my.cinemax.app.free.entity.Genre;
 import my.cinemax.app.free.entity.Poster;
 import my.cinemax.app.free.ui.Adapters.PosterAdapter;
@@ -225,6 +227,7 @@ public class GenreActivity extends AppCompatActivity {
                     // Clear existing data
                     posterArrayList.clear();
                     int foundMovies = 0;
+                    int foundChannels = 0;
 
                     // Filter movies by the selected genre
                     if (apiResponse.getMovies() != null && !apiResponse.getMovies().isEmpty()) {
@@ -262,11 +265,46 @@ public class GenreActivity extends AppCompatActivity {
                         }
                     }
 
-                    // Note: Channels don't have genre information in the current data structure
-                    // So we skip channel filtering for now
-                    Log.d("GenreActivity", "Skipping channel filtering - channels don't have genre information");
+                    // Filter channels/series by the selected genre
+                    // Channels use 'categories' instead of 'genres'
+                    if (apiResponse.getChannels() != null && !apiResponse.getChannels().isEmpty()) {
+                        for (Channel channel : apiResponse.getChannels()) {
+                            boolean matchesGenre = false;
+                            
+                            Log.d("GenreActivity", "Checking channel: " + (channel != null ? channel.getTitle() : "null"));
+                            
+                            // Check if channel has the selected category/genre
+                            if (channel != null && channel.getCategories() != null && !channel.getCategories().isEmpty()) {
+                                Log.d("GenreActivity", "Channel has " + channel.getCategories().size() + " categories");
+                                for (Category channelCategory : channel.getCategories()) {
+                                    if (channelCategory != null) {
+                                        Log.d("GenreActivity", "Channel category: " + channelCategory.getTitle() + " (ID: " + channelCategory.getId() + ")");
+                                        
+                                        // Match by both ID and title for better compatibility
+                                        if (genre != null && 
+                                            ((channelCategory.getId() != null && genre.getId() != null && channelCategory.getId().equals(genre.getId())) ||
+                                             (channelCategory.getTitle() != null && genre.getTitle() != null && 
+                                              channelCategory.getTitle().equalsIgnoreCase(genre.getTitle())))) {
+                                            matchesGenre = true;
+                                            Log.d("GenreActivity", "✓ Genre match found for channel: " + channel.getTitle());
+                                            break;
+                                        }
+                                    }
+                                }
+                            } else {
+                                Log.d("GenreActivity", "Channel has no categories or null categories");
+                            }
+                            
+                            if (matchesGenre) {
+                                // Convert Channel to Poster for display
+                                Poster channelAsPoster = convertChannelToPoster(channel);
+                                posterArrayList.add(channelAsPoster);
+                                foundChannels++;
+                            }
+                        }
+                    }
 
-                    Log.d("GenreActivity", "Genre filtering complete. Found " + foundMovies + " movies (channels skipped - no genre info)");
+                    Log.d("GenreActivity", "Genre filtering complete. Found " + foundMovies + " movies and " + foundChannels + " channels");
                     Log.d("GenreActivity", "Total items in posterList: " + posterArrayList.size());
                     
                     // Apply sorting
@@ -540,6 +578,54 @@ public class GenreActivity extends AppCompatActivity {
 
             }
         });
+    }
+
+    /**
+     * Convert a Channel object to a Poster object for display in the genre list
+     */
+    private Poster convertChannelToPoster(Channel channel) {
+        Poster poster = new Poster();
+        
+        // Copy basic information
+        poster.setId(channel.getId());
+        poster.setTitle(channel.getTitle());
+        poster.setType("channel"); // Set type to distinguish from movies
+        poster.setLabel(channel.getLabel());
+        poster.setSublabel(channel.getSublabel());
+        poster.setDescription(channel.getDescription());
+        poster.setClassification(channel.getClassification());
+        poster.setViews(channel.getViews());
+        poster.setShares(channel.getShares());
+        poster.setRating(channel.getRating());
+        poster.setComment(channel.getComment());
+        poster.setImage(channel.getImage());
+        poster.setPlayas(channel.getPlayas());
+        
+        // Convert categories to genres
+        if (channel.getCategories() != null && !channel.getCategories().isEmpty()) {
+            List<Genre> genres = new ArrayList<>();
+            for (Category category : channel.getCategories()) {
+                if (category != null) {
+                    Genre genre = new Genre();
+                    genre.setId(category.getId());
+                    genre.setTitle(category.getTitle());
+                    genres.add(genre);
+                }
+            }
+            poster.setGenres(genres);
+        }
+        
+        // Copy sources if available
+        if (channel.getSources() != null) {
+            poster.setSources(channel.getSources());
+        }
+        
+        // Copy countries if available  
+        if (channel.getCountries() != null) {
+            poster.setCountries(channel.getCountries());
+        }
+        
+        return poster;
     }
 
 }
