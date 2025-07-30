@@ -443,6 +443,14 @@ public class MovieActivity extends AppCompatActivity {
     private void getMovie() {
         poster = getIntent().getParcelableExtra("poster");
         from = getIntent().getStringExtra("from");
+        
+        // Check if poster is null - this prevents crashes
+        if (poster == null) {
+            Log.e("MovieActivity", "Poster object is null - finishing activity");
+            Toast.makeText(this, "Content not available", Toast.LENGTH_SHORT).show();
+            finish();
+            return;
+        }
     }
     private void setMovie() {
         Picasso.with(this).load((poster.getCover()!=null ? poster.getCover() : poster.getImage())).into(image_view_activity_movie_cover);
@@ -1690,63 +1698,44 @@ public class MovieActivity extends AppCompatActivity {
         }
         return false;
     }
-    public void DownloadSource(Source  source){
-        switch (source.getType()){
-            case "mov": {
-                if (android.os.Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-                    DownloadQ(source);
-                }else {
-                    Download(source);
-                }
-            }
-            case "webm": {
-                if (android.os.Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-                    DownloadQ(source);
-                }else {
-                    Download(source);
-                }
-            }
-            break;
-            case "mkv": {
-                if (android.os.Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-                    DownloadQ(source);
-                }else {
-                    Download(source);
-                }
-            }
-            break;
-            case "mp4": {
-                if (android.os.Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-                    DownloadQ(source);
-                }else {
-                    Download(source);
-                }
-            }
-            break;
-            case "m3u8":
-                if(!isMyServiceRunning(DownloadService.class)){
+    public void DownloadSource(Source source){
+        if (source == null || source.getUrl() == null) {
+            Toasty.error(this, "Invalid download source", Toast.LENGTH_SHORT).show();
+            return;
+        }
+        
+        String url = source.getUrl();
+        
+        // Smart detection for download handling
+        if (url.contains(".m3u8")) {
+            // Handle HLS streams
+            if(!isMyServiceRunning(DownloadService.class)){
+                Intent intent = new Intent(MovieActivity.this, DownloadService.class);
+                intent.putExtra("type","movie");
+                intent.putExtra("url",source.getUrl());
+                intent.putExtra("title",poster.getTitle());
+                intent.putExtra("image",poster.getImage());
+                intent.putExtra("id",source.getId());
+                intent.putExtra("element",poster.getId());
 
+                if (poster.getDuration()!=null)
+                    intent.putExtra("duration",poster.getDuration());
+                else
+                    intent.putExtra("duration","");
 
-                    Intent intent = new Intent(MovieActivity.this, DownloadService.class);
-                    intent.putExtra("type","movie");
-                    intent.putExtra("url",source.getUrl());
-                    intent.putExtra("title",poster.getTitle());
-                    intent.putExtra("image",poster.getImage());
-                    intent.putExtra("id",source.getId());
-                    intent.putExtra("element",poster.getId());
-
-                    if (poster.getDuration()!=null)
-                        intent.putExtra("duration",poster.getDuration());
-                    else
-                        intent.putExtra("duration","");
-
-                    Toasty.info(this,"Download has been started ...",Toast.LENGTH_LONG).show();
-                    expandPanel(this);
-                    startService(intent);
-                }else{
-                    Toasty.warning(MovieActivity.this, "Multi-download not supported with m3u8 files. please wait !", Toast.LENGTH_SHORT).show();
-                }
-                break;
+                Toasty.info(this,"Download has been started ...",Toast.LENGTH_LONG).show();
+                expandPanel(this);
+                startService(intent);
+            }else{
+                Toasty.warning(MovieActivity.this, "Multi-download not supported with m3u8 files. please wait !", Toast.LENGTH_SHORT).show();
+            }
+        } else {
+            // Handle regular video files (mp4, mkv, webm, mov, etc.)
+            if (android.os.Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                DownloadQ(source);
+            } else {
+                Download(source);
+            }
         }
     }
     private static void expandPanel(Context _context) {

@@ -487,6 +487,14 @@ public class SerieActivity extends AppCompatActivity implements PlaylistDownload
     private void getSerie() {
         poster = getIntent().getParcelableExtra("poster");
         from = getIntent().getStringExtra("from");
+        
+        // Check if poster is null - this prevents crashes
+        if (poster == null) {
+            Log.e("SerieActivity", "Poster object is null - finishing activity");
+            Toast.makeText(this, "Content not available", Toast.LENGTH_SHORT).show();
+            finish();
+            return;
+        }
     }
     private void setSerie() {
         Picasso.with(this).load((poster.getCover()!=null ? poster.getCover() : poster.getImage())).into(image_view_activity_serie_cover);
@@ -1876,64 +1884,43 @@ public class SerieActivity extends AppCompatActivity implements PlaylistDownload
         }
         return false;
     }
-    public void DownloadSource(Source  source){
+    public void DownloadSource(Source source){
+        if (source == null || source.getUrl() == null) {
+            Toasty.error(this, "Invalid download source", Toast.LENGTH_SHORT).show();
+            return;
+        }
+        
+        String url = source.getUrl();
+        
+        // Smart detection for download handling
+        if (url.contains(".m3u8")) {
+            // Handle HLS streams
+            if(!isMyServiceRunning(DownloadService.class)){
+                Intent intent = new Intent(SerieActivity.this, DownloadService.class);
+                intent.putExtra("type","episode");
+                intent.putExtra("url",source.getUrl());
+                intent.putExtra("title",poster.getTitle()+" - "+selectedEpisode.getTitle());
+                intent.putExtra("image",selectedEpisode.getImage());
+                intent.putExtra("id",source.getId());
+                intent.putExtra("element",selectedEpisode.getId());
+                if (selectedEpisode.getDuration()!=null)
+                    intent.putExtra("duration",selectedEpisode.getDuration());
+                else
+                    intent.putExtra("duration","");
 
-        switch (source.getType()){
-            case "mov": {
-                if (android.os.Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-                    DownloadQ(source);
-                }else {
-                    Download(source);
-                }
+                Toasty.info(this,"Download has been started ...",Toast.LENGTH_LONG).show();
+                startService(intent);
+                expandPanel(this);
+            }else{
+                Toasty.warning(SerieActivity.this, "Multi-download not supported with m3u8 files. please wait !", Toast.LENGTH_SHORT).show();
             }
-            break;
-            case "mkv": {
-                if (android.os.Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-                    DownloadQ(source);
-                }else {
-                    Download(source);
-                }
+        } else {
+            // Handle regular video files (mp4, mkv, webm, mov, etc.)
+            if (android.os.Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                DownloadQ(source);
+            } else {
+                Download(source);
             }
-            break;
-            case "webm": {
-                if (android.os.Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-                    DownloadQ(source);
-                }else {
-                    Download(source);
-                }
-            }
-            break;
-            case "mp4": {
-                if (android.os.Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-                    DownloadQ(source);
-                }else {
-                    Download(source);
-                }
-            }
-            break;
-            case "m3u8":
-                if(!isMyServiceRunning(DownloadService.class)){
-
-                    Intent intent = new Intent(SerieActivity.this, DownloadService.class);
-                    intent.putExtra("type","episode");
-                    intent.putExtra("url",source.getUrl());
-                    intent.putExtra("title",poster.getTitle()+" - "+selectedEpisode.getTitle());
-                    intent.putExtra("image",selectedEpisode.getImage());
-                    intent.putExtra("id",source.getId());
-                    intent.putExtra("element",selectedEpisode.getId());
-                    if (selectedEpisode.getDuration()!=null)
-                        intent.putExtra("duration",selectedEpisode.getDuration());
-                    else
-                        intent.putExtra("duration","");
-
-                    Toasty.info(this,"Download has been started ...",Toast.LENGTH_LONG).show();
-                    startService(intent);
-                    expandPanel(this);
-
-                }else{
-                    Toasty.warning(SerieActivity.this, "Multi-download not supported with m3u8 files. please wait !", Toast.LENGTH_SHORT).show();
-                }
-                break;
         }
     }
     private static void expandPanel(Context _context) {
