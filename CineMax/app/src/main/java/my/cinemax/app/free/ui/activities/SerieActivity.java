@@ -667,11 +667,15 @@ public class SerieActivity extends AppCompatActivity implements PlaylistDownload
             intent.putExtra("id",selectedEpisode.getId());
             intent.putExtra("url",playableList.get(position).getUrl());
             
-            // Fix video type for m3u8 URLs
+            // Fix video type for streaming URLs
             String videoType = playableList.get(position).getType();
             String url = playableList.get(position).getUrl();
-            if (url != null && url.contains(".m3u8")) {
-                videoType = "m3u8";  // Player expects "m3u8" for HLS streams
+            if (url != null) {
+                if (url.contains(".m3u8")) {
+                    videoType = "m3u8";  // Player expects "m3u8" for HLS streams
+                } else if (url.contains(".mpd")) {
+                    videoType = "dash";  // Player expects "dash" for MPD/DASH streams
+                }
             }
             intent.putExtra("type", videoType);
             intent.putExtra("kind","episode");
