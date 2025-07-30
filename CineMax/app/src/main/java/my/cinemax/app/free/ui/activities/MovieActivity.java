@@ -356,13 +356,7 @@ public class MovieActivity extends AppCompatActivity {
 
     private void setPlayableList() {
         for (int i = 0; i < poster.getSources().size(); i++) {
-            // Support both old format (kind: "both"/"play") and new format (kind: "mp4"/"hls"/"video"/"live")
-            String kind = poster.getSources().get(i).getKind();
-            String type = poster.getSources().get(i).getType();
-            
-            if (kind != null && (kind.equals("both") || kind.equals("play") || 
-                kind.equals("mp4") || kind.equals("hls") || 
-                (type != null && (type.equals("video") || type.equals("live"))))) {
+            if (poster.getSources().get(i).getKind().equals("both") || poster.getSources().get(i).getKind().equals("play")){
                 playSources.add(poster.getSources().get(i));
             }
         }
@@ -370,13 +364,8 @@ public class MovieActivity extends AppCompatActivity {
     }
     private void setDownloadableList() {
         for (int i = 0; i < poster.getSources().size(); i++) {
-            // Support both old format (kind: "both"/"download") and new format (kind: "mp4"/"hls")
-            String kind = poster.getSources().get(i).getKind();
-            String type = poster.getSources().get(i).getType();
-            
-            if (kind != null && (kind.equals("both") || kind.equals("download") ||
-                (kind.equals("mp4") && type != null && type.equals("video")))) {
-                if (type != null && !type.equals("youtube") && !type.equals("embed")){
+            if (poster.getSources().get(i).getKind().equals("both") || poster.getSources().get(i).getKind().equals("download")){
+                if (!poster.getSources().get(i).getType().equals("youtube") && !poster.getSources().get(i).getType().equals("embed")){
                     downloadableList.add(poster.getSources().get(i));
                 }
             }
