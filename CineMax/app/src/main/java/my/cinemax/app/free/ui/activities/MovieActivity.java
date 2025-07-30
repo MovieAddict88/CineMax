@@ -355,21 +355,29 @@ public class MovieActivity extends AppCompatActivity {
 
 
     private void setPlayableList() {
-        for (int i = 0; i < poster.getSources().size(); i++) {
-            if (poster.getSources().get(i).getKind().equals("both") || poster.getSources().get(i).getKind().equals("play")){
-                playSources.add(poster.getSources().get(i));
-            }
-        }
-
-    }
-    private void setDownloadableList() {
-        for (int i = 0; i < poster.getSources().size(); i++) {
-            if (poster.getSources().get(i).getKind().equals("both") || poster.getSources().get(i).getKind().equals("download")){
-                if (!poster.getSources().get(i).getType().equals("youtube") && !poster.getSources().get(i).getType().equals("embed")){
-                    downloadableList.add(poster.getSources().get(i));
+        if (poster != null && poster.getSources() != null) {
+            for (int i = 0; i < poster.getSources().size(); i++) {
+                Source source = poster.getSources().get(i);
+                if (source != null && source.getKind() != null && 
+                    (source.getKind().equals("both") || source.getKind().equals("play"))) {
+                    playSources.add(source);
                 }
             }
         }
+    }
+    private void setDownloadableList() {
+        if (poster != null && poster.getSources() != null) {
+            for (int i = 0; i < poster.getSources().size(); i++) {
+                Source source = poster.getSources().get(i);
+                if (source != null && source.getKind() != null && source.getType() != null &&
+                    (source.getKind().equals("both") || source.getKind().equals("download"))) {
+                    if (!source.getType().equals("youtube") && !source.getType().equals("embed")) {
+                        downloadableList.add(source);
+                    }
+                }
+            }
+        }
+    }
     }
 
     private void getRandomMovies() {
@@ -595,7 +603,15 @@ public class MovieActivity extends AppCompatActivity {
             Intent intent = new Intent(MovieActivity.this,PlayerActivity.class);
             intent.putExtra("id",poster.getId());
             intent.putExtra("url",playSources.get(position).getUrl());
-            intent.putExtra("type",playSources.get(position).getType());
+            
+            // Fix video type for m3u8 URLs
+            String videoType = playSources.get(position).getType();
+            String url = playSources.get(position).getUrl();
+            if (url != null && url.contains(".m3u8")) {
+                videoType = "m3u8";  // Player expects "m3u8" for HLS streams
+            }
+            intent.putExtra("type", videoType);
+            
             intent.putExtra("image",poster.getImage());
             intent.putExtra("kind","movie");
             intent.putExtra("title",poster.getTitle());

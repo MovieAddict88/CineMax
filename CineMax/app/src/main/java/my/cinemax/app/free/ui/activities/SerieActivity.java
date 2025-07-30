@@ -372,10 +372,14 @@ public class SerieActivity extends AppCompatActivity implements PlaylistDownload
         selectedEpisode = episode;
 
         downloadableList.clear();
-        for (int i = 0; i < episode.getSources().size(); i++) {
-            if (episode.getSources().get(i).getKind().equals("both") || episode.getSources().get(i).getKind().equals("download")){
-                if (!episode.getSources().get(i).getType().equals("youtube") && !episode.getSources().get(i).getType().equals("embed")){
-                    downloadableList.add(episode.getSources().get(i));
+        if (episode != null && episode.getSources() != null) {
+            for (int i = 0; i < episode.getSources().size(); i++) {
+                Source source = episode.getSources().get(i);
+                if (source != null && source.getKind() != null && source.getType() != null &&
+                    (source.getKind().equals("both") || source.getKind().equals("download"))) {
+                    if (!source.getType().equals("youtube") && !source.getType().equals("embed")) {
+                        downloadableList.add(source);
+                    }
                 }
             }
         }
@@ -395,10 +399,13 @@ public class SerieActivity extends AppCompatActivity implements PlaylistDownload
     private void setPlayableList(Episode episode) {
         selectedEpisode = episode;
         playableList.clear();
-        for (int i = 0; i < episode.getSources().size(); i++) {
-            if (episode.getSources().get(i).getKind().equals("both") || episode.getSources().get(i).getKind().equals("play")) {
-
-                playableList.add(episode.getSources().get(i));
+        if (episode != null && episode.getSources() != null) {
+            for (int i = 0; i < episode.getSources().size(); i++) {
+                Source source = episode.getSources().get(i);
+                if (source != null && source.getKind() != null && 
+                    (source.getKind().equals("both") || source.getKind().equals("play"))) {
+                    playableList.add(source);
+                }
             }
         }
 
@@ -659,7 +666,14 @@ public class SerieActivity extends AppCompatActivity implements PlaylistDownload
             Intent intent = new Intent(SerieActivity.this,PlayerActivity.class);
             intent.putExtra("id",selectedEpisode.getId());
             intent.putExtra("url",playableList.get(position).getUrl());
-            intent.putExtra("type",playableList.get(position).getType());
+            
+            // Fix video type for m3u8 URLs
+            String videoType = playableList.get(position).getType();
+            String url = playableList.get(position).getUrl();
+            if (url != null && url.contains(".m3u8")) {
+                videoType = "m3u8";  // Player expects "m3u8" for HLS streams
+            }
+            intent.putExtra("type", videoType);
             intent.putExtra("kind","episode");
             intent.putExtra("image",poster.getImage());
             intent.putExtra("title",poster.getTitle());

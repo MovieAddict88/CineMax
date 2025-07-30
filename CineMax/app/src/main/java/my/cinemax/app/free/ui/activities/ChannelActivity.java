@@ -297,9 +297,13 @@ public class ChannelActivity extends AppCompatActivity {
 
     }
     private void setPlayableList() {
-        for (int i = 0; i < channel.getSources().size(); i++) {
-            if (channel.getSources().get(i).getKind().equals("both") || channel.getSources().get(i).getKind().equals("play")){
-                playSources.add(channel.getSources().get(i));
+        if (channel != null && channel.getSources() != null) {
+            for (int i = 0; i < channel.getSources().size(); i++) {
+                Source source = channel.getSources().get(i);
+                if (source != null && source.getKind() != null && 
+                    (source.getKind().equals("both") || source.getKind().equals("play"))) {
+                    playSources.add(source);
+                }
             }
         }
 
@@ -1033,7 +1037,14 @@ public class ChannelActivity extends AppCompatActivity {
             Intent intent = new Intent(ChannelActivity.this,PlayerActivity.class);
             intent.putExtra("id",channel.getId());
             intent.putExtra("url",playSources.get(position).getUrl());
-            intent.putExtra("type",playSources.get(position).getType());
+            
+            // Fix video type for m3u8 URLs
+            String videoType = playSources.get(position).getType();
+            String url = playSources.get(position).getUrl();
+            if (url != null && url.contains(".m3u8")) {
+                videoType = "m3u8";  // Player expects "m3u8" for HLS streams
+            }
+            intent.putExtra("type", videoType);
             intent.putExtra("image",channel.getImage());
             intent.putExtra("kind","channel");
             intent.putExtra("isLive",true);
