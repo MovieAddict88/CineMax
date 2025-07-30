@@ -13,6 +13,7 @@ import retrofit2.Retrofit;
 import android.graphics.Bitmap;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.ImageView;
@@ -30,9 +31,11 @@ import my.cinemax.app.free.api.apiClient;
 import my.cinemax.app.free.api.apiRest;
 import my.cinemax.app.free.entity.Actor;
 import my.cinemax.app.free.entity.Poster;
+import my.cinemax.app.free.entity.JsonApiResponse;
 import my.cinemax.app.free.ui.Adapters.PosterAdapter;
 import com.squareup.picasso.Picasso;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class ActorActivity extends AppCompatActivity {
@@ -51,6 +54,10 @@ public class ActorActivity extends AppCompatActivity {
     private LinearLayoutManager linearLayoutManagerMoreMovies;
     private RecyclerView recycle_view_activity_activity_actor_movies;
 
+    // JSON API data cache
+    private JsonApiResponse cachedJsonResponse = null;
+    private List<Poster> allMovies = new ArrayList<>();
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -60,7 +67,7 @@ public class ActorActivity extends AppCompatActivity {
         getMovie();
         setActor();
 
-        getRandomMovies();
+        getMoviesByActorFromJson();
         showAdsBanner();
 
     }
@@ -95,6 +102,76 @@ public class ActorActivity extends AppCompatActivity {
     }
     private void initAction() {
 
+    }
+
+    /**
+     * Load movies by actor from GitHub JSON API instead of old server API
+     */
+    private void getMoviesByActorFromJson() {
+        // If we already have cached data, use it
+        if (cachedJsonResponse != null && !allMovies.isEmpty()) {
+            filterAndDisplayMoviesByActor();
+            return;
+        }
+        
+        // Load data from GitHub JSON API
+        apiClient.getJsonApiData(new apiClient.JsonApiCallback() {
+            @Override
+            public void onSuccess(JsonApiResponse jsonResponse) {
+                if (jsonResponse != null && jsonResponse.getMovies() != null) {
+                    cachedJsonResponse = jsonResponse;
+                    allMovies = jsonResponse.getMovies();
+                    filterAndDisplayMoviesByActor();
+                } else {
+                    Log.e("ActorActivity", "No movies data available");
+                }
+            }
+            
+            @Override
+            public void onError(String error) {
+                Log.e("ActorActivity", "Error loading JSON data: " + error);
+            }
+        });
+    }
+    
+    /**
+     * Filter movies by actor and display them
+     */
+    private void filterAndDisplayMoviesByActor() {
+        List<Poster> actorMovies = new ArrayList<>();
+        
+        // Filter movies by actor
+        for (Poster movie : allMovies) {
+            if (movie.getActors() != null) {
+                for (Actor movieActor : movie.getActors()) {
+                    if (movieActor.getId() != null && movieActor.getId().equals(actor.getId())) {
+                        actorMovies.add(movie);
+                        break;
+                    }
+                }
+            }
+        }
+        
+        // Display movies if found
+        if (actorMovies.size() > 0) {
+            linearLayoutManagerMoreMovies = new LinearLayoutManager(getApplicationContext(), LinearLayoutManager.HORIZONTAL, false);
+            posterAdapter = new PosterAdapter(actorMovies, ActorActivity.this);
+            recycle_view_activity_activity_actor_movies.setHasFixedSize(true);
+            recycle_view_activity_activity_actor_movies.setAdapter(posterAdapter);
+            recycle_view_activity_activity_actor_movies.setLayoutManager(linearLayoutManagerMoreMovies);
+            linear_layout_activity_actor_movies.setVisibility(View.VISIBLE);
+        } else {
+            linear_layout_activity_actor_movies.setVisibility(View.GONE);
+        }
+    }
+
+    /**
+     * @deprecated Old API method - replaced with getMoviesByActorFromJson()
+     */
+    @Deprecated
+    private void getRandomMovies() {
+        // This method is kept for backward compatibility but now redirects to JSON API
+        getMoviesByActorFromJson();
     }
 
     private void initView() {
@@ -134,31 +211,6 @@ public class ActorActivity extends AppCompatActivity {
         return super.onOptionsItemSelected(item);
     }
 
-    private void getRandomMovies() {
-
-        Retrofit retrofit = apiClient.getClient();
-        apiRest service = retrofit.create(apiRest.class);
-
-        Call<List<Poster>> call = service.getPosterByActor(actor.getId());
-        call.enqueue(new Callback<List<Poster>>() {
-            @Override
-            public void onResponse(Call<List<Poster>> call, Response<List<Poster>> response) {
-                if (response.isSuccessful()){
-                    if (response.body().size()>0) {
-                        linearLayoutManagerMoreMovies = new LinearLayoutManager(getApplicationContext(), LinearLayoutManager.HORIZONTAL, false);
-                        posterAdapter  = new PosterAdapter(response.body(), ActorActivity.this);
-                        recycle_view_activity_activity_actor_movies.setHasFixedSize(true);
-                        recycle_view_activity_activity_actor_movies.setAdapter(posterAdapter);
-                        recycle_view_activity_activity_actor_movies.setLayoutManager(linearLayoutManagerMoreMovies);
-                        linear_layout_activity_actor_movies.setVisibility(View.VISIBLE);
-                    }
-                }
-            }
-            @Override
-            public void onFailure(Call<List<Poster>> call, Throwable t) {
-            }
-        });
-    }
     public boolean checkSUBSCRIBED(){
         PrefManager prefManager= new PrefManager(getApplicationContext());
         if (!prefManager.getString("SUBSCRIBED").equals("TRUE") && !prefManager.getString("NEW_SUBSCRIBE_ENABLED").equals("TRUE")) {
