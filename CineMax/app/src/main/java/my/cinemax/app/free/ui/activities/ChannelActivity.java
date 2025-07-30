@@ -298,7 +298,13 @@ public class ChannelActivity extends AppCompatActivity {
     }
     private void setPlayableList() {
         for (int i = 0; i < channel.getSources().size(); i++) {
-            if (channel.getSources().get(i).getKind().equals("both") || channel.getSources().get(i).getKind().equals("play")){
+            // Support both old format (kind: "both"/"play") and new format (kind: "mp4"/"hls"/"video"/"live")
+            String kind = channel.getSources().get(i).getKind();
+            String type = channel.getSources().get(i).getType();
+            
+            if (kind != null && (kind.equals("both") || kind.equals("play") || 
+                kind.equals("mp4") || kind.equals("hls") || 
+                (type != null && (type.equals("video") || type.equals("live"))))) {
                 playSources.add(channel.getSources().get(i));
             }
         }

@@ -373,8 +373,13 @@ public class SerieActivity extends AppCompatActivity implements PlaylistDownload
 
         downloadableList.clear();
         for (int i = 0; i < episode.getSources().size(); i++) {
-            if (episode.getSources().get(i).getKind().equals("both") || episode.getSources().get(i).getKind().equals("download")){
-                if (!episode.getSources().get(i).getType().equals("youtube") && !episode.getSources().get(i).getType().equals("embed")){
+            // Support both old format (kind: "both"/"download") and new format (kind: "mp4"/"hls")
+            String kind = episode.getSources().get(i).getKind();
+            String type = episode.getSources().get(i).getType();
+            
+            if (kind != null && (kind.equals("both") || kind.equals("download") ||
+                (kind.equals("mp4") && type != null && type.equals("video")))) {
+                if (type != null && !type.equals("youtube") && !type.equals("embed")){
                     downloadableList.add(episode.getSources().get(i));
                 }
             }
@@ -396,8 +401,13 @@ public class SerieActivity extends AppCompatActivity implements PlaylistDownload
         selectedEpisode = episode;
         playableList.clear();
         for (int i = 0; i < episode.getSources().size(); i++) {
-            if (episode.getSources().get(i).getKind().equals("both") || episode.getSources().get(i).getKind().equals("play")) {
-
+            // Support both old format (kind: "both"/"play") and new format (kind: "mp4"/"hls"/"video"/"live")
+            String kind = episode.getSources().get(i).getKind();
+            String type = episode.getSources().get(i).getType();
+            
+            if (kind != null && (kind.equals("both") || kind.equals("play") || 
+                kind.equals("mp4") || kind.equals("hls") || 
+                (type != null && (type.equals("video") || type.equals("live"))))) {
                 playableList.add(episode.getSources().get(i));
             }
         }
