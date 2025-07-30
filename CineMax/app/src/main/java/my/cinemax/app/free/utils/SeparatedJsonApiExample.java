@@ -5,6 +5,9 @@ import my.cinemax.app.free.api.apiClient;
 import my.cinemax.app.free.entity.ActorActressResponse;
 import my.cinemax.app.free.entity.ContentResponse;
 import my.cinemax.app.free.entity.ThrillerResponse;
+import my.cinemax.app.free.entity.Actor;
+import my.cinemax.app.free.entity.Poster;
+import java.util.List;
 
 /**
  * Example utility class demonstrating how to use the separated JSON APIs
@@ -34,7 +37,7 @@ public class SeparatedJsonApiExample {
                     
                     // Process each thriller movie
                     for (int i = 0; i < Math.min(thrillerResponse.getThrillerMovies().size(), 5); i++) {
-                        var movie = thrillerResponse.getThrillerMovies().get(i);
+                        Poster movie = thrillerResponse.getThrillerMovies().get(i);
                         Log.d(TAG, "Movie " + (i + 1) + ": " + movie.getTitle() + " (" + movie.getYear() + ")");
                     }
                 }
@@ -65,7 +68,7 @@ public class SeparatedJsonApiExample {
                     Log.d(TAG, "Found " + actorActressResponse.getActors().size() + " actors");
                     
                     for (int i = 0; i < Math.min(actorActressResponse.getActors().size(), 3); i++) {
-                        var actor = actorActressResponse.getActors().get(i);
+                        Actor actor = actorActressResponse.getActors().get(i);
                         Log.d(TAG, "Actor " + (i + 1) + ": " + actor.getName() + " (" + actor.getType() + ")");
                     }
                 }
@@ -75,13 +78,13 @@ public class SeparatedJsonApiExample {
                     Log.d(TAG, "Found " + actorActressResponse.getActresses().size() + " actresses");
                     
                     for (int i = 0; i < Math.min(actorActressResponse.getActresses().size(), 3); i++) {
-                        var actress = actorActressResponse.getActresses().get(i);
+                        Actor actress = actorActressResponse.getActresses().get(i);
                         Log.d(TAG, "Actress " + (i + 1) + ": " + actress.getName() + " (" + actress.getType() + ")");
                     }
                 }
                 
                 // Get all cast members
-                var allCast = actorActressResponse.getAllCast();
+                List<Actor> allCast = actorActressResponse.getAllCast();
                 Log.d(TAG, "All cast members: " + allCast.size());
             }
             

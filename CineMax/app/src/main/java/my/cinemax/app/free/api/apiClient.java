@@ -357,20 +357,26 @@ public class apiClient {
                 .build();
         
         apiRest adsService = adsRetrofit.create(apiRest.class);
-        Call<JsonApiResponse> call = adsService.getAdsConfig();
+        Call<ContentResponse> call = adsService.getAdsConfig();
         
-        call.enqueue(new Callback<JsonApiResponse>() {
+        call.enqueue(new Callback<ContentResponse>() {
             @Override
-            public void onResponse(Call<JsonApiResponse> call, retrofit2.Response<JsonApiResponse> response) {
+            public void onResponse(Call<ContentResponse> call, retrofit2.Response<ContentResponse> response) {
                 if (response.isSuccessful() && response.body() != null) {
-                    callback.onResponse(call, response);
+                    // Convert ContentResponse to JsonApiResponse for backward compatibility
+                    JsonApiResponse jsonResponse = new JsonApiResponse();
+                    jsonResponse.setAdsConfig(response.body().getAdsConfig());
+                    
+                    // Create a new response with the converted data
+                    retrofit2.Response<JsonApiResponse> convertedResponse = retrofit2.Response.success(jsonResponse);
+                    callback.onResponse(call, convertedResponse);
                 } else {
                     callback.onFailure(call, new Exception("Failed to load ads configuration"));
                 }
             }
             
             @Override
-            public void onFailure(Call<JsonApiResponse> call, Throwable t) {
+            public void onFailure(Call<ContentResponse> call, Throwable t) {
                 callback.onFailure(call, t);
             }
         });
