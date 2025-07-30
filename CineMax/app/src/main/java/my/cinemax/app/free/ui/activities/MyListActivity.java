@@ -30,6 +30,7 @@ import my.cinemax.app.free.entity.Poster;
 import my.cinemax.app.free.ui.Adapters.PosterAdapter;
 
 import java.util.ArrayList;
+import java.util.List;
 
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -80,160 +81,183 @@ public class MyListActivity extends AppCompatActivity {
 
 
     private void loadPosters() {
-        PrefManager prf= new PrefManager(MyListActivity.this.getApplicationContext());
-        if (prf.getString("LOGGED").toString().equals("TRUE")){
-                Integer id_user=  Integer.parseInt(prf.getString("ID_USER"));
-                String   key_user=  prf.getString("TOKEN_USER");
-                swipe_refresh_layout_list_my_list_search.setRefreshing(true);
-                linear_layout_load_my_list_activity.setVisibility(View.VISIBLE);
-                Retrofit retrofit = apiClient.getClient();
-                apiRest service = retrofit.create(apiRest.class);
-                Call<Data> call = service.myList(id_user,key_user);
-                call.enqueue(new Callback<Data>() {
-                    @Override
-                    public void onResponse(Call<Data> call, final Response<Data> response) {
-                        if (response.isSuccessful()){
-
-                            if (response.body().getChannels() !=null){
-                                for (int i = 0; i < response.body().getChannels().size(); i++) {
-                                    channelArrayList.add(response.body().getChannels().get(i));
-                                }
+        // Use local storage for My List instead of old API
+        swipe_refresh_layout_list_my_list_search.setRefreshing(true);
+        linear_layout_load_my_list_activity.setVisibility(View.VISIBLE);
+        
+        // Load user's saved list from local storage
+        PrefManager prf = new PrefManager(MyListActivity.this.getApplicationContext());
+        
+        // Get saved movie/series IDs from SharedPreferences
+        String savedMoviesIds = prf.getString("MY_LIST_MOVIES", "");
+        String savedChannelsIds = prf.getString("MY_LIST_CHANNELS", "");
+        
+        // Load data from GitHub JSON API
+        apiClient.getJsonApiData(new retrofit2.Callback<my.cinemax.app.free.entity.JsonApiResponse>() {
+            @Override
+            public void onResponse(Call<my.cinemax.app.free.entity.JsonApiResponse> call, retrofit2.Response<my.cinemax.app.free.entity.JsonApiResponse> response) {
+                if (response.isSuccessful() && response.body() != null) {
+                    my.cinemax.app.free.entity.JsonApiResponse apiResponse = response.body();
+                    
+                    // Parse saved IDs
+                    List<Integer> savedMovieIds = new ArrayList<>();
+                    List<Integer> savedChannelIds = new ArrayList<>();
+                    
+                    if (!savedMoviesIds.isEmpty()) {
+                        String[] movieIds = savedMoviesIds.split(",");
+                        for (String id : movieIds) {
+                            try {
+                                savedMovieIds.add(Integer.parseInt(id.trim()));
+                            } catch (NumberFormatException e) {
+                                // Ignore invalid IDs
                             }
-
-                            if (channelArrayList.size()>0){
-                                posterArrayList.add(new Poster().setTypeView(3));
-                                if (native_ads_enabled){
-                                    Log.v("MYADS","ENABLED");
-                                    if (tabletSize) {
-                                        gridLayoutManager=  new GridLayoutManager(getApplicationContext(),6,RecyclerView.VERTICAL,false);
-                                        Log.v("MYADS","tabletSize");
-                                        gridLayoutManager.setSpanSizeLookup(new GridLayoutManager.SpanSizeLookup() {
-                                            @Override
-                                            public int getSpanSize(int position) {
-                                                return ((position ) % (lines_beetween_ads + 1 ) == 0 || position == 0) ? 6 : 1;
-                                            }
-                                        });
-                                    } else {
-                                        gridLayoutManager=  new GridLayoutManager(getApplicationContext(),3,RecyclerView.VERTICAL,false);
-                                        gridLayoutManager.setSpanSizeLookup(new GridLayoutManager.SpanSizeLookup() {
-                                            @Override
-                                            public int getSpanSize(int position) {
-                                                return ((position ) % (lines_beetween_ads + 1 ) == 0 || position == 0) ? 3 : 1;
-                                            }
-                                        });
-                                    }
-                                }else {
-                                    if (tabletSize) {
-                                        gridLayoutManager=  new GridLayoutManager(getApplicationContext(),6,RecyclerView.VERTICAL,false);
-                                        gridLayoutManager.setSpanSizeLookup(new GridLayoutManager.SpanSizeLookup() {
-                                            @Override
-                                            public int getSpanSize(int position) {
-                                                return ( position == 0) ? 6 : 1;
-                                            }
-                                        });
-                                    } else {
-                                        gridLayoutManager=  new GridLayoutManager(getApplicationContext(),3,RecyclerView.VERTICAL,false);
-                                        gridLayoutManager.setSpanSizeLookup(new GridLayoutManager.SpanSizeLookup() {
-                                            @Override
-                                            public int getSpanSize(int position) {
-                                                return ( position == 0) ? 3 : 1;
-                                            }
-                                        });
-                                    }
-                                }
-                            }else{
-                                if (native_ads_enabled){
-                                    Log.v("MYADS","ENABLED");
-                                    if (tabletSize) {
-                                        gridLayoutManager=  new GridLayoutManager(getApplicationContext(),6,RecyclerView.VERTICAL,false);
-                                        Log.v("MYADS","tabletSize");
-                                        gridLayoutManager.setSpanSizeLookup(new GridLayoutManager.SpanSizeLookup() {
-                                            @Override
-                                            public int getSpanSize(int position) {
-                                                return ((position  + 1) % (lines_beetween_ads  + 1  ) == 0 && position!=0) ? 6 : 1;
-                                            }
-                                        });
-                                    } else {
-                                        gridLayoutManager=  new GridLayoutManager(getApplicationContext(),3,RecyclerView.VERTICAL,false);
-                                        gridLayoutManager.setSpanSizeLookup(new GridLayoutManager.SpanSizeLookup() {
-                                            @Override
-                                            public int getSpanSize(int position) {
-                                                return ((position  + 1) % (lines_beetween_ads + 1 ) == 0  && position!=0)  ? 3 : 1;
-                                            }
-                                        });
-                                    }
-                                }else {
-                                    if (tabletSize) {
-                                        gridLayoutManager=  new GridLayoutManager(getApplicationContext(),6,RecyclerView.VERTICAL,false);
-                                    } else {
-                                        gridLayoutManager=  new GridLayoutManager(getApplicationContext(),3,RecyclerView.VERTICAL,false);
-                                    }
-                                }
+                        }
+                    }
+                    
+                    if (!savedChannelsIds.isEmpty()) {
+                        String[] channelIds = savedChannelsIds.split(",");
+                        for (String id : channelIds) {
+                            try {
+                                savedChannelIds.add(Integer.parseInt(id.trim()));
+                            } catch (NumberFormatException e) {
+                                // Ignore invalid IDs
                             }
-
-                            if (response.body().getPosters() !=null){
-                                for (int i = 0; i < response.body().getPosters().size(); i++) {
-                                    posterArrayList.add(response.body().getPosters().get(i).setTypeView(1));
-                                    if (native_ads_enabled){
-                                        item++;
-                                        if (item == lines_beetween_ads ){
-                                            item= 0;
-                                            if (prefManager.getString("ADMIN_NATIVE_TYPE").equals("FACEBOOK")) {
-                                                posterArrayList.add(new Poster().setTypeView(4));
-                                            }else if (prefManager.getString("ADMIN_NATIVE_TYPE").equals("ADMOB")){
-                                                posterArrayList.add(new Poster().setTypeView(5));
-                                            } else if (prefManager.getString("ADMIN_NATIVE_TYPE").equals("BOTH")){
-                                                if (type_ads == 0) {
-                                                    posterArrayList.add(new Poster().setTypeView(4));
-                                                    type_ads = 1;
-                                                }else if (type_ads == 1){
-                                                    posterArrayList.add(new Poster().setTypeView(5));
-                                                    type_ads = 0;
-                                                }
-                                            }
+                        }
+                    }
+                    
+                    // Find matching channels
+                    if (apiResponse.getChannels() != null && !savedChannelIds.isEmpty()) {
+                        for (Channel channel : apiResponse.getChannels()) {
+                            if (channel.getId() != null && savedChannelIds.contains(channel.getId())) {
+                                channelArrayList.add(channel);
+                            }
+                        }
+                    }
+                    
+                    // Find matching movies/series
+                    if (apiResponse.getMovies() != null && !savedMovieIds.isEmpty()) {
+                        for (Poster poster : apiResponse.getMovies()) {
+                            if (poster.getId() != null && savedMovieIds.contains(poster.getId())) {
+                                posterArrayList.add(poster.setTypeView(1));
+                            }
+                        }
+                    }
+                    
+                    // Set up layout based on content
+                    if (channelArrayList.size() > 0) {
+                        posterArrayList.add(0, new Poster().setTypeView(3)); // Add channels header
+                        
+                        if (native_ads_enabled) {
+                            if (tabletSize) {
+                                gridLayoutManager = new GridLayoutManager(getApplicationContext(), 6, RecyclerView.VERTICAL, false);
+                                gridLayoutManager.setSpanSizeLookup(new GridLayoutManager.SpanSizeLookup() {
+                                    @Override
+                                    public int getSpanSize(int position) {
+                                        return ((position) % (lines_beetween_ads + 1) == 0 || position == 0) ? 6 : 1;
+                                    }
+                                });
+                            } else {
+                                gridLayoutManager = new GridLayoutManager(getApplicationContext(), 3, RecyclerView.VERTICAL, false);
+                                gridLayoutManager.setSpanSizeLookup(new GridLayoutManager.SpanSizeLookup() {
+                                    @Override
+                                    public int getSpanSize(int position) {
+                                        return (position == 0) ? 6 : 1;
+                                    }
+                                });
+                            }
+                        }
+                    } else {
+                        if (native_ads_enabled) {
+                            if (tabletSize) {
+                                gridLayoutManager = new GridLayoutManager(getApplicationContext(), 6, RecyclerView.VERTICAL, false);
+                                gridLayoutManager.setSpanSizeLookup(new GridLayoutManager.SpanSizeLookup() {
+                                    @Override
+                                    public int getSpanSize(int position) {
+                                        return ((position + 1) % (lines_beetween_ads + 1) == 0 && position != 0) ? 6 : 1;
+                                    }
+                                });
+                            } else {
+                                gridLayoutManager = new GridLayoutManager(getApplicationContext(), 3, RecyclerView.VERTICAL, false);
+                                gridLayoutManager.setSpanSizeLookup(new GridLayoutManager.SpanSizeLookup() {
+                                    @Override
+                                    public int getSpanSize(int position) {
+                                        return ((position + 1) % (lines_beetween_ads + 1) == 0 && position != 0) ? 3 : 1;
+                                    }
+                                });
+                            }
+                        } else {
+                            if (tabletSize) {
+                                gridLayoutManager = new GridLayoutManager(getApplicationContext(), 6, RecyclerView.VERTICAL, false);
+                            } else {
+                                gridLayoutManager = new GridLayoutManager(getApplicationContext(), 3, RecyclerView.VERTICAL, false);
+                            }
+                        }
+                    }
+                    
+                    // Add ads if enabled
+                    if (native_ads_enabled && posterArrayList.size() > 1) {
+                        for (int i = 1; i < posterArrayList.size(); i++) {
+                            if (posterArrayList.get(i).getTypeView() == 1) { // Only for content items, not headers
+                                item++;
+                                if (item == lines_beetween_ads) {
+                                    item = 0;
+                                    if (prefManager.getString("ADMIN_NATIVE_TYPE").equals("FACEBOOK")) {
+                                        posterArrayList.add(i + 1, new Poster().setTypeView(4));
+                                    } else if (prefManager.getString("ADMIN_NATIVE_TYPE").equals("ADMOB")) {
+                                        posterArrayList.add(i + 1, new Poster().setTypeView(5));
+                                    } else if (prefManager.getString("ADMIN_NATIVE_TYPE").equals("BOTH")) {
+                                        if (type_ads == 0) {
+                                            posterArrayList.add(i + 1, new Poster().setTypeView(4));
+                                            type_ads = 1;
+                                        } else if (type_ads == 1) {
+                                            posterArrayList.add(i + 1, new Poster().setTypeView(5));
+                                            type_ads = 0;
                                         }
                                     }
-
+                                    i++; // Skip the ad we just added
                                 }
                             }
-                            if (channelArrayList.size() == 0 && posterArrayList.size() == 0){
-                                linear_layout_layout_error.setVisibility(View.GONE);
-                                recycler_view_activity_my_list.setVisibility(View.GONE);
-                                image_view_empty_list.setVisibility(View.VISIBLE);
-                            }else{
-                                linear_layout_layout_error.setVisibility(View.GONE);
-                                recycler_view_activity_my_list.setVisibility(View.VISIBLE);
-                                image_view_empty_list.setVisibility(View.GONE);
-                            }
-                        }else{
-                            linear_layout_layout_error.setVisibility(View.VISIBLE);
-                            recycler_view_activity_my_list.setVisibility(View.GONE);
-                            image_view_empty_list.setVisibility(View.GONE);
                         }
-                        swipe_refresh_layout_list_my_list_search.setRefreshing(false);
-                        linear_layout_load_my_list_activity.setVisibility(View.GONE);
-                        recycler_view_activity_my_list.setLayoutManager(gridLayoutManager);
-                        adapter.notifyDataSetChanged();
                     }
-
-                    @Override
-                    public void onFailure(Call<Data> call, Throwable t) {
-                        linear_layout_layout_error.setVisibility(View.VISIBLE);
-                        recycler_view_activity_my_list.setVisibility(View.GONE);
+                    
+                    // Show results or empty state
+                    if (posterArrayList.size() > 0 && (posterArrayList.size() > 1 || posterArrayList.get(0).getTypeView() != 3)) {
+                        linear_layout_layout_error.setVisibility(View.GONE);
+                        recycler_view_activity_my_list.setVisibility(View.VISIBLE);
                         image_view_empty_list.setVisibility(View.GONE);
-                        swipe_refresh_layout_list_my_list_search.setVisibility(View.GONE);
-                        linear_layout_load_my_list_activity.setVisibility(View.GONE);
-                        swipe_refresh_layout_list_my_list_search.setRefreshing(false);
-
-
+                        
+                        recycler_view_activity_my_list.setHasFixedSize(true);
+                        recycler_view_activity_my_list.setLayoutManager(gridLayoutManager);
+                        adapter = new PosterAdapter(posterArrayList, channelArrayList, MyListActivity.this, true);
+                        recycler_view_activity_my_list.setAdapter(adapter);
+                        adapter.notifyDataSetChanged();
+                    } else {
+                        linear_layout_layout_error.setVisibility(View.GONE);
+                        recycler_view_activity_my_list.setVisibility(View.GONE);
+                        image_view_empty_list.setVisibility(View.VISIBLE);
                     }
-                });
-        }else{
-            Intent intent = new Intent(MyListActivity.this,LoginActivity.class);
-            startActivity(intent);
-            overridePendingTransition(R.anim.slide_up, R.anim.slide_down);
-            finish();
-        }
+                } else {
+                    // Show empty state on API failure
+                    linear_layout_layout_error.setVisibility(View.GONE);
+                    recycler_view_activity_my_list.setVisibility(View.GONE);
+                    image_view_empty_list.setVisibility(View.VISIBLE);
+                }
+                
+                swipe_refresh_layout_list_my_list_search.setRefreshing(false);
+                linear_layout_load_my_list_activity.setVisibility(View.GONE);
+            }
+            
+            @Override
+            public void onFailure(Call<my.cinemax.app.free.entity.JsonApiResponse> call, Throwable t) {
+                // Show empty state on network failure
+                linear_layout_layout_error.setVisibility(View.GONE);
+                recycler_view_activity_my_list.setVisibility(View.GONE);
+                image_view_empty_list.setVisibility(View.VISIBLE);
+                
+                swipe_refresh_layout_list_my_list_search.setRefreshing(false);
+                linear_layout_load_my_list_activity.setVisibility(View.GONE);
+            }
+        });
     }
 
 

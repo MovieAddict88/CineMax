@@ -73,38 +73,81 @@ public class ActorsActivity extends AppCompatActivity {
     }
 
     private void loadActors() {
-        if (page==0){
+        if (page == 0) {
             linear_layout_load_actors_activity.setVisibility(View.VISIBLE);
-        }else{
+        } else {
             relative_layout_load_more.setVisibility(View.VISIBLE);
         }
         swipe_refresh_layout_list_actors_search.setRefreshing(false);
-        Retrofit retrofit = apiClient.getClient();
-        apiRest service = retrofit.create(apiRest.class);
-        Call<List<Actor>> call = service.getActorsList(page,searchtext);
-        call.enqueue(new Callback<List<Actor>>() {
+        
+        // Use GitHub JSON API instead of old API
+        apiClient.getJsonApiData(new retrofit2.Callback<my.cinemax.app.free.entity.JsonApiResponse>() {
             @Override
-            public void onResponse(Call<List<Actor>> call, final Response<List<Actor>> response) {
-                if (response.isSuccessful()){
-                    if (response.body().size()>0){
-                        for (int i = 0; i < response.body().size(); i++) {
-                            actorArrayList.add(response.body().get(i));
+            public void onResponse(Call<my.cinemax.app.free.entity.JsonApiResponse> call, retrofit2.Response<my.cinemax.app.free.entity.JsonApiResponse> response) {
+                if (response.isSuccessful() && response.body() != null) {
+                    my.cinemax.app.free.entity.JsonApiResponse apiResponse = response.body();
+                    
+                    if (apiResponse.getActors() != null && apiResponse.getActors().size() > 0) {
+                        List<Actor> filteredActors = new ArrayList<>();
+                        
+                        // Apply search filtering if searchtext is provided
+                        for (Actor actor : apiResponse.getActors()) {
+                            boolean matchesSearch = false;
+                            
+                            if (searchtext == null || searchtext.equals("null") || searchtext.trim().isEmpty()) {
+                                // No search filter, show all actors
+                                matchesSearch = true;
+                            } else {
+                                // Apply search filter
+                                String searchLower = searchtext.toLowerCase().trim();
+                                if (actor.getName() != null && actor.getName().toLowerCase().contains(searchLower)) {
+                                    matchesSearch = true;
+                                }
+                            }
+                            
+                            if (matchesSearch) {
+                                filteredActors.add(actor);
+                            }
                         }
-                        linear_layout_layout_error.setVisibility(View.GONE);
-                        recycler_view_activity_actors.setVisibility(View.VISIBLE);
-                        image_view_empty_list.setVisibility(View.GONE);
-
-                        adapter.notifyDataSetChanged();
-                        page++;
-                        loading=true;
-                    }else{
-                        if (page==0) {
+                        
+                        // Sort actors alphabetically by name
+                        java.util.Collections.sort(filteredActors, new java.util.Comparator<Actor>() {
+                            @Override
+                            public int compare(Actor a1, Actor a2) {
+                                String name1 = a1.getName();
+                                String name2 = a2.getName();
+                                if (name1 == null) name1 = "";
+                                if (name2 == null) name2 = "";
+                                return name1.compareToIgnoreCase(name2);
+                            }
+                        });
+                        
+                        if (!filteredActors.isEmpty()) {
+                            for (Actor actor : filteredActors) {
+                                actorArrayList.add(actor);
+                            }
+                            linear_layout_layout_error.setVisibility(View.GONE);
+                            recycler_view_activity_actors.setVisibility(View.VISIBLE);
+                            image_view_empty_list.setVisibility(View.GONE);
+                            
+                            adapter.notifyDataSetChanged();
+                            page++;
+                            loading = true;
+                        } else {
+                            if (page == 0) {
+                                linear_layout_layout_error.setVisibility(View.GONE);
+                                recycler_view_activity_actors.setVisibility(View.GONE);
+                                image_view_empty_list.setVisibility(View.VISIBLE);
+                            }
+                        }
+                    } else {
+                        if (page == 0) {
                             linear_layout_layout_error.setVisibility(View.GONE);
                             recycler_view_activity_actors.setVisibility(View.GONE);
                             image_view_empty_list.setVisibility(View.VISIBLE);
                         }
                     }
-                }else{
+                } else {
                     linear_layout_layout_error.setVisibility(View.VISIBLE);
                     recycler_view_activity_actors.setVisibility(View.GONE);
                     image_view_empty_list.setVisibility(View.GONE);
@@ -113,16 +156,15 @@ public class ActorsActivity extends AppCompatActivity {
                 swipe_refresh_layout_list_actors_search.setRefreshing(false);
                 linear_layout_load_actors_activity.setVisibility(View.GONE);
             }
-
+            
             @Override
-            public void onFailure(Call<List<Actor>> call, Throwable t) {
+            public void onFailure(Call<my.cinemax.app.free.entity.JsonApiResponse> call, Throwable t) {
                 linear_layout_layout_error.setVisibility(View.VISIBLE);
                 recycler_view_activity_actors.setVisibility(View.GONE);
                 image_view_empty_list.setVisibility(View.GONE);
                 relative_layout_load_more.setVisibility(View.GONE);
-                swipe_refresh_layout_list_actors_search.setVisibility(View.GONE);
+                swipe_refresh_layout_list_actors_search.setRefreshing(false);
                 linear_layout_load_actors_activity.setVisibility(View.GONE);
-
             }
         });
     }
