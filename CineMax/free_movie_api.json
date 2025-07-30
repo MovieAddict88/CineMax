@@ -1,0 +1,305 @@
+{
+  "api_info": {
+    "version": "1.0",
+    "last_updated": "2024-01-01"
+  },
+  "home": {
+    "slides": [
+      {
+        "id": 1,
+        "title": "Big Buck Bunny",
+        "image": "https://peach.blender.org/wp-content/uploads/bbb-splash.png",
+        "url": "movie/1"
+      }
+    ],
+    "channels": [
+      {
+        "id": 1,
+        "title": "CNN Live News",
+        "description": "24/7 news coverage",
+        "image": "https://upload.wikimedia.org/wikipedia/commons/thumb/b/b1/CNN.svg/1200px-CNN.svg.png",
+        "rating": 8.5
+      }
+    ],
+    "actors": [
+      {
+        "id": 1,
+        "name": "Sample Actor",
+        "image": "https://via.placeholder.com/300x400/000000/FFFFFF?text=Actor"
+      }
+    ],
+    "genres": [
+      {
+        "id": 1,
+        "title": "Animation",
+        "posters": [
+          {
+            "id": 1,
+            "title": "Big Buck Bunny",
+            "type": "movie",
+            "year": "2008",
+            "rating": 7.5,
+            "image": "https://peach.blender.org/wp-content/uploads/bbb-splash.png",
+            "genres": [
+              {
+                "id": 1,
+                "title": "Animation"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": 2,
+        "title": "Drama",
+        "posters": [
+          {
+            "id": 2,
+            "title": "Sample Drama Series",
+            "type": "series",
+            "year": "2023",
+            "rating": 8.2,
+            "image": "https://via.placeholder.com/300x400/000000/FFFFFF?text=Drama",
+            "genres": [
+              {
+                "id": 2,
+                "title": "Drama"
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  "movies": [
+    {
+      "id": 1,
+      "title": "Big Buck Bunny",
+      "type": "movie",
+      "year": "2008",
+      "rating": 7.5,
+      "imdb": "7.5",
+      "description": "A large and lovable rabbit deals with three tiny bullies.",
+      "image": "https://peach.blender.org/wp-content/uploads/bbb-splash.png",
+      "cover": "https://peach.blender.org/wp-content/uploads/bbb-splash.png",
+      "views": 1000,
+      "genres": [
+        {
+          "id": 1,
+          "title": "Animation"
+        }
+      ],
+      "sources": [
+        {
+          "id": 1,
+          "type": "video",
+          "title": "Big Buck Bunny 1080p",
+          "quality": "1080p",
+          "size": "264MB",
+          "kind": "both",
+          "premium": "false",
+          "external": false,
+          "url": "http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4"
+        }
+      ]
+    },
+    {
+      "id": 2,
+      "title": "Sample Drama Series",
+      "type": "series",
+      "year": "2023",
+      "rating": 8.2,
+      "imdb": "8.2",
+      "description": "A compelling drama series with complex characters.",
+      "image": "https://via.placeholder.com/300x400/000000/FFFFFF?text=Drama",
+      "cover": "https://via.placeholder.com/1920x1080/000000/FFFFFF?text=Drama+Cover",
+      "views": 2500,
+      "genres": [
+        {
+          "id": 2,
+          "title": "Drama"
+        }
+      ],
+      "sources": [
+        {
+          "id": 2,
+          "type": "video",
+          "title": "Episode 1 - 1080p",
+          "quality": "1080p",
+          "size": "500MB",
+          "kind": "both",
+          "premium": "false",
+          "external": false,
+          "url": "http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ElephantsDream.mp4"
+        }
+      ]
+    },
+    {
+      "id": 3,
+      "title": "Elephants Dream",
+      "type": "movie",
+      "year": "2006",
+      "rating": 6.8,
+      "imdb": "6.8",
+      "description": "The story of two strange characters exploring a capricious and seemingly infinite machine.",
+      "image": "https://upload.wikimedia.org/wikipedia/commons/thumb/9/96/Elephants_Dream_s5_both.jpg/256px-Elephants_Dream_s5_both.jpg",
+      "cover": "https://upload.wikimedia.org/wikipedia/commons/thumb/9/96/Elephants_Dream_s5_both.jpg/1024px-Elephants_Dream_s5_both.jpg",
+      "views": 800,
+      "genres": [
+        {
+          "id": 1,
+          "title": "Animation"
+        },
+        {
+          "id": 3,
+          "title": "Sci-Fi"
+        }
+      ],
+      "sources": [
+        {
+          "id": 3,
+          "type": "video",
+          "title": "Elephants Dream 1080p",
+          "quality": "1080p",
+          "size": "213MB",
+          "kind": "both",
+          "premium": "false",
+          "external": false,
+          "url": "http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ElephantsDream.mp4"
+        }
+      ]
+    }
+  ],
+  "channels": [
+    {
+      "id": 1,
+      "title": "CNN Live News",
+      "description": "24/7 news coverage",
+      "image": "https://upload.wikimedia.org/wikipedia/commons/thumb/b/b1/CNN.svg/1200px-CNN.svg.png",
+      "rating": 8.5,
+      "views": 5000,
+      "categories": [
+        {
+          "id": 1,
+          "title": "News"
+        }
+      ],
+      "countries": [
+        {
+          "id": 1,
+          "title": "United States"
+        }
+      ],
+      "sources": [
+        {
+          "id": 4,
+          "type": "live",
+          "title": "720p Live Stream",
+          "quality": "720p",
+          "size": "Live",
+          "kind": "play",
+          "premium": "false",
+          "external": false,
+          "url": "https://qp-pldt-live-grp-02-prod.akamaized.net/out/u/tv5_5.m3u8"
+        }
+      ]
+    }
+  ],
+  "actors": [
+    {
+      "id": 1,
+      "name": "Sample Actor",
+      "image": "https://via.placeholder.com/300x400/000000/FFFFFF?text=Actor",
+      "bio": "A talented actor known for various roles."
+    }
+  ],
+  "genres": [
+    {
+      "id": 1,
+      "title": "Animation",
+      "posters": []
+    },
+    {
+      "id": 2,
+      "title": "Drama",
+      "posters": []
+    },
+    {
+      "id": 3,
+      "title": "Sci-Fi",
+      "posters": []
+    }
+  ],
+  "categories": [
+    {
+      "id": 1,
+      "title": "News",
+      "channels": []
+    },
+    {
+      "id": 2,
+      "title": "Sports",
+      "channels": []
+    }
+  ],
+  "countries": [
+    {
+      "id": 1,
+      "title": "United States",
+      "channels": []
+    }
+  ],
+  "subscription_plans": [],
+  "video_sources": {
+    "big_buck_bunny": {
+      "title": "Big Buck Bunny",
+      "description": "Sample video for testing",
+      "urls": {
+        "hd": "http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4",
+        "sd": "http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4"
+      },
+      "duration": "596",
+      "size": "264MB",
+      "license": "Creative Commons"
+    },
+    "elephants_dream": {
+      "title": "Elephants Dream",
+      "description": "Sample video for testing",
+      "urls": {
+        "hd": "http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ElephantsDream.mp4",
+        "sd": "http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ElephantsDream.mp4"
+      },
+      "duration": "653",
+      "size": "213MB",
+      "license": "Creative Commons"
+    },
+    "live_streams": {
+      "news": "https://qp-pldt-live-grp-02-prod.akamaized.net/out/u/tv5_5.m3u8",
+      "sports": "https://qp-pldt-live-grp-02-prod.akamaized.net/out/u/tv5_5.m3u8"
+    }
+  },
+  "ads_config": {
+    "admob": {
+      "banner_id": "ca-app-pub-3940256099942544/6300978111",
+      "interstitial_id": "ca-app-pub-3940256099942544/1033173712",
+      "rewarded_id": "ca-app-pub-3940256099942544/5224354917",
+      "native_id": "ca-app-pub-3940256099942544/2247696110"
+    },
+    "facebook": {
+      "banner_id": "YOUR_PLACEMENT_ID",
+      "interstitial_id": "YOUR_PLACEMENT_ID",
+      "rewarded_id": "YOUR_PLACEMENT_ID",
+      "native_id": "YOUR_PLACEMENT_ID"
+    },
+    "settings": {
+      "banner_enabled": true,
+      "banner_type": "ADMOB",
+      "interstitial_enabled": true,
+      "interstitial_type": "ADMOB",
+      "interstitial_clicks": 3,
+      "native_enabled": true,
+      "native_type": "ADMOB",
+      "native_lines": 2
+    }
+  }
+}

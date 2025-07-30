@@ -224,31 +224,58 @@ public class GenreActivity extends AppCompatActivity {
                         for (Poster poster : apiResponse.getMovies()) {
                             boolean matchesGenre = false;
                             
+                            Log.d("GenreActivity", "Checking poster: " + (poster != null ? poster.getTitle() : "null"));
+                            Log.d("GenreActivity", "Looking for genre ID: " + (genre != null ? genre.getId() : "null genre"));
+                            
                             // Check if poster has the selected genre
-                            if (poster.getGenres() != null && !poster.getGenres().isEmpty()) {
+                            if (poster != null && poster.getGenres() != null && !poster.getGenres().isEmpty()) {
+                                Log.d("GenreActivity", "Poster has " + poster.getGenres().size() + " genres");
+                                
                                 for (my.cinemax.app.free.entity.Genre posterGenre : poster.getGenres()) {
-                                    if (posterGenre != null && posterGenre.getId() != null && 
-                                        genre != null && genre.getId() != null && 
-                                        posterGenre.getId().equals(genre.getId())) {
-                                        matchesGenre = true;
-                                        break;
+                                    if (posterGenre != null && posterGenre.getId() != null) {
+                                        Log.d("GenreActivity", "Poster genre ID: " + posterGenre.getId() + ", title: " + posterGenre.getTitle());
+                                        
+                                        if (genre != null && genre.getId() != null && 
+                                            posterGenre.getId().equals(genre.getId())) {
+                                            Log.d("GenreActivity", "MATCH FOUND! Poster '" + poster.getTitle() + "' matches genre '" + genre.getTitle() + "'");
+                                            matchesGenre = true;
+                                            break;
+                                        }
+                                    } else {
+                                        Log.w("GenreActivity", "Poster genre is null or has null ID");
                                     }
                                 }
+                            } else {
+                                Log.w("GenreActivity", "Poster is null or has no genres");
                             }
                             
                             // Special handling for special genre IDs
                             if (!matchesGenre && genre != null && genre.getId() != null) {
                                 // Handle special cases where genre ID might be 0 or negative
                                 if (genre.getId() == 0) {
+                                    Log.d("GenreActivity", "Genre ID is 0, showing all content");
                                     // Show all content if genre ID is 0
+                                    matchesGenre = true;
+                                } else if (genre.getId() == -1) {
+                                    Log.d("GenreActivity", "Genre ID is -1, showing top rated content");
+                                    // Top rated content
+                                    matchesGenre = true;
+                                } else if (genre.getId() == -2) {
+                                    Log.d("GenreActivity", "Genre ID is -2, showing my list content");
+                                    // My list content
                                     matchesGenre = true;
                                 }
                             }
                             
                             if (matchesGenre) {
+                                Log.d("GenreActivity", "Adding poster to filtered list: " + poster.getTitle());
                                 filteredPosters.add(poster);
+                            } else {
+                                Log.d("GenreActivity", "Poster '" + (poster != null ? poster.getTitle() : "null") + "' does not match genre");
                             }
                         }
+                        
+                        Log.d("GenreActivity", "Total filtered posters: " + filteredPosters.size());
                         
                         // Apply sorting
                         if (SelectedOrder != null) {
