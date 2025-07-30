@@ -311,6 +311,14 @@ public class ChannelActivity extends AppCompatActivity {
     private void getChannel() {
         channel = getIntent().getParcelableExtra("channel");
         from = getIntent().getStringExtra("from");
+        
+        // Check if channel is null - this prevents crashes
+        if (channel == null) {
+            Log.e("ChannelActivity", "Channel object is null - finishing activity");
+            Toast.makeText(this, "Channel not available", Toast.LENGTH_SHORT).show();
+            finish();
+            return;
+        }
     }
     private void setChannel() {
         Picasso.with(this).load(channel.getImage()).into(image_view_activity_channel_cover);
