@@ -172,7 +172,24 @@ public class GenreActivity extends AppCompatActivity {
     private void getGenre() {
         genre = getIntent().getParcelableExtra("genre");
         from = getIntent().getStringExtra("from");
-
+        
+        // Add null safety check for genre
+        if (genre == null) {
+            Log.e("GenreActivity", "Genre object is null, finishing activity");
+            finish();
+            return;
+        }
+        
+        // Ensure genre has valid ID and title
+        if (genre.getId() == null) {
+            Log.e("GenreActivity", "Genre ID is null, setting default ID");
+            genre.setId(0); // Set default ID
+        }
+        
+        if (genre.getTitle() == null || genre.getTitle().isEmpty()) {
+            Log.e("GenreActivity", "Genre title is null or empty, setting default title");
+            genre.setTitle("Unknown Category"); // Set default title
+        }
     }
 
 
@@ -394,7 +411,13 @@ public class GenreActivity extends AppCompatActivity {
         }
 
         Toolbar toolbar = (Toolbar)findViewById(R.id.toolbar);
-        toolbar.setTitle(genre.getTitle());
+        // Add null safety check for genre before setting title
+        if (genre != null && genre.getTitle() != null) {
+            toolbar.setTitle(genre.getTitle());
+        } else {
+            toolbar.setTitle("Category");
+            Log.e("GenreActivity", "Genre or genre title is null, using default title");
+        }
         setSupportActionBar(toolbar);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
