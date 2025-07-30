@@ -285,9 +285,9 @@ SeparatedJsonApiExample.comparePerformance();
 
 To use this implementation, create the following files in your GitHub repository:
 
-1. `thriller.json` - Thriller movie data
-2. `actor_actress.json` - Actor and actress data
-3. `actual_content.json` - Main content data
+1. `thriller.json` - Thriller movie data ✅ (Sample provided)
+2. `actor_actress.json` - Actor and actress data ✅ (Sample provided)
+3. `actual_content.json` - Main content data ✅ (Sample provided)
 4. `ads_config.json` - Ads configuration (existing)
 
 The URLs should point to:
