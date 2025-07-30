@@ -297,9 +297,13 @@ public class ChannelActivity extends AppCompatActivity {
 
     }
     private void setPlayableList() {
-        for (int i = 0; i < channel.getSources().size(); i++) {
-            if (channel.getSources().get(i).getKind().equals("both") || channel.getSources().get(i).getKind().equals("play")){
-                playSources.add(channel.getSources().get(i));
+        if (channel != null && channel.getSources() != null) {
+            for (int i = 0; i < channel.getSources().size(); i++) {
+                Source source = channel.getSources().get(i);
+                if (source != null && source.getKind() != null && 
+                    (source.getKind().equals("both") || source.getKind().equals("play"))) {
+                    playSources.add(source);
+                }
             }
         }
 
@@ -307,6 +311,14 @@ public class ChannelActivity extends AppCompatActivity {
     private void getChannel() {
         channel = getIntent().getParcelableExtra("channel");
         from = getIntent().getStringExtra("from");
+        
+        // Check if channel is null - this prevents crashes
+        if (channel == null) {
+            Log.e("ChannelActivity", "Channel object is null - finishing activity");
+            Toast.makeText(this, "Channel not available", Toast.LENGTH_SHORT).show();
+            finish();
+            return;
+        }
     }
     private void setChannel() {
         Picasso.with(this).load(channel.getImage()).into(image_view_activity_channel_cover);
@@ -1033,7 +1045,18 @@ public class ChannelActivity extends AppCompatActivity {
             Intent intent = new Intent(ChannelActivity.this,PlayerActivity.class);
             intent.putExtra("id",channel.getId());
             intent.putExtra("url",playSources.get(position).getUrl());
-            intent.putExtra("type",playSources.get(position).getType());
+            
+            // Fix video type for streaming URLs
+            String videoType = playSources.get(position).getType();
+            String url = playSources.get(position).getUrl();
+            if (url != null) {
+                if (url.contains(".m3u8")) {
+                    videoType = "m3u8";  // Player expects "m3u8" for HLS streams
+                } else if (url.contains(".mpd")) {
+                    videoType = "dash";  // Player expects "dash" for MPD/DASH streams
+                }
+            }
+            intent.putExtra("type", videoType);
             intent.putExtra("image",channel.getImage());
             intent.putExtra("kind","channel");
             intent.putExtra("isLive",true);

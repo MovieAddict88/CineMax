@@ -1087,9 +1087,15 @@ public class HomeActivity extends AppCompatActivity implements NavigationView.On
     }
     
     private void updateTvFragmentWithCachedData() {
-        if (cachedJsonResponse != null && dataLoaded && cachedJsonResponse.getChannels() != null) {
+        if (cachedJsonResponse != null && dataLoaded) {
             Log.d("JSON_API", "Updating TvFragment with cached data");
-            updateTvFragmentWithJsonData(cachedJsonResponse.getChannels());
+            // Use home channels for Live TV category (same as Home category)
+            if (cachedJsonResponse.getHome() != null && cachedJsonResponse.getHome().getChannels() != null) {
+                updateTvFragmentWithJsonData(cachedJsonResponse.getHome().getChannels());
+            } else if (cachedJsonResponse.getChannels() != null) {
+                // Fallback to main channels if home channels not available
+                updateTvFragmentWithJsonData(cachedJsonResponse.getChannels());
+            }
         }
     }
     
@@ -1194,7 +1200,11 @@ public class HomeActivity extends AppCompatActivity implements NavigationView.On
                             }
                         }
                         
-                        if (jsonResponse.getChannels() != null && !jsonResponse.getChannels().isEmpty()) {
+                        // Use home channels for Live TV category (same as Home category)
+                        if (jsonResponse.getHome() != null && jsonResponse.getHome().getChannels() != null && !jsonResponse.getHome().getChannels().isEmpty()) {
+                            updateTvFragmentWithJsonData(jsonResponse.getHome().getChannels());
+                        } else if (jsonResponse.getChannels() != null && !jsonResponse.getChannels().isEmpty()) {
+                            // Fallback to main channels if home channels not available
                             updateTvFragmentWithJsonData(jsonResponse.getChannels());
                         }
                         
