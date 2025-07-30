@@ -1164,7 +1164,7 @@ public class HomeActivity extends AppCompatActivity implements NavigationView.On
         // Check if we have internet connection
         if (!isNetworkAvailable()) {
             Log.e("JSON_API", "No network connection");
-            Toasty.error(HomeActivity.this, "No internet connection", Toast.LENGTH_SHORT).show();
+            Toasty.error(HomeActivity.this, "Check your internet connection", Toast.LENGTH_SHORT).show();
             return;
         }
         

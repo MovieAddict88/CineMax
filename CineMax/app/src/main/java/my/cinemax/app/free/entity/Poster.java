@@ -67,6 +67,10 @@ public class Poster implements Parcelable {
     @Expose
     private Float rating;
 
+    @SerializedName("views")
+    @Expose
+    private Integer views;
+
     @SerializedName("image")
     @Expose
     private String image;
@@ -118,6 +122,11 @@ public class Poster implements Parcelable {
         } else {
             rating = in.readFloat();
         }
+        if (in.readByte() == 0) {
+            views = null;
+        } else {
+            views = in.readInt();
+        }
         image = in.readString();
         cover = in.readString();
         genres = in.createTypedArrayList(Genre.CREATOR);
@@ -151,6 +160,12 @@ public class Poster implements Parcelable {
         } else {
             dest.writeByte((byte) 1);
             dest.writeFloat(rating);
+        }
+        if (views == null) {
+            dest.writeByte((byte) 0);
+        } else {
+            dest.writeByte((byte) 1);
+            dest.writeInt(views);
         }
         dest.writeString(image);
         dest.writeString(cover);
@@ -225,6 +240,14 @@ public class Poster implements Parcelable {
         return year;
     }
 
+    public Integer getYearAsInteger() {
+        try {
+            return year != null ? Integer.parseInt(year) : null;
+        } catch (NumberFormatException e) {
+            return null;
+        }
+    }
+
     public void setClassification(String classification) {
         this.classification = classification;
     }
@@ -239,6 +262,14 @@ public class Poster implements Parcelable {
 
     public void setRating(Float rating) {
         this.rating = rating;
+    }
+
+    public Integer getViews() {
+        return views;
+    }
+
+    public void setViews(Integer views) {
+        this.views = views;
     }
 
     public String getDuration() {

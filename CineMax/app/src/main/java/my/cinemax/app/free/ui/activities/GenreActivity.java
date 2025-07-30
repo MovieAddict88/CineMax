@@ -11,6 +11,8 @@ import retrofit2.Response;
 import retrofit2.Retrofit;
 
 import android.content.Intent;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.Menu;
@@ -20,6 +22,7 @@ import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
+import android.widget.Toast;
 
 import com.google.android.gms.ads.AdListener;
 import com.google.android.gms.ads.AdRequest;
@@ -31,6 +34,7 @@ import my.cinemax.app.free.api.apiClient;
 import my.cinemax.app.free.api.apiRest;
 import my.cinemax.app.free.entity.Genre;
 import my.cinemax.app.free.entity.Poster;
+import my.cinemax.app.free.entity.JsonApiResponse;
 import my.cinemax.app.free.ui.Adapters.PosterAdapter;
 
 import java.util.ArrayList;
@@ -100,16 +104,7 @@ public class GenreActivity extends AppCompatActivity {
     @Override
     public boolean onOptionsItemSelected(MenuItem itemMenu) {
         switch (itemMenu.getItemId()) {
-            // Respond to the action bar's Up/Home button
-            case android.R.id.home:
-                if (from!=null){
-                    Intent intent =  new Intent(getApplicationContext(),HomeActivity.class);
-                    startActivity(intent);
-                }else{
-                    super.onBackPressed();
-                }
-                return true;
-            case R.id.nav_created:
+            case R.id.item_order_created:
                 SelectedOrder = "created";
                 item = 0;
                 page = 0;
@@ -118,7 +113,7 @@ public class GenreActivity extends AppCompatActivity {
                 adapter.notifyDataSetChanged();
                 loadPosters();
                 return true;
-            case R.id.nav_rating:
+            case R.id.item_order_rating:
                 SelectedOrder = "rating";
                 item = 0;
                 page = 0;
@@ -127,7 +122,7 @@ public class GenreActivity extends AppCompatActivity {
                 adapter.notifyDataSetChanged();
                 loadPosters();
                 return true;
-            case R.id.nav_views:
+            case R.id.item_order_views:
                 SelectedOrder = "views";
                 item = 0;
                 page = 0;
@@ -136,7 +131,7 @@ public class GenreActivity extends AppCompatActivity {
                 adapter.notifyDataSetChanged();
                 loadPosters();
                 return true;
-            case R.id.nav_year:
+            case R.id.item_order_year:
                 SelectedOrder = "year";
                 item = 0;
                 page = 0;
@@ -145,8 +140,8 @@ public class GenreActivity extends AppCompatActivity {
                 adapter.notifyDataSetChanged();
                 loadPosters();
                 return true;
-            case R.id.nav_title:
-                SelectedOrder = "title";
+            case R.id.item_order_name:
+                SelectedOrder = "name";
                 item = 0;
                 page = 0;
                 loading = true;
@@ -154,43 +149,116 @@ public class GenreActivity extends AppCompatActivity {
                 adapter.notifyDataSetChanged();
                 loadPosters();
                 return true;
-            case R.id.nav_imdb:
-                SelectedOrder = "imdb";
-                item = 0;
-                page = 0;
-                loading = true;
-                posterArrayList.clear();
-                adapter.notifyDataSetChanged();
-                loadPosters();
-
-                return true;
+            default:
+                return super.onOptionsItemSelected(itemMenu);
         }
-        return super.onOptionsItemSelected(itemMenu);
     }
+
     private void getGenre() {
         genre = getIntent().getParcelableExtra("genre");
         from = getIntent().getStringExtra("from");
-
     }
 
+    /**
+     * Check if network is available
+     */
+    private boolean isNetworkAvailable() {
+        ConnectivityManager connectivityManager = (ConnectivityManager) getSystemService(CONNECTIVITY_SERVICE);
+        NetworkInfo activeNetworkInfo = connectivityManager.getActiveNetworkInfo();
+        return activeNetworkInfo != null && activeNetworkInfo.isConnected();
+    }
 
     private void loadPosters() {
+        // Check network connectivity first
+        if (!isNetworkAvailable()) {
+            linear_layout_layout_error.setVisibility(View.VISIBLE);
+            recycler_view_activity_genre.setVisibility(View.GONE);
+            image_view_empty_list.setVisibility(View.GONE);
+            relative_layout_load_more.setVisibility(View.GONE);
+            swipe_refresh_layout_list_genre_search.setRefreshing(false);
+            linear_layout_load_genre_activity.setVisibility(View.GONE);
+            Toast.makeText(this, "Check your internet connection", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
         if (page==0){
             linear_layout_load_genre_activity.setVisibility(View.VISIBLE);
         }else{
             relative_layout_load_more.setVisibility(View.VISIBLE);
         }
         swipe_refresh_layout_list_genre_search.setRefreshing(false);
-        Retrofit retrofit = apiClient.getClient();
-        apiRest service = retrofit.create(apiRest.class);
-        Call<List<Poster>> call = service.getPostersByFiltres(genre.getId(),SelectedOrder,page);
-        call.enqueue(new Callback<List<Poster>>() {
+        
+        // Use the new JSON API system instead of old API endpoints
+        apiClient.getJsonApiData(new apiClient.JsonApiCallback() {
             @Override
-            public void onResponse(Call<List<Poster>> call, final Response<List<Poster>> response) {
-                if (response.isSuccessful()){
-                    if (response.body().size()>0){
-                        for (int i = 0; i < response.body().size(); i++) {
-                            posterArrayList.add(response.body().get(i));
+            public void onSuccess(JsonApiResponse jsonResponse) {
+                if (jsonResponse != null && jsonResponse.getMovies() != null) {
+                    List<Poster> allMovies = jsonResponse.getMovies();
+                    List<Poster> filteredMovies = new ArrayList<>();
+                    
+                    // Filter movies by genre
+                    for (Poster movie : allMovies) {
+                        if (genre.getId() == -1) {
+                            // Top rated movies
+                            if (movie.getRating() != null && movie.getRating() >= 4.0) {
+                                filteredMovies.add(movie);
+                            }
+                        } else if (genre.getId() == 0) {
+                            // Most viewed movies
+                            if (movie.getViews() != null && movie.getViews() > 1000) {
+                                filteredMovies.add(movie);
+                            }
+                        } else if (genre.getId() == -2) {
+                            // My list - this should be handled differently
+                            // For now, show all movies
+                            filteredMovies.add(movie);
+                        } else {
+                            // Filter by specific genre
+                            if (movie.getGenres() != null) {
+                                for (Genre movieGenre : movie.getGenres()) {
+                                    if (movieGenre.getId().equals(genre.getId())) {
+                                        filteredMovies.add(movie);
+                                        break;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    
+                    // Apply sorting based on SelectedOrder
+                    if (SelectedOrder.equals("rating")) {
+                        filteredMovies.sort((a, b) -> {
+                            Float ratingA = a.getRating() != null ? a.getRating() : 0f;
+                            Float ratingB = b.getRating() != null ? b.getRating() : 0f;
+                            return ratingB.compareTo(ratingA);
+                        });
+                    } else if (SelectedOrder.equals("views")) {
+                        filteredMovies.sort((a, b) -> {
+                            Integer viewsA = a.getViews() != null ? a.getViews() : 0;
+                            Integer viewsB = b.getViews() != null ? b.getViews() : 0;
+                            return viewsB.compareTo(viewsA);
+                        });
+                    } else if (SelectedOrder.equals("year")) {
+                        filteredMovies.sort((a, b) -> {
+                            Integer yearA = a.getYearAsInteger() != null ? a.getYearAsInteger() : 0;
+                            Integer yearB = b.getYearAsInteger() != null ? b.getYearAsInteger() : 0;
+                            return yearB.compareTo(yearA);
+                        });
+                    } else if (SelectedOrder.equals("name")) {
+                        filteredMovies.sort((a, b) -> {
+                            String titleA = a.getTitle() != null ? a.getTitle() : "";
+                            String titleB = b.getTitle() != null ? b.getTitle() : "";
+                            return titleA.compareToIgnoreCase(titleB);
+                        });
+                    }
+                    
+                    // Add movies to the list with pagination
+                    int startIndex = page * 20; // 20 items per page
+                    int endIndex = Math.min(startIndex + 20, filteredMovies.size());
+                    
+                    if (startIndex < filteredMovies.size()) {
+                        for (int i = startIndex; i < endIndex; i++) {
+                            posterArrayList.add(filteredMovies.get(i));
                             if (native_ads_enabled){
                                 item++;
                                 if (item == lines_beetween_ads ){
@@ -214,18 +282,17 @@ public class GenreActivity extends AppCompatActivity {
                         linear_layout_layout_error.setVisibility(View.GONE);
                         recycler_view_activity_genre.setVisibility(View.VISIBLE);
                         image_view_empty_list.setVisibility(View.GONE);
-
                         adapter.notifyDataSetChanged();
                         page++;
                         loading=true;
-                    }else{
+                    } else {
                         if (page==0) {
                             linear_layout_layout_error.setVisibility(View.GONE);
                             recycler_view_activity_genre.setVisibility(View.GONE);
                             image_view_empty_list.setVisibility(View.VISIBLE);
                         }
                     }
-                }else{
+                } else {
                     linear_layout_layout_error.setVisibility(View.VISIBLE);
                     recycler_view_activity_genre.setVisibility(View.GONE);
                     image_view_empty_list.setVisibility(View.GONE);
@@ -236,22 +303,20 @@ public class GenreActivity extends AppCompatActivity {
             }
 
             @Override
-            public void onFailure(Call<List<Poster>> call, Throwable t) {
+            public void onError(String error) {
+                Log.e("GenreActivity", "Error loading data: " + error);
                 linear_layout_layout_error.setVisibility(View.VISIBLE);
                 recycler_view_activity_genre.setVisibility(View.GONE);
                 image_view_empty_list.setVisibility(View.GONE);
                 relative_layout_load_more.setVisibility(View.GONE);
-                swipe_refresh_layout_list_genre_search.setVisibility(View.GONE);
+                swipe_refresh_layout_list_genre_search.setRefreshing(false);
                 linear_layout_load_genre_activity.setVisibility(View.GONE);
-
+                Toast.makeText(GenreActivity.this, "Network error: " + error, Toast.LENGTH_SHORT).show();
             }
         });
     }
 
     private void initAction() {
-
-
-
         swipe_refresh_layout_list_genre_search.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
             @Override
             public void onRefresh() {
@@ -281,123 +346,100 @@ public class GenreActivity extends AppCompatActivity {
             {
                 if(dy > 0) //check for scroll down
                 {
-
-                    visibleItemCount    = gridLayoutManager.getChildCount();
-                    totalItemCount      = gridLayoutManager.getItemCount();
-                    pastVisiblesItems   = gridLayoutManager.findFirstVisibleItemPosition();
+                    visibleItemCount = gridLayoutManager.getChildCount();
+                    totalItemCount = gridLayoutManager.getItemCount();
+                    pastVisiblesItems = gridLayoutManager.findFirstVisibleItemPosition();
 
                     if (loading)
                     {
                         if ( (visibleItemCount + pastVisiblesItems) >= totalItemCount)
                         {
                             loading = false;
+                            Log.v("...", "Last Item Wow !");
                             loadPosters();
                         }
                     }
-                }else{
-
                 }
             }
         });
     }
 
     private void initView() {
+        this.swipe_refresh_layout_list_genre_search = (SwipeRefreshLayout) findViewById(R.id.swipe_refresh_layout_list_genre_search);
+        this.linear_layout_layout_error = (LinearLayout) findViewById(R.id.linear_layout_layout_error);
+        this.recycler_view_activity_genre = (RecyclerView) findViewById(R.id.recycler_view_activity_genre);
+        this.image_view_empty_list = (ImageView) findViewById(R.id.image_view_empty_list);
+        this.relative_layout_load_more = (RelativeLayout) findViewById(R.id.relative_layout_load_more);
+        this.linear_layout_load_genre_activity = (LinearLayout) findViewById(R.id.linear_layout_load_genre_activity);
+        this.button_try_again = (Button) findViewById(R.id.button_try_again);
 
-        boolean tabletSize = getResources().getBoolean(R.bool.isTablet);
-        if (!prefManager.getString("ADMIN_NATIVE_TYPE").equals("FALSE")){
-            native_ads_enabled=true;
-            if (tabletSize) {
-                lines_beetween_ads=6*Integer.parseInt(prefManager.getString("ADMIN_NATIVE_LINES"));
-            }else{
-                lines_beetween_ads=3*Integer.parseInt(prefManager.getString("ADMIN_NATIVE_LINES"));
-            }
+        this.tabletSize = getResources().getBoolean(R.bool.isTablet);
+        if (this.tabletSize) {
+            this.lines_beetween_ads=Integer.parseInt(prefManager.getString("ADMIN_NATIVE_LINES"));
+        }else{
+            this.lines_beetween_ads=Integer.parseInt(prefManager.getString("ADMIN_NATIVE_LINES"));
         }
         if (checkSUBSCRIBED()) {
             native_ads_enabled=false;
         }
 
-        Toolbar toolbar = (Toolbar)findViewById(R.id.toolbar);
-        toolbar.setTitle(genre.getTitle());
-        setSupportActionBar(toolbar);
-        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-
-        this.linear_layout_load_genre_activity=findViewById(R.id.linear_layout_load_genre_activity);
-        this.relative_layout_load_more=findViewById(R.id.relative_layout_load_more);
-        this.swipe_refresh_layout_list_genre_search=findViewById(R.id.swipe_refresh_layout_list_genre_search);
-        button_try_again            = findViewById(R.id.button_try_again);
-        image_view_empty_list       = findViewById(R.id.image_view_empty_list);
-        linear_layout_layout_error  = findViewById(R.id.linear_layout_layout_error);
-        recycler_view_activity_genre          = findViewById(R.id.recycler_view_activity_genre);
-        adapter = new PosterAdapter(posterArrayList, this);
-
-        if (native_ads_enabled){
-            Log.v("MYADS","ENABLED");
-            if (tabletSize) {
-                this.gridLayoutManager=  new GridLayoutManager(getApplicationContext(),6,RecyclerView.VERTICAL,false);
-                Log.v("MYADS","tabletSize");
-                gridLayoutManager.setSpanSizeLookup(new GridLayoutManager.SpanSizeLookup() {
-                    @Override
-                    public int getSpanSize(int position) {
-                        return ((position  + 1) % (lines_beetween_ads  + 1  ) == 0 && position!=0) ? 6 : 1;
-                    }
-                });
-            } else {
-                this.gridLayoutManager=  new GridLayoutManager(getApplicationContext(),3,RecyclerView.VERTICAL,false);
-                gridLayoutManager.setSpanSizeLookup(new GridLayoutManager.SpanSizeLookup() {
-                    @Override
-                    public int getSpanSize(int position) {
-                        return ((position  + 1) % (lines_beetween_ads + 1 ) == 0  && position!=0)  ? 3 : 1;
-                    }
-                });
+        this.gridLayoutManager=  new GridLayoutManager(this,1,RecyclerView.VERTICAL,false);
+        this.gridLayoutManager.setSpanSizeLookup(new GridLayoutManager.SpanSizeLookup() {
+            @Override
+            public int getSpanSize(int position) {
+                if (posterArrayList.get(position).getTypeView()==1){
+                    return 1;
+                }else{
+                    return 2;
+                }
             }
-        }else {
-            if (tabletSize) {
-                this.gridLayoutManager=  new GridLayoutManager(getApplicationContext(),6,RecyclerView.VERTICAL,false);
-            } else {
-                this.gridLayoutManager=  new GridLayoutManager(getApplicationContext(),3,RecyclerView.VERTICAL,false);
+        });
+        this.gridLayoutManager.setSpanSizeLookup(new GridLayoutManager.SpanSizeLookup() {
+            @Override
+            public int getSpanSize(int position) {
+                if (posterArrayList.get(position).getTypeView()==1){
+                    return 1;
+                }else{
+                    return 2;
+                }
             }
-        }
-
-        recycler_view_activity_genre.setHasFixedSize(true);
-        recycler_view_activity_genre.setAdapter(adapter);
-        recycler_view_activity_genre.setLayoutManager(gridLayoutManager);
-
+        });
+        this.adapter =new PosterAdapter(posterArrayList,this);
+        this.recycler_view_activity_genre.setHasFixedSize(true);
+        this.recycler_view_activity_genre.setAdapter(this.adapter);
+        this.recycler_view_activity_genre.setLayoutManager(this.gridLayoutManager);
     }
 
     public boolean checkSUBSCRIBED(){
-        PrefManager prefManager= new PrefManager(getApplicationContext());
-        if (!prefManager.getString("SUBSCRIBED").equals("TRUE") && !prefManager.getString("NEW_SUBSCRIBE_ENABLED").equals("TRUE")) {
-            return false;
+        PrefManager prf= new PrefManager(getApplicationContext());
+        if (prf.getString("LOGGED").toString().equals("TRUE")) {
+            if (!prf.getString("SUBSCRIBED").toString().equals("TRUE")) {
+                return false;
+            }
         }
         return true;
     }
+
     public void showAdsBanner() {
-        if (!checkSUBSCRIBED()) {
-            PrefManager prefManager= new PrefManager(getApplicationContext());
-            if (!prefManager.getString("ADMIN_BANNER_TYPE").equals("FALSE")){
-                showAdmobBanner();
-            }
+        if (checkSUBSCRIBED()) {
+            findViewById(R.id.include_banner_ads).setVisibility(View.GONE);
+        }else{
+            showAdmobBanner();
         }
     }
+
     public void showAdmobBanner(){
-        PrefManager prefManager= new PrefManager(getApplicationContext());
-        LinearLayout linear_layout_ads =  (LinearLayout) findViewById(R.id.linear_layout_ads);
-        final AdView mAdView = new AdView(this);
+        AdView mAdView = findViewById(R.id.adView);
+        AdRequest adRequest = new AdRequest.Builder().build();
         mAdView.setAdSize(AdSize.SMART_BANNER);
         mAdView.setAdUnitId(prefManager.getString("ADMIN_BANNER_ADMOB_ID"));
-        AdRequest adRequest = new AdRequest.Builder()
-                .build();
         mAdView.loadAd(adRequest);
-        linear_layout_ads.addView(mAdView);
-
         mAdView.setAdListener(new AdListener() {
             @Override
             public void onAdLoaded() {
                 super.onAdLoaded();
-                mAdView.setVisibility(View.VISIBLE);
-
+                findViewById(R.id.include_banner_ads).setVisibility(View.VISIBLE);
             }
         });
     }
-
 }
