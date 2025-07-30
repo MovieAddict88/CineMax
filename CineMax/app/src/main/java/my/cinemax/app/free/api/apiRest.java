@@ -14,6 +14,7 @@ import my.cinemax.app.free.entity.Plan;
 import my.cinemax.app.free.entity.Poster;
 import my.cinemax.app.free.entity.Season;
 import my.cinemax.app.free.entity.JsonApiResponse;
+import my.cinemax.app.free.entity.AdsResponse;
 
 import java.util.List;
 
@@ -239,6 +240,6 @@ public interface apiRest {
     Call<JsonApiResponse> getJsonApiData();
     
     @GET("ads_config.json")
-    Call<my.cinemax.app.free.entity.AdsEntity> getAdsData();
+    Call<AdsResponse> getAdsData();
 }
 
