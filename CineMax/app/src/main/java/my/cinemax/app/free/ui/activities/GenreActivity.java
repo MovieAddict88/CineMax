@@ -429,20 +429,37 @@ public class GenreActivity extends AppCompatActivity {
     }
 
     public void showAdmobBanner(){
+        AdView mAdView = findViewById(R.id.adView);
         LinearLayout adContainer = findViewById(R.id.linear_layout_ads);
-        adContainer.removeAllViews();
-        AdView mAdView = new AdView(this);
-        mAdView.setAdSize(AdSize.SMART_BANNER);
-        mAdView.setAdUnitId(prefManager.getString("ADMIN_BANNER_ADMOB_ID"));
-        AdRequest adRequest = new AdRequest.Builder().build();
-        mAdView.loadAd(adRequest);
-        mAdView.setAdListener(new AdListener() {
-            @Override
-            public void onAdLoaded() {
-                super.onAdLoaded();
-                adContainer.setVisibility(View.VISIBLE);
-            }
-        });
-        adContainer.addView(mAdView);
+        if (mAdView != null) {
+            // If adView exists in the layout, use it
+            AdRequest adRequest = new AdRequest.Builder().build();
+            mAdView.setAdSize(AdSize.SMART_BANNER);
+            mAdView.setAdUnitId(prefManager.getString("ADMIN_BANNER_ADMOB_ID"));
+            mAdView.loadAd(adRequest);
+            mAdView.setAdListener(new AdListener() {
+                @Override
+                public void onAdLoaded() {
+                    super.onAdLoaded();
+                    adContainer.setVisibility(View.VISIBLE);
+                }
+            });
+        } else {
+            // Fallback: programmatically add AdView if not present in layout
+            adContainer.removeAllViews();
+            mAdView = new AdView(this);
+            mAdView.setAdSize(AdSize.SMART_BANNER);
+            mAdView.setAdUnitId(prefManager.getString("ADMIN_BANNER_ADMOB_ID"));
+            AdRequest adRequest = new AdRequest.Builder().build();
+            mAdView.loadAd(adRequest);
+            mAdView.setAdListener(new AdListener() {
+                @Override
+                public void onAdLoaded() {
+                    super.onAdLoaded();
+                    adContainer.setVisibility(View.VISIBLE);
+                }
+            });
+            adContainer.addView(mAdView);
+        }
     }
 }
