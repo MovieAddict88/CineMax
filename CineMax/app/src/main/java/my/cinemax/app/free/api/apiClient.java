@@ -11,6 +11,9 @@ import my.cinemax.app.free.config.Global;
 import my.cinemax.app.free.entity.ApiResponse;
 import my.cinemax.app.free.entity.JsonApiResponse;
 import my.cinemax.app.free.entity.Poster;
+import my.cinemax.app.free.entity.ThrillerResponse;
+import my.cinemax.app.free.entity.ActorActressResponse;
+import my.cinemax.app.free.entity.ContentResponse;
 import com.squareup.picasso.Picasso;
 
 import java.io.File;
@@ -192,6 +195,113 @@ public class apiClient {
      */
     public static void getGenresFromJson(Callback<JsonApiResponse> callback) {
         getJsonApiData(callback);
+    }
+    
+    // ===== NEW SEPARATED JSON API METHODS =====
+    
+    /**
+     * Fetch thriller-specific data from thriller.json
+     */
+    public static void getThrillerData(Callback<ThrillerResponse> callback) {
+        apiRest service = getClient().create(apiRest.class);
+        Call<ThrillerResponse> call = service.getThrillerData();
+        call.enqueue(callback);
+    }
+    
+    /**
+     * Fetch actor and actress data from actor_actress.json
+     */
+    public static void getActorActressData(Callback<ActorActressResponse> callback) {
+        apiRest service = getClient().create(apiRest.class);
+        Call<ActorActressResponse> call = service.getActorActressData();
+        call.enqueue(callback);
+    }
+    
+    /**
+     * Fetch main content data from actual_content.json
+     */
+    public static void getContentData(Callback<ContentResponse> callback) {
+        apiRest service = getClient().create(apiRest.class);
+        Call<ContentResponse> call = service.getContentData();
+        call.enqueue(callback);
+    }
+    
+    /**
+     * Fetch ads configuration from ads_config.json
+     */
+    public static void getAdsConfigData(Callback<ContentResponse> callback) {
+        apiRest service = getClient().create(apiRest.class);
+        Call<ContentResponse> call = service.getAdsConfig();
+        call.enqueue(callback);
+    }
+    
+    /**
+     * Get thriller data with custom callback interface
+     */
+    public static void getThrillerData(ThrillerCallback callback) {
+        apiRest service = getClient().create(apiRest.class);
+        Call<ThrillerResponse> call = service.getThrillerData();
+        call.enqueue(new Callback<ThrillerResponse>() {
+            @Override
+            public void onResponse(Call<ThrillerResponse> call, retrofit2.Response<ThrillerResponse> response) {
+                if (response.isSuccessful() && response.body() != null) {
+                    callback.onSuccess(response.body());
+                } else {
+                    callback.onError("Failed to load thriller data");
+                }
+            }
+            
+            @Override
+            public void onFailure(Call<ThrillerResponse> call, Throwable t) {
+                callback.onError("Network error: " + t.getMessage());
+            }
+        });
+    }
+    
+    /**
+     * Get actor/actress data with custom callback interface
+     */
+    public static void getActorActressData(ActorActressCallback callback) {
+        apiRest service = getClient().create(apiRest.class);
+        Call<ActorActressResponse> call = service.getActorActressData();
+        call.enqueue(new Callback<ActorActressResponse>() {
+            @Override
+            public void onResponse(Call<ActorActressResponse> call, retrofit2.Response<ActorActressResponse> response) {
+                if (response.isSuccessful() && response.body() != null) {
+                    callback.onSuccess(response.body());
+                } else {
+                    callback.onError("Failed to load actor/actress data");
+                }
+            }
+            
+            @Override
+            public void onFailure(Call<ActorActressResponse> call, Throwable t) {
+                callback.onError("Network error: " + t.getMessage());
+            }
+        });
+    }
+    
+    /**
+     * Get content data with custom callback interface
+     */
+    public static void getContentData(ContentCallback callback) {
+        apiRest service = getClient().create(apiRest.class);
+        Call<ContentResponse> call = service.getContentData();
+        call.enqueue(new Callback<ContentResponse>() {
+            @Override
+            public void onResponse(Call<ContentResponse> call, retrofit2.Response<ContentResponse> response) {
+                if (response.isSuccessful() && response.body() != null) {
+                    callback.onSuccess(response.body());
+                } else {
+                    callback.onError("Failed to load content data");
+                }
+            }
+            
+            @Override
+            public void onFailure(Call<ContentResponse> call, Throwable t) {
+                callback.onError("Network error: " + t.getMessage());
+            }
+        });
     }
     
     /**
@@ -457,6 +567,23 @@ public class apiClient {
     // Callback interface for JSON API data
     public interface JsonApiCallback {
         void onSuccess(JsonApiResponse jsonResponse);
+        void onError(String error);
+    }
+    
+    // ===== NEW CALLBACK INTERFACES FOR SEPARATED JSON APIs =====
+    
+    public interface ThrillerCallback {
+        void onSuccess(ThrillerResponse thrillerResponse);
+        void onError(String error);
+    }
+    
+    public interface ActorActressCallback {
+        void onSuccess(ActorActressResponse actorActressResponse);
+        void onError(String error);
+    }
+    
+    public interface ContentCallback {
+        void onSuccess(ContentResponse contentResponse);
         void onError(String error);
     }
 }

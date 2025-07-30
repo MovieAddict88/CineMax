@@ -14,6 +14,9 @@ import my.cinemax.app.free.entity.Plan;
 import my.cinemax.app.free.entity.Poster;
 import my.cinemax.app.free.entity.Season;
 import my.cinemax.app.free.entity.JsonApiResponse;
+import my.cinemax.app.free.entity.ThrillerResponse;
+import my.cinemax.app.free.entity.ActorActressResponse;
+import my.cinemax.app.free.entity.ContentResponse;
 
 import java.util.List;
 
@@ -231,14 +234,30 @@ public interface apiRest {
     @POST("check/mylist/"+ Global.SECURE_KEY+"/"+ Global.ITEM_PURCHASE_CODE+"/")
     Call<Integer> CheckMyList(@Field("id")  Integer id,@Field("user")  Integer user,@Field("key")  String key,@Field("type")  String type);
 
-    // ===== NEW JSON API ENDPOINTS =====
-    // These endpoints will fetch data from your GitHub JSON file
+    // ===== SEPARATED JSON API ENDPOINTS =====
+    // These endpoints fetch data from separate JSON files
+    
+    // Thriller-specific data
+    @GET("thriller.json")
+    Call<ThrillerResponse> getThrillerData();
+    
+    // Actor and actress data
+    @GET("actor_actress.json")
+    Call<ActorActressResponse> getActorActressData();
+    
+    // Main content data
+    @GET("actual_content.json")
+    Call<ContentResponse> getContentData();
+    
+    // Ads configuration
+    @GET("ads_config.json")
+    Call<ContentResponse> getAdsConfig();
+    
+    // ===== LEGACY JSON API ENDPOINTS =====
+    // These endpoints are kept for backward compatibility
     
     @GET("free_movie_api.json")
     Call<JsonApiResponse> getJsonApiData();
-    
-    @GET("ads_config.json")
-    Call<JsonApiResponse> getAdsConfig();
     
     @GET("free_movie_api.json")
     Call<JsonApiResponse> getHomeDataFromJson();
