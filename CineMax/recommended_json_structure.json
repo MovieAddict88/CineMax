@@ -42,6 +42,40 @@
       "posters": []
     }
   ],
+  "categories": [
+    {
+      "id": 1,
+      "title": "News",
+      "channels": []
+    },
+    {
+      "id": 2,
+      "title": "Sports",
+      "channels": []
+    },
+    {
+      "id": 3,
+      "title": "Entertainment",
+      "channels": []
+    }
+  ],
+  "countries": [
+    {
+      "id": 1,
+      "title": "United States",
+      "channels": []
+    },
+    {
+      "id": 2,
+      "title": "United Kingdom",
+      "channels": []
+    },
+    {
+      "id": 3,
+      "title": "Canada",
+      "channels": []
+    }
+  ],
   "movies": [
     {
       "id": 1,
@@ -118,7 +152,21 @@
   "channels": [
     {
       "id": 1,
-      "title": "Live News Channel",
+      "title": "CNN Live News",
+      "description": "24/7 news coverage",
+      "rating": 8.5,
+      "categories": [
+        {
+          "id": 1,
+          "title": "News"
+        }
+      ],
+      "countries": [
+        {
+          "id": 1,
+          "title": "United States"
+        }
+      ],
       "sources": [
         {
           "id": 6,
@@ -136,6 +184,37 @@
           "type": "live",
           "title": "480p Live Stream", 
           "quality": "480p",
+          "size": "Live",
+          "kind": "play",
+          "premium": "false",
+          "external": false,
+          "url": "https://qp-pldt-live-grp-02-prod.akamaized.net/out/u/tv5_5.m3u8"
+        }
+      ]
+    },
+    {
+      "id": 2,
+      "title": "ESPN Sports",
+      "description": "Sports coverage and highlights",
+      "rating": 9.0,
+      "categories": [
+        {
+          "id": 2,
+          "title": "Sports"
+        }
+      ],
+      "countries": [
+        {
+          "id": 1,
+          "title": "United States"
+        }
+      ],
+      "sources": [
+        {
+          "id": 8,
+          "type": "live",
+          "title": "1080p Live Stream",
+          "quality": "1080p",
           "size": "Live",
           "kind": "play",
           "premium": "false",

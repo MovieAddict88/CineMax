@@ -36,6 +36,8 @@ import my.cinemax.app.free.ui.Adapters.ChannelAdapter;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Collections;
+import java.util.Comparator;
 
 import static com.facebook.FacebookSdk.getApplicationContext;
 
@@ -99,10 +101,10 @@ public class TvFragment extends Fragment {
                 loaded=true;
                 page = 0;
                 loading = true;
-                // Don't load data here - it will be loaded by HomeActivity
-                // getCountiesList();
-                // getCategoriesList();
-                // loadChannels();
+                // Load filters and channels from GitHub JSON
+                getCountiesList();
+                getCategoriesList();
+                loadChannels();
             }
         }
     }
@@ -121,71 +123,76 @@ public class TvFragment extends Fragment {
         return view;
     }
     private void getCountiesList() {
-        // Don't load countries from old API - they will be loaded from JSON data
-        // Retrofit retrofit = apiClient.getClient();
-        // apiRest service = retrofit.create(apiRest.class);
-        // Call<List<Country>> call = service.getCountiesList();
-        // call.enqueue(new Callback<List<Country>>() {
-        //     @Override
-        //     public void onResponse(Call<List<Country>> call, Response<List<Country>> response) {
-        //         if (response.isSuccessful()){
-        //             if (response.body().size()>0) {
-        //                 final String[] countryCodes = new String[response.body().size()+1];
-        //                 countryCodes[0] = "All countries";
-        //                 countriesList.add(new Country());
-
-        //                 for (int i = 0; i < response.body().size(); i++) {
-        //                     countryCodes[i+1] = response.body().get(i).getTitle();
-        //                     countriesList.add(response.body().get(i));
-        //                 }
-        //                 ArrayAdapter<String> filtresAdapter = new ArrayAdapter<String>(getActivity(),
-        //                         R.layout.spinner_layout,R.id.textView,countryCodes);
-
-        //                 filtresAdapter.setDropDownViewResource(R.layout.simple_spinner_dropdown_item);
-        //                 spinner_fragement_channel_countries_list.setAdapter(filtresAdapter);
-        //                 relative_layout_frament_channel_countries.setVisibility(View.VISIBLE);
-        //             }else{
-        //                 relative_layout_frament_channel_countries.setVisibility(View.GONE);
-        //             }
-        //         }
-        //     }
-        //     @Override
-        //     public void onFailure(Call<List<Country>> call, Throwable t) {
-        //     }
-        // });
+        // Load countries from GitHub JSON API
+        apiClient.getJsonApiData(new retrofit2.Callback<my.cinemax.app.free.entity.JsonApiResponse>() {
+            @Override
+            public void onResponse(Call<my.cinemax.app.free.entity.JsonApiResponse> call, retrofit2.Response<my.cinemax.app.free.entity.JsonApiResponse> response) {
+                if (response.isSuccessful() && response.body() != null) {
+                    my.cinemax.app.free.entity.JsonApiResponse apiResponse = response.body();
+                    
+                    if (apiResponse.getCountries() != null && apiResponse.getCountries().size() > 0) {
+                        final String[] countryNames = new String[apiResponse.getCountries().size() + 1];
+                        countryNames[0] = "All countries";
+                        countriesList.add(new Country()); // Add "All countries" option
+                        
+                        for (int i = 0; i < apiResponse.getCountries().size(); i++) {
+                            countryNames[i + 1] = apiResponse.getCountries().get(i).getTitle();
+                            countriesList.add(apiResponse.getCountries().get(i));
+                        }
+                        
+                        ArrayAdapter<String> filtresAdapter = new ArrayAdapter<String>(getActivity(),
+                                R.layout.spinner_layout, R.id.textView, countryNames);
+                        filtresAdapter.setDropDownViewResource(R.layout.simple_spinner_dropdown_item);
+                        spinner_fragement_channel_countries_list.setAdapter(filtresAdapter);
+                        relative_layout_frament_channel_countries.setVisibility(View.VISIBLE);
+                    } else {
+                        relative_layout_frament_channel_countries.setVisibility(View.GONE);
+                    }
+                }
+            }
+            
+            @Override
+            public void onFailure(Call<my.cinemax.app.free.entity.JsonApiResponse> call, Throwable t) {
+                // Hide country filter if loading fails
+                relative_layout_frament_channel_countries.setVisibility(View.GONE);
+            }
+        });
     }
     private void getCategoriesList() {
-        // Don't load categories from old API - they will be loaded from JSON data
-        // Retrofit retrofit = apiClient.getClient();
-        // apiRest service = retrofit.create(apiRest.class);
-        // Call<List<Category>> call = service.getCategoriesList();
-        // call.enqueue(new Callback<List<Category>>() {
-        //     @Override
-        //     public void onResponse(Call<List<Category>> call, Response<List<Category>> response) {
-        //         if (response.isSuccessful()){
-        //             if (response.body().size()>0) {
-        //                 final String[] categoryCodes = new String[response.body().size()+1];
-        //                 categoryCodes[0] = "All categories";
-        //                 categoryList.add(new Category());
-
-        //                 for (int i = 0; i < response.body().size(); i++) {
-        //                     categoryCodes[i+1] = response.body().get(i).getTitle();
-        //                     categoryList.add(response.body().get(i));
-        //                 }
-        //                 ArrayAdapter<String> filtresAdapter = new ArrayAdapter<String>(getActivity(),
-        //                         R.layout.spinner_layout,R.id.textView,categoryCodes);
-        //                 filtresAdapter.setDropDownViewResource(R.layout.simple_spinner_dropdown_item);
-        //                 spinner_fragement_channel_categories_list.setAdapter(filtresAdapter);
-        //                 relative_layout_frament_channel_categories.setVisibility(View.VISIBLE);
-        //             }else{
-        //                 relative_layout_frament_channel_categories.setVisibility(View.GONE);
-        //             }
-        //         }
-        //     }
-        //     @Override
-        //     public void onFailure(Call<List<Category>> call, Throwable t) {
-        //     }
-        // });
+        // Load categories from GitHub JSON API
+        apiClient.getJsonApiData(new retrofit2.Callback<my.cinemax.app.free.entity.JsonApiResponse>() {
+            @Override
+            public void onResponse(Call<my.cinemax.app.free.entity.JsonApiResponse> call, retrofit2.Response<my.cinemax.app.free.entity.JsonApiResponse> response) {
+                if (response.isSuccessful() && response.body() != null) {
+                    my.cinemax.app.free.entity.JsonApiResponse apiResponse = response.body();
+                    
+                    if (apiResponse.getCategories() != null && apiResponse.getCategories().size() > 0) {
+                        final String[] categoryNames = new String[apiResponse.getCategories().size() + 1];
+                        categoryNames[0] = "All categories";
+                        categoryList.add(new Category()); // Add "All categories" option
+                        
+                        for (int i = 0; i < apiResponse.getCategories().size(); i++) {
+                            categoryNames[i + 1] = apiResponse.getCategories().get(i).getTitle();
+                            categoryList.add(apiResponse.getCategories().get(i));
+                        }
+                        
+                        ArrayAdapter<String> filtresAdapter = new ArrayAdapter<String>(getActivity(),
+                                R.layout.spinner_layout, R.id.textView, categoryNames);
+                        filtresAdapter.setDropDownViewResource(R.layout.simple_spinner_dropdown_item);
+                        spinner_fragement_channel_categories_list.setAdapter(filtresAdapter);
+                        relative_layout_frament_channel_categories.setVisibility(View.VISIBLE);
+                    } else {
+                        relative_layout_frament_channel_categories.setVisibility(View.GONE);
+                    }
+                }
+            }
+            
+            @Override
+            public void onFailure(Call<my.cinemax.app.free.entity.JsonApiResponse> call, Throwable t) {
+                // Hide category filter if loading fails
+                relative_layout_frament_channel_categories.setVisibility(View.GONE);
+            }
+        });
     }
 
     private void initActon() {
@@ -392,77 +399,140 @@ public class TvFragment extends Fragment {
 
     }
     private void loadChannels() {
-        // Don't load channels from old API - they will be loaded from JSON data
-        // if (page==0){
-        //     linear_layout_load_channel_fragment.setVisibility(View.VISIBLE);
-        // }else{
-        //     relative_layout_load_more_channel_fragment.setVisibility(View.VISIBLE);
-        // }
-        // swipe_refresh_layout_channel_fragment.setRefreshing(false);
-        // Retrofit retrofit = apiClient.getClient();
-        // apiRest service = retrofit.create(apiRest.class);
-        // Call<List<Channel>> call = service.getChannelsByFiltres(categorySelected,countrySelected,page);
-        // call.enqueue(new Callback<List<Channel>>() {
-        //     @Override
-        //     public void onResponse(Call<List<Channel>> call, final Response<List<Channel>> response) {
-        //         if (response.isSuccessful()){
-        //             if (response.body().size()>0){
-        //                 for (int i = 0; i < response.body().size(); i++) {
-        //                     channelList.add(response.body().get(i));
-        //                     if (native_ads_enabled){
-        //                         item++;
-        //                         if (item == lines_beetween_ads ){
-        //                             item= 0;
-        //                             if (prefManager.getString("ADMIN_NATIVE_TYPE").equals("FACEBOOK")) {
-        //                             channelList.add(new Channel().setTypeView(3));
-        //                         }else if (prefManager.getString("ADMIN_NATIVE_TYPE").equals("ADMOB")){
-        //                             channelList.add(new Channel().setTypeView(4));
-        //                         } else if (prefManager.getString("ADMIN_NATIVE_TYPE").equals("BOTH")){
-        //                             if (type_ads == 0) {
-        //                                 channelList.add(new Channel().setTypeView(3));
-        //                                 type_ads = 1;
-        //                             }else if (type_ads == 1){
-        //                                 channelList.add(new Channel().setTypeView(4));
-        //                                 type_ads = 0;
-        //                             }
-        //                         }
-        //                     }
-        //                 }
-        //                 linear_layout_page_error_channel_fragment.setVisibility(View.GONE);
-        //                 recycler_view_channel_fragment.setVisibility(View.VISIBLE);
-        //                 image_view_empty_list.setVisibility(View.GONE);
-
-        //                 adapter.notifyDataSetChanged();
-        //                 page++;
-        //                 loading=true;
-        //             }else{
-        //                 if (page==0) {
-        //                     linear_layout_page_error_channel_fragment.setVisibility(View.GONE);
-        //                     recycler_view_channel_fragment.setVisibility(View.GONE);
-        //                     image_view_empty_list.setVisibility(View.VISIBLE);
-        //                 }
-        //             }
-        //         }else{
-        //             linear_layout_page_error_channel_fragment.setVisibility(View.VISIBLE);
-        //             recycler_view_channel_fragment.setVisibility(View.GONE);
-        //             image_view_empty_list.setVisibility(View.GONE);
-        //         }
-        //         relative_layout_load_more_channel_fragment.setVisibility(View.GONE);
-        //         swipe_refresh_layout_channel_fragment.setRefreshing(false);
-        //         linear_layout_load_channel_fragment.setVisibility(View.GONE);
-        //     }
-
-        //     @Override
-        //     public void onFailure(Call<List<Channel>> call, Throwable t) {
-        //         linear_layout_page_error_channel_fragment.setVisibility(View.VISIBLE);
-        //         recycler_view_channel_fragment.setVisibility(View.GONE);
-        //         image_view_empty_list.setVisibility(View.GONE);
-        //         relative_layout_load_more_channel_fragment.setVisibility(View.GONE);
-        //         swipe_refresh_layout_channel_fragment.setVisibility(View.GONE);
-        //         linear_layout_load_channel_fragment.setVisibility(View.GONE);
-
-        //     }
-        // });
+        // Load channels from GitHub JSON API with filtering
+        if (page == 0) {
+            linear_layout_load_channel_fragment.setVisibility(View.VISIBLE);
+        } else {
+            relative_layout_load_more_channel_fragment.setVisibility(View.VISIBLE);
+        }
+        swipe_refresh_layout_channel_fragment.setRefreshing(false);
+        
+        apiClient.getJsonApiData(new retrofit2.Callback<my.cinemax.app.free.entity.JsonApiResponse>() {
+            @Override
+            public void onResponse(Call<my.cinemax.app.free.entity.JsonApiResponse> call, retrofit2.Response<my.cinemax.app.free.entity.JsonApiResponse> response) {
+                if (response.isSuccessful() && response.body() != null) {
+                    my.cinemax.app.free.entity.JsonApiResponse apiResponse = response.body();
+                    
+                    if (apiResponse.getChannels() != null && apiResponse.getChannels().size() > 0) {
+                        List<Channel> filteredChannels = new ArrayList<>();
+                        
+                        for (Channel channel : apiResponse.getChannels()) {
+                            boolean matchesFilters = true;
+                            
+                            // Apply category filtering
+                            if (categorySelected != 0) {
+                                boolean matchesCategory = false;
+                                if (channel.getCategories() != null && !channel.getCategories().isEmpty()) {
+                                    for (Category category : channel.getCategories()) {
+                                        if (category.getId() != null && category.getId().equals(categorySelected)) {
+                                            matchesCategory = true;
+                                            break;
+                                        }
+                                    }
+                                }
+                                if (!matchesCategory) {
+                                    matchesFilters = false;
+                                }
+                            }
+                            
+                            // Apply country filtering
+                            if (countrySelected != 0 && matchesFilters) {
+                                boolean matchesCountry = false;
+                                if (channel.getCountries() != null && !channel.getCountries().isEmpty()) {
+                                    for (Country country : channel.getCountries()) {
+                                        if (country.getId() != null && country.getId().equals(countrySelected)) {
+                                            matchesCountry = true;
+                                            break;
+                                        }
+                                    }
+                                }
+                                if (!matchesCountry) {
+                                    matchesFilters = false;
+                                }
+                            }
+                            
+                            if (matchesFilters) {
+                                filteredChannels.add(channel);
+                            }
+                        }
+                        
+                        // Sort channels by title (alphabetical)
+                        Collections.sort(filteredChannels, new Comparator<Channel>() {
+                            @Override
+                            public int compare(Channel c1, Channel c2) {
+                                String title1 = c1.getTitle();
+                                String title2 = c2.getTitle();
+                                if (title1 == null) title1 = "";
+                                if (title2 == null) title2 = "";
+                                return title1.compareToIgnoreCase(title2);
+                            }
+                        });
+                        
+                        if (!filteredChannels.isEmpty()) {
+                            for (Channel channel : filteredChannels) {
+                                channelList.add(channel);
+                                
+                                if (native_ads_enabled) {
+                                    item++;
+                                    if (item == lines_beetween_ads) {
+                                        item = 0;
+                                        if (prefManager.getString("ADMIN_NATIVE_TYPE").equals("FACEBOOK")) {
+                                            channelList.add(new Channel().setTypeView(3));
+                                        } else if (prefManager.getString("ADMIN_NATIVE_TYPE").equals("ADMOB")) {
+                                            channelList.add(new Channel().setTypeView(4));
+                                        } else if (prefManager.getString("ADMIN_NATIVE_TYPE").equals("BOTH")) {
+                                            if (type_ads == 0) {
+                                                channelList.add(new Channel().setTypeView(3));
+                                                type_ads = 1;
+                                            } else if (type_ads == 1) {
+                                                channelList.add(new Channel().setTypeView(4));
+                                                type_ads = 0;
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                            linear_layout_page_error_channel_fragment.setVisibility(View.GONE);
+                            recycler_view_channel_fragment.setVisibility(View.VISIBLE);
+                            image_view_empty_list.setVisibility(View.GONE);
+                            
+                            adapter.notifyDataSetChanged();
+                            page++;
+                            loading = true;
+                        } else {
+                            if (page == 0) {
+                                linear_layout_page_error_channel_fragment.setVisibility(View.GONE);
+                                recycler_view_channel_fragment.setVisibility(View.GONE);
+                                image_view_empty_list.setVisibility(View.VISIBLE);
+                            }
+                        }
+                    } else {
+                        if (page == 0) {
+                            linear_layout_page_error_channel_fragment.setVisibility(View.GONE);
+                            recycler_view_channel_fragment.setVisibility(View.GONE);
+                            image_view_empty_list.setVisibility(View.VISIBLE);
+                        }
+                    }
+                } else {
+                    linear_layout_page_error_channel_fragment.setVisibility(View.VISIBLE);
+                    recycler_view_channel_fragment.setVisibility(View.GONE);
+                    image_view_empty_list.setVisibility(View.GONE);
+                }
+                relative_layout_load_more_channel_fragment.setVisibility(View.GONE);
+                swipe_refresh_layout_channel_fragment.setRefreshing(false);
+                linear_layout_load_channel_fragment.setVisibility(View.GONE);
+            }
+            
+            @Override
+            public void onFailure(Call<my.cinemax.app.free.entity.JsonApiResponse> call, Throwable t) {
+                linear_layout_page_error_channel_fragment.setVisibility(View.VISIBLE);
+                recycler_view_channel_fragment.setVisibility(View.GONE);
+                image_view_empty_list.setVisibility(View.GONE);
+                relative_layout_load_more_channel_fragment.setVisibility(View.GONE);
+                swipe_refresh_layout_channel_fragment.setVisibility(View.GONE);
+                linear_layout_load_channel_fragment.setVisibility(View.GONE);
+            }
+        });
     }
     
     // Method to update fragment with JSON data
