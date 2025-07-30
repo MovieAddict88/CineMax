@@ -35,6 +35,8 @@ import my.cinemax.app.free.ui.Adapters.PosterAdapter;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Collections;
+import java.util.Comparator;
 
 public class GenreActivity extends AppCompatActivity {
     private SwipeRefreshLayout swipe_refresh_layout_list_genre_search;
@@ -175,57 +177,133 @@ public class GenreActivity extends AppCompatActivity {
 
 
     private void loadPosters() {
-        if (page==0){
+        if (page == 0) {
             linear_layout_load_genre_activity.setVisibility(View.VISIBLE);
-        }else{
+        } else {
             relative_layout_load_more.setVisibility(View.VISIBLE);
         }
         swipe_refresh_layout_list_genre_search.setRefreshing(false);
-        Retrofit retrofit = apiClient.getClient();
-        apiRest service = retrofit.create(apiRest.class);
-        Call<List<Poster>> call = service.getPostersByFiltres(genre.getId(),SelectedOrder,page);
-        call.enqueue(new Callback<List<Poster>>() {
+        
+        // Use GitHub JSON API instead of old API
+        apiClient.getJsonApiData(new retrofit2.Callback<my.cinemax.app.free.entity.JsonApiResponse>() {
             @Override
-            public void onResponse(Call<List<Poster>> call, final Response<List<Poster>> response) {
-                if (response.isSuccessful()){
-                    if (response.body().size()>0){
-                        for (int i = 0; i < response.body().size(); i++) {
-                            posterArrayList.add(response.body().get(i));
-                            if (native_ads_enabled){
-                                item++;
-                                if (item == lines_beetween_ads ){
-                                    item= 0;
-                                    if (prefManager.getString("ADMIN_NATIVE_TYPE").equals("FACEBOOK")) {
-                                        posterArrayList.add(new Poster().setTypeView(4));
-                                    }else if (prefManager.getString("ADMIN_NATIVE_TYPE").equals("ADMOB")){
-                                        posterArrayList.add(new Poster().setTypeView(5));
-                                    } else if (prefManager.getString("ADMIN_NATIVE_TYPE").equals("BOTH")){
-                                        if (type_ads == 0) {
+            public void onResponse(Call<my.cinemax.app.free.entity.JsonApiResponse> call, retrofit2.Response<my.cinemax.app.free.entity.JsonApiResponse> response) {
+                if (response.isSuccessful() && response.body() != null) {
+                    my.cinemax.app.free.entity.JsonApiResponse apiResponse = response.body();
+                    
+                    if (apiResponse.getMovies() != null && apiResponse.getMovies().size() > 0) {
+                        List<Poster> filteredPosters = new ArrayList<>();
+                        
+                        // Filter content by the selected genre
+                        for (Poster poster : apiResponse.getMovies()) {
+                            boolean matchesGenre = false;
+                            
+                            // Check if poster has the selected genre
+                            if (poster.getGenres() != null && !poster.getGenres().isEmpty()) {
+                                for (my.cinemax.app.free.entity.Genre posterGenre : poster.getGenres()) {
+                                    if (posterGenre.getId() != null && posterGenre.getId().equals(genre.getId())) {
+                                        matchesGenre = true;
+                                        break;
+                                    }
+                                }
+                            }
+                            
+                            if (matchesGenre) {
+                                filteredPosters.add(poster);
+                            }
+                        }
+                        
+                        // Apply sorting
+                        if (SelectedOrder != null) {
+                            switch (SelectedOrder) {
+                                case "created":
+                                    // Keep original order (newest first)
+                                    break;
+                                case "rating":
+                                    Collections.sort(filteredPosters, new Comparator<Poster>() {
+                                        @Override
+                                        public int compare(Poster p1, Poster p2) {
+                                            Float rating1 = p1.getRating();
+                                            Float rating2 = p2.getRating();
+                                            if (rating1 == null) rating1 = 0f;
+                                            if (rating2 == null) rating2 = 0f;
+                                            return rating2.compareTo(rating1); // Descending
+                                        }
+                                    });
+                                    break;
+                                case "year":
+                                    Collections.sort(filteredPosters, new Comparator<Poster>() {
+                                        @Override
+                                        public int compare(Poster p1, Poster p2) {
+                                            String year1 = p1.getYear();
+                                            String year2 = p2.getYear();
+                                            if (year1 == null) year1 = "0";
+                                            if (year2 == null) year2 = "0";
+                                            return year2.compareTo(year1); // Descending
+                                        }
+                                    });
+                                    break;
+                                case "name":
+                                    Collections.sort(filteredPosters, new Comparator<Poster>() {
+                                        @Override
+                                        public int compare(Poster p1, Poster p2) {
+                                            String title1 = p1.getTitle();
+                                            String title2 = p2.getTitle();
+                                            if (title1 == null) title1 = "";
+                                            if (title2 == null) title2 = "";
+                                            return title1.compareToIgnoreCase(title2); // Ascending
+                                        }
+                                    });
+                                    break;
+                            }
+                        }
+                        
+                        if (!filteredPosters.isEmpty()) {
+                            for (Poster poster : filteredPosters) {
+                                posterArrayList.add(poster);
+                                
+                                if (native_ads_enabled) {
+                                    item++;
+                                    if (item == lines_beetween_ads) {
+                                        item = 0;
+                                        if (prefManager.getString("ADMIN_NATIVE_TYPE").equals("FACEBOOK")) {
                                             posterArrayList.add(new Poster().setTypeView(4));
-                                            type_ads = 1;
-                                        }else if (type_ads == 1){
+                                        } else if (prefManager.getString("ADMIN_NATIVE_TYPE").equals("ADMOB")) {
                                             posterArrayList.add(new Poster().setTypeView(5));
-                                            type_ads = 0;
+                                        } else if (prefManager.getString("ADMIN_NATIVE_TYPE").equals("BOTH")) {
+                                            if (type_ads == 0) {
+                                                posterArrayList.add(new Poster().setTypeView(4));
+                                                type_ads = 1;
+                                            } else if (type_ads == 1) {
+                                                posterArrayList.add(new Poster().setTypeView(5));
+                                                type_ads = 0;
+                                            }
                                         }
                                     }
                                 }
                             }
+                            linear_layout_layout_error.setVisibility(View.GONE);
+                            recycler_view_activity_genre.setVisibility(View.VISIBLE);
+                            image_view_empty_list.setVisibility(View.GONE);
+                            
+                            adapter.notifyDataSetChanged();
+                            page++;
+                            loading = true;
+                        } else {
+                            if (page == 0) {
+                                linear_layout_layout_error.setVisibility(View.GONE);
+                                recycler_view_activity_genre.setVisibility(View.GONE);
+                                image_view_empty_list.setVisibility(View.VISIBLE);
+                            }
                         }
-                        linear_layout_layout_error.setVisibility(View.GONE);
-                        recycler_view_activity_genre.setVisibility(View.VISIBLE);
-                        image_view_empty_list.setVisibility(View.GONE);
-
-                        adapter.notifyDataSetChanged();
-                        page++;
-                        loading=true;
-                    }else{
-                        if (page==0) {
+                    } else {
+                        if (page == 0) {
                             linear_layout_layout_error.setVisibility(View.GONE);
                             recycler_view_activity_genre.setVisibility(View.GONE);
                             image_view_empty_list.setVisibility(View.VISIBLE);
                         }
                     }
-                }else{
+                } else {
                     linear_layout_layout_error.setVisibility(View.VISIBLE);
                     recycler_view_activity_genre.setVisibility(View.GONE);
                     image_view_empty_list.setVisibility(View.GONE);
@@ -234,16 +312,15 @@ public class GenreActivity extends AppCompatActivity {
                 swipe_refresh_layout_list_genre_search.setRefreshing(false);
                 linear_layout_load_genre_activity.setVisibility(View.GONE);
             }
-
+            
             @Override
-            public void onFailure(Call<List<Poster>> call, Throwable t) {
+            public void onFailure(Call<my.cinemax.app.free.entity.JsonApiResponse> call, Throwable t) {
                 linear_layout_layout_error.setVisibility(View.VISIBLE);
                 recycler_view_activity_genre.setVisibility(View.GONE);
                 image_view_empty_list.setVisibility(View.GONE);
                 relative_layout_load_more.setVisibility(View.GONE);
-                swipe_refresh_layout_list_genre_search.setVisibility(View.GONE);
+                swipe_refresh_layout_list_genre_search.setRefreshing(false);
                 linear_layout_load_genre_activity.setVisibility(View.GONE);
-
             }
         });
     }
