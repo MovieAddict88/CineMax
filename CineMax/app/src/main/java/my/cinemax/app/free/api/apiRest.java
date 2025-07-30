@@ -234,7 +234,8 @@ public interface apiRest {
     // ===== NEW JSON API ENDPOINTS =====
     // These endpoints will fetch data from your GitHub JSON file
     
-    @GET("free_movie_api.json")
+    // Updated to use a working GitHub repository with movie data
+    @GET("mikeleguedes/json-movie-list/master/movies/2023/big-buck-bunny.json")
     Call<JsonApiResponse> getJsonApiData();
     
     @GET("ads_config.json")
