@@ -169,6 +169,7 @@ public class HomeAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
                     }else{
                         Intent intent  =  new Intent(activity.getApplicationContext(), GenreActivity.class);
                         intent.putExtra("genre", dataList.get(position).getGenre());
+                        intent.putExtra("from", "home"); // Add from parameter to indicate source
                         (activity).startActivity(intent, ActivityOptionsCompat.makeScaleUpAnimation(v, (int) v.getX(), (int) v.getY(), v.getWidth(), v.getHeight()).toBundle());
                     }
 

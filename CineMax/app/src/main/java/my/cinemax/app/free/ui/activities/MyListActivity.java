@@ -92,6 +92,10 @@ public class MyListActivity extends AppCompatActivity {
         String savedMoviesIds = prf.getString("MY_LIST_MOVIES");
         String savedChannelsIds = prf.getString("MY_LIST_CHANNELS");
         
+        // Handle empty strings for safety
+        if (savedMoviesIds == null) savedMoviesIds = "";
+        if (savedChannelsIds == null) savedChannelsIds = "";
+        
         // Load data from GitHub JSON API
         apiClient.getJsonApiData(new retrofit2.Callback<my.cinemax.app.free.entity.JsonApiResponse>() {
             @Override

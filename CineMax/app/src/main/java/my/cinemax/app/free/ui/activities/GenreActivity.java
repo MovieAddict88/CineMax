@@ -194,6 +194,15 @@ public class GenreActivity extends AppCompatActivity {
 
 
     private void loadPosters() {
+        // Safety check: ensure genre is not null
+        if (genre == null) {
+            Log.e("GenreActivity", "Cannot load posters: genre is null");
+            linear_layout_layout_error.setVisibility(View.VISIBLE);
+            recycler_view_activity_genre.setVisibility(View.GONE);
+            image_view_empty_list.setVisibility(View.GONE);
+            return;
+        }
+        
         if (page == 0) {
             linear_layout_load_genre_activity.setVisibility(View.VISIBLE);
         } else {
@@ -218,10 +227,21 @@ public class GenreActivity extends AppCompatActivity {
                             // Check if poster has the selected genre
                             if (poster.getGenres() != null && !poster.getGenres().isEmpty()) {
                                 for (my.cinemax.app.free.entity.Genre posterGenre : poster.getGenres()) {
-                                    if (posterGenre.getId() != null && posterGenre.getId().equals(genre.getId())) {
+                                    if (posterGenre != null && posterGenre.getId() != null && 
+                                        genre != null && genre.getId() != null && 
+                                        posterGenre.getId().equals(genre.getId())) {
                                         matchesGenre = true;
                                         break;
                                     }
+                                }
+                            }
+                            
+                            // Special handling for special genre IDs
+                            if (!matchesGenre && genre != null && genre.getId() != null) {
+                                // Handle special cases where genre ID might be 0 or negative
+                                if (genre.getId() == 0) {
+                                    // Show all content if genre ID is 0
+                                    matchesGenre = true;
                                 }
                             }
                             
@@ -332,12 +352,18 @@ public class GenreActivity extends AppCompatActivity {
             
             @Override
             public void onFailure(Call<my.cinemax.app.free.entity.JsonApiResponse> call, Throwable t) {
+                Log.e("GenreActivity", "Failed to load data from GitHub JSON API", t);
+                
+                // Show error layout
                 linear_layout_layout_error.setVisibility(View.VISIBLE);
                 recycler_view_activity_genre.setVisibility(View.GONE);
                 image_view_empty_list.setVisibility(View.GONE);
                 relative_layout_load_more.setVisibility(View.GONE);
                 swipe_refresh_layout_list_genre_search.setRefreshing(false);
                 linear_layout_load_genre_activity.setVisibility(View.GONE);
+                
+                // Log the error details for debugging
+                Log.e("GenreActivity", "Error details: " + t.getMessage());
             }
         });
     }
