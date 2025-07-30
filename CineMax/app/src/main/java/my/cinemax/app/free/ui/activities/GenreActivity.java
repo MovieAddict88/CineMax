@@ -104,7 +104,7 @@ public class GenreActivity extends AppCompatActivity {
     @Override
     public boolean onOptionsItemSelected(MenuItem itemMenu) {
         switch (itemMenu.getItemId()) {
-            case R.id.item_order_created:
+            case R.id.nav_created:
                 SelectedOrder = "created";
                 item = 0;
                 page = 0;
@@ -113,7 +113,7 @@ public class GenreActivity extends AppCompatActivity {
                 adapter.notifyDataSetChanged();
                 loadPosters();
                 return true;
-            case R.id.item_order_rating:
+            case R.id.nav_rating:
                 SelectedOrder = "rating";
                 item = 0;
                 page = 0;
@@ -122,7 +122,7 @@ public class GenreActivity extends AppCompatActivity {
                 adapter.notifyDataSetChanged();
                 loadPosters();
                 return true;
-            case R.id.item_order_views:
+            case R.id.nav_views:
                 SelectedOrder = "views";
                 item = 0;
                 page = 0;
@@ -131,7 +131,7 @@ public class GenreActivity extends AppCompatActivity {
                 adapter.notifyDataSetChanged();
                 loadPosters();
                 return true;
-            case R.id.item_order_year:
+            case R.id.nav_year:
                 SelectedOrder = "year";
                 item = 0;
                 page = 0;
@@ -140,7 +140,7 @@ public class GenreActivity extends AppCompatActivity {
                 adapter.notifyDataSetChanged();
                 loadPosters();
                 return true;
-            case R.id.item_order_name:
+            case R.id.nav_title:
                 SelectedOrder = "name";
                 item = 0;
                 page = 0;
@@ -422,24 +422,27 @@ public class GenreActivity extends AppCompatActivity {
 
     public void showAdsBanner() {
         if (checkSUBSCRIBED()) {
-            findViewById(R.id.include_banner_ads).setVisibility(View.GONE);
+            findViewById(R.id.linear_layout_ads).setVisibility(View.GONE);
         }else{
             showAdmobBanner();
         }
     }
 
     public void showAdmobBanner(){
-        AdView mAdView = findViewById(R.id.adView);
-        AdRequest adRequest = new AdRequest.Builder().build();
+        LinearLayout adContainer = findViewById(R.id.linear_layout_ads);
+        adContainer.removeAllViews();
+        AdView mAdView = new AdView(this);
         mAdView.setAdSize(AdSize.SMART_BANNER);
         mAdView.setAdUnitId(prefManager.getString("ADMIN_BANNER_ADMOB_ID"));
+        AdRequest adRequest = new AdRequest.Builder().build();
         mAdView.loadAd(adRequest);
         mAdView.setAdListener(new AdListener() {
             @Override
             public void onAdLoaded() {
                 super.onAdLoaded();
-                findViewById(R.id.include_banner_ads).setVisibility(View.VISIBLE);
+                adContainer.setVisibility(View.VISIBLE);
             }
         });
+        adContainer.addView(mAdView);
     }
 }
