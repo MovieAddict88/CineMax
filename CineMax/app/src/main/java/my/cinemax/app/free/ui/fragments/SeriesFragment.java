@@ -149,10 +149,7 @@ public class SeriesFragment extends Fragment {
                         spinner_fragement_series_genre_list.setAdapter(filtresAdapter);
                         relative_layout_frament_series_genres.setVisibility(View.VISIBLE);
                         
-                        Log.d("SeriesFragment", "Loaded " + genreList.size() + " genres");
-                        for (Genre genre : genreList) {
-                            Log.d("SeriesFragment", "Genre: " + genre.getTitle() + " (ID: " + genre.getId() + ")");
-                        }
+
                     } else {
                         relative_layout_frament_series_genres.setVisibility(View.GONE);
                         Log.w("SeriesFragment", "No genres found in API response");
@@ -300,8 +297,8 @@ public class SeriesFragment extends Fragment {
                     {
                         if ( (visibleItemCount + pastVisiblesItems) >= totalItemCount)
                         {
+                            // Don't load more since we're loading all series at once
                             loading = false;
-                            loadSeries();
                         }
                     }
                 }else{
@@ -445,32 +442,7 @@ public class SeriesFragment extends Fragment {
                             }
                         }
                         
-                        // Debug logging
-                        Log.d("SeriesFragment", "Total series found: " + filteredSeries.size() + 
-                              ", Genre selected: " + genreSelected + 
-                              ", Order selected: " + orderSelected);
-                        
-                        // Additional debugging for series data
-                        if (apiResponse.getMovies() != null) {
-                            Log.d("SeriesFragment", "Total movies in API: " + apiResponse.getMovies().size());
-                            int seriesCount = 0;
-                            for (Poster poster : apiResponse.getMovies()) {
-                                if ("series".equals(poster.getType()) || "serie".equals(poster.getType())) {
-                                    seriesCount++;
-                                    Log.d("SeriesFragment", "Found series: " + poster.getTitle() + " with genres: " + 
-                                          (poster.getGenres() != null ? poster.getGenres().size() : 0));
-                                    if (poster.getGenres() != null) {
-                                        for (Genre genre : poster.getGenres()) {
-                                            Log.d("SeriesFragment", "  - Genre: " + genre.getTitle() + " (ID: " + genre.getId() + ")");
-                                        }
-                                    }
-                                }
-                            }
-                            Log.d("SeriesFragment", "Total series in API: " + seriesCount);
-                        }
-                        
-                        // Debug genre filtering
-                        Log.d("SeriesFragment", "Genre filtering - Selected: " + genreSelected + ", Filtered count: " + filteredSeries.size());
+
                         
                         // Apply ordering
                         if (orderSelected != null) {
@@ -548,6 +520,13 @@ public class SeriesFragment extends Fragment {
                         }
                         
                         if (!filteredSeries.isEmpty()) {
+                            // Only add series if this is the first page or if we're loading more
+                            if (page == 0) {
+                                // Clear the list for first page
+                                movieList.clear();
+                                movieList.add(new Poster().setTypeView(2));
+                            }
+                            
                             for (Poster poster : filteredSeries) {
                                 movieList.add(poster);
                                 
@@ -584,7 +563,7 @@ public class SeriesFragment extends Fragment {
                         
                         adapter.notifyDataSetChanged();
                         page++;
-                        loading = true;
+                        loading = false; // Set to false to prevent infinite loading
                     } else {
                         if (page == 0) {
                             linear_layout_page_error_series_fragment.setVisibility(View.GONE);

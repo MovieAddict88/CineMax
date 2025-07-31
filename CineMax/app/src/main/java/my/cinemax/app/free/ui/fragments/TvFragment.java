@@ -147,10 +147,7 @@ public class TvFragment extends Fragment {
                         spinner_fragement_channel_countries_list.setAdapter(filtresAdapter);
                         relative_layout_frament_channel_countries.setVisibility(View.VISIBLE);
                         
-                        Log.d("TvFragment", "Loaded " + countriesList.size() + " countries");
-                        for (Country country : countriesList) {
-                            Log.d("TvFragment", "Country: " + country.getTitle() + " (ID: " + country.getId() + ")");
-                        }
+
                     } else {
                         relative_layout_frament_channel_countries.setVisibility(View.GONE);
                     }
@@ -191,10 +188,7 @@ public class TvFragment extends Fragment {
                         spinner_fragement_channel_categories_list.setAdapter(filtresAdapter);
                         relative_layout_frament_channel_categories.setVisibility(View.VISIBLE);
                         
-                        Log.d("TvFragment", "Loaded " + categoryList.size() + " categories");
-                        for (Category category : categoryList) {
-                            Log.d("TvFragment", "Category: " + category.getTitle() + " (ID: " + category.getId() + ")");
-                        }
+
                     } else {
                         relative_layout_frament_channel_categories.setVisibility(View.GONE);
                     }
@@ -331,8 +325,8 @@ public class TvFragment extends Fragment {
                     {
                         if ( (visibleItemCount + pastVisiblesItems) >= totalItemCount)
                         {
+                            // Don't load more since we're loading all channels at once
                             loading = false;
-                            loadChannels();
                         }
                     }
                 }else{
@@ -468,45 +462,23 @@ public class TvFragment extends Fragment {
                                 // Show all countries
                                 matchesCountry = true;
                             } else {
-                                // Enhanced country matching using both countries list and sublabel
-                                boolean foundInCountries = false;
-                                if (channel.getCountries() != null && !channel.getCountries().isEmpty()) {
-                                    // Check if channel has the selected country
-                                    for (Country country : channel.getCountries()) {
-                                        if (country.getId() != null && country.getId().intValue() == countrySelected) {
-                                            foundInCountries = true;
-                                            break;
-                                        }
+                                // Simple country matching - check sublabel first
+                                String sublabel = channel.getSublabel();
+                                if (sublabel != null && !sublabel.isEmpty()) {
+                                    String sublabelLower = sublabel.toLowerCase();
+                                    if (countrySelected == 1 && (sublabelLower.contains("usa") || sublabelLower.contains("united states"))) {
+                                        matchesCountry = true;
+                                    } else if (countrySelected == 2 && (sublabelLower.contains("uk") || sublabelLower.contains("united kingdom"))) {
+                                        matchesCountry = true;
+                                    } else if (countrySelected == 3 && sublabelLower.contains("france")) {
+                                        matchesCountry = true;
+                                    } else if (countrySelected == 4 && sublabelLower.contains("germany")) {
+                                        matchesCountry = true;
+                                    } else if (sublabelLower.contains("ph") || sublabelLower.contains("philippines")) {
+                                        // Show Philippines channels for any country selection
+                                        matchesCountry = true;
                                     }
                                 }
-                                
-                                // If not found in countries list, try sublabel matching
-                                if (!foundInCountries) {
-                                    String sublabel = channel.getSublabel();
-                                    if (sublabel != null && !sublabel.isEmpty()) {
-                                        String sublabelLower = sublabel.toLowerCase();
-                                        // Map country IDs to country names/abbreviations
-                                        if (countrySelected == 1 && (sublabelLower.contains("usa") || sublabelLower.contains("united states") || sublabelLower.contains("us"))) {
-                                            foundInCountries = true;
-                                        } else if (countrySelected == 2 && (sublabelLower.contains("uk") || sublabelLower.contains("united kingdom") || sublabelLower.contains("gb"))) {
-                                            foundInCountries = true;
-                                        } else if (countrySelected == 3 && (sublabelLower.contains("france") || sublabelLower.contains("fr"))) {
-                                            foundInCountries = true;
-                                        } else if (countrySelected == 4 && (sublabelLower.contains("germany") || sublabelLower.contains("de"))) {
-                                            foundInCountries = true;
-                                        }
-                                    }
-                                }
-                                
-                                // Special handling for Philippines (PH) - show for any country selection since it's the main content
-                                if (!foundInCountries) {
-                                    String sublabel = channel.getSublabel();
-                                    if (sublabel != null && (sublabel.toLowerCase().contains("ph") || sublabel.toLowerCase().contains("philippines"))) {
-                                        foundInCountries = true;
-                                    }
-                                }
-                                
-                                matchesCountry = foundInCountries;
                             }
                             
                             if (matchesCategory && matchesCountry) {
@@ -514,36 +486,16 @@ public class TvFragment extends Fragment {
                             }
                         }
                         
-                        // Debug logging
-                        Log.d("TvFragment", "Total channels found: " + filteredChannels.size() + 
-                              ", Category selected: " + categorySelected + 
-                              ", Country selected: " + countrySelected);
-                        
-                        // Additional debugging for channel data
-                        if (apiResponse.getChannels() != null) {
-                            Log.d("TvFragment", "Total channels in API: " + apiResponse.getChannels().size());
-                            for (Channel channel : apiResponse.getChannels()) {
-                                Log.d("TvFragment", "Channel: " + channel.getTitle() + 
-                                      " - Categories: " + (channel.getCategories() != null ? channel.getCategories().size() : 0) +
-                                      " - Countries: " + (channel.getCountries() != null ? channel.getCountries().size() : 0) +
-                                      " - Sublabel: " + channel.getSublabel());
-                                if (channel.getCategories() != null) {
-                                    for (Category category : channel.getCategories()) {
-                                        Log.d("TvFragment", "  - Category: " + category.getTitle() + " (ID: " + category.getId() + ")");
-                                    }
-                                }
-                                if (channel.getCountries() != null) {
-                                    for (Country country : channel.getCountries()) {
-                                        Log.d("TvFragment", "  - Country: " + country.getTitle() + " (ID: " + country.getId() + ")");
-                                    }
-                                }
-                            }
-                        }
-                        
-                        // Debug filtering
-                        Log.d("TvFragment", "Filtering - Category: " + categorySelected + ", Country: " + countrySelected + ", Filtered count: " + filteredChannels.size());
+
                         
                         if (!filteredChannels.isEmpty()) {
+                            // Only add channels if this is the first page or if we're loading more
+                            if (page == 0) {
+                                // Clear the list for first page
+                                channelList.clear();
+                                channelList.add(new Channel().setTypeView(2));
+                            }
+                            
                             for (Channel channel : filteredChannels) {
                                 channelList.add(channel);
                                 
@@ -580,7 +532,7 @@ public class TvFragment extends Fragment {
                         
                         adapter.notifyDataSetChanged();
                         page++;
-                        loading = true;
+                        loading = false; // Set to false to prevent infinite loading
                     } else {
                         if (page == 0) {
                             linear_layout_page_error_channel_fragment.setVisibility(View.GONE);
