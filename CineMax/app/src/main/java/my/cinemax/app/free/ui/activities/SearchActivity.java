@@ -90,67 +90,90 @@ public class SearchActivity extends AppCompatActivity {
     private void initView() {
         try {
             // Initialize tablet size properly
-            tabletSize = getResources().getBoolean(R.bool.isTablet);
-            
-            // Initialize native ads settings
-            if (prefManager != null && !prefManager.getString("ADMIN_NATIVE_TYPE").equals("FALSE")) {
-                native_ads_enabled = true;
-                if (tabletSize) {
-                    lines_beetween_ads = 6 * Integer.parseInt(prefManager.getString("ADMIN_NATIVE_LINES"));
-                } else {
-                    lines_beetween_ads = 3 * Integer.parseInt(prefManager.getString("ADMIN_NATIVE_LINES"));
-                }
+            try {
+                tabletSize = getResources().getBoolean(R.bool.isTablet);
+            } catch (Exception e) {
+                Log.w("SearchActivity", "Error getting tablet size, defaulting to false: " + e.getMessage());
+                tabletSize = false;
             }
             
-            if (checkSUBSCRIBED()) {
+            // Initialize native ads settings safely
+            try {
+                if (prefManager != null && !prefManager.getString("ADMIN_NATIVE_TYPE").equals("FALSE")) {
+                    native_ads_enabled = true;
+                    if (tabletSize) {
+                        lines_beetween_ads = 6 * Integer.parseInt(prefManager.getString("ADMIN_NATIVE_LINES"));
+                    } else {
+                        lines_beetween_ads = 3 * Integer.parseInt(prefManager.getString("ADMIN_NATIVE_LINES"));
+                    }
+                }
+                
+                if (checkSUBSCRIBED()) {
+                    native_ads_enabled = false;
+                }
+            } catch (Exception e) {
+                Log.w("SearchActivity", "Error initializing ads settings: " + e.getMessage());
                 native_ads_enabled = false;
             }
 
             // Get query from intent with null check
-            Bundle bundle = getIntent().getExtras();
-            if (bundle != null) {
-                this.query = bundle.getString("query", "");
-                Log.d("SearchActivity", "Search query from intent: '" + this.query + "'");
-            } else {
-                this.query = "";
-                Log.w("SearchActivity", "No extras in intent, using empty query");
-            }
-            
-            // Validate query
-            if (query == null || query.trim().isEmpty()) {
-                Log.w("SearchActivity", "Empty or null search query");
-                query = "";
-            } else {
-                query = query.trim();
-                Log.d("SearchActivity", "Final search query: '" + query + "'");
-            }
-            
-            // Setup toolbar
-            Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
-            if (toolbar != null) {
-                toolbar.setTitle(query.isEmpty() ? "Search" : query);
-                setSupportActionBar(toolbar);
-                if (getSupportActionBar() != null) {
-                    getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+            try {
+                Bundle bundle = getIntent().getExtras();
+                if (bundle != null) {
+                    this.query = bundle.getString("query", "");
+                    Log.d("SearchActivity", "Search query from intent: '" + this.query + "'");
+                } else {
+                    this.query = "";
+                    Log.w("SearchActivity", "No extras in intent, using empty query");
                 }
+                
+                // Validate query
+                if (query == null || query.trim().isEmpty()) {
+                    Log.w("SearchActivity", "Empty or null search query");
+                    query = "";
+                } else {
+                    query = query.trim();
+                    Log.d("SearchActivity", "Final search query: '" + query + "'");
+                }
+            } catch (Exception e) {
+                Log.w("SearchActivity", "Error getting search query: " + e.getMessage());
+                query = "";
+            }
+            
+            // Setup toolbar safely
+            try {
+                Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+                if (toolbar != null) {
+                    toolbar.setTitle(query.isEmpty() ? "Search" : query);
+                    setSupportActionBar(toolbar);
+                    if (getSupportActionBar() != null) {
+                        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+                    }
+                }
+            } catch (Exception e) {
+                Log.w("SearchActivity", "Error setting up toolbar: " + e.getMessage());
             }
 
             // Initialize views with null checks
-            this.linear_layout_load_search_activity = findViewById(R.id.linear_layout_load_search_activity);
-            this.swipe_refresh_layout_list_search_search = findViewById(R.id.swipe_refresh_layout_list_search_search);
-            button_try_again = findViewById(R.id.button_try_again);
-            image_view_empty_list = findViewById(R.id.image_view_empty_list);
-            linear_layout_layout_error = findViewById(R.id.linear_layout_layout_error);
-            recycler_view_activity_search = findViewById(R.id.recycler_view_activity_search);
-            
-            // Initialize adapter with null check
-            if (recycler_view_activity_search != null) {
-                adapter = new PosterAdapter(posterArrayList, this);
-                recycler_view_activity_search.setHasFixedSize(true);
-                recycler_view_activity_search.setAdapter(adapter);
-                Log.d("SearchActivity", "Adapter initialized successfully");
-            } else {
-                Log.e("SearchActivity", "RecyclerView not found in layout");
+            try {
+                this.linear_layout_load_search_activity = findViewById(R.id.linear_layout_load_search_activity);
+                this.swipe_refresh_layout_list_search_search = findViewById(R.id.swipe_refresh_layout_list_search_search);
+                button_try_again = findViewById(R.id.button_try_again);
+                image_view_empty_list = findViewById(R.id.image_view_empty_list);
+                linear_layout_layout_error = findViewById(R.id.linear_layout_layout_error);
+                recycler_view_activity_search = findViewById(R.id.recycler_view_activity_search);
+                
+                // Initialize adapter with null check
+                if (recycler_view_activity_search != null) {
+                    adapter = new PosterAdapter(posterArrayList != null ? posterArrayList : new ArrayList<>(), this);
+                    recycler_view_activity_search.setHasFixedSize(true);
+                    recycler_view_activity_search.setAdapter(adapter);
+                    Log.d("SearchActivity", "Adapter initialized successfully");
+                } else {
+                    Log.e("SearchActivity", "RecyclerView not found in layout");
+                }
+            } catch (Exception e) {
+                Log.e("SearchActivity", "Error initializing views: " + e.getMessage(), e);
             }
         } catch (Exception e) {
             Log.e("SearchActivity", "Error in initView: " + e.getMessage(), e);
@@ -250,28 +273,36 @@ public class SearchActivity extends AppCompatActivity {
             String jsonString = readJsonFromAssets("movie_data.json");
             if (jsonString != null && !jsonString.isEmpty()) {
                 // Parse JSON using Gson
-                com.google.gson.Gson gson = new com.google.gson.Gson();
-                JsonApiResponse localResponse = gson.fromJson(jsonString, JsonApiResponse.class);
-                
-                if (localResponse != null) {
-                    // Cache the response
-                    cachedJsonResponse = localResponse;
-                    allMovies = localResponse.getMovies() != null ? localResponse.getMovies() : new ArrayList<>();
-                    allChannels = localResponse.getChannels() != null ? localResponse.getChannels() : new ArrayList<>();
+                try {
+                    com.google.gson.Gson gson = new com.google.gson.Gson();
+                    JsonApiResponse localResponse = gson.fromJson(jsonString, JsonApiResponse.class);
                     
-                    Log.d("SearchActivity", "Local JSON data loaded successfully - Movies: " + allMovies.size() + ", Channels: " + allChannels.size());
-                    
-                    // Log sample data for debugging
-                    if (!allMovies.isEmpty()) {
-                        Log.d("SearchActivity", "Sample movie: " + allMovies.get(0).getTitle());
+                    if (localResponse != null) {
+                        // Cache the response
+                        cachedJsonResponse = localResponse;
+                        allMovies = localResponse.getMovies() != null ? localResponse.getMovies() : new ArrayList<>();
+                        allChannels = localResponse.getChannels() != null ? localResponse.getChannels() : new ArrayList<>();
+                        
+                        Log.d("SearchActivity", "Local JSON data loaded successfully - Movies: " + allMovies.size() + ", Channels: " + allChannels.size());
+                        
+                        // Log some sample data for debugging
+                        if (!allMovies.isEmpty()) {
+                            Log.d("SearchActivity", "Sample movie: " + allMovies.get(0).getTitle());
+                        }
+                        if (!allChannels.isEmpty()) {
+                            Log.d("SearchActivity", "Sample channel: " + allChannels.get(0).getTitle());
+                        }
+                        
+                        filterAndDisplaySearchResults();
+                        return;
+                    } else {
+                        Log.w("SearchActivity", "Parsed JSON response is null");
                     }
-                    if (!allChannels.isEmpty()) {
-                        Log.d("SearchActivity", "Sample channel: " + allChannels.get(0).getTitle());
-                    }
-                    
-                    filterAndDisplaySearchResults();
-                    return;
+                } catch (Exception e) {
+                    Log.w("SearchActivity", "Error parsing JSON: " + e.getMessage());
                 }
+            } else {
+                Log.w("SearchActivity", "JSON string is null or empty");
             }
             
             // Fallback to sample data if JSON parsing fails
@@ -413,112 +444,143 @@ public class SearchActivity extends AppCompatActivity {
                 return;
             }
             
-            // Validate minimum search length to prevent crashes
-            if (query.trim().length() < 1) {
-                Log.w("SearchActivity", "Search query too short: '" + query + "', showing empty results");
-                displayResults();
-                return;
-            }
-            
             String searchQuery = query.toLowerCase().trim();
             Log.d("SearchActivity", "Searching for: '" + searchQuery + "'");
             
-            // Filter channels by search query with improved null checks
-            if (allChannels != null) {
-                Log.d("SearchActivity", "Filtering " + allChannels.size() + " channels");
-                for (Channel channel : allChannels) {
-                    try {
-                        if (channel != null) {
-                            boolean matches = false;
-                            
-                            // Search in title
-                            if (channel.getTitle() != null) {
-                                String channelTitle = channel.getTitle().toLowerCase().trim();
-                                if (channelTitle.contains(searchQuery)) {
-                                    matches = true;
-                                    Log.d("SearchActivity", "Found matching channel by title: " + channel.getTitle());
-                                }
-                            }
-                            
-                            // Search in description if title didn't match
-                            if (!matches && channel.getDescription() != null) {
-                                String channelDescription = channel.getDescription().toLowerCase().trim();
-                                if (channelDescription.contains(searchQuery)) {
-                                    matches = true;
-                                    Log.d("SearchActivity", "Found matching channel by description: " + channel.getTitle());
-                                }
-                            }
-                            
-                            if (matches) {
-                                channelArrayList.add(channel);
-                            }
-                        }
-                    } catch (Exception e) {
-                        Log.w("SearchActivity", "Error filtering channel: " + e.getMessage());
-                    }
-                }
-            } else {
-                Log.w("SearchActivity", "allChannels is null");
+            // Safely check if data lists exist
+            if (allChannels == null) {
+                Log.w("SearchActivity", "allChannels is null, initializing empty list");
+                allChannels = new ArrayList<>();
             }
             
-            // Filter movies by search query with improved null checks
-            if (allMovies != null) {
-                Log.d("SearchActivity", "Filtering " + allMovies.size() + " movies");
-                for (Poster movie : allMovies) {
-                    try {
-                        if (movie != null) {
-                            boolean matches = false;
-                            
-                            // Search in title
-                            if (movie.getTitle() != null) {
-                                String movieTitle = movie.getTitle().toLowerCase().trim();
-                                if (movieTitle.contains(searchQuery)) {
-                                    matches = true;
-                                    Log.d("SearchActivity", "Found matching movie by title: " + movie.getTitle());
-                                }
-                            }
-                            
-                            // Search in description if title didn't match
-                            if (!matches && movie.getDescription() != null) {
-                                String movieDescription = movie.getDescription().toLowerCase().trim();
-                                if (movieDescription.contains(searchQuery)) {
-                                    matches = true;
-                                    Log.d("SearchActivity", "Found matching movie by description: " + movie.getTitle());
-                                }
-                            }
-                            
-                            if (matches) {
-                                posterArrayList.add(movie.setTypeView(1));
+            if (allMovies == null) {
+                Log.w("SearchActivity", "allMovies is null, initializing empty list");
+                allMovies = new ArrayList<>();
+            }
+            
+            // Filter channels by search query with comprehensive null checks
+            Log.d("SearchActivity", "Filtering " + allChannels.size() + " channels");
+            for (Channel channel : allChannels) {
+                try {
+                    if (channel != null) {
+                        boolean matches = false;
+                        
+                        // Search in title with null check
+                        if (channel.getTitle() != null) {
+                            String channelTitle = channel.getTitle().toLowerCase().trim();
+                            if (channelTitle.contains(searchQuery)) {
+                                matches = true;
+                                Log.d("SearchActivity", "Found matching channel by title: " + channel.getTitle());
                             }
                         }
-                    } catch (Exception e) {
-                        Log.w("SearchActivity", "Error filtering movie: " + e.getMessage());
+                        
+                        // Search in description if title didn't match
+                        if (!matches && channel.getDescription() != null) {
+                            String channelDescription = channel.getDescription().toLowerCase().trim();
+                            if (channelDescription.contains(searchQuery)) {
+                                matches = true;
+                                Log.d("SearchActivity", "Found matching channel by description: " + channel.getTitle());
+                            }
+                        }
+                        
+                        if (matches) {
+                            channelArrayList.add(channel);
+                        }
                     }
+                } catch (Exception e) {
+                    Log.w("SearchActivity", "Error filtering channel: " + e.getMessage());
+                    // Continue with next channel instead of crashing
                 }
-            } else {
-                Log.w("SearchActivity", "allMovies is null");
+            }
+            
+            // Filter movies by search query with comprehensive null checks
+            Log.d("SearchActivity", "Filtering " + allMovies.size() + " movies");
+            for (Poster movie : allMovies) {
+                try {
+                    if (movie != null) {
+                        boolean matches = false;
+                        
+                        // Search in title with null check
+                        if (movie.getTitle() != null) {
+                            String movieTitle = movie.getTitle().toLowerCase().trim();
+                            if (movieTitle.contains(searchQuery)) {
+                                matches = true;
+                                Log.d("SearchActivity", "Found matching movie by title: " + movie.getTitle());
+                            }
+                        }
+                        
+                        // Search in description if title didn't match
+                        if (!matches && movie.getDescription() != null) {
+                            String movieDescription = movie.getDescription().toLowerCase().trim();
+                            if (movieDescription.contains(searchQuery)) {
+                                matches = true;
+                                Log.d("SearchActivity", "Found matching movie by description: " + movie.getTitle());
+                            }
+                        }
+                        
+                        if (matches) {
+                            try {
+                                posterArrayList.add(movie.setTypeView(1));
+                            } catch (Exception e) {
+                                Log.w("SearchActivity", "Error adding movie to list: " + e.getMessage());
+                                // Add movie without setTypeView if it fails
+                                posterArrayList.add(movie);
+                            }
+                        }
+                    }
+                } catch (Exception e) {
+                    Log.w("SearchActivity", "Error filtering movie: " + e.getMessage());
+                    // Continue with next movie instead of crashing
+                }
             }
             
             Log.d("SearchActivity", "Search results - Channels: " + channelArrayList.size() + ", Movies: " + posterArrayList.size());
             
-            // Add channel section header if channels found
-            if (channelArrayList.size() > 0) {
-                posterArrayList.add(0, new Poster().setTypeView(3));
-                setupGridLayoutForChannels();
-            } else {
+            // Safely add channel section header if channels found
+            try {
+                if (channelArrayList.size() > 0) {
+                    Poster headerPoster = new Poster();
+                    if (headerPoster != null) {
+                        headerPoster.setTypeView(3);
+                        posterArrayList.add(0, headerPoster);
+                    }
+                    setupGridLayoutForChannels();
+                } else {
+                    setupGridLayoutForMovies();
+                }
+            } catch (Exception e) {
+                Log.w("SearchActivity", "Error setting up layout: " + e.getMessage());
+                // Fallback to movies layout
                 setupGridLayoutForMovies();
             }
             
-            // Add native ads to movies
-            if (native_ads_enabled) {
-                addNativeAdsToMovies();
+            // Safely add native ads to movies
+            try {
+                if (native_ads_enabled) {
+                    addNativeAdsToMovies();
+                }
+            } catch (Exception e) {
+                Log.w("SearchActivity", "Error adding native ads: " + e.getMessage());
+                // Continue without ads instead of crashing
             }
             
             displayResults();
             
         } catch (Exception e) {
             Log.e("SearchActivity", "Error in filterAndDisplaySearchResults: " + e.getMessage(), e);
-            showError();
+            // Show empty results instead of crashing
+            try {
+                if (posterArrayList != null) {
+                    posterArrayList.clear();
+                }
+                if (channelArrayList != null) {
+                    channelArrayList.clear();
+                }
+                displayResults();
+            } catch (Exception displayError) {
+                Log.e("SearchActivity", "Error displaying empty results: " + displayError.getMessage(), displayError);
+                showError();
+            }
         }
     }
     
@@ -529,75 +591,97 @@ public class SearchActivity extends AppCompatActivity {
         try {
             runOnUiThread(() -> {
                 try {
-                    Log.d("SearchActivity", "Displaying results - Channels: " + (channelArrayList != null ? channelArrayList.size() : 0) + 
-                          ", Movies: " + (posterArrayList != null ? posterArrayList.size() : 0));
+                    // Safely get list sizes with null checks
+                    int channelCount = (channelArrayList != null) ? channelArrayList.size() : 0;
+                    int movieCount = (posterArrayList != null) ? posterArrayList.size() : 0;
+                    
+                    Log.d("SearchActivity", "Displaying results - Channels: " + channelCount + ", Movies: " + movieCount);
                     
                     // Display results based on data availability
-                    if ((channelArrayList == null || channelArrayList.size() == 0) && 
-                        (posterArrayList == null || posterArrayList.size() == 0)) {
+                    if (channelCount == 0 && movieCount == 0) {
                         // Show empty state
                         Log.d("SearchActivity", "No results found, showing empty state");
-                        if (linear_layout_layout_error != null) {
-                            linear_layout_layout_error.setVisibility(View.GONE);
-                        }
-                        if (recycler_view_activity_search != null) {
-                            recycler_view_activity_search.setVisibility(View.GONE);
-                        }
-                        if (image_view_empty_list != null) {
-                            image_view_empty_list.setVisibility(View.VISIBLE);
+                        try {
+                            if (linear_layout_layout_error != null) {
+                                linear_layout_layout_error.setVisibility(View.GONE);
+                            }
+                            if (recycler_view_activity_search != null) {
+                                recycler_view_activity_search.setVisibility(View.GONE);
+                            }
+                            if (image_view_empty_list != null) {
+                                image_view_empty_list.setVisibility(View.VISIBLE);
+                            }
+                        } catch (Exception e) {
+                            Log.w("SearchActivity", "Error showing empty state: " + e.getMessage());
                         }
                     } else {
                         // Show results
                         Log.d("SearchActivity", "Results found, showing list");
-                        if (linear_layout_layout_error != null) {
-                            linear_layout_layout_error.setVisibility(View.GONE);
-                        }
-                        if (recycler_view_activity_search != null) {
-                            recycler_view_activity_search.setVisibility(View.VISIBLE);
-                        }
-                        if (image_view_empty_list != null) {
-                            image_view_empty_list.setVisibility(View.GONE);
+                        try {
+                            if (linear_layout_layout_error != null) {
+                                linear_layout_layout_error.setVisibility(View.GONE);
+                            }
+                            if (recycler_view_activity_search != null) {
+                                recycler_view_activity_search.setVisibility(View.VISIBLE);
+                            }
+                            if (image_view_empty_list != null) {
+                                image_view_empty_list.setVisibility(View.GONE);
+                            }
+                        } catch (Exception e) {
+                            Log.w("SearchActivity", "Error showing results: " + e.getMessage());
                         }
                     }
                     
-                    // Update UI elements
-                    if (swipe_refresh_layout_list_search_search != null) {
-                        swipe_refresh_layout_list_search_search.setRefreshing(false);
-                    }
-                    if (linear_layout_load_search_activity != null) {
-                        linear_layout_load_search_activity.setVisibility(View.GONE);
+                    // Update UI elements safely
+                    try {
+                        if (swipe_refresh_layout_list_search_search != null) {
+                            swipe_refresh_layout_list_search_search.setRefreshing(false);
+                        }
+                        if (linear_layout_load_search_activity != null) {
+                            linear_layout_load_search_activity.setVisibility(View.GONE);
+                        }
+                    } catch (Exception e) {
+                        Log.w("SearchActivity", "Error updating UI elements: " + e.getMessage());
                     }
                     
                     // Setup RecyclerView with null checks
-                    if (recycler_view_activity_search != null && gridLayoutManager != null) {
-                        recycler_view_activity_search.setLayoutManager(gridLayoutManager);
-                        Log.d("SearchActivity", "RecyclerView layout manager set");
-                    } else {
-                        Log.w("SearchActivity", "RecyclerView or GridLayoutManager is null");
-                        // Try to initialize RecyclerView if it's null
-                        if (recycler_view_activity_search == null) {
-                            recycler_view_activity_search = findViewById(R.id.recycler_view_activity_search);
-                            if (recycler_view_activity_search != null) {
-                                adapter = new PosterAdapter(posterArrayList, this);
-                                recycler_view_activity_search.setHasFixedSize(true);
-                                recycler_view_activity_search.setAdapter(adapter);
-                                Log.d("SearchActivity", "RecyclerView initialized");
+                    try {
+                        if (recycler_view_activity_search != null && gridLayoutManager != null) {
+                            recycler_view_activity_search.setLayoutManager(gridLayoutManager);
+                            Log.d("SearchActivity", "RecyclerView layout manager set");
+                        } else {
+                            Log.w("SearchActivity", "RecyclerView or GridLayoutManager is null");
+                            // Try to initialize RecyclerView if it's null
+                            if (recycler_view_activity_search == null) {
+                                recycler_view_activity_search = findViewById(R.id.recycler_view_activity_search);
+                                if (recycler_view_activity_search != null) {
+                                    adapter = new PosterAdapter(posterArrayList != null ? posterArrayList : new ArrayList<>(), this);
+                                    recycler_view_activity_search.setHasFixedSize(true);
+                                    recycler_view_activity_search.setAdapter(adapter);
+                                    Log.d("SearchActivity", "RecyclerView initialized");
+                                }
                             }
                         }
+                    } catch (Exception e) {
+                        Log.w("SearchActivity", "Error setting up RecyclerView: " + e.getMessage());
                     }
                     
                     // Notify adapter with null check
-                    if (adapter != null) {
-                        adapter.notifyDataSetChanged();
-                        Log.d("SearchActivity", "Adapter notified of data change");
-                    } else {
-                        Log.w("SearchActivity", "Adapter is null");
-                        // Try to create adapter if it's null
-                        if (recycler_view_activity_search != null) {
-                            adapter = new PosterAdapter(posterArrayList, this);
-                            recycler_view_activity_search.setAdapter(adapter);
-                            Log.d("SearchActivity", "Adapter created and set");
+                    try {
+                        if (adapter != null) {
+                            adapter.notifyDataSetChanged();
+                            Log.d("SearchActivity", "Adapter notified of data change");
+                        } else {
+                            Log.w("SearchActivity", "Adapter is null");
+                            // Try to create adapter if it's null
+                            if (recycler_view_activity_search != null) {
+                                adapter = new PosterAdapter(posterArrayList != null ? posterArrayList : new ArrayList<>(), this);
+                                recycler_view_activity_search.setAdapter(adapter);
+                                Log.d("SearchActivity", "Adapter created and set");
+                            }
                         }
+                    } catch (Exception e) {
+                        Log.w("SearchActivity", "Error notifying adapter: " + e.getMessage());
                     }
                 } catch (Exception e) {
                     Log.e("SearchActivity", "Error updating UI: " + e.getMessage(), e);
