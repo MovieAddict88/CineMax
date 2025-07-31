@@ -1,11 +1,11 @@
 {
   "api_info": {
-    "version": "1.0",
-    "description": "Free Movie & TV Streaming JSON API for Mobile Apps",
+    "version": "2.0",
+    "description": "Enhanced Free Movie & TV Streaming JSON API with Full Actor Support",
     "last_updated": "2024-01-15",
-    "total_movies": 2,
+    "total_movies": 3,
     "total_channels": 26,
-    "total_actors": 2
+    "total_actors": 3
   },
   "home": {
     "slides": [
@@ -121,7 +121,8 @@
           ],
           "views": 15000,
           "downloads": 5000,
-          "shares": 1200
+          "shares": 1200,
+          "created_at": "2024-01-01"
         }
       },
       {
@@ -523,12 +524,26 @@
       "year": "2008",
       "duration": "10:00",
       "rating": 8.5,
+      "views": 15000,
+      "created_at": "2024-01-01",
       "image": "https://peach.blender.org/wp-content/uploads/title_anouncement.jpg?x11217",
       "cover": "https://peach.blender.org/wp-content/uploads/title_anouncement.jpg?x11217",
       "genres": [
         {
           "id": 6,
           "title": "Animation"
+        }
+      ],
+      "actors": [
+        {
+          "id": 1,
+          "name": "Tom Hanks",
+          "type": "actor",
+          "role": "Lead Actor",
+          "image": "https://example.com/tom-hanks.jpg",
+          "born": "1956-07-09",
+          "height": "6'0\"",
+          "bio": "American actor and filmmaker"
         }
       ],
       "sources": [
@@ -571,76 +586,37 @@
         "type": "video",
         "title": "Big Buck Bunny Trailer",
         "url": "http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4"
-      },
-      "actors": [
-        {
-          "id": 1,
-          "name": "Tom Hanks",
-          "type": "actor",
-          "role": "Lead Actor",
-          "image": "https://example.com/tom-hanks.jpg",
-          "born": "1956-07-09",
-          "height": "6'0\"",
-          "bio": "American actor and filmmaker"
-        }
-      ],
-      "subtitles": [
-        {
-          "id": 1,
-          "title": "English",
-          "language": "en",
-          "url": "https://example.com/subtitles/big-buck-bunny-en.vtt"
-        },
-        {
-          "id": 2,
-          "title": "Spanish",
-          "language": "es",
-          "url": "https://example.com/subtitles/big-buck-bunny-es.vtt"
-        }
-      ],
-      "comments": [
-        {
-          "id": 1,
-          "user": "John Doe",
-          "comment": "Amazing animation! Love this movie.",
-          "created_at": "2024-01-15T10:30:00Z"
-        },
-        {
-          "id": 2,
-          "user": "Jane Smith",
-          "comment": "Great for kids and adults alike!",
-          "created_at": "2024-01-14T15:45:00Z"
-        }
-      ],
-      "views": 15000,
-      "downloads": 5000,
-      "shares": 1200
+      }
     },
     {
       "id": 2,
-      "title": "Sample TV Series",
-      "type": "series",
-      "label": "Drama",
-      "sublabel": "2 Seasons",
-      "imdb": "8.2",
-      "downloadas": "sample-series",
+      "title": "Elephants Dream",
+      "type": "movie",
+      "label": "Animation",
+      "sublabel": "Short Film",
+      "imdb": "7.8",
+      "downloadas": "elephants-dream.mp4",
       "comment": true,
       "playas": "video",
-      "description": "A gripping drama series with 2 seasons. Each season contains 1 episode with multiple quality options and subtitles.",
-      "classification": "TV-14",
-      "year": "2023",
-      "duration": "45:00",
-      "rating": 8.2,
-      "image": "https://example.com/sample-series.jpg",
-      "cover": "https://example.com/sample-series-cover.jpg",
+      "description": "The world's first open movie, Elephants Dream is a story about two characters exploring a capricious and seemingly infinite machine.",
+      "classification": "PG",
+      "year": "2006",
+      "duration": "10:53",
+      "rating": 7.8,
+      "views": 12000,
+      "created_at": "2024-01-02",
+      "image": "https://upload.wikimedia.org/wikipedia/commons/e/e7/Elephants_Dream_s_blue_elephant.png",
+      "cover": "https://upload.wikimedia.org/wikipedia/commons/e/e7/Elephants_Dream_s_blue_elephant.png",
       "genres": [
         {
-          "id": 3,
-          "title": "Drama"
+          "id": 6,
+          "title": "Animation"
+        },
+        {
+          "id": 5,
+          "title": "Sci-Fi"
         }
       ],
-      "sources": [],
-      "trailer": null,
       "actors": [
         {
           "id": 2,
@@ -653,124 +629,96 @@
           "bio": "English actress and activist"
         }
       ],
-      "subtitles": [],
-      "comments": [
+      "sources": [
         {
-          "id": 1,
-          "user": "Series Fan",
-          "comment": "Amazing series! Can't wait for season 2.",
-          "created_at": "2024-01-15T12:00:00Z"
+          "id": 4,
+          "type": "video",
+          "title": "Elephants Dream 1080p",
+          "quality": "1080p",
+          "size": "300MB",
+          "kind": "both",
+          "premium": "false",
+          "external": false,
+          "url": "http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ElephantsDream.mp4"
         }
       ],
-      "views": 8000,
-      "downloads": 2000,
-      "shares": 500,
-      "seasons": [
+      "trailer": {
+        "id": 5,
+        "type": "video",
+        "title": "Elephants Dream Trailer",
+        "url": "http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ElephantsDream.mp4"
+      }
+    },
+    {
+      "id": 3,
+      "title": "Sample Action Movie",
+      "type": "movie",
+      "label": "Action",
+      "sublabel": "Blockbuster",
+      "imdb": "8.2",
+      "downloadas": "sample-action.mp4",
+      "comment": true,
+      "playas": "video",
+      "description": "An exciting action movie with amazing stunts and thrilling sequences.",
+      "classification": "PG-13",
+      "year": "2023",
+      "duration": "120:00",
+      "rating": 8.2,
+      "views": 25000,
+      "created_at": "2024-01-03",
+      "image": "https://example.com/sample-action.jpg",
+      "cover": "https://example.com/sample-action-cover.jpg",
+      "genres": [
         {
           "id": 1,
-          "title": "Season 1",
-          "episodes": [
-            {
-              "id": 1,
-              "title": "Episode 1",
-              "episode_number": 1,
-              "image": "https://example.com/ep1.jpg",
-              "duration": "45:00",
-              "sources": [
-                {
-                  "id": 5,
-                  "type": "video",
-                  "title": "Episode 1 1080p",
-                  "quality": "1080p",
-                  "url": "http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ElephantsDream.mp4"
-                },
-                {
-                  "id": 6,
-                  "type": "video",
-                  "title": "Episode 1 720p",
-                  "quality": "720p",
-                  "url": "http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ElephantsDream.mp4"
-                },
-                {
-                  "id": 7,
-                  "type": "video",
-                  "title": "Episode 1 480p",
-                  "quality": "480p",
-                  "url": "http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ElephantsDream.mp4"
-                }
-              ],
-              "subtitles": [
-                {
-                  "id": 1,
-                  "title": "English",
-                  "language": "en",
-                  "url": "https://example.com/subtitles/ep1-en.vtt"
-                },
-                {
-                  "id": 2,
-                  "title": "Spanish",
-                  "language": "es",
-                  "url": "https://example.com/subtitles/ep1-es.vtt"
-                }
-              ],
-              "views": 5000,
-              "downloads": 1200
-            }
-          ]
+          "title": "Action"
         },
         {
-          "id": 2,
-          "title": "Season 2",
-          "episodes": [
-            {
-              "id": 2,
-              "title": "Episode 1",
-              "episode_number": 1,
-              "image": "https://example.com/ep2.jpg",
-              "duration": "45:00",
-              "sources": [
-                {
-                  "id": 8,
-                  "type": "video",
-                  "title": "Episode 1 1080p",
-                  "quality": "1080p",
-                  "url": "http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4"
-                },
-                {
-                  "id": 9,
-                  "type": "video",
-                  "title": "Episode 1 720p",
-                  "quality": "720p",
-                  "url": "http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4"
-                },
-                {
-                  "id": 10,
-                  "type": "video",
-                  "title": "Episode 1 480p",
-                  "quality": "480p",
-                  "url": "http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4"
-                }
-              ],
-              "subtitles": [
-                {
-                  "id": 3,
-                  "title": "English",
-                  "language": "en",
-                  "url": "https://example.com/subtitles/ep2-en.vtt"
-                },
-                {
-                  "id": 4,
-                  "title": "Spanish",
-                  "language": "es",
-                  "url": "https://example.com/subtitles/ep2-es.vtt"
-                }
-              ],
-              "views": 3000,
-              "downloads": 800
-            }
-          ]
+          "id": 3,
+          "title": "Drama"
         }
-      ]
+      ],
+      "actors": [
+        {
+          "id": 1,
+          "name": "Tom Hanks",
+          "type": "actor",
+          "role": "Lead Actor",
+          "image": "https://example.com/tom-hanks.jpg",
+          "born": "1956-07-09",
+          "height": "6'0\"",
+          "bio": "American actor and filmmaker"
+        },
+        {
+          "id": 3,
+          "name": "Leonardo DiCaprio",
+          "type": "actor",
+          "role": "Supporting Actor",
+          "image": "https://example.com/leonardo-dicaprio.jpg",
+          "born": "1974-11-11",
+          "height": "6'0\"",
+          "bio": "American actor, film producer, and environmentalist"
+        }
+      ],
+      "sources": [
+        {
+          "id": 6,
+          "type": "video",
+          "title": "Sample Action Movie 1080p",
+          "quality": "1080p",
+          "size": "2.5GB",
+          "kind": "both",
+          "premium": "false",
+          "external": false,
+          "url": "https://example.com/sample-action-1080p.mp4"
+        }
+      ],
+      "trailer": {
+        "id": 7,
+        "type": "video",
+        "title": "Sample Action Movie Trailer",
+        "url": "https://example.com/sample-action-trailer.mp4"
+      }
     }
   ],
   "channels": [
@@ -1915,6 +1863,12 @@
           "title": "Big Buck Bunny",
           "image": "https://peach.blender.org/wp-content/uploads/title_anouncement.jpg?x11217",
           "year": "2008"
+        },
+        {
+          "id": 3,
+          "title": "Sample Action Movie",
+          "image": "https://example.com/sample-action.jpg",
+          "year": "2023"
         }
       ]
     },
@@ -1930,8 +1884,26 @@
       "movies": [
         {
           "id": 2,
-          "title": "Sample TV Series",
-          "image": "https://example.com/sample-series.jpg",
+          "title": "Elephants Dream",
+          "image": "https://upload.wikimedia.org/wikipedia/commons/e/e7/Elephants_Dream_s_blue_elephant.png",
+          "year": "2006"
+        }
+      ]
+    },
+    {
+      "id": 3,
+      "name": "Leonardo DiCaprio",
+      "type": "actor",
+      "role": "Lead Actor",
+      "image": "https://example.com/leonardo-dicaprio.jpg",
+      "born": "1974-11-11",
+      "height": "6'0\"",
+      "bio": "American actor, film producer, and environmentalist",
+      "movies": [
+        {
+          "id": 3,
+          "title": "Sample Action Movie",
+          "image": "https://example.com/sample-action.jpg",
           "year": "2023"
         }
       ]
@@ -1941,7 +1913,13 @@
     {
       "id": 1,
       "title": "Action",
-      "posters": []
+      "posters": [
+        {
+          "id": 3,
+          "title": "Sample Action Movie",
+          "image": "https://example.com/sample-action.jpg"
+        }
+      ]
     },
     {
       "id": 2,
@@ -1953,9 +1931,9 @@
       "title": "Drama",
       "posters": [
         {
-          "id": 2,
-          "title": "Sample TV Series",
-          "image": "https://example.com/sample-series.jpg"
+          "id": 3,
+          "title": "Sample Action Movie",
+          "image": "https://example.com/sample-action.jpg"
         }
       ]
     },
@@ -1967,7 +1945,13 @@
     {
       "id": 5,
       "title": "Sci-Fi",
-      "posters": []
+      "posters": [
+        {
+          "id": 2,
+          "title": "Elephants Dream",
+          "image": "https://upload.wikimedia.org/wikipedia/commons/e/e7/Elephants_Dream_s_blue_elephant.png"
+        }
+      ]
     },
     {
       "id": 6,
@@ -1977,6 +1961,11 @@
           "id": 1,
           "title": "Big Buck Bunny",
           "image": "https://peach.blender.org/wp-content/uploads/title_anouncement.jpg?x11217"
+        },
+        {
+          "id": 2,
+          "title": "Elephants Dream",
+          "image": "https://upload.wikimedia.org/wikipedia/commons/e/e7/Elephants_Dream_s_blue_elephant.png"
         }
       ]
     }
@@ -2018,16 +2007,6 @@
     }
   ],
   "subscription_plans": [],
-  "subscription_config": {
-    "enabled": false,
-    "monthly_billing_enabled": false,
-    "free_trial_days": 0,
-    "grace_period_days": 0,
-    "auto_renewal_enabled": false,
-    "payment_methods": [],
-    "currency_default": "USD",
-    "subscription_required_for": []
-  },
   "video_sources": {
     "big_buck_bunny": {
       "title": "Big Buck Bunny",
