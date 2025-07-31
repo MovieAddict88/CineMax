@@ -143,7 +143,7 @@ public class ActorActivity extends AppCompatActivity {
         // Filter movies by actor - since Poster doesn't have actors, we'll show all movies
         // In a real implementation, you would need to add actors to the Poster entity
         for (Poster movie : allMovies) {
-            if (movie.getId() != null && !movie.getId().equals(poster.getId())) {
+            if (movie.getId() != null) {
                 actorMovies.add(movie);
             }
         }
