@@ -35,6 +35,9 @@ public class Channel implements Parcelable {
     @SerializedName("classification")
     @Expose
     private String classification;
+    @SerializedName("year")
+    @Expose
+    private String year;
     @SerializedName("views")
     @Expose
     private Integer views;
@@ -86,6 +89,7 @@ public class Channel implements Parcelable {
         description = in.readString();
         website = in.readString();
         classification = in.readString();
+        year = in.readString();
         if (in.readByte() == 0) {
             views = null;
         } else {
@@ -125,6 +129,7 @@ public class Channel implements Parcelable {
         dest.writeString(description);
         dest.writeString(website);
         dest.writeString(classification);
+        dest.writeString(year);
         if (views == null) {
             dest.writeByte((byte) 0);
         } else {
@@ -207,6 +212,14 @@ public class Channel implements Parcelable {
 
     public void setClassification(String classification) {
         this.classification = classification;
+    }
+
+    public String getYear() {
+        return year;
+    }
+
+    public void setYear(String year) {
+        this.year = year;
     }
 
     public Integer getViews() {

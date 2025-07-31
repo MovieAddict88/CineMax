@@ -30,6 +30,7 @@ import my.cinemax.app.free.R;
 import my.cinemax.app.free.api.apiClient;
 import my.cinemax.app.free.api.apiRest;
 import my.cinemax.app.free.api.TmdbRatingManager;
+import my.cinemax.app.free.entity.Category;
 import my.cinemax.app.free.entity.Channel;
 import my.cinemax.app.free.entity.Genre;
 import my.cinemax.app.free.entity.Poster;
@@ -418,11 +419,11 @@ public class SeriesFragment extends Fragment {
                     my.cinemax.app.free.entity.JsonApiResponse apiResponse = response.body();
                     
                     List<Poster> filteredSeries = new ArrayList<>();
+                    int seriesCount = 0;
                     
                     // Process movies marked as series
                     if (apiResponse.getMovies() != null && apiResponse.getMovies().size() > 0) {
                         Log.d("SeriesFragment", "Total movies in API: " + apiResponse.getMovies().size());
-                        int seriesCount = 0;
                         for (Poster poster : apiResponse.getMovies()) {
                             // Filter by type (series/serie)
                             String type = poster.getType();
@@ -473,7 +474,7 @@ public class SeriesFragment extends Fragment {
                                 if (genreSelected == 0) {
                                     matchesGenre = true;
                                 } else if (channel.getCategories() != null && !channel.getCategories().isEmpty()) {
-                                    for (my.cinemax.app.free.entity.Category category : channel.getCategories()) {
+                                    for (Category category : channel.getCategories()) {
                                         if (category.getId() != null && category.getId().intValue() == genreSelected) {
                                             matchesGenre = true;
                                             break;
@@ -716,7 +717,7 @@ public class SeriesFragment extends Fragment {
         // Convert categories to genres
         if (channel.getCategories() != null) {
             List<Genre> genres = new ArrayList<>();
-            for (my.cinemax.app.free.entity.Category category : channel.getCategories()) {
+            for (Category category : channel.getCategories()) {
                 Genre genre = new Genre();
                 genre.setId(category.getId());
                 genre.setTitle(category.getTitle());
