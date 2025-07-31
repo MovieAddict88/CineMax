@@ -1,0 +1,207 @@
+{
+  "api_info": {
+    "version": "2.1", 
+    "description": "True Auto-Detection API - Minimal Input Required",
+    "last_updated": "2024-01-15",
+    "auto_detection": true,
+    "manual_metadata": false
+  },
+  "input_data": {
+    "description": "This shows what you actually INPUT - just basic info",
+    "movies": [
+      {
+        "id": 1,
+        "title": "Big Buck Bunny",
+        "type": "movie"
+      }
+    ],
+    "tv_series": [
+      {
+        "id": 2,
+        "title": "Breaking Bad", 
+        "type": "tv"
+      }
+    ]
+  },
+  "auto_detected_results": {
+    "description": "This shows what gets AUTO-FILLED by TMDB service",
+    "movies": [
+      {
+        "id": 1,
+        "title": "Big Buck Bunny",
+        "type": "movie",
+        "playas": "movie",
+        "comment": true,
+        
+        "AUTO_FILLED_FROM_TMDB": "Everything below is automatically detected",
+        "tmdb_id": "AUTO_DETECTED_IF_FOUND",
+        "description": "AUTO_FILLED_FROM_TMDB_OVERVIEW", 
+        "rating": "AUTO_FILLED_FROM_TMDB_VOTE_AVERAGE",
+        "vote_count": "AUTO_FILLED_FROM_TMDB_VOTE_COUNT",
+        "popularity": "AUTO_FILLED_FROM_TMDB_POPULARITY",
+        "country": "AUTO_FILLED_FROM_TMDB_PRODUCTION_COUNTRIES",
+        "release_date": "AUTO_FILLED_FROM_TMDB_RELEASE_DATE",
+        "duration": "AUTO_FILLED_FROM_TMDB_RUNTIME",
+        "poster_tmdb": "AUTO_FILLED_FROM_TMDB_POSTER_PATH",
+        "backdrop": "AUTO_FILLED_FROM_TMDB_BACKDROP_PATH",
+        "original_title": "AUTO_FILLED_FROM_TMDB_ORIGINAL_TITLE",
+        "original_language": "AUTO_FILLED_FROM_TMDB_ORIGINAL_LANGUAGE",
+        "adult": "AUTO_FILLED_FROM_TMDB_ADULT",
+        "status": "AUTO_FILLED_FROM_TMDB_STATUS",
+        "production_companies": "AUTO_FILLED_FROM_TMDB_PRODUCTION_COMPANIES",
+        "spoken_languages": "AUTO_FILLED_FROM_TMDB_SPOKEN_LANGUAGES",
+        "genres": "AUTO_FILLED_FROM_TMDB_GENRES",
+        "actors": "AUTO_FILLED_FROM_TMDB_CREDITS_CAST",
+        
+        "AUTO_GENERATED": "Streaming sources auto-generated using TMDB ID",
+        "sources": [
+          {
+            "id": 1,
+            "type": "embed",
+            "title": "VidSrc Player",
+            "quality": "1080p",
+            "kind": "external", 
+            "premium": "free",
+            "external": true,
+            "url": "https://vidsrc.net/embed/movie/{AUTO_GENERATED_TMDB_ID}"
+          }
+        ]
+      }
+    ],
+    "tv_series": [
+      {
+        "id": 2,
+        "title": "Breaking Bad",
+        "type": "tv",
+        "playas": "series",
+        "comment": true,
+        
+        "AUTO_FILLED_FROM_TMDB": "Everything below is automatically detected",
+        "tmdb_id": "AUTO_FILLED_FROM_TMDB_SEARCH",
+        "description": "AUTO_FILLED_FROM_TMDB_OVERVIEW",
+        "rating": "AUTO_FILLED_FROM_TMDB_VOTE_AVERAGE", 
+        "vote_count": "AUTO_FILLED_FROM_TMDB_VOTE_COUNT",
+        "popularity": "AUTO_FILLED_FROM_TMDB_POPULARITY",
+        "country": "AUTO_FILLED_FROM_TMDB_ORIGIN_COUNTRY",
+        "first_air_date": "AUTO_FILLED_FROM_TMDB_FIRST_AIR_DATE",
+        "last_air_date": "AUTO_FILLED_FROM_TMDB_LAST_AIR_DATE", 
+        "number_of_seasons": "AUTO_FILLED_FROM_TMDB_NUMBER_OF_SEASONS",
+        "number_of_episodes": "AUTO_FILLED_FROM_TMDB_NUMBER_OF_EPISODES",
+        "status": "AUTO_FILLED_FROM_TMDB_STATUS",
+        "duration": "AUTO_FILLED_FROM_TMDB_EPISODE_RUN_TIME",
+        "poster_tmdb": "AUTO_FILLED_FROM_TMDB_POSTER_PATH",
+        "backdrop": "AUTO_FILLED_FROM_TMDB_BACKDROP_PATH",
+        "original_title": "AUTO_FILLED_FROM_TMDB_ORIGINAL_NAME",
+        "original_language": "AUTO_FILLED_FROM_TMDB_ORIGINAL_LANGUAGE",
+        "production_companies": "AUTO_FILLED_FROM_TMDB_PRODUCTION_COMPANIES",
+        "networks": "AUTO_FILLED_FROM_TMDB_NETWORKS",
+        "spoken_languages": "AUTO_FILLED_FROM_TMDB_SPOKEN_LANGUAGES",
+        "genres": "AUTO_FILLED_FROM_TMDB_GENRES",
+        "actors": "AUTO_FILLED_FROM_TMDB_CREDITS_CAST",
+        
+        "AUTO_GENERATED": "Seasons and episodes auto-generated",
+        "seasons": [
+          {
+            "id": 1,
+            "title": "Season 1",
+            "episodes": [
+              {
+                "id": 1,
+                "title": "Episode 1",
+                "description": "Auto-generated episode description",
+                "duration": "AUTO_FILLED_SERIES_AVERAGE_DURATION",
+                "playas": "episode",
+                "sources": [
+                  {
+                    "id": 1,
+                    "type": "embed",
+                    "title": "VidSrc Player",
+                    "quality": "1080p",
+                    "kind": "external",
+                    "premium": "free", 
+                    "external": true,
+                    "url": "https://vidsrc.net/embed/tv/{AUTO_GENERATED_TMDB_ID}/1/1"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "id": 2,
+            "title": "Season 2", 
+            "episodes": [
+              {
+                "id": 1,
+                "title": "Episode 1",
+                "description": "Auto-generated episode description",
+                "duration": "AUTO_FILLED_SERIES_AVERAGE_DURATION",
+                "playas": "episode",
+                "sources": [
+                  {
+                    "id": 1,
+                    "type": "embed",
+                    "title": "VidSrc Player", 
+                    "quality": "1080p",
+                    "kind": "external",
+                    "premium": "free",
+                    "external": true,
+                    "url": "https://vidsrc.net/embed/tv/{AUTO_GENERATED_TMDB_ID}/2/1"
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  "workflow_explanation": {
+    "step_1": "Input: Just provide title and type",
+    "step_2": "AutoEnrichmentService searches TMDB for the title",
+    "step_3": "All metadata fields auto-filled from TMDB API response",
+    "step_4": "Streaming URLs auto-generated using TMDB ID",
+    "step_5": "For TV series: Seasons/episodes structure auto-created",
+    "result": "Complete movie/TV data with ZERO manual image hunting"
+  },
+  "code_usage": {
+    "simple_movie_example": {
+      "input": "AutoEnrichmentService.autoDetectMetadata('The Dark Knight', 'movie', callback)",
+      "auto_filled_output": {
+        "tmdb_id": 155,
+        "rating": 8.5,
+        "poster_tmdb": "https://image.tmdb.org/t/p/w500/qJ2tW6WMUDux911r6m7haRef0WH.jpg",
+        "backdrop": "https://image.tmdb.org/t/p/w1280/hqkIcbrOHL86UncnHIsHVcVmzue.jpg",
+        "actors": "Christian Bale, Heath Ledger, etc. (with photos)",
+        "streaming_url": "https://vidsrc.net/embed/movie/155"
+      }
+    },
+    "simple_tv_example": {
+      "input": "AutoEnrichmentService.autoDetectMetadata('Game of Thrones', 'tv', callback)",
+      "auto_filled_output": {
+        "tmdb_id": 1399,
+        "rating": 9.3,
+        "number_of_seasons": 8,
+        "poster_tmdb": "AUTO_FILLED_TMDB_POSTER",
+        "backdrop": "AUTO_FILLED_TMDB_BACKDROP", 
+        "episode_urls": "https://vidsrc.net/embed/tv/1399/1/1, etc."
+      }
+    }
+  },
+  "benefits": {
+    "old_manual_way": [
+      "Find poster image URL manually",
+      "Find backdrop image URL manually", 
+      "Find actor photos manually",
+      "Research rating manually",
+      "Research country manually",
+      "Research duration manually",
+      "Write description manually",
+      "Create streaming URLs manually"
+    ],
+    "new_auto_detection": [
+      "Just provide title",
+      "Everything else is automatic!"
+    ],
+    "time_saved": "99% less manual work"
+  }
+}
