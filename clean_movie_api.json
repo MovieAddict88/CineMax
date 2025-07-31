@@ -1,0 +1,313 @@
+{
+  "api_info": {
+    "version": "2.0",
+    "description": "Free Movie & TV Streaming JSON API - Clean Version for TMDB Integration",
+    "last_updated": "2024-01-15",
+    "total_movies": 2,
+    "total_channels": 3,
+    "total_actors": 2
+  },
+  "home": {
+    "slides": [
+      {
+        "id": 1,
+        "title": "Big Buck Bunny",
+        "type": "movie",
+        "image": "",
+        "url": "movies/1",
+        "poster": {
+          "id": 1,
+          "title": "Big Buck Bunny",
+          "type": "movie",
+          "label": "",
+          "sublabel": "Short Film",
+          "imdb": "",
+          "downloadas": "big-buck-bunny.mp4",
+          "comment": true,
+          "playas": "video",
+          "description": "",
+          "classification": "",
+          "year": "2008",
+          "duration": "",
+          "rating": 0,
+          "image": "",
+          "cover": "",
+          "genres": [],
+          "sources": [
+            {
+              "id": 1,
+              "type": "video",
+              "title": "Big Buck Bunny 1080p",
+              "quality": "1080p",
+              "size": "264MB",
+              "kind": "both",
+              "premium": "false",
+              "external": false,
+              "url": "http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4"
+            }
+          ],
+          "trailer": null,
+          "actors": [],
+          "subtitles": [],
+          "comments": [],
+          "views": 0,
+          "downloads": 0,
+          "shares": 0
+        }
+      }
+    ],
+    "featured_movies": [
+      {
+        "id": 1,
+        "title": "Big Buck Bunny",
+        "type": "movie",
+        "label": "",
+        "sublabel": "Short Film", 
+        "imdb": "",
+        "downloadas": "big-buck-bunny.mp4",
+        "comment": true,
+        "playas": "video",
+        "description": "",
+        "classification": "",
+        "year": "2008",
+        "duration": "",
+        "rating": 0,
+        "views": 0,
+        "created_at": "2024-01-01",
+        "image": "",
+        "cover": "",
+        "genres": [],
+        "sources": [
+          {
+            "id": 1,
+            "type": "video",
+            "title": "Big Buck Bunny 1080p",
+            "quality": "1080p",
+            "size": "264MB",
+            "kind": "both",
+            "premium": "false",
+            "external": false,
+            "url": "http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4"
+          }
+        ],
+        "trailer": null,
+        "actors": [],
+        "subtitles": [],
+        "comments": [],
+        "downloads": 0,
+        "shares": 0
+      }
+    ],
+    "channels": [],
+    "actors": [],
+    "genres": []
+  },
+  "movies": [
+    {
+      "id": 1,
+      "title": "Big Buck Bunny",
+      "type": "movie",
+      "label": "",
+      "sublabel": "Short Film",
+      "imdb": "",
+      "downloadas": "big-buck-bunny.mp4",
+      "comment": true,
+      "playas": "video",
+      "description": "",
+      "classification": "",
+      "year": "2008",
+      "duration": "",
+      "rating": 0,
+      "image": "",
+      "cover": "",
+      "genres": [],
+      "sources": [
+        {
+          "id": 1,
+          "type": "video",
+          "title": "Big Buck Bunny 1080p",
+          "quality": "1080p",
+          "size": "264MB",
+          "kind": "both",
+          "premium": "false",
+          "external": false,
+          "url": "http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4"
+        }
+      ],
+      "trailer": null,
+      "actors": [],
+      "subtitles": [],
+      "comments": [],
+      "views": 0,
+      "downloads": 0,
+      "shares": 0
+    },
+    {
+      "id": 2,
+      "title": "Breaking Bad",
+      "type": "series",
+      "label": "",
+      "sublabel": "2 Seasons",
+      "imdb": "",
+      "downloadas": "breaking-bad",
+      "comment": true,
+      "playas": "video",
+      "description": "",
+      "classification": "",
+      "year": "2008",
+      "duration": "",
+      "rating": 0,
+      "views": 0,
+      "created_at": "2024-01-02",
+      "image": "",
+      "cover": "",
+      "genres": [],
+      "sources": [],
+      "trailer": null,
+      "actors": [],
+      "subtitles": [],
+      "comments": [],
+      "downloads": 0,
+      "shares": 0,
+      "seasons": [
+        {
+          "id": 1,
+          "title": "Season 1",
+          "episodes": [
+            {
+              "id": 1,
+              "title": "Episode 1",
+              "episode_number": 1,
+              "image": "",
+              "duration": "",
+              "sources": [
+                {
+                  "id": 5,
+                  "type": "video",
+                  "title": "Episode 1 1080p",
+                  "quality": "1080p",
+                  "url": "http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ElephantsDream.mp4"
+                }
+              ],
+              "subtitles": [],
+              "views": 0,
+              "downloads": 0
+            }
+          ]
+        },
+        {
+          "id": 2,
+          "title": "Season 2",
+          "episodes": [
+            {
+              "id": 2,
+              "title": "Episode 1",
+              "episode_number": 1,
+              "image": "",
+              "duration": "",
+              "sources": [
+                {
+                  "id": 8,
+                  "type": "video",
+                  "title": "Episode 1 1080p",
+                  "quality": "1080p",
+                  "url": "http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4"
+                }
+              ],
+              "subtitles": [],
+              "views": 0,
+              "downloads": 0
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "channels": [
+    {
+      "id": 1,
+      "title": "AZ2",
+      "label": "Entertainment",
+      "sublabel": "Philippines",
+      "description": "AZ2",
+      "website": "https://example-news.com",
+      "classification": "News",
+      "views": 25000,
+      "shares": 800,
+      "rating": 7.8,
+      "comment": true,
+      "image": "",
+      "playas": "live",
+      "sources": [
+        {
+          "id": 6,
+          "type": "live",
+          "title": "720p",
+          "quality": "720p",
+          "size": "Live",
+          "kind": "play",
+          "premium": "false",
+          "external": false,
+          "url": "https://qp-pldt-live-grp-02-prod.akamaized.net/out/u/tv5_5.m3u8"
+        }
+      ],
+      "categories": [
+        {
+          "id": 3,
+          "title": "Entertainment"
+        }
+      ],
+      "countries": [
+        {
+          "id": 1,
+          "title": "PH"
+        }
+      ],
+      "comments": []
+    }
+  ],
+  "actors": [],
+  "genres": [],
+  "categories": [
+    {
+      "id": 1,
+      "title": "News"
+    },
+    {
+      "id": 2,
+      "title": "Sports"
+    },
+    {
+      "id": 3,
+      "title": "Entertainment"
+    },
+    {
+      "id": 4,
+      "title": "Documentary"
+    }
+  ],
+  "countries": [
+    {
+      "id": 1,
+      "title": "USA"
+    },
+    {
+      "id": 2,
+      "title": "UK"
+    }
+  ],
+  "subscription_plans": [],
+  "subscription_config": {
+    "enabled": false,
+    "monthly_billing_enabled": false,
+    "free_trial_days": 0,
+    "grace_period_days": 0,
+    "auto_renewal_enabled": false,
+    "payment_methods": [],
+    "currency_default": "USD",
+    "subscription_required_for": []
+  },
+  "ads_config": {
+    "enabled": false
+  }
+}

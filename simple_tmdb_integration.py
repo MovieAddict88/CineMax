@@ -387,19 +387,20 @@ def main():
     # Initialize TMDB integrator
     integrator = SimpleTMDBIntegrator(API_KEY)
     
-    # Process the JSON file
-    integrator.process_json_file('original_api.json', 'enhanced_movie_api.json')
+    # Process the clean JSON file (no existing images)
+    integrator.process_json_file('clean_movie_api.json', 'fully_enhanced_movie_api.json')
     
     print("\n🎬 TMDB Integration Complete!")
     print("📝 Summary of enhancements:")
-    print("   • Added comprehensive movie metadata from TMDB")
-    print("   • Enhanced TV series information")
-    print("   • Added high-quality poster and backdrop images")
-    print("   • Integrated cast and crew information")
-    print("   • Added production companies and networks")
-    print("   • Enhanced genres and classifications")
+    print("   • Auto-detected comprehensive movie metadata from TMDB")
+    print("   • Auto-detected TV series information")
+    print("   • Auto-detected high-quality poster and backdrop images")
+    print("   • Auto-detected cast and crew information with photos")
+    print("   • Auto-detected production companies and networks")
+    print("   • Auto-detected genres and classifications")
     print("   • Added VidSrc.net embed sources as requested")
     print("   • Maintained all existing stream sources")
+    print("   • All images are 100% from TMDB API - no pre-existing images!")
 
 if __name__ == "__main__":
     main()
