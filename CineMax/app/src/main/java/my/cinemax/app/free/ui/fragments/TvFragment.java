@@ -209,7 +209,18 @@ public class TvFragment extends Fragment {
                    if (id == 0) {
                        countrySelected = 0;
                    } else {
-                       countrySelected = countriesList.get((int) id).getId().intValue();
+                       // Fix: Ensure proper integer conversion and bounds checking
+                       int index = (int) id;
+                       if (index >= 0 && index < countriesList.size()) {
+                           Country selectedCountry = countriesList.get(index);
+                           if (selectedCountry != null && selectedCountry.getId() != null) {
+                               countrySelected = selectedCountry.getId().intValue();
+                           } else {
+                               countrySelected = 0;
+                           }
+                       } else {
+                           countrySelected = 0;
+                       }
                    }
                    item = 0;
                    page = 0;
@@ -235,7 +246,18 @@ public class TvFragment extends Fragment {
                     if (id == 0) {
                         categorySelected = 0;
                     } else {
-                        categorySelected = categoryList.get((int) id).getId().intValue();
+                        // Fix: Ensure proper integer conversion and bounds checking
+                        int index = (int) id;
+                        if (index >= 0 && index < categoryList.size()) {
+                            Category selectedCategory = categoryList.get(index);
+                            if (selectedCategory != null && selectedCategory.getId() != null) {
+                                categorySelected = selectedCategory.getId().intValue();
+                            } else {
+                                categorySelected = 0;
+                            }
+                        } else {
+                            categorySelected = 0;
+                        }
                     }
                     item = 0;
                     page = 0;
@@ -443,8 +465,20 @@ public class TvFragment extends Fragment {
                                 // Fallback: use sublabel for country matching if countries list is empty
                                 String sublabel = channel.getSublabel();
                                 if (sublabel != null && !sublabel.isEmpty()) {
-                                    // Simple country matching - can be enhanced
-                                    matchesCountry = true;
+                                    // Enhanced country matching based on sublabel
+                                    String sublabelLower = sublabel.toLowerCase();
+                                    if (countrySelected == 1 && (sublabelLower.contains("usa") || sublabelLower.contains("united states"))) {
+                                        matchesCountry = true;
+                                    } else if (countrySelected == 2 && (sublabelLower.contains("uk") || sublabelLower.contains("united kingdom"))) {
+                                        matchesCountry = true;
+                                    } else if (countrySelected == 3 && sublabelLower.contains("france")) {
+                                        matchesCountry = true;
+                                    } else if (countrySelected == 4 && sublabelLower.contains("germany")) {
+                                        matchesCountry = true;
+                                    } else if (sublabelLower.contains("ph") || sublabelLower.contains("philippines")) {
+                                        // Handle Philippines channels
+                                        matchesCountry = true;
+                                    }
                                 }
                             }
                             
@@ -452,6 +486,11 @@ public class TvFragment extends Fragment {
                                 filteredChannels.add(channel);
                             }
                         }
+                        
+                        // Debug logging
+                        Log.d("TvFragment", "Total channels found: " + filteredChannels.size() + 
+                              ", Category selected: " + categorySelected + 
+                              ", Country selected: " + countrySelected);
                         
                         if (!filteredChannels.isEmpty()) {
                             for (Channel channel : filteredChannels) {

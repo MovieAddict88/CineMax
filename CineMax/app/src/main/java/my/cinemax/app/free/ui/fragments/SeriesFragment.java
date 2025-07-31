@@ -131,23 +131,28 @@ public class SeriesFragment extends Fragment {
                     my.cinemax.app.free.entity.JsonApiResponse apiResponse = response.body();
                     
                     if (apiResponse.getGenres() != null && apiResponse.getGenres().size() > 0) {
-                        final String[] genreNames = new String[apiResponse.getGenres().size() + 1];
-                        genreNames[0] = "All genres";
-                        genreList.add(new Genre()); // Add "All genres" option
+                        genreList.clear();
+                        genreList.add(new Genre(0, "All genres")); // Add "All genres" option with proper ID
                         
-                        for (int i = 0; i < apiResponse.getGenres().size(); i++) {
-                            genreNames[i + 1] = apiResponse.getGenres().get(i).getTitle();
-                            genreList.add(apiResponse.getGenres().get(i));
+                        for (Genre genre : apiResponse.getGenres()) {
+                            genreList.add(genre);
                         }
                         
-                        ArrayAdapter<String> filtresAdapter = new ArrayAdapter<String>(getActivity(),
-                                R.layout.spinner_layout, R.id.textView, genreNames);
+                        // Use Genre object adapter for proper ID mapping
+                        ArrayAdapter<Genre> filtresAdapter = new ArrayAdapter<Genre>(getActivity(),
+                                R.layout.spinner_layout, R.id.textView, genreList);
                         filtresAdapter.setDropDownViewResource(R.layout.simple_spinner_dropdown_item);
                         spinner_fragement_series_genre_list.setAdapter(filtresAdapter);
                         relative_layout_frament_series_genres.setVisibility(View.VISIBLE);
+                        
+                        Log.d("SeriesFragment", "Loaded " + genreList.size() + " genres");
                     } else {
                         relative_layout_frament_series_genres.setVisibility(View.GONE);
+                        Log.w("SeriesFragment", "No genres found in API response");
                     }
+                } else {
+                    relative_layout_frament_series_genres.setVisibility(View.GONE);
+                    Log.e("SeriesFragment", "Failed to load genres: " + response.code());
                 }
             }
             
@@ -155,6 +160,7 @@ public class SeriesFragment extends Fragment {
             public void onFailure(Call<my.cinemax.app.free.entity.JsonApiResponse> call, Throwable t) {
                 // Hide genre filter if loading fails
                 relative_layout_frament_series_genres.setVisibility(View.GONE);
+                Log.e("SeriesFragment", "Failed to load genres", t);
             }
         });
     }
@@ -175,7 +181,18 @@ public class SeriesFragment extends Fragment {
                     if (id == 0) {
                         genreSelected = 0;
                     } else {
-                        genreSelected = genreList.get((int) id).getId().intValue();
+                        // Fix: Ensure proper integer conversion and bounds checking
+                        int index = (int) id;
+                        if (index >= 0 && index < genreList.size()) {
+                            Genre selectedGenre = genreList.get(index);
+                            if (selectedGenre != null && selectedGenre.getId() != null) {
+                                genreSelected = selectedGenre.getId().intValue();
+                            } else {
+                                genreSelected = 0;
+                            }
+                        } else {
+                            genreSelected = 0;
+                        }
                     }
                     item = 0;
                     page = 0;
@@ -421,6 +438,11 @@ public class SeriesFragment extends Fragment {
                                 }
                             }
                         }
+                        
+                        // Debug logging
+                        Log.d("SeriesFragment", "Total series found: " + filteredSeries.size() + 
+                              ", Genre selected: " + genreSelected + 
+                              ", Order selected: " + orderSelected);
                         
                         // Apply ordering
                         if (orderSelected != null) {

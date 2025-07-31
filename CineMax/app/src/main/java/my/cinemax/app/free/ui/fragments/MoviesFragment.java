@@ -173,7 +173,18 @@ public class MoviesFragment extends Fragment {
                     if (id == 0) {
                         genreSelected = 0;
                     } else {
-                        genreSelected = genreList.get((int) id).getId();
+                        // Fix: Ensure proper integer conversion and bounds checking
+                        int index = (int) id;
+                        if (index >= 0 && index < genreList.size()) {
+                            Genre selectedGenre = genreList.get(index);
+                            if (selectedGenre != null && selectedGenre.getId() != null) {
+                                genreSelected = selectedGenre.getId().intValue();
+                            } else {
+                                genreSelected = 0;
+                            }
+                        } else {
+                            genreSelected = 0;
+                        }
                     }
                     item = 0;
                     page = 0;
