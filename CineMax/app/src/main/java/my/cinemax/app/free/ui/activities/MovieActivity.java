@@ -74,6 +74,8 @@ import my.cinemax.app.free.config.Global;
 import my.cinemax.app.free.entity.Actor;
 import my.cinemax.app.free.entity.ApiResponse;
 import my.cinemax.app.free.entity.Comment;
+import my.cinemax.app.free.entity.Genre;
+import my.cinemax.app.free.entity.JsonApiResponse;
 import my.cinemax.app.free.entity.DownloadItem;
 import my.cinemax.app.free.entity.Language;
 import my.cinemax.app.free.entity.Poster;
@@ -379,31 +381,44 @@ public class MovieActivity extends AppCompatActivity {
         }
     }
 
-    private void getRandomMovies() {
-        String genres_list = "";
-        for (int i = 0; i < poster.getGenres().size(); i++) {
-            if (poster.getGenres().size()-1 == i){
-                genres_list+=poster.getGenres().get(i).getId();
-            }else{
-                genres_list+=poster.getGenres().get(i).getId()+",";
-            }
-        }
-        Retrofit retrofit = apiClient.getClient();
-        apiRest service = retrofit.create(apiRest.class);
-
-        Call<List<Poster>> call = service.getRandomMoivies(genres_list);
-        call.enqueue(new Callback<List<Poster>>() {
+    /**
+     * Load random movies from GitHub JSON API instead of old server API
+     */
+    private void getRandomMoviesFromJson() {
+        // Load data from GitHub JSON API
+        apiClient.getJsonApiData(new apiClient.JsonApiCallback() {
             @Override
-            public void onResponse(Call<List<Poster>> call, Response<List<Poster>> response) {
-                if (response.isSuccessful()){
-                    if (response.body().size()>0) {
-                        List<Poster> posterList = new ArrayList<>();
-                        for (int i = 0; i < response.body().size(); i++) {
-                            if (response.body().get(i).getId() != poster.getId())
-                                posterList.add(response.body().get(i));
+            public void onSuccess(JsonApiResponse jsonResponse) {
+                if (jsonResponse != null && jsonResponse.getMovies() != null) {
+                    List<Poster> posterList = new ArrayList<>();
+                    
+                    // Filter movies by genres and exclude current movie
+                    for (Poster movie : jsonResponse.getMovies()) {
+                        if (movie.getId() != null && !movie.getId().equals(poster.getId())) {
+                            // Check if movie has any matching genres
+                            if (movie.getGenres() != null && poster.getGenres() != null) {
+                                for (Genre movieGenre : movie.getGenres()) {
+                                    for (Genre posterGenre : poster.getGenres()) {
+                                        if (movieGenre.getId() != null && posterGenre.getId() != null &&
+                                            movieGenre.getId().equals(posterGenre.getId())) {
+                                            posterList.add(movie);
+                                            break;
+                                        }
+                                    }
+                                    if (posterList.contains(movie)) break;
+                                }
+                            }
                         }
+                    }
+                    
+                    // Limit to 10 similar movies
+                    if (posterList.size() > 10) {
+                        posterList = posterList.subList(0, 10);
+                    }
+                    
+                    if (posterList.size() > 0) {
                         linearLayoutManagerMoreMovies = new LinearLayoutManager(getApplicationContext(), LinearLayoutManager.HORIZONTAL, false);
-                        posterAdapter  = new PosterAdapter(posterList, MovieActivity.this);
+                        posterAdapter = new PosterAdapter(posterList, MovieActivity.this);
                         recycle_view_activity_activity_movie_more_movies.setHasFixedSize(true);
                         recycle_view_activity_activity_movie_more_movies.setAdapter(posterAdapter);
                         recycle_view_activity_activity_movie_more_movies.setLayoutManager(linearLayoutManagerMoreMovies);
@@ -411,33 +426,62 @@ public class MovieActivity extends AppCompatActivity {
                     }
                 }
             }
+            
             @Override
-            public void onFailure(Call<List<Poster>> call, Throwable t) {
+            public void onError(String error) {
+                Log.e("MovieActivity", "Error loading random movies: " + error);
             }
         });
     }
-    private void getPosterCastings() {
-        Retrofit retrofit = apiClient.getClient();
-        apiRest service = retrofit.create(apiRest.class);
-        Call<List<Actor>> call = service.getRolesByPoster(poster.getId());
-        call.enqueue(new Callback<List<Actor>>() {
+
+    /**
+     * @deprecated Old API method - replaced with getRandomMoviesFromJson()
+     */
+    @Deprecated
+    private void getRandomMovies() {
+        // This method is kept for backward compatibility but now redirects to JSON API
+        getRandomMoviesFromJson();
+    }
+    /**
+     * Load movie castings from GitHub JSON API instead of old server API
+     */
+    private void getPosterCastingsFromJson() {
+        // Load data from GitHub JSON API
+        apiClient.getJsonApiData(new apiClient.JsonApiCallback() {
             @Override
-            public void onResponse(Call<List<Actor>> call, Response<List<Actor>> response) {
-                if (response.isSuccessful()){
-                    if (response.body().size()>0) {
-                        linearLayoutManagerCast = new LinearLayoutManager(getApplicationContext(), LinearLayoutManager.HORIZONTAL, false);
-                        actorAdapter = new ActorAdapter(response.body(), MovieActivity.this);
-                        recycle_view_activity_activity_movie_cast.setHasFixedSize(true);
-                        recycle_view_activity_activity_movie_cast.setAdapter(actorAdapter);
-                        recycle_view_activity_activity_movie_cast.setLayoutManager(linearLayoutManagerCast);
-                        linear_layout_activity_movie_cast.setVisibility(View.VISIBLE);
+            public void onSuccess(JsonApiResponse jsonResponse) {
+                if (jsonResponse != null && jsonResponse.getMovies() != null) {
+                    // Find the current movie and get its actors
+                    for (Poster movie : jsonResponse.getMovies()) {
+                        if (movie.getId() != null && movie.getId().equals(poster.getId())) {
+                            if (movie.getActors() != null && movie.getActors().size() > 0) {
+                                linearLayoutManagerCast = new LinearLayoutManager(getApplicationContext(), LinearLayoutManager.HORIZONTAL, false);
+                                actorAdapter = new ActorAdapter(movie.getActors(), MovieActivity.this);
+                                recycle_view_activity_activity_movie_cast.setHasFixedSize(true);
+                                recycle_view_activity_activity_movie_cast.setAdapter(actorAdapter);
+                                recycle_view_activity_activity_movie_cast.setLayoutManager(linearLayoutManagerCast);
+                                linear_layout_activity_movie_cast.setVisibility(View.VISIBLE);
+                            }
+                            break;
+                        }
                     }
                 }
             }
+            
             @Override
-            public void onFailure(Call<List<Actor>> call, Throwable t) {
+            public void onError(String error) {
+                Log.e("MovieActivity", "Error loading movie castings: " + error);
             }
         });
+    }
+
+    /**
+     * @deprecated Old API method - replaced with getPosterCastingsFromJson()
+     */
+    @Deprecated
+    private void getPosterCastings() {
+        // This method is kept for backward compatibility but now redirects to JSON API
+        getPosterCastingsFromJson();
     }
 
     private void getMovie() {

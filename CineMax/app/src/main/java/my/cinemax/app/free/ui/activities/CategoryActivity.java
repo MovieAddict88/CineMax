@@ -12,6 +12,7 @@ import retrofit2.Retrofit;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
@@ -24,6 +25,7 @@ import my.cinemax.app.free.api.apiClient;
 import my.cinemax.app.free.api.apiRest;
 import my.cinemax.app.free.entity.Category;
 import my.cinemax.app.free.entity.Channel;
+import my.cinemax.app.free.entity.JsonApiResponse;
 import my.cinemax.app.free.ui.Adapters.ChannelAdapter;
 
 import java.util.ArrayList;
@@ -49,10 +51,13 @@ public class CategoryActivity extends AppCompatActivity {
     private RelativeLayout relative_layout_load_more;
     private LinearLayout linear_layout_load_category_activity;
 
-
     private String SelectedOrder = "created";
     private Category category;
     private String from;
+
+    // JSON API data cache
+    private JsonApiResponse cachedJsonResponse = null;
+    private List<Channel> allChannels = new ArrayList<>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -61,7 +66,7 @@ public class CategoryActivity extends AppCompatActivity {
         getCategory();
         initView();
         initAction();
-        loadChannels();
+        loadChannelsFromJson();
     }
 
     private void getCategory() {
@@ -97,85 +102,132 @@ public class CategoryActivity extends AppCompatActivity {
         return super.onOptionsItemSelected(item);
     }
 
-    private void loadChannels() {
+    /**
+     * Load channels from GitHub JSON API instead of old server API
+     */
+    private void loadChannelsFromJson() {
         if (page==0){
             linear_layout_load_category_activity.setVisibility(View.VISIBLE);
         }else{
             relative_layout_load_more.setVisibility(View.VISIBLE);
         }
         swipe_refresh_layout_list_category_search.setRefreshing(false);
-        Retrofit retrofit = apiClient.getClient();
-        apiRest service = retrofit.create(apiRest.class);
-        Call<List<Channel>> call = service.getChannelsByFiltres(category.getId(),0,page);
-        call.enqueue(new Callback<List<Channel>>() {
+        
+        // If we already have cached data, use it
+        if (cachedJsonResponse != null && !allChannels.isEmpty()) {
+            filterAndDisplayChannels();
+            return;
+        }
+        
+        // Load data from GitHub JSON API
+        apiClient.getJsonApiData(new apiClient.JsonApiCallback() {
             @Override
-            public void onResponse(Call<List<Channel>> call, final Response<List<Channel>> response) {
-                if (response.isSuccessful()){
-                    if (response.body().size()>0){
-                        for (int i = 0; i < response.body().size(); i++) {
-                            posterArrayList.add(response.body().get(i));
-                        }
-                        linear_layout_layout_error.setVisibility(View.GONE);
-                        recycler_view_activity_category.setVisibility(View.VISIBLE);
-                        image_view_empty_list.setVisibility(View.GONE);
-
-                        adapter.notifyDataSetChanged();
-                        page++;
-                        loading=true;
-                    }else{
-                        if (page==0) {
-                            linear_layout_layout_error.setVisibility(View.GONE);
-                            recycler_view_activity_category.setVisibility(View.GONE);
-                            image_view_empty_list.setVisibility(View.VISIBLE);
-                        }
-                    }
-                }else{
-                    linear_layout_layout_error.setVisibility(View.VISIBLE);
-                    recycler_view_activity_category.setVisibility(View.GONE);
-                    image_view_empty_list.setVisibility(View.GONE);
+            public void onSuccess(JsonApiResponse jsonResponse) {
+                if (jsonResponse != null && jsonResponse.getChannels() != null) {
+                    cachedJsonResponse = jsonResponse;
+                    allChannels = jsonResponse.getChannels();
+                    filterAndDisplayChannels();
+                } else {
+                    showError();
                 }
-                relative_layout_load_more.setVisibility(View.GONE);
-                swipe_refresh_layout_list_category_search.setRefreshing(false);
-                linear_layout_load_category_activity.setVisibility(View.GONE);
             }
-
+            
             @Override
-            public void onFailure(Call<List<Channel>> call, Throwable t) {
-                linear_layout_layout_error.setVisibility(View.VISIBLE);
-                recycler_view_activity_category.setVisibility(View.GONE);
-                image_view_empty_list.setVisibility(View.GONE);
-                relative_layout_load_more.setVisibility(View.GONE);
-                swipe_refresh_layout_list_category_search.setVisibility(View.GONE);
-                linear_layout_load_category_activity.setVisibility(View.GONE);
-
+            public void onError(String error) {
+                Log.e("CategoryActivity", "Error loading JSON data: " + error);
+                showError();
             }
         });
+    }
+    
+    /**
+     * Filter channels by category and display them
+     */
+    private void filterAndDisplayChannels() {
+        List<Channel> filteredChannels = new ArrayList<>();
+        
+        // Filter channels by category
+        for (Channel channel : allChannels) {
+            if (channel.getCategory() != null && 
+                channel.getCategory().getId() != null && 
+                channel.getCategory().getId().equals(category.getId())) {
+                filteredChannels.add(channel);
+            }
+        }
+        
+        // Apply pagination
+        int startIndex = page * 20; // 20 items per page
+        int endIndex = Math.min(startIndex + 20, filteredChannels.size());
+        
+        if (startIndex < filteredChannels.size()) {
+            List<Channel> pageChannels = filteredChannels.subList(startIndex, endIndex);
+            
+            // Add channels to the list
+            for (Channel channel : pageChannels) {
+                posterArrayList.add(channel);
+            }
+            
+            linear_layout_layout_error.setVisibility(View.GONE);
+            recycler_view_activity_category.setVisibility(View.VISIBLE);
+            image_view_empty_list.setVisibility(View.GONE);
+
+            adapter.notifyDataSetChanged();
+            page++;
+            loading=true;
+        } else {
+            if (page==0) {
+                linear_layout_layout_error.setVisibility(View.GONE);
+                recycler_view_activity_category.setVisibility(View.GONE);
+                image_view_empty_list.setVisibility(View.VISIBLE);
+            }
+        }
+        
+        relative_layout_load_more.setVisibility(View.GONE);
+        swipe_refresh_layout_list_category_search.setRefreshing(false);
+        linear_layout_load_category_activity.setVisibility(View.GONE);
+    }
+    
+    /**
+     * Show error state
+     */
+    private void showError() {
+        linear_layout_layout_error.setVisibility(View.VISIBLE);
+        recycler_view_activity_category.setVisibility(View.GONE);
+        image_view_empty_list.setVisibility(View.GONE);
+        relative_layout_load_more.setVisibility(View.GONE);
+        swipe_refresh_layout_list_category_search.setVisibility(View.GONE);
+        linear_layout_load_category_activity.setVisibility(View.GONE);
+    }
+
+    /**
+     * @deprecated Old API method - replaced with loadChannelsFromJson()
+     */
+    @Deprecated
+    private void loadChannels() {
+        // This method is kept for backward compatibility but now redirects to JSON API
+        loadChannelsFromJson();
     }
 
     private void initAction() {
 
-
-
         swipe_refresh_layout_list_category_search.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
             @Override
             public void onRefresh() {
-                item = 0;
                 page = 0;
                 loading = true;
                 posterArrayList.clear();
                 adapter.notifyDataSetChanged();
-                loadChannels();
+                loadChannelsFromJson();
             }
         });
         button_try_again.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                item = 0;
                 page = 0;
                 loading = true;
                 posterArrayList.clear();
                 adapter.notifyDataSetChanged();
-                loadChannels();
+                loadChannelsFromJson();
             }
         });
         recycler_view_activity_category.addOnScrollListener(new RecyclerView.OnScrollListener()
@@ -195,7 +247,7 @@ public class CategoryActivity extends AppCompatActivity {
                         if ( (visibleItemCount + pastVisiblesItems) >= totalItemCount)
                         {
                             loading = false;
-                            loadChannels();
+                            loadChannelsFromJson();
                         }
                     }
                 }else{
@@ -206,6 +258,7 @@ public class CategoryActivity extends AppCompatActivity {
     }
 
     private void initView() {
+
         Toolbar toolbar = (Toolbar)findViewById(R.id.toolbar);
         toolbar.setTitle(category.getTitle());
         setSupportActionBar(toolbar);
@@ -219,7 +272,7 @@ public class CategoryActivity extends AppCompatActivity {
         linear_layout_layout_error  = findViewById(R.id.linear_layout_layout_error);
         recycler_view_activity_category          = findViewById(R.id.recycler_view_activity_category);
         adapter = new ChannelAdapter(posterArrayList, this);
-        gridLayoutManager = new GridLayoutManager(this,3);
+        this.gridLayoutManager=  new GridLayoutManager(getApplicationContext(),2,RecyclerView.VERTICAL,false);
         recycler_view_activity_category.setHasFixedSize(true);
         recycler_view_activity_category.setAdapter(adapter);
         recycler_view_activity_category.setLayoutManager(gridLayoutManager);
