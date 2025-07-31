@@ -1,17 +1,25 @@
 package my.cinemax.app.free.entity;
 
+import android.os.Parcel;
+import android.os.Parcelable;
+
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 
 import java.util.List;
 
-public class Season {
+public class Season implements Parcelable {
     @SerializedName("id")
     @Expose
     private Integer id;
     @SerializedName("title")
     @Expose
     private String title;
+    
+    @SerializedName("season_number")
+    @Expose
+    private Integer seasonNumber;
+    
     @SerializedName("episodes")
     @Expose
     private List<Episode> episodes = null;
@@ -32,6 +40,14 @@ public class Season {
         this.title = title;
     }
 
+    public Integer getSeasonNumber() {
+        return seasonNumber;
+    }
+
+    public void setSeasonNumber(Integer seasonNumber) {
+        this.seasonNumber = seasonNumber;
+    }
+
     public List<Episode> getEpisodes() {
         return episodes;
     }
@@ -40,4 +56,53 @@ public class Season {
         this.episodes = episodes;
     }
 
+    protected Season(Parcel in) {
+        if (in.readByte() == 0) {
+            id = null;
+        } else {
+            id = in.readInt();
+        }
+        title = in.readString();
+        if (in.readByte() == 0) {
+            seasonNumber = null;
+        } else {
+            seasonNumber = in.readInt();
+        }
+        episodes = in.createTypedArrayList(Episode.CREATOR);
+    }
+
+    @Override
+    public void writeToParcel(Parcel dest, int flags) {
+        if (id == null) {
+            dest.writeByte((byte) 0);
+        } else {
+            dest.writeByte((byte) 1);
+            dest.writeInt(id);
+        }
+        dest.writeString(title);
+        if (seasonNumber == null) {
+            dest.writeByte((byte) 0);
+        } else {
+            dest.writeByte((byte) 1);
+            dest.writeInt(seasonNumber);
+        }
+        dest.writeTypedList(episodes);
+    }
+
+    @Override
+    public int describeContents() {
+        return 0;
+    }
+
+    public static final Creator<Season> CREATOR = new Creator<Season>() {
+        @Override
+        public Season createFromParcel(Parcel in) {
+            return new Season(in);
+        }
+
+        @Override
+        public Season[] newArray(int size) {
+            return new Season[size];
+        }
+    };
 }

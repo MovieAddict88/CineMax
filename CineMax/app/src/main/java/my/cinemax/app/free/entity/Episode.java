@@ -1,11 +1,14 @@
 package my.cinemax.app.free.entity;
 
+import android.os.Parcel;
+import android.os.Parcelable;
+
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 
 import java.util.List;
 
-public class Episode {
+public class Episode implements Parcelable {
 
     @SerializedName("id")
     @Expose
@@ -29,6 +32,14 @@ public class Episode {
     @SerializedName("duration")
     @Expose
     private String duration;
+
+    @SerializedName("episode_number")
+    @Expose
+    private Integer episodeNumber;
+
+    @SerializedName("year")
+    @Expose
+    private String year;
 
     @SerializedName("image")
     @Expose
@@ -101,4 +112,82 @@ public class Episode {
     public void setDuration(String duration) {
         this.duration = duration;
     }
+
+    public Integer getEpisodeNumber() {
+        return episodeNumber;
+    }
+
+    public void setEpisodeNumber(Integer episodeNumber) {
+        this.episodeNumber = episodeNumber;
+    }
+
+    public String getYear() {
+        return year;
+    }
+
+    public void setYear(String year) {
+        this.year = year;
+    }
+
+    protected Episode(Parcel in) {
+        if (in.readByte() == 0) {
+            id = null;
+        } else {
+            id = in.readInt();
+        }
+        title = in.readString();
+        description = in.readString();
+        downloadas = in.readString();
+        playas = in.readString();
+        duration = in.readString();
+        if (in.readByte() == 0) {
+            episodeNumber = null;
+        } else {
+            episodeNumber = in.readInt();
+        }
+        year = in.readString();
+        image = in.readString();
+        sources = in.createTypedArrayList(Source.CREATOR);
+    }
+
+    @Override
+    public void writeToParcel(Parcel dest, int flags) {
+        if (id == null) {
+            dest.writeByte((byte) 0);
+        } else {
+            dest.writeByte((byte) 1);
+            dest.writeInt(id);
+        }
+        dest.writeString(title);
+        dest.writeString(description);
+        dest.writeString(downloadas);
+        dest.writeString(playas);
+        dest.writeString(duration);
+        if (episodeNumber == null) {
+            dest.writeByte((byte) 0);
+        } else {
+            dest.writeByte((byte) 1);
+            dest.writeInt(episodeNumber);
+        }
+        dest.writeString(year);
+        dest.writeString(image);
+        dest.writeTypedList(sources);
+    }
+
+    @Override
+    public int describeContents() {
+        return 0;
+    }
+
+    public static final Creator<Episode> CREATOR = new Creator<Episode>() {
+        @Override
+        public Episode createFromParcel(Parcel in) {
+            return new Episode(in);
+        }
+
+        @Override
+        public Episode[] newArray(int size) {
+            return new Episode[size];
+        }
+    };
 }

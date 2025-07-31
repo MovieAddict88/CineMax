@@ -9,6 +9,7 @@ import com.google.gson.annotations.SerializedName;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.List;
+import my.cinemax.app.free.entity.Season;
 
 public class Poster implements Parcelable {
     @SerializedName("id")
@@ -100,6 +101,10 @@ public class Poster implements Parcelable {
     @Expose
     private Source trailer ;
 
+    @SerializedName("seasons")
+    @Expose
+    private List<Season> seasons = new ArrayList<>();
+
     private int typeView = 1;
 
     public Poster() {
@@ -142,6 +147,7 @@ public class Poster implements Parcelable {
         createdAt = in.readString();
         sources = in.createTypedArrayList(Source.CREATOR);
         trailer = in.readParcelable(Source.class.getClassLoader());
+        seasons = in.createTypedArrayList(Season.CREATOR);
         typeView = in.readInt();
     }
 
@@ -184,6 +190,7 @@ public class Poster implements Parcelable {
         dest.writeString(createdAt);
         dest.writeTypedList(sources);
         dest.writeParcelable(trailer, flags);
+        dest.writeTypedList(seasons);
         dest.writeInt(typeView);
     }
 
@@ -321,6 +328,14 @@ public class Poster implements Parcelable {
 
     public void setTrailer(Source trailer) {
         this.trailer = trailer;
+    }
+
+    public List<Season> getSeasons() {
+        return seasons;
+    }
+
+    public void setSeasons(List<Season> seasons) {
+        this.seasons = seasons;
     }
 
     public int getTypeView() {

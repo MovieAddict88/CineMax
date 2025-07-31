@@ -425,7 +425,25 @@ public class SerieActivity extends AppCompatActivity implements PlaylistDownload
         }
     }
     private void getSeasons() {
+        // First try to get seasons from the poster object (JSON data)
+        if (poster != null && poster.getSeasons() != null && !poster.getSeasons().isEmpty()) {
+            seasonArrayList.clear();
+            final String[] countryCodes = new String[poster.getSeasons().size()];
 
+            for (int i = 0; i < poster.getSeasons().size(); i++) {
+                countryCodes[i] = poster.getSeasons().get(i).getTitle();
+                seasonArrayList.add(poster.getSeasons().get(i));
+            }
+            ArrayAdapter<String> filtresAdapter = new ArrayAdapter<String>(SerieActivity.this,
+                    R.layout.spinner_layout_season,R.id.textView,countryCodes);
+            filtresAdapter.setDropDownViewResource(R.layout.simple_spinner_dropdown_season_item);
+            spinner_activity_serie_season_list.setAdapter(filtresAdapter);
+
+            linear_layout_activity_serie_seasons.setVisibility(View.VISIBLE);
+            return;
+        }
+
+        // Fallback to API call if no seasons in poster object
         Retrofit retrofit = apiClient.getClient();
         apiRest service = retrofit.create(apiRest.class);
 
@@ -452,17 +470,28 @@ public class SerieActivity extends AppCompatActivity implements PlaylistDownload
                         linear_layout_activity_serie_seasons.setVisibility(View.GONE);
                     }
                 }else{
-                    linear_layout_activity_serie_seasons.setVisibility(View.VISIBLE);
+                    linear_layout_activity_serie_seasons.setVisibility(View.GONE);
                 }
             }
             @Override
             public void onFailure(Call<List<Season>> call, Throwable t) {
                 linear_layout_activity_serie_seasons.setVisibility(View.GONE);
-
             }
         });
     }
     private void getPosterCastings() {
+        // First try to get actors from the poster object (JSON data)
+        if (poster != null && poster.getActors() != null && !poster.getActors().isEmpty()) {
+            linearLayoutManagerCast = new LinearLayoutManager(getApplicationContext(), LinearLayoutManager.HORIZONTAL, false);
+            actorAdapter = new ActorAdapter(poster.getActors(), SerieActivity.this);
+            recycle_view_activity_activity_serie_cast.setHasFixedSize(true);
+            recycle_view_activity_activity_serie_cast.setAdapter(actorAdapter);
+            recycle_view_activity_activity_serie_cast.setLayoutManager(linearLayoutManagerCast);
+            linear_layout_activity_serie_cast.setVisibility(View.VISIBLE);
+            return;
+        }
+
+        // Fallback to API call if no actors in poster object
         Retrofit retrofit = apiClient.getClient();
         apiRest service = retrofit.create(apiRest.class);
         Call<List<Actor>> call = service.getRolesByPoster(poster.getId());
@@ -568,6 +597,11 @@ public class SerieActivity extends AppCompatActivity implements PlaylistDownload
             floating_action_button_activity_serie_comment.setVisibility(View.VISIBLE);
         }else{
             floating_action_button_activity_serie_comment.setVisibility(View.GONE);
+        }
+        
+        // Fetch enhanced description and rating from TMDB
+        if (poster.getTitle() != null && !poster.getTitle().trim().isEmpty()) {
+            fetchTvSeriesDescriptionFromTmdb(poster.getTitle());
         }
     }
 
