@@ -758,12 +758,15 @@ public class SeriesFragment extends Fragment {
                 }
                 
                 if (isTvSeries && correspondingChannel != null) {
+                    // Create final references for use in callback
+                    final Channel finalChannel = correspondingChannel;
+                    final Poster finalSeriesPoster = seriesPoster;
                     // Fetch TV rating
                     ratingManager.fetchTvRating(correspondingChannel, new TmdbRatingManager.RatingCallback() {
                         @Override
                         public void onSuccess(Float rating) {
                             // Update the poster rating as well
-                            seriesPoster.setRating(rating);
+                            finalSeriesPoster.setRating(rating);
                             if (getActivity() != null) {
                                 getActivity().runOnUiThread(new Runnable() {
                                     @Override
@@ -776,10 +779,12 @@ public class SeriesFragment extends Fragment {
 
                         @Override
                         public void onError(String error) {
-                            Log.e("SeriesFragment", "Failed to fetch TV rating for " + correspondingChannel.getTitle() + ": " + error);
+                            Log.e("SeriesFragment", "Failed to fetch TV rating for " + finalChannel.getTitle() + ": " + error);
                         }
                     });
                 } else {
+                    // Create final reference for use in callback
+                    final Poster finalPoster = seriesPoster;
                     // This is a movie marked as series, fetch movie rating
                     ratingManager.fetchMovieRating(seriesPoster, new TmdbRatingManager.RatingCallback() {
                         @Override
@@ -796,7 +801,7 @@ public class SeriesFragment extends Fragment {
 
                         @Override
                         public void onError(String error) {
-                            Log.e("SeriesFragment", "Failed to fetch movie rating for " + seriesPoster.getTitle() + ": " + error);
+                            Log.e("SeriesFragment", "Failed to fetch movie rating for " + finalPoster.getTitle() + ": " + error);
                         }
                     });
                 }

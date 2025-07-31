@@ -628,6 +628,8 @@ public class MoviesFragment extends Fragment {
         
         for (Poster movie : movies) {
             if (movie.getId() != null && movie.getRating() == null) {
+                // Create final reference for use in callback
+                final Poster finalMovie = movie;
                 ratingManager.fetchMovieRating(movie, new TmdbRatingManager.RatingCallback() {
                     @Override
                     public void onSuccess(Float rating) {
@@ -645,7 +647,7 @@ public class MoviesFragment extends Fragment {
 
                     @Override
                     public void onError(String error) {
-                        Log.e("MoviesFragment", "Failed to fetch rating for movie " + movie.getTitle() + ": " + error);
+                        Log.e("MoviesFragment", "Failed to fetch rating for movie " + finalMovie.getTitle() + ": " + error);
                     }
                 });
             }
