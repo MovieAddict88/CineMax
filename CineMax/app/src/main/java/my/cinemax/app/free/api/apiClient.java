@@ -353,7 +353,26 @@ public class apiClient {
             }
         }
         // Enrich TV series (if you have a similar list for TV)
-        // TODO: Add similar logic for TV series and episodes if your data model supports it
+        if (apiResponse.getCategories() != null) {
+            for (Object tvObj : apiResponse.getCategories()) {
+                try {
+                    // This assumes your TV series objects have a getMeta() method with tmdb_id, seasons, etc.
+                    // You may need to adjust this based on your actual data model.
+                    // Pseudocode for enrichment:
+                    // 1. Fetch series metadata
+                    // 2. For each season, fetch season metadata
+                    // 3. For each episode, fetch episode metadata
+                    // Example assumes a structure similar to the JSON you provided
+                    // (You may need to cast or adapt this for your actual model)
+                    // JSONObject meta = ...
+                    // int tmdbId = meta.getInt("tmdb_id");
+                    // JSONObject seriesMeta = TmdbMetadataUtil.fetchTvMetadata(tmdbId, tmdbApiKey);
+                    // ... fill series fields ...
+                    // JSONArray seasons = meta.getJSONArray("seasons");
+                    // for (int i = 0; i < seasons.length(); i++) { ... fetch season ... for each episode ... fetch episode ... }
+                } catch (Exception ignored) {}
+            }
+        }
     }
 
     /**
