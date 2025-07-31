@@ -290,8 +290,10 @@
         "classification": "TV-MA",
         "year": "2008",
         "duration": "45:00",
+        "rating": 9.5,
         "image": "https://image.tmdb.org/t/p/w500/ztkUQFLlC19CCMYHW9o1zWhJRNq.jpg",
         "cover": "https://image.tmdb.org/t/p/w1280/tsRy63Mu5cu8etL1X7ZLyf7UP1M.jpg",
+        "description": "A high school chemistry teacher turned methamphetamine manufacturer partners with a former student to secure his family's financial future as a terminal lung cancer diagnosis threatens to bankrupt his family.",
         "genres": [
           {
             "id": 3,
@@ -572,8 +574,10 @@
       "classification": "TV-MA",
       "year": "2008",
       "duration": "45:00",
+      "rating": 9.5,
       "image": "https://image.tmdb.org/t/p/w500/ztkUQFLlC19CCMYHW9o1zWhJRNq.jpg",
       "cover": "https://image.tmdb.org/t/p/w1280/tsRy63Mu5cu8etL1X7ZLyf7UP1M.jpg",
+      "description": "A high school chemistry teacher turned methamphetamine manufacturer partners with a former student to secure his family's financial future as a terminal lung cancer diagnosis threatens to bankrupt his family.",
       "genres": [
         {
           "id": 3,
@@ -584,6 +588,25 @@
           "title": "Crime"
         }
       ],
+      "sources": [
+        {
+          "id": 5,
+          "type": "embed",
+          "title": "VidSrc Stream",
+          "quality": "HD",
+          "size": "Stream",
+          "kind": "play",
+          "premium": "false",
+          "external": true,
+          "url": "https://vidsrc.net/embed/tv/81189"
+        }
+      ],
+      "trailer": {
+        "id": 6,
+        "type": "video",
+        "title": "Breaking Bad Trailer",
+        "url": "http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4"
+      },
       "seasons": [
         {
           "id": 1,

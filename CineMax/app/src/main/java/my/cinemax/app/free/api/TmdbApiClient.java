@@ -4,6 +4,7 @@ import android.util.Log;
 
 import my.cinemax.app.free.entity.TmdbMovie;
 import my.cinemax.app.free.entity.TmdbSearchResponse;
+import my.cinemax.app.free.entity.TmdbTvSeries;
 
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -13,7 +14,7 @@ import retrofit2.converter.gson.GsonConverterFactory;
 
 /**
  * TMDB API Client
- * Manages TMDB API requests and provides methods to fetch movie descriptions
+ * Manages TMDB API requests and provides methods to fetch movie and TV series descriptions
  */
 public class TmdbApiClient {
     
@@ -51,9 +52,25 @@ public class TmdbApiClient {
     }
     
     /**
+     * Interface for handling TV series description callbacks
+     */
+    public interface TvSeriesDescriptionCallback {
+        void onSuccess(String description);
+        void onError(String error);
+    }
+    
+    /**
      * Interface for handling movie rating callbacks
      */
     public interface MovieRatingCallback {
+        void onSuccess(Float rating);
+        void onError(String error);
+    }
+    
+    /**
+     * Interface for handling TV series rating callbacks
+     */
+    public interface TvSeriesRatingCallback {
         void onSuccess(Float rating);
         void onError(String error);
     }
@@ -67,9 +84,25 @@ public class TmdbApiClient {
     }
     
     /**
+     * Interface for handling TV series description and rating callbacks together
+     */
+    public interface TvSeriesDescriptionAndRatingCallback {
+        void onSuccess(String description, Float rating);
+        void onError(String error);
+    }
+    
+    /**
      * Interface for handling movie search callbacks
      */
     public interface MovieSearchCallback {
+        void onSuccess(TmdbSearchResponse response);
+        void onError(String error);
+    }
+    
+    /**
+     * Interface for handling TV series search callbacks
+     */
+    public interface TvSeriesSearchCallback {
         void onSuccess(TmdbSearchResponse response);
         void onError(String error);
     }
@@ -79,6 +112,14 @@ public class TmdbApiClient {
      */
     public interface MovieDetailsCallback {
         void onSuccess(TmdbMovie movie);
+        void onError(String error);
+    }
+    
+    /**
+     * Interface for handling TV series details callbacks
+     */
+    public interface TvSeriesDetailsCallback {
+        void onSuccess(TmdbTvSeries tvSeries);
         void onError(String error);
     }
     
@@ -361,6 +402,292 @@ public class TmdbApiClient {
             @Override
             public void onFailure(Call<TmdbSearchResponse> call, Throwable t) {
                 Log.e(TAG, "Search request failed", t);
+                callback.onError("Network error: " + t.getMessage());
+            }
+        });
+    }
+
+    // ==================== TV SERIES METHODS ====================
+    
+    /**
+     * Get TV series description by searching for the TV series title
+     * This method will search for the TV series and return the description of the first result
+     * 
+     * @param tvSeriesTitle The title of the TV series to search for
+     * @param callback Callback to handle the result
+     */
+    public void getTvSeriesDescription(String tvSeriesTitle, TvSeriesDescriptionCallback callback) {
+        Log.d(TAG, "Searching for TV series: " + tvSeriesTitle);
+        
+        Call<TmdbSearchResponse> call = apiService.searchTvSeries(TMDB_API_KEY, tvSeriesTitle, 1);
+        call.enqueue(new Callback<TmdbSearchResponse>() {
+            @Override
+            public void onResponse(Call<TmdbSearchResponse> call, Response<TmdbSearchResponse> response) {
+                if (response.isSuccessful() && response.body() != null) {
+                    TmdbSearchResponse searchResponse = response.body();
+                    
+                    if (searchResponse.getResults() != null && !searchResponse.getResults().isEmpty()) {
+                        TmdbSearchResponse.TmdbSearchResult firstResult = searchResponse.getResults().get(0);
+                        String overview = firstResult.getOverview();
+                        
+                        // If we have a description from search, use it
+                        if (overview != null && !overview.trim().isEmpty()) {
+                            Log.d(TAG, "Found description for TV series: " + tvSeriesTitle);
+                            callback.onSuccess(overview);
+                        } else {
+                            // Get detailed info if search results are incomplete
+                            getTvSeriesDetailsById(firstResult.getId(), new TvSeriesDetailsCallback() {
+                                @Override
+                                public void onSuccess(TmdbTvSeries tvSeries) {
+                                    String detailedOverview = tvSeries.getOverview();
+                                    if (detailedOverview != null && !detailedOverview.trim().isEmpty()) {
+                                        callback.onSuccess(detailedOverview);
+                                    } else {
+                                        callback.onError("No description available for this TV series");
+                                    }
+                                }
+                                
+                                @Override
+                                public void onError(String error) {
+                                    callback.onError("Failed to get detailed TV series information: " + error);
+                                }
+                            });
+                        }
+                    } else {
+                        Log.w(TAG, "No search results found for TV series: " + tvSeriesTitle);
+                        callback.onError("TV series not found in TMDB database");
+                    }
+                } else {
+                    Log.e(TAG, "TV series search request failed: " + response.code() + " - " + response.message());
+                    callback.onError("Failed to search for TV series: " + response.message());
+                }
+            }
+            
+            @Override
+            public void onFailure(Call<TmdbSearchResponse> call, Throwable t) {
+                Log.e(TAG, "TV series search request failed", t);
+                callback.onError("Network error: " + t.getMessage());
+            }
+        });
+    }
+    
+    /**
+     * Search for TV series by title
+     * 
+     * @param tvSeriesTitle The title of the TV series to search for
+     * @param callback Callback to handle the result
+     */
+    public void searchTvSeries(String tvSeriesTitle, TvSeriesSearchCallback callback) {
+        Log.d(TAG, "Searching for TV series: " + tvSeriesTitle);
+        
+        Call<TmdbSearchResponse> call = apiService.searchTvSeries(TMDB_API_KEY, tvSeriesTitle, 1);
+        call.enqueue(new Callback<TmdbSearchResponse>() {
+            @Override
+            public void onResponse(Call<TmdbSearchResponse> call, Response<TmdbSearchResponse> response) {
+                if (response.isSuccessful() && response.body() != null) {
+                    callback.onSuccess(response.body());
+                } else {
+                    Log.e(TAG, "TV series search request failed: " + response.code() + " - " + response.message());
+                    callback.onError("Failed to search for TV series: " + response.message());
+                }
+            }
+            
+            @Override
+            public void onFailure(Call<TmdbSearchResponse> call, Throwable t) {
+                Log.e(TAG, "TV series search request failed", t);
+                callback.onError("Network error: " + t.getMessage());
+            }
+        });
+    }
+    
+    /**
+     * Get TV series details by TMDB ID
+     * 
+     * @param tvSeriesId TMDB TV series ID
+     * @param callback Callback to handle the result
+     */
+    public void getTvSeriesDetailsById(Integer tvSeriesId, TvSeriesDetailsCallback callback) {
+        Log.d(TAG, "Getting TV series details for ID: " + tvSeriesId);
+        
+        Call<TmdbTvSeries> call = apiService.getTvSeriesDetails(tvSeriesId, TMDB_API_KEY);
+        call.enqueue(new Callback<TmdbTvSeries>() {
+            @Override
+            public void onResponse(Call<TmdbTvSeries> call, Response<TmdbTvSeries> response) {
+                if (response.isSuccessful() && response.body() != null) {
+                    callback.onSuccess(response.body());
+                } else {
+                    Log.e(TAG, "TV series details request failed: " + response.code() + " - " + response.message());
+                    callback.onError("Failed to get TV series details: " + response.message());
+                }
+            }
+            
+            @Override
+            public void onFailure(Call<TmdbTvSeries> call, Throwable t) {
+                Log.e(TAG, "TV series details request failed", t);
+                callback.onError("Network error: " + t.getMessage());
+            }
+        });
+    }
+    
+    /**
+     * Get TV series description by TMDB ID
+     * 
+     * @param tvSeriesId TMDB TV series ID
+     * @param callback Callback to handle the result
+     */
+    public void getTvSeriesDescriptionById(Integer tvSeriesId, TvSeriesDescriptionCallback callback) {
+        getTvSeriesDetailsById(tvSeriesId, new TvSeriesDetailsCallback() {
+            @Override
+            public void onSuccess(TmdbTvSeries tvSeries) {
+                String overview = tvSeries.getOverview();
+                if (overview != null && !overview.trim().isEmpty()) {
+                    callback.onSuccess(overview);
+                } else {
+                    callback.onError("No description available for this TV series");
+                }
+            }
+            
+            @Override
+            public void onError(String error) {
+                callback.onError(error);
+            }
+        });
+    }
+    
+    /**
+     * Get TV series rating by searching for the TV series title
+     * 
+     * @param tvSeriesTitle The title of the TV series to search for
+     * @param callback Callback to handle the result
+     */
+    public void getTvSeriesRating(String tvSeriesTitle, TvSeriesRatingCallback callback) {
+        Log.d(TAG, "Searching for TV series rating: " + tvSeriesTitle);
+        
+        Call<TmdbSearchResponse> call = apiService.searchTvSeries(TMDB_API_KEY, tvSeriesTitle, 1);
+        call.enqueue(new Callback<TmdbSearchResponse>() {
+            @Override
+            public void onResponse(Call<TmdbSearchResponse> call, Response<TmdbSearchResponse> response) {
+                if (response.isSuccessful() && response.body() != null) {
+                    TmdbSearchResponse searchResponse = response.body();
+                    
+                    if (searchResponse.getResults() != null && !searchResponse.getResults().isEmpty()) {
+                        TmdbSearchResponse.TmdbSearchResult firstResult = searchResponse.getResults().get(0);
+                        Float rating = firstResult.getVoteAverage();
+                        
+                        // If we have a rating from search, use it
+                        if (rating != null && rating > 0) {
+                            Log.d(TAG, "Found rating for TV series: " + tvSeriesTitle);
+                            callback.onSuccess(rating);
+                        } else {
+                            // Get detailed info if search results are incomplete
+                            getTvSeriesDetailsById(firstResult.getId(), new TvSeriesDetailsCallback() {
+                                @Override
+                                public void onSuccess(TmdbTvSeries tvSeries) {
+                                    Float detailedRating = tvSeries.getVoteAverage();
+                                    if (detailedRating != null && detailedRating > 0) {
+                                        callback.onSuccess(detailedRating);
+                                    } else {
+                                        callback.onError("No rating available for this TV series");
+                                    }
+                                }
+                                
+                                @Override
+                                public void onError(String error) {
+                                    callback.onError("Failed to get detailed TV series rating: " + error);
+                                }
+                            });
+                        }
+                    } else {
+                        callback.onError("TV series not found in TMDB database");
+                    }
+                } else {
+                    Log.e(TAG, "TV series rating search request failed: " + response.code() + " - " + response.message());
+                    callback.onError("Failed to search for TV series rating: " + response.message());
+                }
+            }
+            
+            @Override
+            public void onFailure(Call<TmdbSearchResponse> call, Throwable t) {
+                Log.e(TAG, "TV series rating search request failed", t);
+                callback.onError("Network error: " + t.getMessage());
+            }
+        });
+    }
+    
+    /**
+     * Get both TV series description and rating by searching for the TV series title
+     * This is more efficient than making separate calls
+     * 
+     * @param tvSeriesTitle The title of the TV series to search for
+     * @param callback Callback to handle the result
+     */
+    public void getTvSeriesDescriptionAndRating(String tvSeriesTitle, TvSeriesDescriptionAndRatingCallback callback) {
+        Log.d(TAG, "Fetching description and rating from TMDB for TV series: " + tvSeriesTitle);
+        
+        Call<TmdbSearchResponse> call = apiService.searchTvSeries(TMDB_API_KEY, tvSeriesTitle, 1);
+        call.enqueue(new Callback<TmdbSearchResponse>() {
+            @Override
+            public void onResponse(Call<TmdbSearchResponse> call, Response<TmdbSearchResponse> response) {
+                if (response.isSuccessful() && response.body() != null) {
+                    TmdbSearchResponse searchResponse = response.body();
+                    
+                    if (searchResponse.getResults() != null && !searchResponse.getResults().isEmpty()) {
+                        TmdbSearchResponse.TmdbSearchResult firstResult = searchResponse.getResults().get(0);
+                        String overview = firstResult.getOverview();
+                        Float rating = firstResult.getVoteAverage();
+                        
+                        // If we have both description and rating from search, use them
+                        if (overview != null && !overview.trim().isEmpty() && rating != null && rating > 0) {
+                            Log.d(TAG, "Found description and rating for TV series: " + tvSeriesTitle);
+                            callback.onSuccess(overview, rating);
+                        } else {
+                            // Get detailed info if search results are incomplete
+                            getTvSeriesDetailsById(firstResult.getId(), new TvSeriesDetailsCallback() {
+                                @Override
+                                public void onSuccess(TmdbTvSeries tvSeries) {
+                                    String detailedOverview = tvSeries.getOverview();
+                                    Float detailedRating = tvSeries.getVoteAverage();
+                                    
+                                    // Use the best available data
+                                    String finalOverview = (detailedOverview != null && !detailedOverview.trim().isEmpty()) 
+                                        ? detailedOverview 
+                                        : (overview != null && !overview.trim().isEmpty()) ? overview : null;
+                                    
+                                    Float finalRating = (detailedRating != null && detailedRating > 0) 
+                                        ? detailedRating 
+                                        : (rating != null && rating > 0) ? rating : null;
+                                    
+                                    if (finalOverview != null || finalRating != null) {
+                                        callback.onSuccess(finalOverview, finalRating);
+                                    } else {
+                                        callback.onError("No description or rating available for this TV series");
+                                    }
+                                }
+                                
+                                @Override
+                                public void onError(String error) {
+                                    // Fallback to search results if detail fetch fails
+                                    if (overview != null && !overview.trim().isEmpty() || rating != null && rating > 0) {
+                                        callback.onSuccess(overview, rating);
+                                    } else {
+                                        callback.onError("Failed to get detailed TV series information: " + error);
+                                    }
+                                }
+                            });
+                        }
+                    } else {
+                        Log.w(TAG, "No search results found for TV series: " + tvSeriesTitle);
+                        callback.onError("TV series not found in TMDB database");
+                    }
+                } else {
+                    Log.e(TAG, "TV series search request failed: " + response.code() + " - " + response.message());
+                    callback.onError("Failed to search for TV series: " + response.message());
+                }
+            }
+            
+            @Override
+            public void onFailure(Call<TmdbSearchResponse> call, Throwable t) {
+                Log.e(TAG, "TV series search request failed", t);
                 callback.onError("Network error: " + t.getMessage());
             }
         });

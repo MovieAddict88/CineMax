@@ -92,6 +92,7 @@ import my.cinemax.app.free.Provider.PrefManager;
 import my.cinemax.app.free.R;
 import my.cinemax.app.free.api.apiClient;
 import my.cinemax.app.free.api.apiRest;
+import my.cinemax.app.free.api.TmdbApiClient;
 import my.cinemax.app.free.config.Global;
 import my.cinemax.app.free.crypto.PlaylistDownloader;
 import my.cinemax.app.free.entity.Actor;
@@ -2291,5 +2292,88 @@ public class SerieActivity extends AppCompatActivity implements PlaylistDownload
         Intent i = new Intent(Intent.ACTION_VIEW);
         i.setData(Uri.parse(url));
         startActivity(i);
+    }
+    
+    /**
+     * Fetch TV series description and rating from TMDB API
+     * This method searches for the TV series by title and sets both description and rating from TMDB
+     * 
+     * @param tvSeriesTitle The title of the TV series to search for
+     */
+    private void fetchTvSeriesDescriptionFromTmdb(String tvSeriesTitle) {
+        // Set loading placeholders
+        text_view_activity_serie_description.setText("Loading description...");
+        rating_bar_activity_serie_rating.setRating(0f);
+        linear_layout_activity_serie_rating.setVisibility(View.GONE);
+        
+        // Check if TV series title is valid
+        if (tvSeriesTitle == null || tvSeriesTitle.trim().isEmpty()) {
+            text_view_activity_serie_description.setText("Description not available");
+            return;
+        }
+        
+        Log.d(TAG, "Fetching description and rating from TMDB for TV series: " + tvSeriesTitle);
+        
+        // Use TMDB API to fetch both description and rating efficiently
+        TmdbApiClient.getInstance().getTvSeriesDescriptionAndRating(tvSeriesTitle, new TmdbApiClient.TvSeriesDescriptionAndRatingCallback() {
+            @Override
+            public void onSuccess(String description, Float rating) {
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        // Set description
+                        if (description != null && !description.trim().isEmpty()) {
+                            Log.d(TAG, "Successfully fetched TMDB description for TV series: " + tvSeriesTitle);
+                            text_view_activity_serie_description.setText(description);
+                        } else {
+                            Log.w(TAG, "Empty description received from TMDB for TV series: " + tvSeriesTitle);
+                            text_view_activity_serie_description.setText("Description not available");
+                        }
+                        
+                        // Set rating
+                        if (rating != null && rating > 0) {
+                            Log.d(TAG, "Successfully fetched TMDB rating for TV series: " + tvSeriesTitle + " - " + rating);
+                            rating_bar_activity_serie_rating.setRating(rating);
+                            linear_layout_activity_serie_rating.setVisibility(View.VISIBLE);
+                            
+                            // Also update the IMDB rating text view if it exists
+                            if (text_view_activity_serie_imdb_rating != null) {
+                                text_view_activity_serie_imdb_rating.setText(String.format("%.1f", rating));
+                                text_view_activity_serie_imdb_rating.setVisibility(View.VISIBLE);
+                                linear_layout_activity_serie_imdb_rating.setVisibility(View.VISIBLE);
+                            }
+                        } else {
+                            Log.w(TAG, "No rating received from TMDB for TV series: " + tvSeriesTitle);
+                            linear_layout_activity_serie_rating.setVisibility(View.GONE);
+                        }
+                    }
+                });
+            }
+            
+            @Override
+            public void onError(String error) {
+                Log.e(TAG, "Failed to fetch TMDB data for TV series " + tvSeriesTitle + ": " + error);
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        // Fallback to original data if available
+                        String fallbackDescription = poster.getDescription();
+                        if (fallbackDescription != null && !fallbackDescription.trim().isEmpty()) {
+                            text_view_activity_serie_description.setText(fallbackDescription);
+                        } else {
+                            text_view_activity_serie_description.setText("Description not available");
+                        }
+                        
+                        // For rating, try to get from poster
+                        if (poster.getRating() != null && poster.getRating() > 0) {
+                            rating_bar_activity_serie_rating.setRating(poster.getRating());
+                            linear_layout_activity_serie_rating.setVisibility(View.VISIBLE);
+                        } else {
+                            linear_layout_activity_serie_rating.setVisibility(View.GONE);
+                        }
+                    }
+                });
+            }
+        });
     }
 }
