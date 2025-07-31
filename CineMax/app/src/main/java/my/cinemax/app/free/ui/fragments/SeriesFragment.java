@@ -150,6 +150,9 @@ public class SeriesFragment extends Fragment {
                         relative_layout_frament_series_genres.setVisibility(View.VISIBLE);
                         
                         Log.d("SeriesFragment", "Loaded " + genreList.size() + " genres");
+                        for (Genre genre : genreList) {
+                            Log.d("SeriesFragment", "Genre: " + genre.getTitle() + " (ID: " + genre.getId() + ")");
+                        }
                     } else {
                         relative_layout_frament_series_genres.setVisibility(View.GONE);
                         Log.w("SeriesFragment", "No genres found in API response");
@@ -446,6 +449,20 @@ public class SeriesFragment extends Fragment {
                         Log.d("SeriesFragment", "Total series found: " + filteredSeries.size() + 
                               ", Genre selected: " + genreSelected + 
                               ", Order selected: " + orderSelected);
+                        
+                        // Additional debugging for series data
+                        if (apiResponse.getMovies() != null) {
+                            Log.d("SeriesFragment", "Total movies in API: " + apiResponse.getMovies().size());
+                            int seriesCount = 0;
+                            for (Poster poster : apiResponse.getMovies()) {
+                                if ("series".equals(poster.getType()) || "serie".equals(poster.getType())) {
+                                    seriesCount++;
+                                    Log.d("SeriesFragment", "Found series: " + poster.getTitle() + " with genres: " + 
+                                          (poster.getGenres() != null ? poster.getGenres().size() : 0));
+                                }
+                            }
+                            Log.d("SeriesFragment", "Total series in API: " + seriesCount);
+                        }
                         
                         // Apply ordering
                         if (orderSelected != null) {
