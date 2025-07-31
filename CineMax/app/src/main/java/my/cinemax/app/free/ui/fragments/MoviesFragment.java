@@ -512,15 +512,16 @@ public class MoviesFragment extends Fragment {
                             // Update ratings from TMDB
                             TmdbRatingManager.updateMoviesRatings(filteredMovies, new TmdbRatingManager.RatingUpdateCallback() {
                                 @Override
-                                public void onSuccess(Object item) {
+                                public void onSuccess(Object callbackItem) {
                                     // Add movies to list after rating update
+                                    int currentItem = MoviesFragment.this.item;
                                     for (Poster poster : filteredMovies) {
                                         movieList.add(poster);
                                         
                                         if (native_ads_enabled) {
-                                            item++;
-                                            if (item == lines_beetween_ads) {
-                                                item = 0;
+                                            currentItem++;
+                                            if (currentItem == lines_beetween_ads) {
+                                                currentItem = 0;
                                                 if (prefManager.getString("ADMIN_NATIVE_TYPE").equals("FACEBOOK")) {
                                                     movieList.add(new Poster().setTypeView(4));
                                                 } else if (prefManager.getString("ADMIN_NATIVE_TYPE").equals("ADMOB")) {
@@ -537,6 +538,8 @@ public class MoviesFragment extends Fragment {
                                             }
                                         }
                                     }
+                                    // Update the main item variable
+                                    MoviesFragment.this.item = currentItem;
                                     
                                     // Update UI on main thread
                                     if (getActivity() != null) {
@@ -558,13 +561,14 @@ public class MoviesFragment extends Fragment {
                                 public void onError(String error) {
                                     Log.w("MoviesFragment", "Failed to update ratings: " + error);
                                     // Still show movies even if rating update fails
+                                    int currentItem = MoviesFragment.this.item;
                                     for (Poster poster : filteredMovies) {
                                         movieList.add(poster);
                                         
                                         if (native_ads_enabled) {
-                                            item++;
-                                            if (item == lines_beetween_ads) {
-                                                item = 0;
+                                            currentItem++;
+                                            if (currentItem == lines_beetween_ads) {
+                                                currentItem = 0;
                                                 if (prefManager.getString("ADMIN_NATIVE_TYPE").equals("FACEBOOK")) {
                                                     movieList.add(new Poster().setTypeView(4));
                                                 } else if (prefManager.getString("ADMIN_NATIVE_TYPE").equals("ADMOB")) {
@@ -581,6 +585,8 @@ public class MoviesFragment extends Fragment {
                                             }
                                         }
                                     }
+                                    // Update the main item variable
+                                    MoviesFragment.this.item = currentItem;
                                     
                                     // Update UI on main thread
                                     if (getActivity() != null) {
