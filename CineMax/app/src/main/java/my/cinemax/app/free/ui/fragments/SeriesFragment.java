@@ -546,21 +546,18 @@ public class SeriesFragment extends Fragment {
                             // Update ratings from TMDB
                             TmdbRatingManager.updateMoviesRatings(filteredSeries, new TmdbRatingManager.RatingUpdateCallback() {
                                 @Override
-                                public void onSuccess(Object item) {
-                                    // Only add series if this is the first page or if we're loading more
+                                public void onSuccess(Object callbackItem) {
+                                    int currentItem = SeriesFragment.this.item;
                                     if (page == 0) {
-                                        // Clear the list for first page
                                         movieList.clear();
                                         movieList.add(new Poster().setTypeView(2));
                                     }
-                                    
                                     for (Poster poster : filteredSeries) {
                                         movieList.add(poster);
-                                        
                                         if (native_ads_enabled) {
-                                            item++;
-                                            if (item == lines_beetween_ads) {
-                                                item = 0;
+                                            currentItem++;
+                                            if (currentItem == lines_beetween_ads) {
+                                                currentItem = 0;
                                                 if (prefManager.getString("ADMIN_NATIVE_TYPE").equals("FACEBOOK")) {
                                                     movieList.add(new Poster().setTypeView(3));
                                                 } else if (prefManager.getString("ADMIN_NATIVE_TYPE").equals("ADMOB")) {
@@ -577,8 +574,7 @@ public class SeriesFragment extends Fragment {
                                             }
                                         }
                                     }
-                                    
-                                    // Update UI on main thread
+                                    SeriesFragment.this.item = currentItem;
                                     if (getActivity() != null) {
                                         getActivity().runOnUiThread(new Runnable() {
                                             @Override
@@ -588,7 +584,7 @@ public class SeriesFragment extends Fragment {
                                                 image_view_empty_list.setVisibility(View.GONE);
                                                 adapter.notifyDataSetChanged();
                                                 page++;
-                                                loading = false; // Set to false to prevent infinite loading
+                                                loading = false;
                                             }
                                         });
                                     }
@@ -597,20 +593,17 @@ public class SeriesFragment extends Fragment {
                                 @Override
                                 public void onError(String error) {
                                     Log.w("SeriesFragment", "Failed to update ratings: " + error);
-                                    // Still show series even if rating update fails
+                                    int currentItem = SeriesFragment.this.item;
                                     if (page == 0) {
-                                        // Clear the list for first page
                                         movieList.clear();
                                         movieList.add(new Poster().setTypeView(2));
                                     }
-                                    
                                     for (Poster poster : filteredSeries) {
                                         movieList.add(poster);
-                                        
                                         if (native_ads_enabled) {
-                                            item++;
-                                            if (item == lines_beetween_ads) {
-                                                item = 0;
+                                            currentItem++;
+                                            if (currentItem == lines_beetween_ads) {
+                                                currentItem = 0;
                                                 if (prefManager.getString("ADMIN_NATIVE_TYPE").equals("FACEBOOK")) {
                                                     movieList.add(new Poster().setTypeView(3));
                                                 } else if (prefManager.getString("ADMIN_NATIVE_TYPE").equals("ADMOB")) {
@@ -627,8 +620,7 @@ public class SeriesFragment extends Fragment {
                                             }
                                         }
                                     }
-                                    
-                                    // Update UI on main thread
+                                    SeriesFragment.this.item = currentItem;
                                     if (getActivity() != null) {
                                         getActivity().runOnUiThread(new Runnable() {
                                             @Override
@@ -638,7 +630,7 @@ public class SeriesFragment extends Fragment {
                                                 image_view_empty_list.setVisibility(View.GONE);
                                                 adapter.notifyDataSetChanged();
                                                 page++;
-                                                loading = false; // Set to false to prevent infinite loading
+                                                loading = false;
                                             }
                                         });
                                     }

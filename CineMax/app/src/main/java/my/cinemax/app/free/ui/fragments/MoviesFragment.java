@@ -513,7 +513,6 @@ public class MoviesFragment extends Fragment {
                             TmdbRatingManager.updateMoviesRatings(filteredMovies, new TmdbRatingManager.RatingUpdateCallback() {
                                 @Override
                                 public void onSuccess(Object callbackItem) {
-                                    // Add movies to list after rating update
                                     int currentItem = MoviesFragment.this.item;
                                     for (Poster poster : filteredMovies) {
                                         movieList.add(poster);
@@ -538,7 +537,6 @@ public class MoviesFragment extends Fragment {
                                             }
                                         }
                                     }
-                                    // Update the main item variable
                                     MoviesFragment.this.item = currentItem;
                                     
                                     // Update UI on main thread
@@ -560,7 +558,6 @@ public class MoviesFragment extends Fragment {
                                 @Override
                                 public void onError(String error) {
                                     Log.w("MoviesFragment", "Failed to update ratings: " + error);
-                                    // Still show movies even if rating update fails
                                     int currentItem = MoviesFragment.this.item;
                                     for (Poster poster : filteredMovies) {
                                         movieList.add(poster);
@@ -585,7 +582,6 @@ public class MoviesFragment extends Fragment {
                                             }
                                         }
                                     }
-                                    // Update the main item variable
                                     MoviesFragment.this.item = currentItem;
                                     
                                     // Update UI on main thread
