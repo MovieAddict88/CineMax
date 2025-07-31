@@ -56,7 +56,7 @@ import com.google.android.gms.cast.framework.CastSession;
 import com.google.android.gms.cast.framework.SessionManager;
 import com.google.android.gms.cast.framework.media.RemoteMediaClient;
 import com.google.android.gms.common.images.WebImage;
-import my.cinemax.app.free.BR;
+// import my.cinemax.app.free.BR; // Temporarily commented until data binding generates this
 import my.cinemax.app.free.R;
 import my.cinemax.app.free.entity.Subtitle;
 import my.cinemax.app.free.ui.activities.PlayerActivity;
@@ -461,7 +461,7 @@ public class CustomPlayerViewModel extends BaseObservable implements ExoPlayer.E
     }
     private void setLoadingComplete(boolean complete) {
         loadingComplete = complete;
-        notifyPropertyChanged(BR.loadingComplete);
+        // notifyPropertyChanged(BR.loadingComplete); // Temporarily commented
     }
 
     @Bindable
@@ -498,7 +498,7 @@ public class CustomPlayerViewModel extends BaseObservable implements ExoPlayer.E
         }
         if (playbackState ==  Player.STATE_BUFFERING ){
             isLoadingNow =  true;
-            notifyPropertyChanged(BR.loaidingNow);
+            // notifyPropertyChanged(BR.loaidingNow); // Temporarily commented
         }
         if (playbackState ==  Player.STATE_READY){
             isLoadingNow =  false;

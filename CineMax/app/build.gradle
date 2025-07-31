@@ -53,7 +53,7 @@ android {
         exclude "lib/mips/librsjni.so"
     }
     dataBinding {
-        enabled = true
+        enabled = false
     }
     compileOptions {
         coreLibraryDesugaringEnabled true
