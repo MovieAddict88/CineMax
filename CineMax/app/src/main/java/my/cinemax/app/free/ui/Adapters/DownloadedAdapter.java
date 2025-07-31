@@ -80,7 +80,7 @@ public class DownloadedAdapter extends   RecyclerView.Adapter<RecyclerView.ViewH
                     // Set progress
                     downloadedHolder.progress_bar_download.setProgress(downloadItem.getProgress());
                     
-                    // Set status text
+                    // Set status text with more detailed information
                     String statusText = downloadItem.getProgress() + "%";
                     if (downloadItem.getTotalBytes() > 0) {
                         statusText += " (" + formatFileSize(downloadItem.getDownloadedBytes()) + 
@@ -93,11 +93,18 @@ public class DownloadedAdapter extends   RecyclerView.Adapter<RecyclerView.ViewH
                     downloadedHolder.image_view_item_download_play.setClickable(false);
                     downloadedHolder.image_view_item_download_delete.setClickable(false);
                     downloadedHolder.image_view_item_download_finder.setClickable(false);
+                    
+                    // Show downloading indicator
+                    downloadedHolder.image_view_item_download_play.setImageResource(R.drawable.ic_play);
+                    downloadedHolder.image_view_item_download_play.setVisibility(View.VISIBLE);
+                    downloadedHolder.image_view_item_download_play.setAlpha(0.5f);
                 } else {
                     // Show normal completed download UI
                     downloadedHolder.progress_bar_download.setVisibility(View.GONE);
                     downloadedHolder.text_view_download_status.setVisibility(View.GONE);
                     downloadedHolder.image_view_item_download_play.setVisibility(View.VISIBLE);
+                    downloadedHolder.image_view_item_download_play.setAlpha(1.0f);
+                    downloadedHolder.image_view_item_download_play.setImageResource(R.drawable.ic_play);
                     
                     // Enable click actions for completed downloads
                     downloadedHolder.relative_layout_item_download.setClickable(true);

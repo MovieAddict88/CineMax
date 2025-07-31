@@ -43,7 +43,7 @@ public class DownloadProgressManager {
             public void run() {
                 if (isPolling) {
                     pollDownloadProgress();
-                    handler.postDelayed(this, 1000); // Poll every second
+                    handler.postDelayed(this, 500); // Poll every 500ms for more responsive updates
                 }
             }
         };
@@ -109,6 +109,7 @@ public class DownloadProgressManager {
                     downloadItem.setProgress(progress);
                     downloadItem.setDownloadedBytes(downloadedBytes);
                     downloadItem.setTotalBytes(totalBytes);
+                    downloadItem.setDownloading(true);
                     
                     // Send progress update
                     sendProgressUpdate(downloadItem, status, progress);
