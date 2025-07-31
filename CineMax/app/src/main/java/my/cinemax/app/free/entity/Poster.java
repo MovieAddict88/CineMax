@@ -100,6 +100,10 @@ public class Poster implements Parcelable {
     @Expose
     private Source trailer ;
 
+    @SerializedName("featured")
+    @Expose
+    private Boolean featured;
+
     private int typeView = 1;
 
     public Poster() {
@@ -391,6 +395,14 @@ public class Poster implements Parcelable {
 
     public String getSublabel() {
         return sublabel;
+    }
+
+    public Boolean getFeatured() {
+        return featured;
+    }
+
+    public void setFeatured(Boolean featured) {
+        this.featured = featured;
     }
 }
 

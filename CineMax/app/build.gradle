@@ -61,21 +61,29 @@ android {
         sourceCompatibility JavaVersion.VERSION_1_8
         targetCompatibility JavaVersion.VERSION_1_8
     }
+    
+    // Handle dependency conflicts
+    configurations.all {
+        resolutionStrategy {
+            force 'androidx.lifecycle:lifecycle-viewmodel:2.3.1'
+            force 'androidx.lifecycle:lifecycle-livedata:2.3.1'
+            force 'androidx.lifecycle:lifecycle-common-java8:2.3.1'
+        }
+    }
 
 }
 
 dependencies {
     coreLibraryDesugaring 'com.android.tools:desugar_jdk_libs:1.1.5'
 
-    // Room Database dependencies
-    implementation 'androidx.room:room-runtime:2.4.3'
-    annotationProcessor 'androidx.room:room-compiler:2.4.3'
-    implementation 'androidx.room:room-rxjava2:2.4.3'
+    // Room Database dependencies with compatible versions
+    implementation 'androidx.room:room-runtime:2.3.0'
+    annotationProcessor 'androidx.room:room-compiler:2.3.0'
     
-    // Lifecycle components for ViewModel and LiveData
-    implementation 'androidx.lifecycle:lifecycle-viewmodel:2.5.1'
-    implementation 'androidx.lifecycle:lifecycle-livedata:2.5.1'
-    implementation 'androidx.lifecycle:lifecycle-common-java8:2.5.1'
+    // Lifecycle components for ViewModel and LiveData (compatible versions)
+    implementation 'androidx.lifecycle:lifecycle-viewmodel:2.3.1'
+    implementation 'androidx.lifecycle:lifecycle-livedata:2.3.1'
+    implementation 'androidx.lifecycle:lifecycle-common-java8:2.3.1'
 
     implementation fileTree(include: ['*.jar'], dir: 'libs')
     implementation 'androidx.constraintlayout:constraintlayout:2.1.0'
