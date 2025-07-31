@@ -131,23 +131,33 @@ public class SeriesFragment extends Fragment {
                     my.cinemax.app.free.entity.JsonApiResponse apiResponse = response.body();
                     
                     if (apiResponse.getGenres() != null && apiResponse.getGenres().size() > 0) {
-                        final String[] genreNames = new String[apiResponse.getGenres().size() + 1];
-                        genreNames[0] = "All genres";
-                        genreList.add(new Genre()); // Add "All genres" option
+                        genreList.clear();
+                        // Add "All genres" option with proper ID using setter methods
+                        Genre allGenres = new Genre();
+                        allGenres.setId(0);
+                        allGenres.setTitle("All genres");
+                        genreList.add(allGenres);
                         
-                        for (int i = 0; i < apiResponse.getGenres().size(); i++) {
-                            genreNames[i + 1] = apiResponse.getGenres().get(i).getTitle();
-                            genreList.add(apiResponse.getGenres().get(i));
+                        for (Genre genre : apiResponse.getGenres()) {
+                            genreList.add(genre);
                         }
                         
-                        ArrayAdapter<String> filtresAdapter = new ArrayAdapter<String>(getActivity(),
-                                R.layout.spinner_layout, R.id.textView, genreNames);
-                        filtresAdapter.setDropDownViewResource(R.layout.simple_spinner_dropdown_item);
+                        // Use Genre object adapter for proper ID mapping
+                        ArrayAdapter<Genre> filtresAdapter = new ArrayAdapter<Genre>(getActivity(),
+                                android.R.layout.simple_spinner_item, genreList);
+                        filtresAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
                         spinner_fragement_series_genre_list.setAdapter(filtresAdapter);
                         relative_layout_frament_series_genres.setVisibility(View.VISIBLE);
+                        
+                        Log.d("SeriesFragment", "Loaded " + genreList.size() + " genres");
+
                     } else {
                         relative_layout_frament_series_genres.setVisibility(View.GONE);
+                        Log.w("SeriesFragment", "No genres found in API response");
                     }
+                } else {
+                    relative_layout_frament_series_genres.setVisibility(View.GONE);
+                    Log.e("SeriesFragment", "Failed to load genres: " + response.code());
                 }
             }
             
@@ -155,6 +165,7 @@ public class SeriesFragment extends Fragment {
             public void onFailure(Call<my.cinemax.app.free.entity.JsonApiResponse> call, Throwable t) {
                 // Hide genre filter if loading fails
                 relative_layout_frament_series_genres.setVisibility(View.GONE);
+                Log.e("SeriesFragment", "Failed to load genres", t);
             }
         });
     }
@@ -172,12 +183,22 @@ public class SeriesFragment extends Fragment {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
                 if (!firstLoadGenre) {
-                    if (id==0){
-                        genreSelected  =0;
-
-                    }else{
-                        genreSelected  = genreList.get((int) id).getId();
+                    if (position == 0) {
+                        genreSelected = 0;
+                    } else {
+                        // Fix: Use position for proper indexing with Genre object adapter
+                        if (position >= 0 && position < genreList.size()) {
+                            Genre selectedGenre = genreList.get(position);
+                            if (selectedGenre != null && selectedGenre.getId() != null) {
+                                genreSelected = selectedGenre.getId().intValue();
+                            } else {
+                                genreSelected = 0;
+                            }
+                        } else {
+                            genreSelected = 0;
+                        }
                     }
+                    Log.d("SeriesFragment", "Genre selected: " + genreSelected);
                     item = 0;
                     page = 0;
                     loading = true;
@@ -185,7 +206,7 @@ public class SeriesFragment extends Fragment {
                     movieList.add(new Poster().setTypeView(2));
                     adapter.notifyDataSetChanged();
                     loadSeries();
-                }else{
+                } else {
                     firstLoadGenre = false;
                 }
             }
@@ -220,6 +241,7 @@ public class SeriesFragment extends Fragment {
                             orderSelected = "views";
                             break;
                     }
+                    Log.d("SeriesFragment", "Order selected: " + orderSelected);
                     item = 0;
                     page = 0;
                     loading = true;
@@ -278,8 +300,8 @@ public class SeriesFragment extends Fragment {
                     {
                         if ( (visibleItemCount + pastVisiblesItems) >= totalItemCount)
                         {
+                            // Don't load more since we're loading all series at once
                             loading = false;
-                            loadSeries();
                         }
                     }
                 }else{
@@ -289,20 +311,20 @@ public class SeriesFragment extends Fragment {
         });
     }
     public boolean checkSUBSCRIBED(){
+        PrefManager prefManager= new PrefManager(getApplicationContext());
         if (!prefManager.getString("SUBSCRIBED").equals("TRUE") && !prefManager.getString("NEW_SUBSCRIBE_ENABLED").equals("TRUE")) {
             return false;
         }
         return true;
     }
     private void initView() {
-
         boolean tabletSize = getResources().getBoolean(R.bool.isTablet);
         if (!prefManager.getString("ADMIN_NATIVE_TYPE").equals("FALSE")){
             native_ads_enabled=true;
             if (tabletSize) {
-                lines_beetween_ads=6*Integer.parseInt(prefManager.getString("ADMIN_NATIVE_LINES"));
+                lines_beetween_ads=8*Integer.parseInt(prefManager.getString("ADMIN_NATIVE_LINES"));
             }else{
-                lines_beetween_ads=3*Integer.parseInt(prefManager.getString("ADMIN_NATIVE_LINES"));
+                lines_beetween_ads=4*Integer.parseInt(prefManager.getString("ADMIN_NATIVE_LINES"));
             }
         }
         if (checkSUBSCRIBED()) {
@@ -320,64 +342,62 @@ public class SeriesFragment extends Fragment {
         this.relative_layout_series_fragement_filtres_button = (RelativeLayout) view.findViewById(R.id.relative_layout_series_fragement_filtres_button);
         this.card_view_series_fragement_filtres_layout = (CardView) view.findViewById(R.id.card_view_series_fragement_filtres_layout);
         this.image_view_series_fragement_close_filtres = (ImageView) view.findViewById(R.id.image_view_series_fragement_close_filtres);
-        this.spinner_fragement_series_orders_list = (AppCompatSpinner) view.findViewById(R.id.spinner_fragement_series_orders_list);
         this.spinner_fragement_series_genre_list = (AppCompatSpinner) view.findViewById(R.id.spinner_fragement_series_genre_list);
+        this.spinner_fragement_series_orders_list = (AppCompatSpinner) view.findViewById(R.id.spinner_fragement_series_orders_list);
         this.relative_layout_frament_series_genres = (RelativeLayout) view.findViewById(R.id.relative_layout_frament_series_genres);
 
+        this.gridLayoutManager=  new GridLayoutManager(getActivity().getApplicationContext(),2,RecyclerView.VERTICAL,false);
 
         adapter = new PosterAdapter(movieList,getActivity());
         if (native_ads_enabled){
             Log.v("MYADS","ENABLED");
             if (tabletSize) {
-                this.gridLayoutManager=  new GridLayoutManager(getActivity().getApplicationContext(),6,RecyclerView.VERTICAL,false);
+                this.gridLayoutManager=  new GridLayoutManager(getActivity().getApplicationContext(),4,RecyclerView.VERTICAL,false);
                 Log.v("MYADS","tabletSize");
                 gridLayoutManager.setSpanSizeLookup(new GridLayoutManager.SpanSizeLookup() {
                     @Override
                     public int getSpanSize(int position) {
-                        return ((position ) % (lines_beetween_ads + 1 ) == 0 || position == 0) ? 6 : 1;
+                        return ((position ) % (lines_beetween_ads + 1 ) == 0 || position == 0) ? 4 : 1;
                     }
                 });
             } else {
-                this.gridLayoutManager=  new GridLayoutManager(getActivity().getApplicationContext(),3,RecyclerView.VERTICAL,false);
+                this.gridLayoutManager=  new GridLayoutManager(getActivity().getApplicationContext(),2,RecyclerView.VERTICAL,false);
                 gridLayoutManager.setSpanSizeLookup(new GridLayoutManager.SpanSizeLookup() {
                     @Override
                     public int getSpanSize(int position) {
-                        return ((position ) % (lines_beetween_ads + 1 ) == 0 || position == 0) ? 3 : 1;
+                        return ((position ) % (lines_beetween_ads + 1 ) == 0 || position == 0) ? 2 : 1;
                     }
                 });
             }
         }else {
             if (tabletSize) {
-                this.gridLayoutManager=  new GridLayoutManager(getActivity().getApplicationContext(),6,RecyclerView.VERTICAL,false);
+                this.gridLayoutManager=  new GridLayoutManager(getActivity().getApplicationContext(),4,RecyclerView.VERTICAL,false);
                 gridLayoutManager.setSpanSizeLookup(new GridLayoutManager.SpanSizeLookup() {
                     @Override
                     public int getSpanSize(int position) {
-                        return ( position == 0) ? 6 : 1;
+                        return ( position == 0) ? 4 : 1;
                     }
                 });
             } else {
-                this.gridLayoutManager=  new GridLayoutManager(getActivity().getApplicationContext(),3,RecyclerView.VERTICAL,false);
+                this.gridLayoutManager=  new GridLayoutManager(getActivity().getApplicationContext(),2,RecyclerView.VERTICAL,false);
                 gridLayoutManager.setSpanSizeLookup(new GridLayoutManager.SpanSizeLookup() {
                     @Override
                     public int getSpanSize(int position) {
-                        return ( position == 0) ? 3 : 1;
+                        return ( position == 0) ? 2 : 1;
                     }
                 });
             }
         }
 
-
         recycler_view_series_fragment.setHasFixedSize(true);
         recycler_view_series_fragment.setAdapter(adapter);
         recycler_view_series_fragment.setLayoutManager(gridLayoutManager);
-        // test
 
-
-        final String[] countryCodes = getResources().getStringArray(R.array.orders_list);
-
+        // Initialize order spinner
+        String[] orders = {"Last Added", "Rating", "IMDb", "Title", "Year", "Views"};
         ArrayAdapter<String> ordersAdapter = new ArrayAdapter<String>(getActivity(),
-                R.layout.spinner_layout,R.id.textView,countryCodes);
-        ordersAdapter.setDropDownViewResource(R.layout.simple_spinner_dropdown_item);
+                android.R.layout.simple_spinner_item, orders);
+        ordersAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         spinner_fragement_series_orders_list.setAdapter(ordersAdapter);
     }
     private void loadSeries() {
@@ -398,30 +418,47 @@ public class SeriesFragment extends Fragment {
                     if (apiResponse.getMovies() != null && apiResponse.getMovies().size() > 0) {
                         List<Poster> filteredSeries = new ArrayList<>();
                         
+                        Log.d("SeriesFragment", "Total movies in API: " + apiResponse.getMovies().size());
+                        int seriesCount = 0;
                         for (Poster poster : apiResponse.getMovies()) {
                             // Filter by type (series/serie)
                             String type = poster.getType();
+                            Log.d("SeriesFragment", "Checking poster: " + poster.getTitle() + " with type: " + type);
                             if ("series".equals(type) || "serie".equals(type)) {
+                                seriesCount++;
+                                Log.d("SeriesFragment", "Found series: " + poster.getTitle());
                                 // Apply genre filtering
                                 boolean matchesGenre = false;
                                 if (genreSelected == 0) {
                                     // Show all genres
                                     matchesGenre = true;
+                                    Log.d("SeriesFragment", "All genres selected, including: " + poster.getTitle());
                                 } else if (poster.getGenres() != null && !poster.getGenres().isEmpty()) {
                                     // Check if poster has the selected genre
                                     for (Genre genre : poster.getGenres()) {
-                                        if (genre.getId() != null && genre.getId().equals(genreSelected)) {
+                                        Log.d("SeriesFragment", "Checking genre: " + genre.getTitle() + " (ID: " + genre.getId() + ") against selected: " + genreSelected);
+                                        if (genre.getId() != null && genre.getId().intValue() == genreSelected) {
                                             matchesGenre = true;
+                                            Log.d("SeriesFragment", "Genre match found for: " + poster.getTitle());
                                             break;
                                         }
                                     }
+                                } else {
+                                    Log.d("SeriesFragment", "No genres found for: " + poster.getTitle());
                                 }
                                 
                                 if (matchesGenre) {
                                     filteredSeries.add(poster);
+                                    Log.d("SeriesFragment", "Added to filtered list: " + poster.getTitle());
+                                } else {
+                                    Log.d("SeriesFragment", "Excluded from filtered list: " + poster.getTitle() + " (genre mismatch)");
                                 }
                             }
                         }
+                        Log.d("SeriesFragment", "Total series found: " + seriesCount);
+                        
+                        Log.d("SeriesFragment", "Total series found: " + filteredSeries.size() + 
+                              " (Genre: " + genreSelected + ", Order: " + orderSelected + ")");
                         
                         // Apply ordering
                         if (orderSelected != null) {
@@ -441,19 +478,25 @@ public class SeriesFragment extends Fragment {
                                         }
                                     });
                                     break;
-                                case "year":
+                                case "imdb":
                                     Collections.sort(filteredSeries, new Comparator<Poster>() {
                                         @Override
                                         public int compare(Poster p1, Poster p2) {
-                                            String year1 = p1.getYear();
-                                            String year2 = p2.getYear();
-                                            if (year1 == null) year1 = "0";
-                                            if (year2 == null) year2 = "0";
-                                            return year2.compareTo(year1); // Descending
+                                            String imdb1 = p1.getImdb();
+                                            String imdb2 = p2.getImdb();
+                                            if (imdb1 == null) imdb1 = "0";
+                                            if (imdb2 == null) imdb2 = "0";
+                                            try {
+                                                float rating1 = Float.parseFloat(imdb1);
+                                                float rating2 = Float.parseFloat(imdb2);
+                                                return Float.compare(rating2, rating1); // Descending
+                                            } catch (NumberFormatException e) {
+                                                return 0;
+                                            }
                                         }
                                     });
                                     break;
-                                case "name":
+                                case "title":
                                     Collections.sort(filteredSeries, new Comparator<Poster>() {
                                         @Override
                                         public int compare(Poster p1, Poster p2) {
@@ -465,10 +508,47 @@ public class SeriesFragment extends Fragment {
                                         }
                                     });
                                     break;
+                                case "year":
+                                    Collections.sort(filteredSeries, new Comparator<Poster>() {
+                                        @Override
+                                        public int compare(Poster p1, Poster p2) {
+                                            String year1 = p1.getYear();
+                                            String year2 = p2.getYear();
+                                            if (year1 == null) year1 = "0";
+                                            if (year2 == null) year2 = "0";
+                                            try {
+                                                int year1Int = Integer.parseInt(year1);
+                                                int year2Int = Integer.parseInt(year2);
+                                                return Integer.compare(year2Int, year1Int); // Descending
+                                            } catch (NumberFormatException e) {
+                                                return 0;
+                                            }
+                                        }
+                                    });
+                                    break;
+                                case "views":
+                                    Collections.sort(filteredSeries, new Comparator<Poster>() {
+                                        @Override
+                                        public int compare(Poster p1, Poster p2) {
+                                            Integer views1 = p1.getViews();
+                                            Integer views2 = p2.getViews();
+                                            if (views1 == null) views1 = 0;
+                                            if (views2 == null) views2 = 0;
+                                            return views2.compareTo(views1); // Descending
+                                        }
+                                    });
+                                    break;
                             }
                         }
                         
                         if (!filteredSeries.isEmpty()) {
+                            // Only add series if this is the first page or if we're loading more
+                            if (page == 0) {
+                                // Clear the list for first page
+                                movieList.clear();
+                                movieList.add(new Poster().setTypeView(2));
+                            }
+                            
                             for (Poster poster : filteredSeries) {
                                 movieList.add(poster);
                                 
@@ -477,15 +557,15 @@ public class SeriesFragment extends Fragment {
                                     if (item == lines_beetween_ads) {
                                         item = 0;
                                         if (prefManager.getString("ADMIN_NATIVE_TYPE").equals("FACEBOOK")) {
-                                            movieList.add(new Poster().setTypeView(4));
+                                            movieList.add(new Poster().setTypeView(3));
                                         } else if (prefManager.getString("ADMIN_NATIVE_TYPE").equals("ADMOB")) {
-                                            movieList.add(new Poster().setTypeView(5));
+                                            movieList.add(new Poster().setTypeView(4));
                                         } else if (prefManager.getString("ADMIN_NATIVE_TYPE").equals("BOTH")) {
                                             if (type_ads == 0) {
-                                                movieList.add(new Poster().setTypeView(4));
+                                                movieList.add(new Poster().setTypeView(3));
                                                 type_ads = 1;
                                             } else if (type_ads == 1) {
-                                                movieList.add(new Poster().setTypeView(5));
+                                                movieList.add(new Poster().setTypeView(4));
                                                 type_ads = 0;
                                             }
                                         }
@@ -495,10 +575,6 @@ public class SeriesFragment extends Fragment {
                             linear_layout_page_error_series_fragment.setVisibility(View.GONE);
                             recycler_view_series_fragment.setVisibility(View.VISIBLE);
                             image_view_empty_list.setVisibility(View.GONE);
-                            
-                            adapter.notifyDataSetChanged();
-                            page++;
-                            loading = true;
                         } else {
                             if (page == 0) {
                                 linear_layout_page_error_series_fragment.setVisibility(View.GONE);
@@ -506,6 +582,10 @@ public class SeriesFragment extends Fragment {
                                 image_view_empty_list.setVisibility(View.VISIBLE);
                             }
                         }
+                        
+                        adapter.notifyDataSetChanged();
+                        page++;
+                        loading = false; // Set to false to prevent infinite loading
                     } else {
                         if (page == 0) {
                             linear_layout_page_error_series_fragment.setVisibility(View.GONE);
@@ -522,52 +602,59 @@ public class SeriesFragment extends Fragment {
                 swipe_refresh_layout_series_fragment.setRefreshing(false);
                 linear_layout_load_series_fragment.setVisibility(View.GONE);
             }
-            
+
             @Override
             public void onFailure(Call<my.cinemax.app.free.entity.JsonApiResponse> call, Throwable t) {
                 linear_layout_page_error_series_fragment.setVisibility(View.VISIBLE);
                 recycler_view_series_fragment.setVisibility(View.GONE);
                 image_view_empty_list.setVisibility(View.GONE);
                 relative_layout_load_more_series_fragment.setVisibility(View.GONE);
-                swipe_refresh_layout_series_fragment.setVisibility(View.GONE);
+                swipe_refresh_layout_series_fragment.setRefreshing(false);
                 linear_layout_load_series_fragment.setVisibility(View.GONE);
             }
         });
     }
     
-    /**
-     * Update the fragment with series data from JSON
-     */
+    // Method to update fragment with JSON data
     public void updateWithJsonData(List<Poster> series) {
-        if (series != null && !series.isEmpty()) {
+        if (series != null && series.size() > 0) {
             // Clear existing data
             movieList.clear();
-            movieList.add(new Poster().setTypeView(2)); // Header item
-            // Add series data (accept both 'series' and 'serie')
-            for (Poster poster : series) {
-                String type = poster.getType();
-                if ("series".equals(type) || "serie".equals(type)) {
-                    movieList.add(poster);
+            page = 0;
+            item = 0;
+            
+            // Add series from JSON
+            for (int i = 0; i < series.size(); i++) {
+                movieList.add(series.get(i));
+                
+                if (native_ads_enabled) {
+                    item++;
+                    if (item == lines_beetween_ads) {
+                        item = 0;
+                        if (prefManager.getString("ADMIN_NATIVE_TYPE").equals("FACEBOOK")) {
+                            movieList.add(new Poster().setTypeView(3));
+                        } else if (prefManager.getString("ADMIN_NATIVE_TYPE").equals("ADMOB")) {
+                            movieList.add(new Poster().setTypeView(4));
+                        } else if (prefManager.getString("ADMIN_NATIVE_TYPE").equals("BOTH")) {
+                            if (type_ads == 0) {
+                                movieList.add(new Poster().setTypeView(3));
+                                type_ads = 1;
+                            } else if (type_ads == 1) {
+                                movieList.add(new Poster().setTypeView(4));
+                                type_ads = 0;
+                            }
+                        }
+                    }
                 }
             }
-            // Update UI
+            
+            // Show the data
             linear_layout_page_error_series_fragment.setVisibility(View.GONE);
             recycler_view_series_fragment.setVisibility(View.VISIBLE);
             image_view_empty_list.setVisibility(View.GONE);
             linear_layout_load_series_fragment.setVisibility(View.GONE);
-            // Notify adapter
-            if (adapter != null) {
-                adapter.notifyDataSetChanged();
-            }
-            // Mark as loaded
-            loaded = true;
-            loading = false;
-        } else {
-            // Show empty state
-            linear_layout_page_error_series_fragment.setVisibility(View.GONE);
-            recycler_view_series_fragment.setVisibility(View.GONE);
-            image_view_empty_list.setVisibility(View.VISIBLE);
-            linear_layout_load_series_fragment.setVisibility(View.GONE);
+            
+            adapter.notifyDataSetChanged();
         }
     }
 }
