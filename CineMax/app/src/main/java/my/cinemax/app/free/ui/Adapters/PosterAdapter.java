@@ -295,7 +295,7 @@ public class PosterAdapter  extends RecyclerView.Adapter<RecyclerView.ViewHolder
     }
     @Override
     public int getItemCount() {
-        return posterList.size();
+        return posterList != null ? posterList.size() : 0;
     }
     public class PosterHolder extends RecyclerView.ViewHolder {
         private final TextView text_view_item_poster_label;
@@ -319,10 +319,22 @@ public class PosterAdapter  extends RecyclerView.Adapter<RecyclerView.ViewHolder
     }
     @Override
     public int getItemViewType(int position) {
-        if ((posterList.get(position).getTypeView())==0){
+        try {
+            if (posterList != null && position >= 0 && position < posterList.size()) {
+                Poster poster = posterList.get(position);
+                if (poster != null) {
+                    if (poster.getTypeView() == 0) {
+                        return 1;
+                    }
+                    return poster.getTypeView();
+                }
+            }
+            // Fallback to default type
             return 1;
+        } catch (Exception e) {
+            Log.e("PosterAdapter", "Error in getItemViewType: " + e.getMessage(), e);
+            return 1; // Return default type
         }
-        return   posterList.get(position).getTypeView();
     }
 
     private class ChannelsHolder extends RecyclerView.ViewHolder {

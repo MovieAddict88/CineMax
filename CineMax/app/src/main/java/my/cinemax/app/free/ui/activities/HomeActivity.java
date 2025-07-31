@@ -179,14 +179,28 @@ public class HomeActivity extends AppCompatActivity implements NavigationView.On
             edit_text_home_activity_search.setText("");
         });
         edit_text_home_activity_search.setOnEditorActionListener((v,actionId,event) -> {
-            if (edit_text_home_activity_search.getText().length()>0){
-                Intent intent =  new Intent(HomeActivity.this,SearchActivity.class);
-                intent.putExtra("query",edit_text_home_activity_search.getText().toString());
-                startActivity(intent);
-                overridePendingTransition(R.anim.enter, R.anim.exit);
+            try {
+                if (edit_text_home_activity_search != null && 
+                    edit_text_home_activity_search.getText() != null && 
+                    edit_text_home_activity_search.getText().toString().trim().length() > 0) {
+                    
+                    String searchQuery = edit_text_home_activity_search.getText().toString().trim();
+                    Intent intent = new Intent(HomeActivity.this, SearchActivity.class);
+                    intent.putExtra("query", searchQuery);
+                    startActivity(intent);
+                    overridePendingTransition(R.anim.enter, R.anim.exit);
 
-                relative_layout_home_activity_search_section.setVisibility(View.GONE);
-                edit_text_home_activity_search.setText("");
+                    if (relative_layout_home_activity_search_section != null) {
+                        relative_layout_home_activity_search_section.setVisibility(View.GONE);
+                    }
+                    edit_text_home_activity_search.setText("");
+                } else {
+                    // Show message for empty search
+                    Toast.makeText(HomeActivity.this, "Please enter a search term", Toast.LENGTH_SHORT).show();
+                }
+            } catch (Exception e) {
+                Log.e("HomeActivity", "Error in search action: " + e.getMessage(), e);
+                Toast.makeText(HomeActivity.this, "Search error occurred", Toast.LENGTH_SHORT).show();
             }
             return false;
         });
@@ -194,14 +208,28 @@ public class HomeActivity extends AppCompatActivity implements NavigationView.On
             edit_text_home_activity_search.setText("");
         });
         image_view_activity_home_search.setOnClickListener(v->{
-            if (edit_text_home_activity_search.getText().length()>0) {
-
-                Intent intent =  new Intent(HomeActivity.this,SearchActivity.class);
-                intent.putExtra("query",edit_text_home_activity_search.getText().toString());
-                startActivity(intent);
-                overridePendingTransition(R.anim.enter, R.anim.exit);
-                relative_layout_home_activity_search_section.setVisibility(View.GONE);
-                edit_text_home_activity_search.setText("");
+            try {
+                if (edit_text_home_activity_search != null && 
+                    edit_text_home_activity_search.getText() != null && 
+                    edit_text_home_activity_search.getText().toString().trim().length() > 0) {
+                    
+                    String searchQuery = edit_text_home_activity_search.getText().toString().trim();
+                    Intent intent = new Intent(HomeActivity.this, SearchActivity.class);
+                    intent.putExtra("query", searchQuery);
+                    startActivity(intent);
+                    overridePendingTransition(R.anim.enter, R.anim.exit);
+                    
+                    if (relative_layout_home_activity_search_section != null) {
+                        relative_layout_home_activity_search_section.setVisibility(View.GONE);
+                    }
+                    edit_text_home_activity_search.setText("");
+                } else {
+                    // Show message for empty search
+                    Toast.makeText(HomeActivity.this, "Please enter a search term", Toast.LENGTH_SHORT).show();
+                }
+            } catch (Exception e) {
+                Log.e("HomeActivity", "Error in search click: " + e.getMessage(), e);
+                Toast.makeText(HomeActivity.this, "Search error occurred", Toast.LENGTH_SHORT).show();
             }
         });
     }
