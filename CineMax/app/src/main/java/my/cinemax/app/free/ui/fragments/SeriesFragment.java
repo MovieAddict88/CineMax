@@ -418,30 +418,44 @@ public class SeriesFragment extends Fragment {
                     if (apiResponse.getMovies() != null && apiResponse.getMovies().size() > 0) {
                         List<Poster> filteredSeries = new ArrayList<>();
                         
+                        Log.d("SeriesFragment", "Total movies in API: " + apiResponse.getMovies().size());
+                        int seriesCount = 0;
                         for (Poster poster : apiResponse.getMovies()) {
                             // Filter by type (series/serie)
                             String type = poster.getType();
+                            Log.d("SeriesFragment", "Checking poster: " + poster.getTitle() + " with type: " + type);
                             if ("series".equals(type) || "serie".equals(type)) {
+                                seriesCount++;
+                                Log.d("SeriesFragment", "Found series: " + poster.getTitle());
                                 // Apply genre filtering
                                 boolean matchesGenre = false;
                                 if (genreSelected == 0) {
                                     // Show all genres
                                     matchesGenre = true;
+                                    Log.d("SeriesFragment", "All genres selected, including: " + poster.getTitle());
                                 } else if (poster.getGenres() != null && !poster.getGenres().isEmpty()) {
                                     // Check if poster has the selected genre
                                     for (Genre genre : poster.getGenres()) {
+                                        Log.d("SeriesFragment", "Checking genre: " + genre.getTitle() + " (ID: " + genre.getId() + ") against selected: " + genreSelected);
                                         if (genre.getId() != null && genre.getId().intValue() == genreSelected) {
                                             matchesGenre = true;
+                                            Log.d("SeriesFragment", "Genre match found for: " + poster.getTitle());
                                             break;
                                         }
                                     }
+                                } else {
+                                    Log.d("SeriesFragment", "No genres found for: " + poster.getTitle());
                                 }
                                 
                                 if (matchesGenre) {
                                     filteredSeries.add(poster);
+                                    Log.d("SeriesFragment", "Added to filtered list: " + poster.getTitle());
+                                } else {
+                                    Log.d("SeriesFragment", "Excluded from filtered list: " + poster.getTitle() + " (genre mismatch)");
                                 }
                             }
                         }
+                        Log.d("SeriesFragment", "Total series found: " + seriesCount);
                         
                         Log.d("SeriesFragment", "Total series found: " + filteredSeries.size() + 
                               " (Genre: " + genreSelected + ", Order: " + orderSelected + ")");
