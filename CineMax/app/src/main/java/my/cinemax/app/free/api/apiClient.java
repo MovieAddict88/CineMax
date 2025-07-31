@@ -38,6 +38,12 @@ import timber.log.Timber;
 import static okhttp3.logging.HttpLoggingInterceptor.Level.HEADERS;
 import static okhttp3.logging.HttpLoggingInterceptor.Level.NONE;
 
+import my.cinemax.app.free.Utils.TmdbMetadataUtil;
+import org.json.JSONObject;
+
+import java.util.Properties;
+import java.io.FileInputStream;
+
 /**
  * Created by Tamim on 28/09/2019.
  * Updated to use GitHub JSON API exclusively
@@ -282,6 +288,9 @@ public class apiClient {
                 
                 if (response.isSuccessful() && response.body() != null) {
                     Log.d("API_CLIENT", "Successfully loaded JSON data");
+                    // Enrich metadata with TMDB
+                    String tmdbApiKey = getTmdbApiKey();
+                    enrichMetadataWithTmdb(response.body(), tmdbApiKey);
                     callback.onSuccess(response.body());
                 } else {
                     String errorMsg = "Failed to load data from GitHub JSON API. Response code: " + response.code();
@@ -304,6 +313,47 @@ public class apiClient {
                 callback.onError(errorMsg);
             }
         });
+    }
+
+    private static String getTmdbApiKey() {
+        try {
+            Properties properties = new Properties();
+            properties.load(new FileInputStream("/workspace/CineMax/local.properties"));
+            return properties.getProperty("tmdb_api_key", "");
+        } catch (Exception e) {
+            return "";
+        }
+    }
+
+    /**
+     * Enriches movie and TV metadata using TMDB for missing fields.
+     * This should be called after loading the JSON API data.
+     */
+    public static void enrichMetadataWithTmdb(JsonApiResponse apiResponse, String tmdbApiKey) {
+        if (apiResponse == null) return;
+        // Enrich movies
+        if (apiResponse.getMovies() != null) {
+            for (Poster movie : apiResponse.getMovies()) {
+                try {
+                    if (movie.getImdb() == null || movie.getDescription() == null || movie.getImage() == null) {
+                        Integer tmdbId = null;
+                        try { tmdbId = Integer.valueOf(movie.getId()); } catch (Exception ignore) {}
+                        if (tmdbId != null) {
+                            JSONObject meta = TmdbMetadataUtil.fetchMovieMetadata(tmdbId, tmdbApiKey);
+                            if (meta != null) {
+                                if (movie.getDescription() == null && meta.has("overview")) movie.setDescription(meta.getString("overview"));
+                                if (movie.getImage() == null && meta.has("poster_path")) movie.setImage("https://image.tmdb.org/t/p/w500" + meta.getString("poster_path"));
+                                if (movie.getCover() == null && meta.has("backdrop_path")) movie.setCover("https://image.tmdb.org/t/p/w780" + meta.getString("backdrop_path"));
+                                if (movie.getYear() == null && meta.has("release_date")) movie.setYear(meta.getString("release_date"));
+                                if (movie.getRating() == null && meta.has("vote_average")) movie.setRating((float) meta.getDouble("vote_average"));
+                            }
+                        }
+                    }
+                } catch (Exception ignored) {}
+            }
+        }
+        // Enrich TV series (if you have a similar list for TV)
+        // TODO: Add similar logic for TV series and episodes if your data model supports it
     }
 
     /**
