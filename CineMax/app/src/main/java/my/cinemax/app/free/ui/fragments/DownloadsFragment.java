@@ -76,6 +76,15 @@ public class DownloadsFragment extends Fragment  implements DownloadedAdapter.Do
         loadDownloadsList();
         initBroadcastReceiverNetworkStateChanged();
         initDownloadProgressReceiver();
+
+        // Register for reload_downloads_list broadcast
+        LocalBroadcastManager.getInstance(getActivity()).registerReceiver(new BroadcastReceiver() {
+            @Override
+            public void onReceive(Context context, Intent intent) {
+                loadDownloadsList();
+            }
+        }, new IntentFilter("reload_downloads_list"));
+
         return view;
     }
 

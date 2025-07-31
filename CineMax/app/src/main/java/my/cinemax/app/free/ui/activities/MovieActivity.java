@@ -2071,6 +2071,10 @@ public class MovieActivity extends AppCompatActivity {
         // Add to progress manager for tracking
         DownloadProgressManager progressManager = new DownloadProgressManager(this);
         progressManager.addActiveDownload(downloadItem);
+
+        // Notify DownloadsFragment to reload
+        Intent reloadIntent = new Intent("reload_downloads_list");
+        androidx.localbroadcastmanager.content.LocalBroadcastManager.getInstance(this).sendBroadcast(reloadIntent);
     }
     public void DownloadQ(Source source){
         my.cinemax.app.free.Utils.Log.log("Android Q");
@@ -2112,6 +2116,10 @@ public class MovieActivity extends AppCompatActivity {
         // Add to progress manager for tracking
         DownloadProgressManager progressManager = new DownloadProgressManager(this);
         progressManager.addActiveDownload(downloadItem);
+
+        // Notify DownloadsFragment to reload
+        Intent reloadIntent = new Intent("reload_downloads_list");
+        androidx.localbroadcastmanager.content.LocalBroadcastManager.getInstance(this).sendBroadcast(reloadIntent);
     }
 
     public void openLink(int position){
