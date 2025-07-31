@@ -70,6 +70,7 @@ import my.cinemax.app.free.Provider.PrefManager;
 import my.cinemax.app.free.R;
 import my.cinemax.app.free.api.apiClient;
 import my.cinemax.app.free.api.apiRest;
+import my.cinemax.app.free.api.TmdbApiClient;
 import my.cinemax.app.free.config.Global;
 import my.cinemax.app.free.entity.Actor;
 import my.cinemax.app.free.entity.ApiResponse;
@@ -504,7 +505,9 @@ public class MovieActivity extends AppCompatActivity {
         ViewCompat.setTransitionName(image_view_activity_movie_cover, "imageMain");
         text_view_activity_movie_title.setText(poster.getTitle());
         text_view_activity_movie_sub_title.setText(poster.getTitle());
-        text_view_activity_movie_description.setText(poster.getDescription());
+        
+        // Fetch description from TMDB API instead of using JSON description
+        fetchMovieDescriptionFromTmdb(poster.getTitle());
         if (poster.getYear()!=null){
             if (!poster.getYear().isEmpty()){
                 text_view_activity_movie_year.setText(poster.getYear());
@@ -2133,6 +2136,61 @@ public class MovieActivity extends AppCompatActivity {
         Intent i = new Intent(Intent.ACTION_VIEW);
         i.setData(Uri.parse(url));
         startActivity(i);
+    }
+    
+    /**
+     * Fetch movie description from TMDB API
+     * This method searches for the movie by title and sets the description from TMDB
+     * 
+     * @param movieTitle The title of the movie to search for
+     */
+    private void fetchMovieDescriptionFromTmdb(String movieTitle) {
+        // Set a loading placeholder
+        text_view_activity_movie_description.setText("Loading description...");
+        
+        // Check if movie title is valid
+        if (movieTitle == null || movieTitle.trim().isEmpty()) {
+            text_view_activity_movie_description.setText("Description not available");
+            return;
+        }
+        
+        Log.d(TAG, "Fetching description from TMDB for: " + movieTitle);
+        
+        // Use TMDB API to fetch description
+        TmdbApiClient.getInstance().getMovieDescription(movieTitle, new TmdbApiClient.MovieDescriptionCallback() {
+            @Override
+            public void onSuccess(String description) {
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        if (description != null && !description.trim().isEmpty()) {
+                            Log.d(TAG, "Successfully fetched TMDB description for: " + movieTitle);
+                            text_view_activity_movie_description.setText(description);
+                        } else {
+                            Log.w(TAG, "Empty description received from TMDB for: " + movieTitle);
+                            text_view_activity_movie_description.setText("Description not available");
+                        }
+                    }
+                });
+            }
+            
+            @Override
+            public void onError(String error) {
+                Log.e(TAG, "Failed to fetch TMDB description for " + movieTitle + ": " + error);
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        // Fallback to original description if available, otherwise show fallback message
+                        String fallbackDescription = poster.getDescription();
+                        if (fallbackDescription != null && !fallbackDescription.trim().isEmpty()) {
+                            text_view_activity_movie_description.setText(fallbackDescription);
+                        } else {
+                            text_view_activity_movie_description.setText("Description not available");
+                        }
+                    }
+                });
+            }
+        });
     }
 
 

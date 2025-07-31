@@ -13,6 +13,10 @@ public class Global {
 	
 	
     // Change this to your GitHub Raw URL where you upload free_movie_api.json
+    // IMPORTANT: Upload the new free_movie_api.json file (with Avengers movie data) to your GitHub repository
+    // and update this URL to point to your own repository
+    // IMPORTANT: Upload the new free_movie_api.json file (with Avengers movie data) to your GitHub repository
+    // and update this URL to point to your own repository
     public static final String API_URL = "https://raw.githubusercontent.com/MovieAddict88/movie-api/main/free_movie_api.json";
     public static final String ADS_API_URL = "https://raw.githubusercontent.com/MovieAddict88/movie-api/main/ads_config.json";
     
