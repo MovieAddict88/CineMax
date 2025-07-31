@@ -115,6 +115,7 @@ import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 import retrofit2.Retrofit;
+import my.cinemax.app.free.Utils.DownloadProgressManager;
 
 public class MovieActivity extends AppCompatActivity {
     private  static String TAG= "MovieActivity";
@@ -2066,6 +2067,10 @@ public class MovieActivity extends AppCompatActivity {
         }
         my_downloads_temp.add(downloadItem);
         Hawk.put("my_downloads_temp", my_downloads_temp);
+        
+        // Add to progress manager for tracking
+        DownloadProgressManager progressManager = new DownloadProgressManager(this);
+        progressManager.addActiveDownload(downloadItem);
     }
     public void DownloadQ(Source source){
         my.cinemax.app.free.Utils.Log.log("Android Q");
@@ -2103,6 +2108,10 @@ public class MovieActivity extends AppCompatActivity {
         }
         my_downloads_temp.add(downloadItem);
         Hawk.put("my_downloads_temp", my_downloads_temp);
+        
+        // Add to progress manager for tracking
+        DownloadProgressManager progressManager = new DownloadProgressManager(this);
+        progressManager.addActiveDownload(downloadItem);
     }
 
     public void openLink(int position){

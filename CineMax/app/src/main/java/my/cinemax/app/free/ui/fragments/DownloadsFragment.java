@@ -11,6 +11,7 @@ import android.net.wifi.WifiManager;
 import android.os.Bundle;
 
 import androidx.fragment.app.Fragment;
+import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
@@ -24,6 +25,7 @@ import android.widget.LinearLayout;
 import com.orhanobut.hawk.Hawk;
 import my.cinemax.app.free.Provider.AndroidWebServer;
 import my.cinemax.app.free.R;
+import my.cinemax.app.free.Utils.DownloadProgressManager;
 import my.cinemax.app.free.entity.DownloadItem;
 import my.cinemax.app.free.ui.Adapters.DownloadedAdapter;
 import my.cinemax.app.free.ui.activities.PlayerActivity;
@@ -43,6 +45,7 @@ public class DownloadsFragment extends Fragment  implements DownloadedAdapter.Do
     // INSTANCE OF ANDROID WEB SERVER
     private AndroidWebServer androidWebServer;
     private BroadcastReceiver broadcastReceiverNetworkState;
+    private BroadcastReceiver downloadProgressReceiver;
     private static boolean isStarted = false;
 
     private View view;
@@ -54,6 +57,9 @@ public class DownloadsFragment extends Fragment  implements DownloadedAdapter.Do
     private GridLayoutManager gridLayoutManager;
     private DownloadedAdapter downloadedAdapter;
     private DownloadItem downloadItem;
+    
+    // Download progress manager
+    private DownloadProgressManager downloadProgressManager;
 
     public DownloadsFragment() {
     }
@@ -66,9 +72,99 @@ public class DownloadsFragment extends Fragment  implements DownloadedAdapter.Do
         this.view =  inflater.inflate(R.layout.fragment_downloads, container, false);
         initView();
         initAction();
+        initDownloadProgressManager();
         loadDownloadsList();
         initBroadcastReceiverNetworkStateChanged();
+        initDownloadProgressReceiver();
         return view;
+    }
+
+    private void initDownloadProgressManager() {
+        downloadProgressManager = new DownloadProgressManager(getActivity());
+        downloadProgressManager.startPolling();
+    }
+
+    private void initDownloadProgressReceiver() {
+        downloadProgressReceiver = new BroadcastReceiver() {
+            @Override
+            public void onReceive(Context context, Intent intent) {
+                String action = intent.getStringExtra("action");
+                if (action != null) {
+                    switch (action) {
+                        case "progress_update":
+                            handleProgressUpdate(intent);
+                            break;
+                        case "download_completed":
+                            handleDownloadCompleted(intent);
+                            break;
+                        case "download_failed":
+                            handleDownloadFailed(intent);
+                            break;
+                    }
+                }
+            }
+        };
+        
+        IntentFilter filter = new IntentFilter(DownloadProgressManager.DOWNLOAD_PROGRESS_UPDATE);
+        LocalBroadcastManager.getInstance(getActivity()).registerReceiver(downloadProgressReceiver, filter);
+    }
+
+    private void handleProgressUpdate(Intent intent) {
+        Long downloadId = intent.getLongExtra("downloadId", -1);
+        String title = intent.getStringExtra("title");
+        int progress = intent.getIntExtra("progress", 0);
+        long downloadedBytes = intent.getLongExtra("downloadedBytes", 0);
+        long totalBytes = intent.getLongExtra("totalBytes", 0);
+        String type = intent.getStringExtra("type");
+
+        // Update the download item in the list
+        updateDownloadProgress(downloadId, progress, downloadedBytes, totalBytes);
+    }
+
+    private void handleDownloadCompleted(Intent intent) {
+        Long downloadId = intent.getLongExtra("downloadId", -1);
+        String title = intent.getStringExtra("title");
+        String type = intent.getStringExtra("type");
+
+        // Refresh the downloads list
+        loadDownloadsList();
+    }
+
+    private void handleDownloadFailed(Intent intent) {
+        Long downloadId = intent.getLongExtra("downloadId", -1);
+        String title = intent.getStringExtra("title");
+        String type = intent.getStringExtra("type");
+
+        // Remove failed download from temp list and refresh
+        removeFailedDownload(downloadId);
+        loadDownloadsList();
+    }
+
+    private void updateDownloadProgress(Long downloadId, int progress, long downloadedBytes, long totalBytes) {
+        // Find the download item in the list and update its progress
+        for (int i = 0; i < downloadItemArrayList.size(); i++) {
+            DownloadItem item = downloadItemArrayList.get(i);
+            if (item.getDownloadid() != null && item.getDownloadid().equals(downloadId)) {
+                item.setProgress(progress);
+                item.setDownloadedBytes(downloadedBytes);
+                item.setTotalBytes(totalBytes);
+                item.setDownloading(true);
+                
+                // Update the adapter
+                if (downloadedAdapter != null) {
+                    downloadedAdapter.notifyItemChanged(i);
+                }
+                break;
+            }
+        }
+    }
+
+    private void removeFailedDownload(Long downloadId) {
+        List<DownloadItem> tempDownloads = Hawk.get("my_downloads_temp");
+        if (tempDownloads != null) {
+            tempDownloads.removeIf(item -> item.getDownloadid() != null && item.getDownloadid().equals(downloadId));
+            Hawk.put("my_downloads_temp", tempDownloads);
+        }
     }
 
     private void loadDownloadsList() {
@@ -76,24 +172,49 @@ public class DownloadsFragment extends Fragment  implements DownloadedAdapter.Do
         linear_layout_load_downloads_fragment.setVisibility(View.VISIBLE);
         recycler_view_downloads_fragment.setVisibility(View.GONE);
         image_view_empty_list.setVisibility(View.GONE);
-        List<DownloadItem> my_downloads_list =Hawk.get("my_downloads_list");
+        
+        // Load completed downloads
+        List<DownloadItem> my_downloads_list = Hawk.get("my_downloads_list");
         if (my_downloads_list == null) {
             my_downloads_list = new ArrayList<>();
         }
-        downloadItemArrayList.add(new DownloadItem().setTypeView(2));
-        for (int i = 0; i < my_downloads_list.size(); i++) {
-            downloadItemArrayList.add(my_downloads_list.get(i));
+        
+        // Load active downloads (temp list)
+        List<DownloadItem> my_downloads_temp = Hawk.get("my_downloads_temp");
+        if (my_downloads_temp == null) {
+            my_downloads_temp = new ArrayList<>();
         }
-        if (my_downloads_list.size()==0){
+        
+        // Add header
+        downloadItemArrayList.add(new DownloadItem().setTypeView(2));
+        
+        // Add active downloads first (with progress)
+        for (DownloadItem item : my_downloads_temp) {
+            if (item.getDownloadid() != null) {
+                item.setDownloading(true);
+                downloadItemArrayList.add(item);
+            }
+        }
+        
+        // Add completed downloads
+        for (DownloadItem item : my_downloads_list) {
+            item.setDownloading(false);
+            downloadItemArrayList.add(item);
+        }
+        
+        if (downloadItemArrayList.size() <= 1) { // Only header
             linear_layout_load_downloads_fragment.setVisibility(View.GONE);
             recycler_view_downloads_fragment.setVisibility(View.GONE);
             image_view_empty_list.setVisibility(View.VISIBLE);
-        }else{
+        } else {
             linear_layout_load_downloads_fragment.setVisibility(View.GONE);
             recycler_view_downloads_fragment.setVisibility(View.VISIBLE);
             image_view_empty_list.setVisibility(View.GONE);
         }
-        downloadedAdapter.notifyDataSetChanged();
+        
+        if (downloadedAdapter != null) {
+            downloadedAdapter.notifyDataSetChanged();
+        }
     }
 
     private void initAction() {
@@ -228,8 +349,13 @@ public class DownloadsFragment extends Fragment  implements DownloadedAdapter.Do
 
     @Override
     public void onDestroy() {
+        if (downloadProgressManager != null) {
+            downloadProgressManager.cleanup();
+        }
+        if (downloadProgressReceiver != null) {
+            LocalBroadcastManager.getInstance(getActivity()).unregisterReceiver(downloadProgressReceiver);
+        }
         getActivity().unregisterReceiver(broadcastReceiverNetworkState);
-
         super.onDestroy();
     }
 }

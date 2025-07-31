@@ -44,7 +44,13 @@ public class DownloadItem implements Parcelable {
 
     @SerializedName("downloadid")
     @Expose
-    private long downloadid;
+    private Long downloadid;
+
+    // Progress tracking fields
+    private int progress = 0;
+    private long downloadedBytes = 0;
+    private long totalBytes = 0;
+    private boolean isDownloading = false;
 
     private int typeView = 1;
 
@@ -80,7 +86,15 @@ public class DownloadItem implements Parcelable {
         } else {
             element = in.readInt();
         }
-        downloadid = in.readLong();
+        if (in.readByte() == 0) {
+            downloadid = null;
+        } else {
+            downloadid = in.readLong();
+        }
+        progress = in.readInt();
+        downloadedBytes = in.readLong();
+        totalBytes = in.readLong();
+        isDownloading = in.readByte() != 0;
     }
 
     @Override
@@ -103,7 +117,16 @@ public class DownloadItem implements Parcelable {
             dest.writeByte((byte) 1);
             dest.writeInt(element);
         }
-        dest.writeLong(downloadid);
+        if (downloadid == null) {
+            dest.writeByte((byte) 0);
+        } else {
+            dest.writeByte((byte) 1);
+            dest.writeLong(downloadid);
+        }
+        dest.writeInt(progress);
+        dest.writeLong(downloadedBytes);
+        dest.writeLong(totalBytes);
+        dest.writeByte((byte) (isDownloading ? 1 : 0));
     }
 
     @Override
@@ -187,12 +210,44 @@ public class DownloadItem implements Parcelable {
         this.element = element;
     }
 
-    public long getDownloadid() {
+    public Long getDownloadid() {
         return downloadid;
     }
 
-    public void setDownloadid(long downloadid) {
+    public void setDownloadid(Long downloadid) {
         this.downloadid = downloadid;
+    }
+
+    public int getProgress() {
+        return progress;
+    }
+
+    public void setProgress(int progress) {
+        this.progress = progress;
+    }
+
+    public long getDownloadedBytes() {
+        return downloadedBytes;
+    }
+
+    public void setDownloadedBytes(long downloadedBytes) {
+        this.downloadedBytes = downloadedBytes;
+    }
+
+    public long getTotalBytes() {
+        return totalBytes;
+    }
+
+    public void setTotalBytes(long totalBytes) {
+        this.totalBytes = totalBytes;
+    }
+
+    public boolean isDownloading() {
+        return isDownloading;
+    }
+
+    public void setDownloading(boolean downloading) {
+        isDownloading = downloading;
     }
 
     public int getTypeView() {
