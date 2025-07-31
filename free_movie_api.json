@@ -420,7 +420,6 @@
             "created_at": "2024-01-14T15:45:00Z"
           }
         ],
-        "views": 15000,
         "downloads": 5000,
         "shares": 1200
       }
@@ -512,19 +511,19 @@
   "movies": [
     {
       "id": 1,
-      "title": "Big Buck Bunny",
+      "title": "The Avengers",
       "type": "movie",
       "label": "Animation",
       "sublabel": "Short Film",
-      "imdb": "8.5",
+      "imdb": "7.8",
       "downloadas": "big-buck-bunny.mp4",
       "comment": true,
       "playas": "video",
-      "description": "Big Buck Bunny tells the story of a giant rabbit with a heart bigger than himself. When one sunny day three rodents rudely harass him by throwing nuts, hitting his flowers, and destroying his home, he snaps and goes after them.",
-      "classification": "G",
-      "year": "2008",
-      "duration": "10:00",
-      "rating": 8.5,
+      "description": "When an unexpected enemy emerges and threatens global safety and security, Nick Fury, director of the international peacekeeping agency known as S.H.I.E.L.D., finds himself in need of a team to pull the world back from the brink of disaster.",
+      "classification": "PG-13",
+      "year": "2012",
+      "duration": "2:23",
+      "rating": 7.8,
       "image": "https://peach.blender.org/wp-content/uploads/title_anouncement.jpg?x11217",
       "cover": "https://peach.blender.org/wp-content/uploads/title_anouncement.jpg?x11217",
       "genres": [
@@ -566,6 +565,17 @@
           "premium": "false",
           "external": false,
           "url": "http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4"
+        },
+        {
+          "id": 4,
+          "type": "embed",
+          "title": "VidSrc Embed",
+          "quality": "HD",
+          "size": "Stream",
+          "kind": "external",
+          "premium": "false",
+          "external": true,
+          "url": "https://vidsrc.net/embed/movie/24428"
         }
       ],
       "trailer": {
@@ -632,10 +642,10 @@
       "classification": "TV-14",
       "year": "2023",
       "duration": "45:00",
-              "rating": 8.2,
-        "views": 8000,
-        "created_at": "2024-01-02",
-        "image": "https://example.com/sample-series.jpg",
+      "rating": 8.2,
+      "views": 8000,
+      "created_at": "2024-01-02",
+      "image": "https://example.com/sample-series.jpg",
       "cover": "https://example.com/sample-series-cover.jpg",
       "genres": [
         {
@@ -666,7 +676,6 @@
           "created_at": "2024-01-15T12:00:00Z"
         }
       ],
-      "views": 8000,
       "downloads": 2000,
       "shares": 500,
       "seasons": [
