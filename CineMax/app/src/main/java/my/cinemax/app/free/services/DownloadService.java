@@ -25,12 +25,18 @@ import java.util.List;
 import java.util.Random;
 
 import androidx.core.app.NotificationCompat;
+import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 import es.dmoral.toasty.Toasty;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Retrofit;
 
 public class DownloadService  extends IntentService  implements PlaylistDownloader.DownloadListener {
+
+    public static final String PROGRESS_UPDATE = "download_progress_update";
+    public static final String DOWNLOAD_STARTED = "download_started";
+    public static final String DOWNLOAD_COMPLETED = "download_completed";
+    public static final String DOWNLOAD_FAILED = "download_failed";
 
     private String title ="";
     private String playlistUrl ="";
@@ -84,6 +90,9 @@ public class DownloadService  extends IntentService  implements PlaylistDownload
                 .setAutoCancel(false);
         notificationManager.notify(id, notificationBuilder.build());
 
+        // Send download started broadcast
+        sendProgressUpdate(DOWNLOAD_STARTED, 0, id, title, type);
+
         try {
             PlaylistDownloader downloader =
                     new PlaylistDownloader(playlistUrl,this);
@@ -95,6 +104,7 @@ public class DownloadService  extends IntentService  implements PlaylistDownload
 
         } catch (java.io.IOException e) {
             Toast.makeText(this, "Url/path not correct", Toast.LENGTH_SHORT).show();
+            sendProgressUpdate(DOWNLOAD_FAILED, 0, id, title, type);
             e.printStackTrace();
         }
 
@@ -117,11 +127,16 @@ public class DownloadService  extends IntentService  implements PlaylistDownload
     }
 
 
-    private void sendProgressUpdate(boolean downloadComplete) {
-       /* Intent intent = new Intent(MainActivity.PROGRESS_UPDATE);
-        intent.putExtra("downloadComplete", downloadComplete);
-        LocalBroadcastManager.getInstance(DownloadService.this).sendBroadcast(intent);*/
+    private void sendProgressUpdate(String action, int progress, Integer downloadId, String downloadTitle, String downloadType) {
+        Intent intent = new Intent(PROGRESS_UPDATE);
+        intent.putExtra("action", action);
+        intent.putExtra("progress", progress);
+        intent.putExtra("downloadId", downloadId);
+        intent.putExtra("downloadTitle", downloadTitle);
+        intent.putExtra("downloadType", downloadType);
+        LocalBroadcastManager.getInstance(DownloadService.this).sendBroadcast(intent);
     }
+
     public void  addMovieDownload(Integer id){
             Retrofit retrofit = apiClient.getClient();
             apiRest service = retrofit.create(apiRest.class);
@@ -154,7 +169,7 @@ public class DownloadService  extends IntentService  implements PlaylistDownload
 
     }
     private void onDownloadComplete(boolean downloadComplete) {
-        sendProgressUpdate(downloadComplete);
+        sendProgressUpdate(DOWNLOAD_COMPLETED, 100, id, title, type);
         notificationBuilder.setSmallIcon(R.drawable.ic_file_download);
         notificationManager.cancel(id);
         notificationBuilder.setOngoing(false);
@@ -226,6 +241,7 @@ public class DownloadService  extends IntentService  implements PlaylistDownload
     @Override
     public void onProgressUpdate(int progress) {
         updateNotification(progress);
+        sendProgressUpdate(PROGRESS_UPDATE, progress, id, title, type);
     }
 
     @Override
