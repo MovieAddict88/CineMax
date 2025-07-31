@@ -25,6 +25,7 @@ import com.google.android.gms.ads.AdSize;
 import com.google.android.gms.ads.AdView;
 import my.cinemax.app.free.Provider.PrefManager;
 import my.cinemax.app.free.R;
+import my.cinemax.app.free.MyApplication;
 import my.cinemax.app.free.api.apiClient;
 import my.cinemax.app.free.api.apiRest;
 import my.cinemax.app.free.entity.Channel;
@@ -178,6 +179,13 @@ public class SearchActivity extends AppCompatActivity {
                 return;
             }
             
+            // Check network connectivity first
+            if (!MyApplication.hasNetwork()) {
+                Log.w("SearchActivity", "No network connectivity, loading from local data");
+                loadFromLocalJsonFile();
+                return;
+            }
+            
             Log.d("SearchActivity", "Loading data from GitHub JSON API...");
             
             // Load data from GitHub JSON API
@@ -215,6 +223,11 @@ public class SearchActivity extends AppCompatActivity {
                 public void onError(String error) {
                     Log.e("SearchActivity", "Error loading JSON data: " + error);
                     Log.d("SearchActivity", "Trying to load from local JSON file as fallback...");
+                    
+                    // Show the actual error to the user first
+                    runOnUiThread(() -> {
+                        Toast.makeText(SearchActivity.this, "GitHub API Error: " + error, Toast.LENGTH_LONG).show();
+                    });
                     
                     // Try to load from local JSON file as fallback
                     loadFromLocalJsonFile();
