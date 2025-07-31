@@ -39,6 +39,9 @@ public class Actor implements Parcelable {
         @Expose
         private String bio;
 
+    public Actor() {
+        // Default constructor
+    }
 
     protected Actor(Parcel in) {
         if (in.readByte() == 0) {

@@ -161,7 +161,7 @@ public class TMDBService {
         poster.setYear(movieDetails.has("release_date") ? 
                       movieDetails.get("release_date").getAsString().substring(0, 4) : "");
         poster.setImdb(String.valueOf(movieDetails.get("vote_average").getAsDouble()));
-        poster.setRating(movieDetails.get("vote_average").getAsDouble());
+        poster.setRating(Float.valueOf(movieDetails.get("vote_average").getAsFloat()));
         
         // Runtime
         if (movieDetails.has("runtime")) {
@@ -272,7 +272,7 @@ public class TMDBService {
         poster.setYear(tvDetails.has("first_air_date") ? 
                       tvDetails.get("first_air_date").getAsString().substring(0, 4) : "");
         poster.setImdb(String.valueOf(tvDetails.get("vote_average").getAsDouble()));
-        poster.setRating(tvDetails.get("vote_average").getAsDouble());
+        poster.setRating(Float.valueOf(tvDetails.get("vote_average").getAsFloat()));
         
         // Genres
         if (tvDetails.has("genres")) {
