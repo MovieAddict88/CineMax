@@ -60,13 +60,12 @@ public class DownloadQueueManager {
             
             long downloadId = downloadManager.enqueue(downloadRequest);
             request.downloadItem.setDownloadid(downloadId);
+            // Immediately update temp downloads with the correct downloadId
+            saveToTempDownloads(request.downloadItem);
             activeDownloadIds.add(downloadId);
             
             // Add to progress manager
             progressManager.addActiveDownload(request.downloadItem);
-            
-            // Save to temp downloads
-            saveToTempDownloads(request.downloadItem);
             
             Log.d(TAG, "Started download: " + request.downloadItem.getTitle() + " (ID: " + downloadId + ")");
             

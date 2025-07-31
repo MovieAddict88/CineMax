@@ -182,6 +182,12 @@ public class DownloadProgressManager {
     }
     
     private void sendProgressUpdate(DownloadItem downloadItem, int status, int progress) {
+        // Ensure bytes are set
+        if (downloadItem.getDownloadedBytes() == 0 && downloadItem.getTotalBytes() == 0) {
+            Log.w(TAG, "Progress update: Downloaded bytes and total bytes are both zero for " + downloadItem.getTitle());
+        } else {
+            Log.d(TAG, "Progress update: " + downloadItem.getTitle() + " - " + progress + "% (" + downloadItem.getDownloadedBytes() + "/" + downloadItem.getTotalBytes() + ")");
+        }
         Intent intent = new Intent(DOWNLOAD_PROGRESS_UPDATE);
         intent.putExtra("action", "progress_update");
         intent.putExtra("downloadId", downloadItem.getDownloadid());
@@ -191,7 +197,6 @@ public class DownloadProgressManager {
         intent.putExtra("downloadedBytes", downloadItem.getDownloadedBytes());
         intent.putExtra("totalBytes", downloadItem.getTotalBytes());
         intent.putExtra("type", downloadItem.getType());
-        
         LocalBroadcastManager.getInstance(context).sendBroadcast(intent);
     }
     
