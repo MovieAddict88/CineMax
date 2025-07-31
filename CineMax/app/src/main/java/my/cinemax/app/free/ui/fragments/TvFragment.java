@@ -142,14 +142,8 @@ public class TvFragment extends Fragment {
                         
                         // Use Country object adapter for proper ID mapping
                         ArrayAdapter<Country> filtresAdapter = new ArrayAdapter<Country>(getActivity(),
-                                R.layout.spinner_layout, R.id.textView, countriesList) {
-                            @Override
-                            public String getItem(int position) {
-                                Country country = super.getItem(position);
-                                return country != null ? country.getTitle() : "";
-                            }
-                        };
-                        filtresAdapter.setDropDownViewResource(R.layout.simple_spinner_dropdown_item);
+                                android.R.layout.simple_spinner_item, countriesList);
+                        filtresAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
                         spinner_fragement_channel_countries_list.setAdapter(filtresAdapter);
                         relative_layout_frament_channel_countries.setVisibility(View.VISIBLE);
                     } else {
@@ -187,14 +181,8 @@ public class TvFragment extends Fragment {
                         
                         // Use Category object adapter for proper ID mapping
                         ArrayAdapter<Category> filtresAdapter = new ArrayAdapter<Category>(getActivity(),
-                                R.layout.spinner_layout, R.id.textView, categoryList) {
-                            @Override
-                            public String getItem(int position) {
-                                Category category = super.getItem(position);
-                                return category != null ? category.getTitle() : "";
-                            }
-                        };
-                        filtresAdapter.setDropDownViewResource(R.layout.simple_spinner_dropdown_item);
+                                android.R.layout.simple_spinner_item, categoryList);
+                        filtresAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
                         spinner_fragement_channel_categories_list.setAdapter(filtresAdapter);
                         relative_layout_frament_channel_categories.setVisibility(View.VISIBLE);
                     } else {

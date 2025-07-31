@@ -86,4 +86,9 @@ public class Genre  implements Parcelable {
         dest.writeString(title);
         dest.writeTypedList(posters);
     }
+    
+    @Override
+    public String toString() {
+        return title != null ? title : "";
+    }
 }

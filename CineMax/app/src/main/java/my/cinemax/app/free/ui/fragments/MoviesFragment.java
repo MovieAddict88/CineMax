@@ -142,14 +142,8 @@ public class MoviesFragment extends Fragment {
                         
                         // Use Genre object adapter for proper ID mapping
                         ArrayAdapter<Genre> filtresAdapter = new ArrayAdapter<Genre>(getActivity(),
-                                R.layout.spinner_layout, R.id.textView, genreList) {
-                            @Override
-                            public String getItem(int position) {
-                                Genre genre = super.getItem(position);
-                                return genre != null ? genre.getTitle() : "";
-                            }
-                        };
-                        filtresAdapter.setDropDownViewResource(R.layout.simple_spinner_dropdown_item);
+                                android.R.layout.simple_spinner_item, genreList);
+                        filtresAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
                         spinner_fragement_movies_genre_list.setAdapter(filtresAdapter);
                         relative_layout_frament_movies_genres.setVisibility(View.VISIBLE);
                     } else {
