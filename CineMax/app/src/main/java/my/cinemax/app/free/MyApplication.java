@@ -25,6 +25,7 @@ import com.unity3d.ads.UnityAds;
 
 import my.cinemax.app.free.BuildConfig;
 import my.cinemax.app.free.R;
+import my.cinemax.app.free.database.DataManager;
 
 /**
  * Created by Tamim on 28/09/2019.
@@ -51,6 +52,9 @@ public class MyApplication extends MultiDexApplication {
         UnityAds.initialize (this, getResources().getString(R.string.unity_ads_app_id));
 //        initCast();
         mUserAgent = Util.getUserAgent(this, "MyApplication");
+        
+        // Initialize database and data manager
+        initializeDatabase();
     }
 
     private void initLogger() {
@@ -100,6 +104,23 @@ public class MyApplication extends MultiDexApplication {
     public static boolean hasNetwork ()
     {
         return instance.checkIfHasNetwork();
+    }
+    
+    /**
+     * Initialize database and data manager for the application
+     */
+    private void initializeDatabase() {
+        try {
+            // Initialize DataManager which will create the database
+            DataManager dataManager = DataManager.getInstance(this);
+            
+            // Clean old data on app start (optional)
+            dataManager.cleanOldData();
+            
+            android.util.Log.d("MyApplication", "Database initialized successfully");
+        } catch (Exception e) {
+            android.util.Log.e("MyApplication", "Error initializing database: " + e.getMessage(), e);
+        }
     }
 
 }
