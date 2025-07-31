@@ -29,6 +29,7 @@ import my.cinemax.app.free.Provider.PrefManager;
 import my.cinemax.app.free.R;
 import my.cinemax.app.free.api.apiClient;
 import my.cinemax.app.free.api.apiRest;
+import my.cinemax.app.free.api.TmdbRatingManager;
 import my.cinemax.app.free.entity.Genre;
 import my.cinemax.app.free.entity.Poster;
 import my.cinemax.app.free.ui.Adapters.PosterAdapter;
@@ -531,6 +532,10 @@ public class MoviesFragment extends Fragment {
                                     }
                                 }
                             }
+                            
+                            // Fetch TMDB ratings for movies
+                            fetchTmdbRatingsForMovies(filteredMovies);
+                            
                             linear_layout_page_error_movies_fragment.setVisibility(View.GONE);
                             recycler_view_movies_fragment.setVisibility(View.VISIBLE);
                             image_view_empty_list.setVisibility(View.GONE);
@@ -612,6 +617,38 @@ public class MoviesFragment extends Fragment {
             image_view_empty_list.setVisibility(View.GONE);
             linear_layout_load_movies_fragment.setVisibility(View.GONE);
             adapter.notifyDataSetChanged();
+        }
+    }
+
+    /**
+     * Fetch TMDB ratings for a list of movies
+     */
+    private void fetchTmdbRatingsForMovies(List<Poster> movies) {
+        TmdbRatingManager ratingManager = TmdbRatingManager.getInstance();
+        
+        for (Poster movie : movies) {
+            if (movie.getId() != null && movie.getRating() == null) {
+                ratingManager.fetchMovieRating(movie, new TmdbRatingManager.RatingCallback() {
+                    @Override
+                    public void onSuccess(Float rating) {
+                        // Rating is already set in the movie object by the manager
+                        // Update the adapter on the main thread
+                        if (getActivity() != null) {
+                            getActivity().runOnUiThread(new Runnable() {
+                                @Override
+                                public void run() {
+                                    adapter.notifyDataSetChanged();
+                                }
+                            });
+                        }
+                    }
+
+                    @Override
+                    public void onError(String error) {
+                        Log.e("MoviesFragment", "Failed to fetch rating for movie " + movie.getTitle() + ": " + error);
+                    }
+                });
+            }
         }
     }
 }

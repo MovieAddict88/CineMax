@@ -246,9 +246,9 @@ public class JsonApiResponse {
     }
     
     public static class VideoSources {
-        @SerializedName("big_buck_bunny")
+        @SerializedName("avengers_endgame")
         @Expose
-        private VideoSource bigBuckBunny;
+        private VideoSource avengersEndgame;
         
         @SerializedName("elephants_dream")
         @Expose
@@ -259,8 +259,8 @@ public class JsonApiResponse {
         private LiveStreams liveStreams;
         
         // Getters and Setters
-        public VideoSource getBigBuckBunny() { return bigBuckBunny; }
-        public void setBigBuckBunny(VideoSource bigBuckBunny) { this.bigBuckBunny = bigBuckBunny; }
+        public VideoSource getAvengersEndgame() { return avengersEndgame; }
+        public void setAvengersEndgame(VideoSource avengersEndgame) { this.avengersEndgame = avengersEndgame; }
         
         public VideoSource getElephantsDream() { return elephantsDream; }
         public void setElephantsDream(VideoSource elephantsDream) { this.elephantsDream = elephantsDream; }
@@ -327,6 +327,10 @@ public class JsonApiResponse {
         @Expose
         private String p480;
         
+        @SerializedName("embed")
+        @Expose
+        private String embed;
+        
         // Getters and Setters
         public String getP1080() { return p1080; }
         public void setP1080(String p1080) { this.p1080 = p1080; }
@@ -336,6 +340,9 @@ public class JsonApiResponse {
         
         public String getP480() { return p480; }
         public void setP480(String p480) { this.p480 = p480; }
+        
+        public String getEmbed() { return embed; }
+        public void setEmbed(String embed) { this.embed = embed; }
     }
     
     public static class LiveStreams {

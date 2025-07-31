@@ -1008,9 +1008,9 @@ public class HomeActivity extends AppCompatActivity implements NavigationView.On
                     JsonApiResponse.VideoSources videoSources = response.body().getVideoSources();
                     
                     if (videoSources != null) {
-                        // Return Big Buck Bunny or Elephants Dream URLs
-                        if (videoSources.getBigBuckBunny() != null) {
-                            callback.onSuccess(videoSources.getBigBuckBunny().getUrls().getP1080());
+                                // Return Avengers: Endgame or other movie URLs
+        if (videoSources.getAvengersEndgame() != null) {
+            callback.onSuccess(videoSources.getAvengersEndgame().getUrls().getEmbed());
                         } else if (videoSources.getElephantsDream() != null) {
                             callback.onSuccess(videoSources.getElephantsDream().getUrls().getP1080());
                         } else {

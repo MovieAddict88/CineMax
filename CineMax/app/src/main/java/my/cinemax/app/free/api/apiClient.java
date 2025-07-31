@@ -478,4 +478,27 @@ public class apiClient {
         void onSuccess(JsonApiResponse jsonResponse);
         void onError(String error);
     }
+
+    /**
+     * Get TMDB API client for fetching movie and TV ratings
+     */
+    private static Retrofit tmdbRetrofit = null;
+    
+    public static Retrofit getTmdbClient() {
+        if (tmdbRetrofit == null) {
+            OkHttpClient okHttpClient = new OkHttpClient().newBuilder()
+                    .addInterceptor(provideHttpLoggingInterceptor())
+                    .connectTimeout(30, TimeUnit.SECONDS)
+                    .readTimeout(30, TimeUnit.SECONDS)
+                    .writeTimeout(30, TimeUnit.SECONDS)
+                    .build();
+
+            tmdbRetrofit = new Retrofit.Builder()
+                    .baseUrl(Global.TMDB_BASE_URL)
+                    .client(okHttpClient)
+                    .addConverterFactory(GsonConverterFactory.create())
+                    .build();
+        }
+        return tmdbRetrofit;
+    }
 }

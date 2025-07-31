@@ -22,6 +22,9 @@ public class Global {
 
     public static final String Youtube_Key = "AIzaSyAephi0fVTEBXgphX7Z_WVSW8iPusDibtg"; // get it from this link  https://console.developers.google.com/apis/credentials
 
+    public static final String TMDB_API_KEY = "ec926176bf467b3f7735e3154238c161"; // TMDB API key for ratings
+    public static final String TMDB_BASE_URL = "https://api.themoviedb.org/3/";
+
     public static final String ITEM_PURCHASE_CODE = "d506abfd-9fe2-4b71-b979-feff21bcad13";
 
 

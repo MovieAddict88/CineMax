@@ -385,13 +385,13 @@ public class SearchActivity extends AppCompatActivity {
             // Create sample movies
             List<Poster> sampleMovies = new ArrayList<>();
             
-            // Add "Big Buck Bunny" movie (exists in GitHub data)
-            Poster bigBuckBunny = new Poster();
-            bigBuckBunny.setId(1);
-            bigBuckBunny.setTitle("Big Buck Bunny");
-            bigBuckBunny.setDescription("Big Buck Bunny tells the story of a giant rabbit with a heart bigger than himself.");
-            bigBuckBunny.setImage("https://peach.blender.org/wp-content/uploads/title_anouncement.jpg?x11217");
-            sampleMovies.add(bigBuckBunny);
+                    // Add "Avengers: Endgame" movie (exists in GitHub data)
+        Poster avengersEndgame = new Poster();
+        avengersEndgame.setId(299534);
+        avengersEndgame.setTitle("Avengers: Endgame");
+        avengersEndgame.setDescription("After the devastating events of Avengers: Infinity War, the universe is in ruins due to the efforts of the Mad Titan, Thanos.");
+        avengersEndgame.setImage("https://image.tmdb.org/t/p/w500/or06FN3Dka5tukK1e9sl16pB3iy.jpg");
+        sampleMovies.add(avengersEndgame);
             
             // Set the data
             localResponse.setChannels(sampleChannels);

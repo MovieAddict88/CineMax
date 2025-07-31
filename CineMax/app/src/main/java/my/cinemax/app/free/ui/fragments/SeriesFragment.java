@@ -29,6 +29,8 @@ import my.cinemax.app.free.Provider.PrefManager;
 import my.cinemax.app.free.R;
 import my.cinemax.app.free.api.apiClient;
 import my.cinemax.app.free.api.apiRest;
+import my.cinemax.app.free.api.TmdbRatingManager;
+import my.cinemax.app.free.entity.Channel;
 import my.cinemax.app.free.entity.Genre;
 import my.cinemax.app.free.entity.Poster;
 import my.cinemax.app.free.ui.Adapters.PosterAdapter;
@@ -415,9 +417,10 @@ public class SeriesFragment extends Fragment {
                 if (response.isSuccessful() && response.body() != null) {
                     my.cinemax.app.free.entity.JsonApiResponse apiResponse = response.body();
                     
+                    List<Poster> filteredSeries = new ArrayList<>();
+                    
+                    // Process movies marked as series
                     if (apiResponse.getMovies() != null && apiResponse.getMovies().size() > 0) {
-                        List<Poster> filteredSeries = new ArrayList<>();
-                        
                         Log.d("SeriesFragment", "Total movies in API: " + apiResponse.getMovies().size());
                         int seriesCount = 0;
                         for (Poster poster : apiResponse.getMovies()) {
@@ -455,6 +458,38 @@ public class SeriesFragment extends Fragment {
                                 }
                             }
                         }
+                        Log.d("SeriesFragment", "Total series found: " + seriesCount);
+                    }
+                    
+                    // Process channels as TV series
+                    if (apiResponse.getChannels() != null && apiResponse.getChannels().size() > 0) {
+                        Log.d("SeriesFragment", "Total channels in API: " + apiResponse.getChannels().size());
+                        for (Channel channel : apiResponse.getChannels()) {
+                            // Convert Channel to Poster for display
+                            Poster seriesPoster = convertChannelToPoster(channel);
+                            if (seriesPoster != null) {
+                                // Apply genre filtering for channels
+                                boolean matchesGenre = false;
+                                if (genreSelected == 0) {
+                                    matchesGenre = true;
+                                } else if (channel.getCategories() != null && !channel.getCategories().isEmpty()) {
+                                    for (my.cinemax.app.free.entity.Category category : channel.getCategories()) {
+                                        if (category.getId() != null && category.getId().intValue() == genreSelected) {
+                                            matchesGenre = true;
+                                            break;
+                                        }
+                                    }
+                                }
+                                
+                                if (matchesGenre) {
+                                    filteredSeries.add(seriesPoster);
+                                    Log.d("SeriesFragment", "Added channel to filtered list: " + channel.getTitle());
+                                }
+                            }
+                        }
+                    }
+                    
+                    if (!filteredSeries.isEmpty()) {
                         Log.d("SeriesFragment", "Total series found: " + seriesCount);
                         
                         Log.d("SeriesFragment", "Total series found: " + filteredSeries.size() + 
@@ -572,6 +607,10 @@ public class SeriesFragment extends Fragment {
                                     }
                                 }
                             }
+                            
+                            // Fetch TMDB ratings for TV series
+                            fetchTmdbRatingsForSeries(filteredSeries, apiResponse.getChannels());
+                            
                             linear_layout_page_error_series_fragment.setVisibility(View.GONE);
                             recycler_view_series_fragment.setVisibility(View.VISIBLE);
                             image_view_empty_list.setVisibility(View.GONE);
@@ -655,6 +694,112 @@ public class SeriesFragment extends Fragment {
             linear_layout_load_series_fragment.setVisibility(View.GONE);
             
             adapter.notifyDataSetChanged();
+        }
+    }
+
+    /**
+     * Convert Channel to Poster for display in series list
+     */
+    private Poster convertChannelToPoster(Channel channel) {
+        if (channel == null) return null;
+        
+        Poster poster = new Poster();
+        poster.setId(channel.getId());
+        poster.setTitle(channel.getTitle());
+        poster.setType("series");
+        poster.setDescription(channel.getDescription());
+        poster.setYear(channel.getYear());
+        poster.setImage(channel.getImage());
+        poster.setViews(channel.getViews());
+        poster.setRating(channel.getRating()); // This will be updated by TMDB
+        
+        // Convert categories to genres
+        if (channel.getCategories() != null) {
+            List<Genre> genres = new ArrayList<>();
+            for (my.cinemax.app.free.entity.Category category : channel.getCategories()) {
+                Genre genre = new Genre();
+                genre.setId(category.getId());
+                genre.setTitle(category.getTitle());
+                genres.add(genre);
+            }
+            poster.setGenres(genres);
+        }
+        
+        // Convert sources
+        if (channel.getSources() != null) {
+            poster.setSources(channel.getSources());
+        }
+        
+        return poster;
+    }
+
+    /**
+     * Fetch TMDB ratings for TV series
+     */
+    private void fetchTmdbRatingsForSeries(List<Poster> series, List<Channel> channels) {
+        TmdbRatingManager ratingManager = TmdbRatingManager.getInstance();
+        
+        // Fetch ratings for series (converted from movies)
+        for (Poster seriesPoster : series) {
+            if (seriesPoster.getId() != null && seriesPoster.getRating() == null) {
+                // Check if this is a TV series (from channels) or movie marked as series
+                boolean isTvSeries = false;
+                Channel correspondingChannel = null;
+                
+                if (channels != null) {
+                    for (Channel channel : channels) {
+                        if (channel.getId() != null && channel.getId().equals(seriesPoster.getId())) {
+                            isTvSeries = true;
+                            correspondingChannel = channel;
+                            break;
+                        }
+                    }
+                }
+                
+                if (isTvSeries && correspondingChannel != null) {
+                    // Fetch TV rating
+                    ratingManager.fetchTvRating(correspondingChannel, new TmdbRatingManager.RatingCallback() {
+                        @Override
+                        public void onSuccess(Float rating) {
+                            // Update the poster rating as well
+                            seriesPoster.setRating(rating);
+                            if (getActivity() != null) {
+                                getActivity().runOnUiThread(new Runnable() {
+                                    @Override
+                                    public void run() {
+                                        adapter.notifyDataSetChanged();
+                                    }
+                                });
+                            }
+                        }
+
+                        @Override
+                        public void onError(String error) {
+                            Log.e("SeriesFragment", "Failed to fetch TV rating for " + correspondingChannel.getTitle() + ": " + error);
+                        }
+                    });
+                } else {
+                    // This is a movie marked as series, fetch movie rating
+                    ratingManager.fetchMovieRating(seriesPoster, new TmdbRatingManager.RatingCallback() {
+                        @Override
+                        public void onSuccess(Float rating) {
+                            if (getActivity() != null) {
+                                getActivity().runOnUiThread(new Runnable() {
+                                    @Override
+                                    public void run() {
+                                        adapter.notifyDataSetChanged();
+                                    }
+                                });
+                            }
+                        }
+
+                        @Override
+                        public void onError(String error) {
+                            Log.e("SeriesFragment", "Failed to fetch movie rating for " + seriesPoster.getTitle() + ": " + error);
+                        }
+                    });
+                }
+            }
         }
     }
 }
