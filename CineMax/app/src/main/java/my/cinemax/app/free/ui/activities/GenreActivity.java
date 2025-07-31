@@ -78,15 +78,21 @@ public class GenreActivity extends AppCompatActivity {
         setContentView(R.layout.activity_genre);
         prefManager= new PrefManager(getApplicationContext());
 
-        getGenre();
-        if (genre == null) {
-            // If genre is null, finish the activity
-            return;
+        try {
+            getGenre();
+            if (genre == null) {
+                Log.e("GenreActivity", "Genre is null after getGenre(), finishing activity");
+                finish();
+                return;
+            }
+            initView();
+            initAction();
+            loadPostersFromJson();
+            showAdsBanner();
+        } catch (Exception e) {
+            Log.e("GenreActivity", "Error in onCreate: " + e.getMessage(), e);
+            finish();
         }
-        initView();
-        initAction();
-        loadPostersFromJson();
-        showAdsBanner();
     }
 
 
@@ -177,12 +183,19 @@ public class GenreActivity extends AppCompatActivity {
         return super.onOptionsItemSelected(itemMenu);
     }
     private void getGenre() {
-        genre = getIntent().getParcelableExtra("genre");
+        // Get genre info from intent extras instead of Parcelable
+        Integer genreId = getIntent().getIntExtra("genre_id", -1);
+        String genreTitle = getIntent().getStringExtra("genre_title");
         from = getIntent().getStringExtra("from");
         
-        // Add null safety check
-        if (genre == null) {
-            Log.e("GenreActivity", "Genre is null, finishing activity");
+        // Create a new Genre object with the received data
+        if (genreId != null && genreTitle != null) {
+            genre = new Genre();
+            genre.setId(genreId);
+            genre.setTitle(genreTitle);
+            Log.d("GenreActivity", "Received genre: " + genreTitle + " (ID: " + genreId + ")");
+        } else {
+            Log.e("GenreActivity", "Genre ID or title is null, finishing activity");
             finish();
             return;
         }
@@ -318,6 +331,7 @@ public class GenreActivity extends AppCompatActivity {
         relative_layout_load_more.setVisibility(View.GONE);
         swipe_refresh_layout_list_genre_search.setRefreshing(false);
         linear_layout_load_genre_activity.setVisibility(View.GONE);
+        
         } catch (Exception e) {
             Log.e("GenreActivity", "Error in filterAndDisplayMovies: " + e.getMessage(), e);
             showError();

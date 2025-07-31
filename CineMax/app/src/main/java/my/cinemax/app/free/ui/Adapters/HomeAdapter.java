@@ -153,37 +153,45 @@ public class HomeAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
                 break;
             case 4:
                 final GenreHolder holder_genres = (GenreHolder) holder_parent;
-                holder_genres.text_view_item_genre_title.setText(dataList.get(position).getGenre().getTitle());
-                holder_genres.image_view_item_genre_more.setOnClickListener(v-> {
-                    if (dataList.get(position).getGenre().getId() == -1){
-                        Intent intent  =  new Intent(activity.getApplicationContext(), TopActivity.class);
-                        intent.putExtra("order", "rating");
-                        (activity).startActivity(intent, ActivityOptionsCompat.makeScaleUpAnimation(v, (int) v.getX(), (int) v.getY(), v.getWidth(), v.getHeight()).toBundle());
-                    }else if (dataList.get(position).getGenre().getId() == 0){
-                        Intent intent  =  new Intent(activity.getApplicationContext(), TopActivity.class);
-                        intent.putExtra("order", "views");
-                        (activity).startActivity(intent, ActivityOptionsCompat.makeScaleUpAnimation(v, (int) v.getX(), (int) v.getY(), v.getWidth(), v.getHeight()).toBundle());
-                    }else if (dataList.get(position).getGenre().getId() == -2){
-                        Intent intent  =  new Intent(activity.getApplicationContext(), MyListActivity.class);
-                        (activity).startActivity(intent, ActivityOptionsCompat.makeScaleUpAnimation(v, (int) v.getX(), (int) v.getY(), v.getWidth(), v.getHeight()).toBundle());
-                    }else{
-                        Intent intent  =  new Intent(activity.getApplicationContext(), GenreActivity.class);
-                        intent.putExtra("genre", dataList.get(position).getGenre());
-                        (activity).startActivity(intent, ActivityOptionsCompat.makeScaleUpAnimation(v, (int) v.getX(), (int) v.getY(), v.getWidth(), v.getHeight()).toBundle());
-                    }
+                // Add null safety checks
+                if (dataList.get(position).getGenre() != null) {
+                    holder_genres.text_view_item_genre_title.setText(dataList.get(position).getGenre().getTitle());
+                    holder_genres.image_view_item_genre_more.setOnClickListener(v-> {
+                        if (dataList.get(position).getGenre().getId() == -1){
+                            Intent intent  =  new Intent(activity.getApplicationContext(), TopActivity.class);
+                            intent.putExtra("order", "rating");
+                            (activity).startActivity(intent, ActivityOptionsCompat.makeScaleUpAnimation(v, (int) v.getX(), (int) v.getY(), v.getWidth(), v.getHeight()).toBundle());
+                        }else if (dataList.get(position).getGenre().getId() == 0){
+                            Intent intent  =  new Intent(activity.getApplicationContext(), TopActivity.class);
+                            intent.putExtra("order", "views");
+                            (activity).startActivity(intent, ActivityOptionsCompat.makeScaleUpAnimation(v, (int) v.getX(), (int) v.getY(), v.getWidth(), v.getHeight()).toBundle());
+                        }else if (dataList.get(position).getGenre().getId() == -2){
+                            Intent intent  =  new Intent(activity.getApplicationContext(), MyListActivity.class);
+                            (activity).startActivity(intent, ActivityOptionsCompat.makeScaleUpAnimation(v, (int) v.getX(), (int) v.getY(), v.getWidth(), v.getHeight()).toBundle());
+                        }else{
+                            Intent intent  =  new Intent(activity.getApplicationContext(), GenreActivity.class);
+                            // Pass only essential genre info to avoid Parcelable issues
+                            intent.putExtra("genre_id", dataList.get(position).getGenre().getId());
+                            intent.putExtra("genre_title", dataList.get(position).getGenre().getTitle());
+                            (activity).startActivity(intent, ActivityOptionsCompat.makeScaleUpAnimation(v, (int) v.getX(), (int) v.getY(), v.getWidth(), v.getHeight()).toBundle());
+                        }
 
-                });
-                this.linearLayoutManagerGenreAdapter=  new LinearLayoutManager(activity, LinearLayoutManager.HORIZONTAL, false);
-                if (dataList.get(position).getGenre().getId() == -2)
-                    this.posterAdapter =new PosterAdapter(dataList.get(position).getGenre().getPosters(),activity,true);
-                else
-                    this.posterAdapter =new PosterAdapter(dataList.get(position).getGenre().getPosters(),activity);
+                    });
+                    this.linearLayoutManagerGenreAdapter=  new LinearLayoutManager(activity, LinearLayoutManager.HORIZONTAL, false);
+                    if (dataList.get(position).getGenre().getId() == -2)
+                        this.posterAdapter =new PosterAdapter(dataList.get(position).getGenre().getPosters(),activity,true);
+                    else
+                        this.posterAdapter =new PosterAdapter(dataList.get(position).getGenre().getPosters(),activity);
 
-                holder_genres.recycle_view_posters_item_genre.setHasFixedSize(true);
-                holder_genres.recycle_view_posters_item_genre.setAdapter(posterAdapter);
-                holder_genres.recycle_view_posters_item_genre.setLayoutManager(linearLayoutManagerGenreAdapter);
-                posterAdapter.notifyDataSetChanged();
-
+                    holder_genres.recycle_view_posters_item_genre.setHasFixedSize(true);
+                    holder_genres.recycle_view_posters_item_genre.setAdapter(posterAdapter);
+                    holder_genres.recycle_view_posters_item_genre.setLayoutManager(linearLayoutManagerGenreAdapter);
+                    posterAdapter.notifyDataSetChanged();
+                } else {
+                    // Handle null genre case
+                    holder_genres.text_view_item_genre_title.setText("Unknown Genre");
+                    holder_genres.image_view_item_genre_more.setVisibility(View.GONE);
+                }
                 break;
             case 6:{
                 final AdmobNativeHolder holder_admob = (AdmobNativeHolder) holder_parent;
