@@ -25,7 +25,7 @@ import com.unity3d.ads.UnityAds;
 
 import my.cinemax.app.free.BuildConfig;
 import my.cinemax.app.free.R;
-import my.cinemax.app.free.database.SimpleDataManager;
+import my.cinemax.app.free.database.DataManager;
 
 /**
  * Created by Tamim on 28/09/2019.
@@ -111,15 +111,15 @@ public class MyApplication extends MultiDexApplication {
      */
     private void initializeDatabase() {
         try {
-            // Initialize SimpleDataManager which will create the database
-            SimpleDataManager dataManager = SimpleDataManager.getInstance(this);
+            // Initialize DataManager which will create the database
+            DataManager dataManager = DataManager.getInstance(this);
             
             // Clean old data on app start (optional)
             dataManager.cleanOldData();
             
             // Test database functionality (only in debug mode)
             if (BuildConfig.DEBUG) {
-                dataManager.checkDatabaseStatus(new SimpleDataManager.DatabaseStatusCallback() {
+                dataManager.checkDatabaseStatus(new DataManager.DatabaseStatusCallback() {
                     @Override
                     public void onStatus(boolean hasData, int itemCount) {
                         android.util.Log.d("MyApplication", "Database status - Has data: " + hasData + ", Item count: " + itemCount);
@@ -127,7 +127,7 @@ public class MyApplication extends MultiDexApplication {
                 });
             }
             
-            android.util.Log.d("MyApplication", "Simple database initialized successfully");
+            android.util.Log.d("MyApplication", "Database initialized successfully with Room 2.6.1");
         } catch (Exception e) {
             android.util.Log.e("MyApplication", "Error initializing database: " + e.getMessage(), e);
         }

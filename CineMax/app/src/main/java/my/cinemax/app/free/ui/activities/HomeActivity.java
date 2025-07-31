@@ -97,7 +97,11 @@ import retrofit2.Callback;
 import retrofit2.Response;
 import retrofit2.Retrofit;
 import my.cinemax.app.free.entity.Actress;
-import my.cinemax.app.free.database.SimpleDataManager;
+import my.cinemax.app.free.database.DataManager;
+import my.cinemax.app.free.database.entities.MovieEntity;
+import my.cinemax.app.free.database.repository.MovieRepository;
+
+import androidx.lifecycle.Observer;
 
 public class HomeActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener {
     private final List<Fragment> mFragmentList = new ArrayList<>();
@@ -105,7 +109,7 @@ public class HomeActivity extends AppCompatActivity implements NavigationView.On
     private ViewPagerAdapter adapter;
     private JsonApiResponse cachedJsonResponse = null;
     private boolean dataLoaded = false;
-    private SimpleDataManager dataManager;
+    private DataManager dataManager;
     private NavigationView navigationView;
     private TextView text_view_name_nave_header;
     private CircleImageView circle_image_view_profile_nav_header;
@@ -1290,10 +1294,10 @@ public class HomeActivity extends AppCompatActivity implements NavigationView.On
      */
     private void initializeDataManager() {
         try {
-            dataManager = SimpleDataManager.getInstance(this);
-            Log.d("HomeActivity", "SimpleDataManager initialized successfully");
+            dataManager = DataManager.getInstance(this);
+            Log.d("HomeActivity", "DataManager initialized successfully with Room 2.6.1");
         } catch (Exception e) {
-            Log.e("HomeActivity", "Error initializing SimpleDataManager: " + e.getMessage(), e);
+            Log.e("HomeActivity", "Error initializing DataManager: " + e.getMessage(), e);
             Toasty.error(this, "Database initialization failed", Toast.LENGTH_SHORT).show();
         }
     }
@@ -1311,7 +1315,7 @@ public class HomeActivity extends AppCompatActivity implements NavigationView.On
         
         Log.d("HomeActivity", "Starting database-first data loading...");
         
-        dataManager.loadDataWithCaching(new SimpleDataManager.DataLoadCallback() {
+        dataManager.loadDataWithCaching(new DataManager.DataLoadCallback() {
             @Override
             public void onDataLoaded(boolean fromCache) {
                 Log.d("HomeActivity", "Data loaded from " + (fromCache ? "cache" : "network"));
@@ -1343,7 +1347,7 @@ public class HomeActivity extends AppCompatActivity implements NavigationView.On
                 Log.e("HomeActivity", "Data loading error: " + error);
                 
                 // Check if we have any cached data to display
-                dataManager.checkDatabaseStatus(new SimpleDataManager.DatabaseStatusCallback() {
+                dataManager.checkDatabaseStatus(new DataManager.DatabaseStatusCallback() {
                     @Override
                     public void onStatus(boolean hasData, int itemCount) {
                         if (hasData) {
@@ -1365,30 +1369,30 @@ public class HomeActivity extends AppCompatActivity implements NavigationView.On
     
     /**
      * Update UI with data from database
-     * This method gets data from database and updates fragments accordingly
+     * This method observes database changes and updates fragments accordingly
      */
     private void updateUIFromDatabase() {
         if (dataManager == null) {
-            Log.e("HomeActivity", "SimpleDataManager is null, cannot update UI from database");
+            Log.e("HomeActivity", "DataManager is null, cannot update UI from database");
             return;
         }
         
         try {
-            // Get all movies from database
-            dataManager.getAllMovies(new SimpleDataManager.MoviesCallback() {
+            MovieRepository movieRepository = dataManager.getMovieRepository();
+            
+            // Observe all movies and update fragments when data changes
+            movieRepository.getAllMovies().observe(this, new Observer<List<MovieEntity>>() {
                 @Override
-                public void onMoviesLoaded(List<Poster> movies) {
-                    if (movies != null && !movies.isEmpty()) {
-                        Log.d("HomeActivity", "Received " + movies.size() + " movies from database");
+                public void onChanged(List<MovieEntity> movieEntities) {
+                    if (movieEntities != null && !movieEntities.isEmpty()) {
+                        Log.d("HomeActivity", "Received " + movieEntities.size() + " movies from database");
+                        
+                        // Convert database entities back to API format for existing fragments
+                        List<Poster> posters = convertEntitiesToPosters(movieEntities);
                         
                         // Update existing fragments with database data
-                        runOnUiThread(() -> updateFragmentsWithDatabaseData(movies));
+                        updateFragmentsWithDatabaseData(posters);
                     }
-                }
-                
-                @Override
-                public void onError(String error) {
-                    Log.e("HomeActivity", "Error loading movies from database: " + error);
                 }
             });
             
@@ -1397,7 +1401,52 @@ public class HomeActivity extends AppCompatActivity implements NavigationView.On
         }
     }
     
-
+    
+    /**
+     * Convert database entities to API Poster objects for compatibility with existing fragments
+     */
+    private List<Poster> convertEntitiesToPosters(List<MovieEntity> entities) {
+        List<Poster> posters = new ArrayList<>();
+        
+        for (MovieEntity entity : entities) {
+            try {
+                Poster poster = new Poster();
+                poster.setId(entity.getId());
+                poster.setTitle(entity.getTitle());
+                poster.setType(entity.getType());
+                poster.setLabel(entity.getLabel());
+                poster.setSublabel(entity.getSublabel());
+                poster.setImdb(entity.getImdb());
+                poster.setDownloadas(entity.getDownloadas());
+                poster.setComment(entity.isComment());
+                poster.setPlayas(entity.getPlayas());
+                poster.setDescription(entity.getDescription());
+                poster.setClassification(entity.getClassification());
+                poster.setYear(entity.getYear());
+                poster.setDuration(entity.getDuration());
+                poster.setRating(entity.getRating());
+                poster.setImage(entity.getImage());
+                poster.setCover(entity.getCover());
+                poster.setViews(entity.getViews());
+                poster.setCreatedAt(entity.getCreatedAt());
+                poster.setTrailer(entity.getTrailer());
+                poster.setFeatured(entity.isFeatured());
+                
+                // TODO: Convert JSON strings back to objects if needed
+                // For now, we'll keep them as empty lists for compatibility
+                poster.setGenres(new ArrayList<>());
+                poster.setActors(new ArrayList<>());
+                poster.setSources(new ArrayList<>());
+                poster.setSubtitles(new ArrayList<>());
+                
+                posters.add(poster);
+            } catch (Exception e) {
+                Log.e("HomeActivity", "Error converting entity to poster: " + e.getMessage(), e);
+            }
+        }
+        
+        return posters;
+    }
     
     /**
      * Update existing fragments with database data
