@@ -527,8 +527,21 @@ public class TvFragment extends Fragment {
                                       " - Categories: " + (channel.getCategories() != null ? channel.getCategories().size() : 0) +
                                       " - Countries: " + (channel.getCountries() != null ? channel.getCountries().size() : 0) +
                                       " - Sublabel: " + channel.getSublabel());
+                                if (channel.getCategories() != null) {
+                                    for (Category category : channel.getCategories()) {
+                                        Log.d("TvFragment", "  - Category: " + category.getTitle() + " (ID: " + category.getId() + ")");
+                                    }
+                                }
+                                if (channel.getCountries() != null) {
+                                    for (Country country : channel.getCountries()) {
+                                        Log.d("TvFragment", "  - Country: " + country.getTitle() + " (ID: " + country.getId() + ")");
+                                    }
+                                }
                             }
                         }
+                        
+                        // Debug filtering
+                        Log.d("TvFragment", "Filtering - Category: " + categorySelected + ", Country: " + countrySelected + ", Filtered count: " + filteredChannels.size());
                         
                         if (!filteredChannels.isEmpty()) {
                             for (Channel channel : filteredChannels) {

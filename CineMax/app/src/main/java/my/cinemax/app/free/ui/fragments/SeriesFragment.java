@@ -459,10 +459,18 @@ public class SeriesFragment extends Fragment {
                                     seriesCount++;
                                     Log.d("SeriesFragment", "Found series: " + poster.getTitle() + " with genres: " + 
                                           (poster.getGenres() != null ? poster.getGenres().size() : 0));
+                                    if (poster.getGenres() != null) {
+                                        for (Genre genre : poster.getGenres()) {
+                                            Log.d("SeriesFragment", "  - Genre: " + genre.getTitle() + " (ID: " + genre.getId() + ")");
+                                        }
+                                    }
                                 }
                             }
                             Log.d("SeriesFragment", "Total series in API: " + seriesCount);
                         }
+                        
+                        // Debug genre filtering
+                        Log.d("SeriesFragment", "Genre filtering - Selected: " + genreSelected + ", Filtered count: " + filteredSeries.size());
                         
                         // Apply ordering
                         if (orderSelected != null) {
