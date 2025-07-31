@@ -23,10 +23,12 @@ import my.cinemax.app.free.Provider.PrefManager;
 import my.cinemax.app.free.R;
 import my.cinemax.app.free.api.apiClient;
 import my.cinemax.app.free.api.apiRest;
+import my.cinemax.app.free.api.TMDBManager;
 import my.cinemax.app.free.entity.Data;
 import my.cinemax.app.free.entity.Genre;
 import my.cinemax.app.free.entity.JsonApiResponse;
 import my.cinemax.app.free.ui.Adapters.HomeAdapter;
+import my.cinemax.app.free.api.TMDBManager;
 
 import java.util.ArrayList;
 import java.util.List;
