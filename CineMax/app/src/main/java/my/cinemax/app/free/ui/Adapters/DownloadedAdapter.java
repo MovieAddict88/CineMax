@@ -14,7 +14,6 @@ import android.widget.TextView;
 
 import com.orhanobut.hawk.Hawk;
 import my.cinemax.app.free.R;
-import my.cinemax.app.free.Utils.DownloadSettingsManager;
 import my.cinemax.app.free.Utils.Log;
 import my.cinemax.app.free.entity.DownloadItem;
 import com.squareup.picasso.Picasso;
@@ -33,13 +32,11 @@ public class DownloadedAdapter extends   RecyclerView.Adapter<RecyclerView.ViewH
     private final DownloadListener downloadListener;
     private List<DownloadItem> downloadItemList;
     private Activity activity;
-    private DownloadSettingsManager settingsManager;
     
     public DownloadedAdapter(List<DownloadItem> downloadItemList, Activity activity,DownloadListener downloadListener) {
         this.downloadItemList = downloadItemList;
         this.activity = activity;
         this.downloadListener = downloadListener;
-        this.settingsManager = new DownloadSettingsManager(activity);
     }
     @Override
     public RecyclerView.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
@@ -84,23 +81,12 @@ public class DownloadedAdapter extends   RecyclerView.Adapter<RecyclerView.ViewH
                     // Set progress
                     downloadedHolder.progress_bar_download.setProgress(downloadItem.getProgress());
                     
-                    // Set status text with speed and ETA
+                    // Set status text
                     String statusText = downloadItem.getProgress() + "%";
                     if (downloadItem.getTotalBytes() > 0) {
                         statusText += " (" + formatFileSize(downloadItem.getDownloadedBytes()) + 
                                     " / " + formatFileSize(downloadItem.getTotalBytes()) + ")";
                     }
-                    
-                    // Add speed and ETA information based on user settings
-                    if (settingsManager.isShowSpeed() && downloadItem.getDownloadSpeed() > 0) {
-                        statusText += "\n" + formatFileSize(downloadItem.getDownloadSpeed()) + "/s";
-                        if (settingsManager.isShowETA() && downloadItem.getEta() != null && !downloadItem.getEta().isEmpty()) {
-                            statusText += " • " + downloadItem.getEta() + " remaining";
-                        }
-                    } else if (settingsManager.isShowETA() && downloadItem.getEta() != null && !downloadItem.getEta().isEmpty()) {
-                        statusText += "\n" + downloadItem.getEta() + " remaining";
-                    }
-                    
                     downloadedHolder.text_view_download_status.setText(statusText);
                     
                     // Disable click actions during download
@@ -108,18 +94,11 @@ public class DownloadedAdapter extends   RecyclerView.Adapter<RecyclerView.ViewH
                     downloadedHolder.image_view_item_download_play.setClickable(false);
                     downloadedHolder.image_view_item_download_delete.setClickable(false);
                     downloadedHolder.image_view_item_download_finder.setClickable(false);
-                    
-                    // Show downloading indicator
-                    downloadedHolder.image_view_item_download_play.setImageResource(R.drawable.ic_play);
-                    downloadedHolder.image_view_item_download_play.setVisibility(View.VISIBLE);
-                    downloadedHolder.image_view_item_download_play.setAlpha(0.5f);
                 } else {
                     // Show normal completed download UI
                     downloadedHolder.progress_bar_download.setVisibility(View.GONE);
                     downloadedHolder.text_view_download_status.setVisibility(View.GONE);
                     downloadedHolder.image_view_item_download_play.setVisibility(View.VISIBLE);
-                    downloadedHolder.image_view_item_download_play.setAlpha(1.0f);
-                    downloadedHolder.image_view_item_download_play.setImageResource(R.drawable.ic_play);
                     
                     // Enable click actions for completed downloads
                     downloadedHolder.relative_layout_item_download.setClickable(true);

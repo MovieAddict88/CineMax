@@ -111,22 +111,21 @@ public class DownloadProgressManager {
                         progress = (int) ((downloadedBytes * 100) / totalBytes);
                     }
                     
-                    // Calculate download speed and ETA
-                    long downloadSpeed = calculateDownloadSpeed(downloadId, downloadedBytes);
-                    String eta = calculateETA(downloadId, downloadedBytes, totalBytes, downloadSpeed);
-                    
                     // Update download item with current progress
                     downloadItem.setProgress(progress);
                     downloadItem.setDownloadedBytes(downloadedBytes);
                     downloadItem.setTotalBytes(totalBytes);
                     downloadItem.setDownloading(true);
                     
-                    // Store current values for next calculation
+                    // Calculate and store ETA information (optional enhancement)
+                    String eta = calculateETA(downloadId, downloadedBytes, totalBytes);
+                    
+                    // Store current values for ETA calculation
                     lastDownloadedBytes.put(downloadId, downloadedBytes);
                     lastUpdateTime.put(downloadId, System.currentTimeMillis());
                     
-                    // Send progress update with speed and ETA
-                    sendProgressUpdate(downloadItem, status, progress, downloadSpeed, eta);
+                    // Send progress update
+                    sendProgressUpdate(downloadItem, status, progress);
                     
                     // Check if download is complete
                     if (status == DownloadManager.STATUS_SUCCESSFUL) {
@@ -152,29 +151,22 @@ public class DownloadProgressManager {
         updateTempDownloads();
     }
     
-    private long calculateDownloadSpeed(long downloadId, long currentBytes) {
+    private String calculateETA(long downloadId, long downloadedBytes, long totalBytes) {
         Long lastBytes = lastDownloadedBytes.get(downloadId);
         Long lastTime = lastUpdateTime.get(downloadId);
         
-        if (lastBytes == null || lastTime == null) {
-            return 0;
+        if (lastBytes == null || lastTime == null || totalBytes <= 0) {
+            return "";
         }
         
-        long bytesDiff = currentBytes - lastBytes;
+        long bytesDiff = downloadedBytes - lastBytes;
         long timeDiff = System.currentTimeMillis() - lastTime;
         
-        if (timeDiff > 0) {
-            return (bytesDiff * 1000) / timeDiff; // bytes per second
+        if (timeDiff <= 0 || bytesDiff <= 0) {
+            return "";
         }
         
-        return 0;
-    }
-    
-    private String calculateETA(long downloadId, long downloadedBytes, long totalBytes, long downloadSpeed) {
-        if (downloadSpeed <= 0 || totalBytes <= 0) {
-            return "Calculating...";
-        }
-        
+        long downloadSpeed = (bytesDiff * 1000) / timeDiff; // bytes per second
         long remainingBytes = totalBytes - downloadedBytes;
         long remainingSeconds = remainingBytes / downloadSpeed;
         
@@ -189,7 +181,7 @@ public class DownloadProgressManager {
         }
     }
     
-    private void sendProgressUpdate(DownloadItem downloadItem, int status, int progress, long downloadSpeed, String eta) {
+    private void sendProgressUpdate(DownloadItem downloadItem, int status, int progress) {
         Intent intent = new Intent(DOWNLOAD_PROGRESS_UPDATE);
         intent.putExtra("action", "progress_update");
         intent.putExtra("downloadId", downloadItem.getDownloadid());
@@ -199,8 +191,6 @@ public class DownloadProgressManager {
         intent.putExtra("downloadedBytes", downloadItem.getDownloadedBytes());
         intent.putExtra("totalBytes", downloadItem.getTotalBytes());
         intent.putExtra("type", downloadItem.getType());
-        intent.putExtra("downloadSpeed", downloadSpeed);
-        intent.putExtra("eta", eta);
         
         LocalBroadcastManager.getInstance(context).sendBroadcast(intent);
     }
@@ -275,15 +265,6 @@ public class DownloadProgressManager {
             lastDownloadedBytes.put(downloadItem.getDownloadid(), 0L);
             lastUpdateTime.put(downloadItem.getDownloadid(), System.currentTimeMillis());
             updateTempDownloads();
-            
-            // Send broadcast to notify Download Fragment about new download
-            Intent intent = new Intent(DOWNLOAD_PROGRESS_UPDATE);
-            intent.putExtra("action", "download_started");
-            intent.putExtra("downloadId", downloadItem.getDownloadid());
-            intent.putExtra("title", downloadItem.getTitle());
-            intent.putExtra("type", downloadItem.getType());
-            
-            LocalBroadcastManager.getInstance(context).sendBroadcast(intent);
         }
     }
     
