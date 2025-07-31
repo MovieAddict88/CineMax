@@ -1,5 +1,8 @@
 package my.cinemax.app.free.api;
 
+import my.cinemax.app.free.entity.TmdbMovieResponse;
+import my.cinemax.app.free.entity.TmdbTvResponse;
+import my.cinemax.app.free.entity.TmdbSearchResponse;
 import retrofit2.Call;
 import retrofit2.http.GET;
 import retrofit2.http.Path;

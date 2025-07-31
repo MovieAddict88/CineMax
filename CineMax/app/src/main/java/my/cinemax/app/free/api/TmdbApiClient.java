@@ -3,6 +3,9 @@ package my.cinemax.app.free.api;
 import android.util.Log;
 
 import my.cinemax.app.free.config.Global;
+import my.cinemax.app.free.entity.TmdbMovieResponse;
+import my.cinemax.app.free.entity.TmdbTvResponse;
+import my.cinemax.app.free.entity.TmdbSearchResponse;
 import okhttp3.OkHttpClient;
 import okhttp3.logging.HttpLoggingInterceptor;
 import retrofit2.Call;
