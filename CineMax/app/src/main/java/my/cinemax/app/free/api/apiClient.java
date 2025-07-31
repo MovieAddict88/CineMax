@@ -159,7 +159,35 @@ public class apiClient {
         Retrofit retrofit = getClient();
         apiRest service = retrofit.create(apiRest.class);
         Call<JsonApiResponse> call = service.getJsonApiData();
-        call.enqueue(callback);
+        call.enqueue(new Callback<JsonApiResponse>() {
+            @Override
+            public void onResponse(Call<JsonApiResponse> call, retrofit2.Response<JsonApiResponse> response) {
+                if (response.isSuccessful() && response.body() != null) {
+                    // Auto-enhance with TMDB metadata
+                    TMDBMetadataManager.getInstance().autoEnhanceJsonResponse(response.body(), 
+                        new TMDBMetadataManager.TMDBEnhancementCallback() {
+                            @Override
+                            public void onSuccess(Poster enhancedItem) {
+                                // Continue with original callback
+                                callback.onResponse(call, response);
+                            }
+                            
+                            @Override
+                            public void onError(String error) {
+                                // Continue even if enhancement fails
+                                callback.onResponse(call, response);
+                            }
+                        });
+                } else {
+                    callback.onResponse(call, response);
+                }
+            }
+            
+            @Override
+            public void onFailure(Call<JsonApiResponse> call, Throwable t) {
+                callback.onFailure(call, t);
+            }
+        });
     }
     
     /**
