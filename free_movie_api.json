@@ -5,33 +5,33 @@
     "last_updated": "2025-07-31",
     "total_movies": 2,
     "total_channels": 26,
-    "total_actors": 2
+    "total_actors": 7
   },
   "home": {
     "slides": [
       {
         "id": 1,
-        "title": "Big Buck Bunny",
+        "title": "The Avengers",
         "type": "movie",
-        "image": "https://peach.blender.org/wp-content/uploads/title_anouncement.jpg?x11217",
+        "image": "https://image.tmdb.org/t/p/w500/RYMX2wcKCBAr24UyPD7xwmjaTn.jpg",
         "url": "movies/1",
         "poster": {
           "id": 1,
-          "title": "Big Buck Bunny",
+          "title": "The Avengers",
           "type": "movie",
-          "label": "Animation",
-          "sublabel": "Short Film",
-          "imdb": "8.5",
-          "downloadas": "big-buck-bunny.mp4",
+          "label": "Action",
+          "sublabel": "Superhero",
+          "imdb": "7.8",
+          "downloadas": "the-avengers-2012.mp4",
           "comment": true,
           "playas": "video",
-          "description": "Big Buck Bunny tells the story of a giant rabbit with a heart bigger than himself. When one sunny day three rodents rudely harass him by throwing nuts, hitting his flowers, and destroying his home, he snaps and goes after them.",
-          "classification": "G",
-          "year": "2008",
-          "duration": "10:00",
-          "rating": 8.5,
-          "image": "https://peach.blender.org/wp-content/uploads/title_anouncement.jpg?x11217",
-          "cover": "https://peach.blender.org/wp-content/uploads/title_anouncement.jpg?x11217",
+          "description": "When an unexpected enemy emerges and threatens global safety and security, Nick Fury, director of the international peacekeeping agency known as S.H.I.E.L.D., finds himself in need of a team to pull the world back from the brink of disaster. Spanning the globe, a daring recruitment effort begins!",
+          "classification": "PG-13",
+          "year": "2012",
+          "duration": "2:23",
+          "rating": 7.8,
+          "image": "https://image.tmdb.org/t/p/w500/RYMX2wcKCBAr24UyPD7xwmjaTn.jpg",
+          "cover": "https://image.tmdb.org/t/p/w1280/9BBTo63ANSmhC4e6r62OJFuK2GL.jpg",
           "genres": [
             {
               "id": 6,
@@ -316,23 +316,23 @@
     "featured_movies": [
       {
         "id": 1,
-        "title": "Big Buck Bunny",
+        "title": "The Avengers",
         "type": "movie",
-        "label": "Animation",
-        "sublabel": "Short Film",
-        "imdb": "8.5",
-        "downloadas": "big-buck-bunny.mp4",
+        "label": "Action",
+        "sublabel": "Superhero",
+        "imdb": "7.8",
+        "downloadas": "the-avengers-2012.mp4",
         "comment": true,
         "playas": "video",
-        "description": "Big Buck Bunny tells the story of a giant rabbit with a heart bigger than himself. When one sunny day three rodents rudely harass him by throwing nuts, hitting his flowers, and destroying his home, he snaps and goes after them.",
-        "classification": "G",
-        "year": "2008",
-        "duration": "10:00",
-        "rating": 8.5,
+        "description": "When an unexpected enemy emerges and threatens global safety and security, Nick Fury, director of the international peacekeeping agency known as S.H.I.E.L.D., finds himself in need of a team to pull the world back from the brink of disaster. Spanning the globe, a daring recruitment effort begins!",
+        "classification": "PG-13",
+        "year": "2012",
+        "duration": "2:23",
+        "rating": 7.8,
         "views": 15000,
         "created_at": "2024-01-01",
-        "image": "https://peach.blender.org/wp-content/uploads/title_anouncement.jpg?x11217",
-        "cover": "https://peach.blender.org/wp-content/uploads/title_anouncement.jpg?x11217",
+        "image": "https://image.tmdb.org/t/p/w500/RYMX2wcKCBAr24UyPD7xwmjaTn.jpg",
+        "cover": "https://image.tmdb.org/t/p/w1280/9BBTo63ANSmhC4e6r62OJFuK2GL.jpg",
         "genres": [
           {
             "id": 6,
@@ -511,33 +511,33 @@
   "movies": [
     {
       "id": 1,
-      "title": "Big Buck Bunny",
+      "title": "The Avengers",
       "type": "movie",
-      "label": "Animation",
-      "sublabel": "Short Film",
-      "imdb": "8.5",
-      "downloadas": "big-buck-bunny.mp4",
+      "label": "Action",
+      "sublabel": "Superhero",
+      "imdb": "7.8",
+      "downloadas": "the-avengers-2012.mp4",
       "comment": true,
       "playas": "video",
-      "description": "Big Buck Bunny tells the story of a giant rabbit with a heart bigger than himself. When one sunny day three rodents rudely harass him by throwing nuts, hitting his flowers, and destroying his home, he snaps and goes after them.",
-      "classification": "G",
-      "year": "2008",
-      "duration": "10:00",
-      "rating": 8.5,
-      "image": "https://peach.blender.org/wp-content/uploads/title_anouncement.jpg?x11217",
-      "cover": "https://peach.blender.org/wp-content/uploads/title_anouncement.jpg?x11217",
+      "description": "When an unexpected enemy emerges and threatens global safety and security, Nick Fury, director of the international peacekeeping agency known as S.H.I.E.L.D., finds himself in need of a team to pull the world back from the brink of disaster. Spanning the globe, a daring recruitment effort begins!",
+      "classification": "PG-13",
+      "year": "2012",
+      "duration": "2:23",
+      "rating": 7.8,
+      "image": "https://image.tmdb.org/t/p/w500/RYMX2wcKCBAr24UyPD7xwmjaTn.jpg",
+      "cover": "https://image.tmdb.org/t/p/w1280/9BBTo63ANSmhC4e6r62OJFuK2GL.jpg",
       "genres": [
         {
-          "id": 16,
-          "title": "Animation"
+          "id": 878,
+          "title": "Science Fiction"
         },
         {
-          "id": 35,
-          "title": "Comedy"
+          "id": 28,
+          "title": "Action"
         },
         {
-          "id": 10751,
-          "title": "Family"
+          "id": 12,
+          "title": "Adventure"
         }
       ],
       "sources": [
@@ -583,7 +583,7 @@
           "kind": "external",
           "premium": "false",
           "external": true,
-          "url": "https://vidsrc.net/embed/movie/10378"
+          "url": "https://vidsrc.net/embed/movie/24428"
         }
       ],
       "trailer": {
@@ -595,13 +595,53 @@
       "actors": [
         {
           "id": 1,
-          "name": "Tom Hanks",
+          "name": "Robert Downey Jr.",
           "type": "actor",
-          "role": "Lead Actor",
-          "image": "https://example.com/tom-hanks.jpg",
-          "born": "1956-07-09",
+          "role": "Tony Stark / Iron Man",
+          "image": "https://image.tmdb.org/t/p/w500/5qHNjhtjMD4YWH3UP0rm4tKwxCL.jpg",
+          "born": "1965-04-04",
+          "height": "5'8\"",
+          "bio": "American actor and producer"
+        },
+        {
+          "id": 2,
+          "name": "Chris Evans",
+          "type": "actor",
+          "role": "Steve Rogers / Captain America",
+          "image": "https://image.tmdb.org/t/p/w500/3bOGNsHlrswhyW79uvIHH1V43JI.jpg",
+          "born": "1981-06-13",
           "height": "6'0\"",
-          "bio": "American actor and filmmaker"
+          "bio": "American actor"
+        },
+        {
+          "id": 3,
+          "name": "Mark Ruffalo",
+          "type": "actor",
+          "role": "Bruce Banner / Hulk",
+          "image": "https://image.tmdb.org/t/p/w500/z3dvKqMNDQWk3QLxzumloQVR0pv.jpg",
+          "born": "1967-11-22",
+          "height": "5'8\"",
+          "bio": "American actor and producer"
+        },
+        {
+          "id": 4,
+          "name": "Chris Hemsworth",
+          "type": "actor",
+          "role": "Thor",
+          "image": "https://image.tmdb.org/t/p/w500/jpurJ9jAcLCYjgHHfYF32m3zJYm.jpg",
+          "born": "1983-08-11",
+          "height": "6'3\"",
+          "bio": "Australian actor"
+        },
+        {
+          "id": 5,
+          "name": "Scarlett Johansson",
+          "type": "actress",
+          "role": "Natasha Romanoff / Black Widow",
+          "image": "https://image.tmdb.org/t/p/w500/6NsMbJXRlDZuDzatN2akFdGuTvx.jpg",
+          "born": "1984-11-22",
+          "height": "5'3\"",
+          "bio": "American actress"
         }
       ],
       "subtitles": [
