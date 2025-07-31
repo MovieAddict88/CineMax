@@ -468,12 +468,26 @@
       {
         "id": 1,
         "title": "Action",
-        "posters": []
+        "posters": [
+          {
+            "id": 1,
+            "title": "Big Buck Bunny",
+            "type": "movie",
+            "image": "https://peach.blender.org/wp-content/uploads/title_anouncement.jpg?x11217"
+          }
+        ]
       },
       {
         "id": 2,
         "title": "Comedy",
-        "posters": []
+        "posters": [
+          {
+            "id": 1,
+            "title": "Big Buck Bunny",
+            "type": "movie",
+            "image": "https://peach.blender.org/wp-content/uploads/title_anouncement.jpg?x11217"
+          }
+        ]
       },
       {
         "id": 3,
@@ -482,6 +496,7 @@
           {
             "id": 2,
             "title": "Sample TV Series",
+            "type": "series",
             "image": "https://example.com/sample-series.jpg"
           }
         ]
@@ -489,12 +504,26 @@
       {
         "id": 4,
         "title": "Horror",
-        "posters": []
+        "posters": [
+          {
+            "id": 1,
+            "title": "Big Buck Bunny",
+            "type": "movie",
+            "image": "https://peach.blender.org/wp-content/uploads/title_anouncement.jpg?x11217"
+          }
+        ]
       },
       {
         "id": 5,
         "title": "Sci-Fi",
-        "posters": []
+        "posters": [
+          {
+            "id": 1,
+            "title": "Big Buck Bunny",
+            "type": "movie",
+            "image": "https://peach.blender.org/wp-content/uploads/title_anouncement.jpg?x11217"
+          }
+        ]
       },
       {
         "id": 6,
@@ -503,6 +532,7 @@
           {
             "id": 1,
             "title": "Big Buck Bunny",
+            "type": "movie",
             "image": "https://peach.blender.org/wp-content/uploads/title_anouncement.jpg?x11217"
           }
         ]
@@ -2050,12 +2080,84 @@
     {
       "id": 1,
       "title": "Action",
-      "posters": []
+      "posters": [
+        {
+          "id": 1,
+          "title": "Big Buck Bunny",
+          "type": "movie",
+          "label": "Animation",
+          "sublabel": "Short Film",
+          "imdb": "8.5",
+          "downloadas": "big-buck-bunny.mp4",
+          "comment": true,
+          "playas": "video",
+          "description": "Big Buck Bunny tells the story of a giant rabbit with a heart bigger than himself.",
+          "classification": "G",
+          "year": "2008",
+          "duration": "10:00",
+          "rating": 8.5,
+          "views": 15000,
+          "created_at": "2024-01-01",
+          "image": "https://peach.blender.org/wp-content/uploads/title_anouncement.jpg?x11217",
+          "cover": "https://peach.blender.org/wp-content/uploads/title_anouncement.jpg?x11217",
+          "genres": [{"id": 1, "title": "Action"}, {"id": 6, "title": "Animation"}],
+          "sources": [
+            {
+              "id": 1,
+              "type": "video",
+              "title": "Big Buck Bunny 1080p",
+              "quality": "1080p",
+              "size": "264MB",
+              "kind": "both",
+              "premium": "false",
+              "external": false,
+              "url": "http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4"
+            }
+          ],
+          "actors": [{"id": 1, "name": "Tom Hanks", "type": "actor", "role": "Lead Actor", "image": "https://example.com/tom-hanks.jpg"}]
+        }
+      ]
     },
     {
       "id": 2,
       "title": "Comedy",
-      "posters": []
+      "posters": [
+        {
+          "id": 1,
+          "title": "Big Buck Bunny",
+          "type": "movie",
+          "label": "Animation",
+          "sublabel": "Short Film",
+          "imdb": "8.5",
+          "downloadas": "big-buck-bunny.mp4",
+          "comment": true,
+          "playas": "video",
+          "description": "Big Buck Bunny tells the story of a giant rabbit with a heart bigger than himself.",
+          "classification": "G",
+          "year": "2008",
+          "duration": "10:00",
+          "rating": 8.5,
+          "views": 15000,
+          "created_at": "2024-01-01",
+          "image": "https://peach.blender.org/wp-content/uploads/title_anouncement.jpg?x11217",
+          "cover": "https://peach.blender.org/wp-content/uploads/title_anouncement.jpg?x11217",
+          "genres": [{"id": 2, "title": "Comedy"}, {"id": 6, "title": "Animation"}],
+          "sources": [
+            {
+              "id": 1,
+              "type": "video",
+              "title": "Big Buck Bunny 1080p",
+              "quality": "1080p",
+              "size": "264MB",
+              "kind": "both",
+              "premium": "false",
+              "external": false,
+              "url": "http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4"
+            }
+          ],
+          "actors": [{"id": 1, "name": "Tom Hanks", "type": "actor", "role": "Lead Actor", "image": "https://example.com/tom-hanks.jpg"}]
+        }
+      ]
     },
     {
       "id": 3,
@@ -2064,19 +2166,131 @@
         {
           "id": 2,
           "title": "Sample TV Series",
-          "image": "https://example.com/sample-series.jpg"
+          "type": "series",
+          "label": "Drama",
+          "sublabel": "2 Seasons",
+          "imdb": "8.2",
+          "downloadas": "sample-series",
+          "comment": true,
+          "playas": "video",
+          "description": "A gripping drama series with 2 seasons.",
+          "classification": "TV-14",
+          "year": "2023",
+          "duration": "45:00",
+          "rating": 8.2,
+          "views": 8000,
+          "created_at": "2024-01-02",
+          "image": "https://example.com/sample-series.jpg",
+          "cover": "https://example.com/sample-series-cover.jpg",
+          "genres": [{"id": 3, "title": "Drama"}],
+          "sources": [],
+          "actors": [{"id": 2, "name": "Emma Watson", "type": "actress", "role": "Lead Actress", "image": "https://example.com/emma-watson.jpg"}],
+          "seasons": [
+            {
+              "id": 1,
+              "title": "Season 1",
+              "episodes": [
+                {
+                  "id": 1,
+                  "title": "Episode 1",
+                  "episode_number": 1,
+                  "sources": [
+                    {
+                      "id": 1,
+                      "type": "video",
+                      "title": "Episode 1 - 1080p",
+                      "quality": "1080p",
+                      "url": "http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
         }
       ]
     },
     {
       "id": 4,
       "title": "Horror",
-      "posters": []
+      "posters": [
+        {
+          "id": 1,
+          "title": "Big Buck Bunny",
+          "type": "movie",
+          "label": "Animation",
+          "sublabel": "Short Film",
+          "imdb": "8.5",
+          "downloadas": "big-buck-bunny.mp4",
+          "comment": true,
+          "playas": "video",
+          "description": "Big Buck Bunny tells the story of a giant rabbit with a heart bigger than himself.",
+          "classification": "G",
+          "year": "2008",
+          "duration": "10:00",
+          "rating": 8.5,
+          "views": 15000,
+          "created_at": "2024-01-01",
+          "image": "https://peach.blender.org/wp-content/uploads/title_anouncement.jpg?x11217",
+          "cover": "https://peach.blender.org/wp-content/uploads/title_anouncement.jpg?x11217",
+          "genres": [{"id": 4, "title": "Horror"}, {"id": 6, "title": "Animation"}],
+          "sources": [
+            {
+              "id": 1,
+              "type": "video",
+              "title": "Big Buck Bunny 1080p",
+              "quality": "1080p",
+              "size": "264MB",
+              "kind": "both",
+              "premium": "false",
+              "external": false,
+              "url": "http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4"
+            }
+          ],
+          "actors": [{"id": 1, "name": "Tom Hanks", "type": "actor", "role": "Lead Actor", "image": "https://example.com/tom-hanks.jpg"}]
+        }
+      ]
     },
     {
       "id": 5,
       "title": "Sci-Fi",
-      "posters": []
+      "posters": [
+        {
+          "id": 1,
+          "title": "Big Buck Bunny",
+          "type": "movie",
+          "label": "Animation",
+          "sublabel": "Short Film",
+          "imdb": "8.5",
+          "downloadas": "big-buck-bunny.mp4",
+          "comment": true,
+          "playas": "video",
+          "description": "Big Buck Bunny tells the story of a giant rabbit with a heart bigger than himself.",
+          "classification": "G",
+          "year": "2008",
+          "duration": "10:00",
+          "rating": 8.5,
+          "views": 15000,
+          "created_at": "2024-01-01",
+          "image": "https://peach.blender.org/wp-content/uploads/title_anouncement.jpg?x11217",
+          "cover": "https://peach.blender.org/wp-content/uploads/title_anouncement.jpg?x11217",
+          "genres": [{"id": 5, "title": "Sci-Fi"}, {"id": 6, "title": "Animation"}],
+          "sources": [
+            {
+              "id": 1,
+              "type": "video",
+              "title": "Big Buck Bunny 1080p",
+              "quality": "1080p",
+              "size": "264MB",
+              "kind": "both",
+              "premium": "false",
+              "external": false,
+              "url": "http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4"
+            }
+          ],
+          "actors": [{"id": 1, "name": "Tom Hanks", "type": "actor", "role": "Lead Actor", "image": "https://example.com/tom-hanks.jpg"}]
+        }
+      ]
     },
     {
       "id": 6,
@@ -2085,7 +2299,37 @@
         {
           "id": 1,
           "title": "Big Buck Bunny",
-          "image": "https://peach.blender.org/wp-content/uploads/title_anouncement.jpg?x11217"
+          "type": "movie",
+          "label": "Animation",
+          "sublabel": "Short Film",
+          "imdb": "8.5",
+          "downloadas": "big-buck-bunny.mp4",
+          "comment": true,
+          "playas": "video",
+          "description": "Big Buck Bunny tells the story of a giant rabbit with a heart bigger than himself.",
+          "classification": "G",
+          "year": "2008",
+          "duration": "10:00",
+          "rating": 8.5,
+          "views": 15000,
+          "created_at": "2024-01-01",
+          "image": "https://peach.blender.org/wp-content/uploads/title_anouncement.jpg?x11217",
+          "cover": "https://peach.blender.org/wp-content/uploads/title_anouncement.jpg?x11217",
+          "genres": [{"id": 6, "title": "Animation"}],
+          "sources": [
+            {
+              "id": 1,
+              "type": "video",
+              "title": "Big Buck Bunny 1080p",
+              "quality": "1080p",
+              "size": "264MB",
+              "kind": "both",
+              "premium": "false",
+              "external": false,
+              "url": "http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4"
+            }
+          ],
+          "actors": [{"id": 1, "name": "Tom Hanks", "type": "actor", "role": "Lead Actor", "image": "https://example.com/tom-hanks.jpg"}]
         }
       ]
     }

@@ -133,6 +133,13 @@ public class Poster implements Parcelable {
         image = in.readString();
         cover = in.readString();
         genres = in.createTypedArrayList(Genre.CREATOR);
+        actors = in.createTypedArrayList(Actor.CREATOR);
+        if (in.readByte() == 0) {
+            views = null;
+        } else {
+            views = in.readInt();
+        }
+        createdAt = in.readString();
         sources = in.createTypedArrayList(Source.CREATOR);
         trailer = in.readParcelable(Source.class.getClassLoader());
         typeView = in.readInt();
@@ -167,6 +174,14 @@ public class Poster implements Parcelable {
         dest.writeString(image);
         dest.writeString(cover);
         dest.writeTypedList(genres);
+        dest.writeTypedList(actors);
+        if (views == null) {
+            dest.writeByte((byte) 0);
+        } else {
+            dest.writeByte((byte) 1);
+            dest.writeInt(views);
+        }
+        dest.writeString(createdAt);
         dest.writeTypedList(sources);
         dest.writeParcelable(trailer, flags);
         dest.writeInt(typeView);
