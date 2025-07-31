@@ -79,6 +79,18 @@ public class Poster implements Parcelable {
     @Expose
     private List<Genre> genres = new ArrayList<>();
 
+    @SerializedName("actors")
+    @Expose
+    private List<Actor> actors = new ArrayList<>();
+
+    @SerializedName("views")
+    @Expose
+    private Integer views;
+
+    @SerializedName("created_at")
+    @Expose
+    private String createdAt;
+
     @SerializedName("sources")
     @Expose
     private List<Source> sources = new ArrayList<>();
@@ -255,6 +267,30 @@ public class Poster implements Parcelable {
 
     public List<Genre> getGenres() {
         return genres;
+    }
+
+    public List<Actor> getActors() {
+        return actors;
+    }
+
+    public void setActors(List<Actor> actors) {
+        this.actors = actors;
+    }
+
+    public Integer getViews() {
+        return views;
+    }
+
+    public void setViews(Integer views) {
+        this.views = views;
+    }
+
+    public String getCreatedAt() {
+        return createdAt;
+    }
+
+    public void setCreatedAt(String createdAt) {
+        this.createdAt = createdAt;
     }
 
     public void setSources(List<Source> sources) {
