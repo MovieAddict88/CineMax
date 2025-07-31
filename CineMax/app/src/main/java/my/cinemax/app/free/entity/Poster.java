@@ -95,10 +95,86 @@ public class Poster implements Parcelable {
     @Expose
     private List<Source> sources = new ArrayList<>();
 
-
     @SerializedName("trailer")
     @Expose
     private Source trailer ;
+
+    // TMDB Integration Fields
+    @SerializedName("tmdb_id")
+    @Expose
+    private Integer tmdbId;
+
+    @SerializedName("country")
+    @Expose
+    private String country;
+
+    @SerializedName("backdrop")
+    @Expose
+    private String backdrop;
+
+    @SerializedName("poster_tmdb")
+    @Expose
+    private String posterTmdb;
+
+    @SerializedName("original_title")
+    @Expose
+    private String originalTitle;
+
+    @SerializedName("original_language")
+    @Expose
+    private String originalLanguage;
+
+    @SerializedName("popularity")
+    @Expose
+    private Float popularity;
+
+    @SerializedName("vote_count")
+    @Expose
+    private Integer voteCount;
+
+    @SerializedName("adult")
+    @Expose
+    private Boolean adult;
+
+    @SerializedName("release_date")
+    @Expose
+    private String releaseDate;
+
+    @SerializedName("first_air_date")
+    @Expose
+    private String firstAirDate;
+
+    @SerializedName("last_air_date")
+    @Expose
+    private String lastAirDate;
+
+    @SerializedName("number_of_seasons")
+    @Expose
+    private Integer numberOfSeasons;
+
+    @SerializedName("number_of_episodes")
+    @Expose
+    private Integer numberOfEpisodes;
+
+    @SerializedName("status")
+    @Expose
+    private String status;
+
+    @SerializedName("seasons")
+    @Expose
+    private List<Season> seasons = new ArrayList<>();
+
+    @SerializedName("production_companies")
+    @Expose
+    private List<String> productionCompanies = new ArrayList<>();
+
+    @SerializedName("networks")
+    @Expose
+    private List<String> networks = new ArrayList<>();
+
+    @SerializedName("spoken_languages")
+    @Expose
+    private List<String> spokenLanguages = new ArrayList<>();
 
     private int typeView = 1;
 
@@ -143,6 +219,48 @@ public class Poster implements Parcelable {
         sources = in.createTypedArrayList(Source.CREATOR);
         trailer = in.readParcelable(Source.class.getClassLoader());
         typeView = in.readInt();
+        
+        // TMDB fields
+        if (in.readByte() == 0) {
+            tmdbId = null;
+        } else {
+            tmdbId = in.readInt();
+        }
+        country = in.readString();
+        backdrop = in.readString();
+        posterTmdb = in.readString();
+        originalTitle = in.readString();
+        originalLanguage = in.readString();
+        if (in.readByte() == 0) {
+            popularity = null;
+        } else {
+            popularity = in.readFloat();
+        }
+        if (in.readByte() == 0) {
+            voteCount = null;
+        } else {
+            voteCount = in.readInt();
+        }
+        byte tmpAdult = in.readByte();
+        adult = tmpAdult == 0 ? null : tmpAdult == 1;
+        releaseDate = in.readString();
+        firstAirDate = in.readString();
+        lastAirDate = in.readString();
+        if (in.readByte() == 0) {
+            numberOfSeasons = null;
+        } else {
+            numberOfSeasons = in.readInt();
+        }
+        if (in.readByte() == 0) {
+            numberOfEpisodes = null;
+        } else {
+            numberOfEpisodes = in.readInt();
+        }
+        status = in.readString();
+        seasons = in.createTypedArrayList(Season.CREATOR);
+        productionCompanies = in.createStringArrayList();
+        networks = in.createStringArrayList();
+        spokenLanguages = in.createStringArrayList();
     }
 
     @Override
@@ -185,6 +303,52 @@ public class Poster implements Parcelable {
         dest.writeTypedList(sources);
         dest.writeParcelable(trailer, flags);
         dest.writeInt(typeView);
+        
+        // TMDB fields
+        if (tmdbId == null) {
+            dest.writeByte((byte) 0);
+        } else {
+            dest.writeByte((byte) 1);
+            dest.writeInt(tmdbId);
+        }
+        dest.writeString(country);
+        dest.writeString(backdrop);
+        dest.writeString(posterTmdb);
+        dest.writeString(originalTitle);
+        dest.writeString(originalLanguage);
+        if (popularity == null) {
+            dest.writeByte((byte) 0);
+        } else {
+            dest.writeByte((byte) 1);
+            dest.writeFloat(popularity);
+        }
+        if (voteCount == null) {
+            dest.writeByte((byte) 0);
+        } else {
+            dest.writeByte((byte) 1);
+            dest.writeInt(voteCount);
+        }
+        dest.writeByte((byte) (adult == null ? 0 : adult ? 1 : 2));
+        dest.writeString(releaseDate);
+        dest.writeString(firstAirDate);
+        dest.writeString(lastAirDate);
+        if (numberOfSeasons == null) {
+            dest.writeByte((byte) 0);
+        } else {
+            dest.writeByte((byte) 1);
+            dest.writeInt(numberOfSeasons);
+        }
+        if (numberOfEpisodes == null) {
+            dest.writeByte((byte) 0);
+        } else {
+            dest.writeByte((byte) 1);
+            dest.writeInt(numberOfEpisodes);
+        }
+        dest.writeString(status);
+        dest.writeTypedList(seasons);
+        dest.writeStringList(productionCompanies);
+        dest.writeStringList(networks);
+        dest.writeStringList(spokenLanguages);
     }
 
     @Override
@@ -391,6 +555,159 @@ public class Poster implements Parcelable {
 
     public String getSublabel() {
         return sublabel;
+    }
+
+    // TMDB Integration Getters and Setters
+    public Integer getTmdbId() {
+        return tmdbId;
+    }
+
+    public void setTmdbId(Integer tmdbId) {
+        this.tmdbId = tmdbId;
+    }
+
+    public String getCountry() {
+        return country;
+    }
+
+    public void setCountry(String country) {
+        this.country = country;
+    }
+
+    public String getBackdrop() {
+        return backdrop;
+    }
+
+    public void setBackdrop(String backdrop) {
+        this.backdrop = backdrop;
+    }
+
+    public String getPosterTmdb() {
+        return posterTmdb;
+    }
+
+    public void setPosterTmdb(String posterTmdb) {
+        this.posterTmdb = posterTmdb;
+    }
+
+    public String getOriginalTitle() {
+        return originalTitle;
+    }
+
+    public void setOriginalTitle(String originalTitle) {
+        this.originalTitle = originalTitle;
+    }
+
+    public String getOriginalLanguage() {
+        return originalLanguage;
+    }
+
+    public void setOriginalLanguage(String originalLanguage) {
+        this.originalLanguage = originalLanguage;
+    }
+
+    public Float getPopularity() {
+        return popularity;
+    }
+
+    public void setPopularity(Float popularity) {
+        this.popularity = popularity;
+    }
+
+    public Integer getVoteCount() {
+        return voteCount;
+    }
+
+    public void setVoteCount(Integer voteCount) {
+        this.voteCount = voteCount;
+    }
+
+    public Boolean getAdult() {
+        return adult;
+    }
+
+    public void setAdult(Boolean adult) {
+        this.adult = adult;
+    }
+
+    public String getReleaseDate() {
+        return releaseDate;
+    }
+
+    public void setReleaseDate(String releaseDate) {
+        this.releaseDate = releaseDate;
+    }
+
+    public String getFirstAirDate() {
+        return firstAirDate;
+    }
+
+    public void setFirstAirDate(String firstAirDate) {
+        this.firstAirDate = firstAirDate;
+    }
+
+    public String getLastAirDate() {
+        return lastAirDate;
+    }
+
+    public void setLastAirDate(String lastAirDate) {
+        this.lastAirDate = lastAirDate;
+    }
+
+    public Integer getNumberOfSeasons() {
+        return numberOfSeasons;
+    }
+
+    public void setNumberOfSeasons(Integer numberOfSeasons) {
+        this.numberOfSeasons = numberOfSeasons;
+    }
+
+    public Integer getNumberOfEpisodes() {
+        return numberOfEpisodes;
+    }
+
+    public void setNumberOfEpisodes(Integer numberOfEpisodes) {
+        this.numberOfEpisodes = numberOfEpisodes;
+    }
+
+    public String getStatus() {
+        return status;
+    }
+
+    public void setStatus(String status) {
+        this.status = status;
+    }
+
+    public List<Season> getSeasons() {
+        return seasons;
+    }
+
+    public void setSeasons(List<Season> seasons) {
+        this.seasons = seasons;
+    }
+
+    public List<String> getProductionCompanies() {
+        return productionCompanies;
+    }
+
+    public void setProductionCompanies(List<String> productionCompanies) {
+        this.productionCompanies = productionCompanies;
+    }
+
+    public List<String> getNetworks() {
+        return networks;
+    }
+
+    public void setNetworks(List<String> networks) {
+        this.networks = networks;
+    }
+
+    public List<String> getSpokenLanguages() {
+        return spokenLanguages;
+    }
+
+    public void setSpokenLanguages(List<String> spokenLanguages) {
+        this.spokenLanguages = spokenLanguages;
     }
 }
 

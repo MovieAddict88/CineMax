@@ -1,0 +1,442 @@
+{
+  "api_info": {
+    "version": "2.0",
+    "description": "Free Movie API with TMDB Integration",
+    "last_updated": "2024-01-15",
+    "total_movies": 2,
+    "total_channels": 0,
+    "total_actors": 15
+  },
+  "home": {
+    "slides": [
+      {
+        "id": 1,
+        "title": "Welcome to CineMax",
+        "description": "Stream your favorite movies and TV shows",
+        "image": "https://image.tmdb.org/t/p/w1280/wNAhuOZ3Zf84jCIlrcI6JhgmY5q.jpg",
+        "url": ""
+      }
+    ],
+    "featured_movies": [
+      {
+        "id": 1,
+        "title": "Big Buck Bunny",
+        "type": "movie"
+      },
+      {
+        "id": 2,
+        "title": "Breaking Bad",
+        "type": "tv"
+      }
+    ],
+    "channels": [],
+    "actors": [],
+    "genres": [
+      {
+        "id": 16,
+        "title": "Animation",
+        "image": "https://image.tmdb.org/t/p/w500/animation_genre.jpg"
+      },
+      {
+        "id": 18,
+        "title": "Drama",
+        "image": "https://image.tmdb.org/t/p/w500/drama_genre.jpg"
+      },
+      {
+        "id": 80,
+        "title": "Crime",
+        "image": "https://image.tmdb.org/t/p/w500/crime_genre.jpg"
+      }
+    ]
+  },
+  "movies": [
+    {
+      "id": 1,
+      "title": "Big Buck Bunny",
+      "type": "movie",
+      "label": "FREE",
+      "sublabel": "HD",
+      "imdb": "7.2",
+      "downloadas": "Big Buck Bunny 2008 1080p",
+      "comment": true,
+      "playas": "movie",
+      "description": "Big Buck Bunny is a comedy about a well-tempered rabbit being harassed by a group of rodents. The rabbit shows patience, but when the rodents kill a butterfly that has befriended the rabbit, the rabbit snaps and goes after the rodents in a fit of rage.",
+      "classification": "G",
+      "year": "2008",
+      "duration": "10 min",
+      "rating": 7.2,
+      "image": "https://peach.blender.org/wp-content/uploads/title_anouncement.jpg",
+      "cover": "https://download.blender.org/peach/bigbuckbunny_movies/big_buck_bunny_1080p_h264.mov",
+      "tmdb_id": null,
+      "country": "Netherlands",
+      "backdrop": "https://peach.blender.org/wp-content/uploads/bbb-splash.png",
+      "poster_tmdb": "https://peach.blender.org/wp-content/uploads/title_anouncement.jpg",
+      "original_title": "Big Buck Bunny",
+      "original_language": "en",
+      "popularity": 15.5,
+      "vote_count": 125,
+      "adult": false,
+      "release_date": "2008-04-10",
+      "first_air_date": null,
+      "last_air_date": null,
+      "number_of_seasons": null,
+      "number_of_episodes": null,
+      "status": "Released",
+      "production_companies": ["Blender Foundation"],
+      "networks": [],
+      "spoken_languages": ["English"],
+      "genres": [
+        {
+          "id": 16,
+          "title": "Animation"
+        },
+        {
+          "id": 35,
+          "title": "Comedy"
+        },
+        {
+          "id": 10751,
+          "title": "Family"
+        }
+      ],
+      "actors": [
+        {
+          "id": 1,
+          "name": "Sacha Goedegebure",
+          "title": "Big Buck Bunny (voice)",
+          "image": "https://image.tmdb.org/t/p/w500/default_actor.jpg"
+        }
+      ],
+      "views": 15420,
+      "created_at": "2024-01-15",
+      "sources": [
+        {
+          "id": 1,
+          "type": "embed",
+          "title": "VidSrc Player",
+          "quality": "1080p",
+          "size": "698 MB",
+          "kind": "external",
+          "premium": "free",
+          "external": true,
+          "url": "https://vidsrc.net/embed/movie/bigbuckbunny"
+        },
+        {
+          "id": 2,
+          "type": "direct",
+          "title": "Direct Stream HD",
+          "quality": "1080p",
+          "size": "698 MB",
+          "kind": "direct",
+          "premium": "free",
+          "external": false,
+          "url": "https://download.blender.org/peach/bigbuckbunny_movies/big_buck_bunny_1080p_h264.mov"
+        },
+        {
+          "id": 3,
+          "type": "direct",
+          "title": "Direct Stream 720p",
+          "quality": "720p",
+          "size": "355 MB",
+          "kind": "direct",
+          "premium": "free",
+          "external": false,
+          "url": "https://download.blender.org/peach/bigbuckbunny_movies/big_buck_bunny_720p_h264.mov"
+        }
+      ],
+      "trailer": {
+        "id": 4,
+        "type": "trailer",
+        "title": "Official Trailer",
+        "quality": "1080p",
+        "size": "50 MB",
+        "kind": "external",
+        "premium": "free",
+        "external": true,
+        "url": "https://download.blender.org/peach/trailer/trailer_1080p.mov"
+      },
+      "seasons": []
+    },
+    {
+      "id": 2,
+      "title": "Breaking Bad",
+      "type": "tv",
+      "label": "HD",
+      "sublabel": "COMPLETE",
+      "imdb": "9.5",
+      "downloadas": "Breaking Bad Complete Series",
+      "comment": true,
+      "playas": "series",
+      "description": "A high school chemistry teacher diagnosed with inoperable lung cancer turns to manufacturing and selling methamphetamine in order to secure his family's future.",
+      "classification": "TV-MA",
+      "year": "2008",
+      "duration": "47 min",
+      "rating": 9.5,
+      "image": "https://image.tmdb.org/t/p/w500/ggFHVNu6YYI5L9pCfOacjizRGt.jpg",
+      "cover": "https://image.tmdb.org/t/p/w1280/tsRy63Mu5cu8etL1X7ZLyf7UP1M.jpg",
+      "tmdb_id": 1396,
+      "country": "United States",
+      "backdrop": "https://image.tmdb.org/t/p/w1280/tsRy63Mu5cu8etL1X7ZLyf7UP1M.jpg",
+      "poster_tmdb": "https://image.tmdb.org/t/p/w500/ggFHVNu6YYI5L9pCfOacjizRGt.jpg",
+      "original_title": "Breaking Bad",
+      "original_language": "en",
+      "popularity": 451.738,
+      "vote_count": 12847,
+      "adult": false,
+      "release_date": null,
+      "first_air_date": "2008-01-20",
+      "last_air_date": "2013-09-29",
+      "number_of_seasons": 2,
+      "number_of_episodes": 2,
+      "status": "Ended",
+      "production_companies": ["High Bridge Productions", "Gran Via Productions", "Sony Pictures Television"],
+      "networks": ["AMC"],
+      "spoken_languages": ["English", "Spanish"],
+      "genres": [
+        {
+          "id": 18,
+          "title": "Drama"
+        },
+        {
+          "id": 80,
+          "title": "Crime"
+        }
+      ],
+      "actors": [
+        {
+          "id": 17419,
+          "name": "Bryan Cranston",
+          "title": "Walter White",
+          "image": "https://image.tmdb.org/t/p/w500/7Jahy5LZX2Fo8fGJNUoYrSYuRz9.jpg"
+        },
+        {
+          "id": 84497,
+          "name": "Aaron Paul",
+          "title": "Jesse Pinkman",
+          "image": "https://image.tmdb.org/t/p/w500/lOhc9ePVVCqhSNcnZmVnllHGGvH.jpg"
+        },
+        {
+          "id": 134531,
+          "name": "Anna Gunn",
+          "title": "Skyler White",
+          "image": "https://image.tmdb.org/t/p/w500/6yLKtfmNhBX6kDvZhSBrfpOmCt8.jpg"
+        }
+      ],
+      "views": 892456,
+      "created_at": "2024-01-15",
+      "sources": [],
+      "trailer": {
+        "id": 5,
+        "type": "trailer",
+        "title": "Breaking Bad Trailer",
+        "quality": "1080p",
+        "size": "120 MB",
+        "kind": "external",
+        "premium": "free",
+        "external": true,
+        "url": "https://vidsrc.net/embed/tv/1396/trailer"
+      },
+      "seasons": [
+        {
+          "id": 1,
+          "title": "Season 1",
+          "episodes": [
+            {
+              "id": 1,
+              "title": "Pilot",
+              "description": "Walter White, a struggling high school chemistry teacher, is diagnosed with advanced lung cancer. He turns to a life of crime, producing and selling methamphetamine accompanied by a former student, Jesse Pinkman, with the aim of securing his family's financial future before he dies.",
+              "downloadas": "Breaking Bad S01E01 Pilot",
+              "playas": "episode",
+              "duration": "58 min",
+              "image": "https://image.tmdb.org/t/p/w500/ic8sO6VfxKHJO9vgrbS7Ud1WPw4.jpg",
+              "sources": [
+                {
+                  "id": 10,
+                  "type": "embed",
+                  "title": "VidSrc Player",
+                  "quality": "1080p",
+                  "size": "1.2 GB",
+                  "kind": "external",
+                  "premium": "free",
+                  "external": true,
+                  "url": "https://vidsrc.net/embed/tv/1396/1/1"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": 2,
+          "title": "Season 2",
+          "episodes": [
+            {
+              "id": 2,
+              "title": "Seven Thirty-Seven",
+              "description": "Walt and Jesse attempt to tie up loose ends. The desperate situation gets more complicated with the flip of a coin. Walt's wife, Skyler, becomes suspicious of Walt's strange behavior.",
+              "downloadas": "Breaking Bad S02E01 Seven Thirty-Seven",
+              "playas": "episode",
+              "duration": "47 min",
+              "image": "https://image.tmdb.org/t/p/w500/1dpIGKqJ2pJiv9nLjx4fLI9RTVP.jpg",
+              "sources": [
+                {
+                  "id": 11,
+                  "type": "embed",
+                  "title": "VidSrc Player",
+                  "quality": "1080p",
+                  "size": "1.1 GB",
+                  "kind": "external",
+                  "premium": "free",
+                  "external": true,
+                  "url": "https://vidsrc.net/embed/tv/1396/2/1"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "channels": [],
+  "actors": [
+    {
+      "id": 17419,
+      "name": "Bryan Cranston",
+      "image": "https://image.tmdb.org/t/p/w500/7Jahy5LZX2Fo8fGJNUoYrSYuRz9.jpg",
+      "biography": "Bryan Lee Cranston is an American actor, director, producer, and screenwriter. He is best known for his roles as Walter White in Breaking Bad and as Hal in Malcolm in the Middle."
+    },
+    {
+      "id": 84497,
+      "name": "Aaron Paul",
+      "image": "https://image.tmdb.org/t/p/w500/lOhc9ePVVCqhSNcnZmVnllHGGvH.jpg",
+      "biography": "Aaron Paul Sturtevant is an American actor and producer. He is best known for portraying Jesse Pinkman in the AMC series Breaking Bad."
+    }
+  ],
+  "genres": [
+    {
+      "id": 16,
+      "title": "Animation",
+      "image": "https://image.tmdb.org/t/p/w500/animation_genre.jpg"
+    },
+    {
+      "id": 18,
+      "title": "Drama",
+      "image": "https://image.tmdb.org/t/p/w500/drama_genre.jpg"
+    },
+    {
+      "id": 35,
+      "title": "Comedy",
+      "image": "https://image.tmdb.org/t/p/w500/comedy_genre.jpg"
+    },
+    {
+      "id": 80,
+      "title": "Crime",
+      "image": "https://image.tmdb.org/t/p/w500/crime_genre.jpg"
+    },
+    {
+      "id": 10751,
+      "title": "Family",
+      "image": "https://image.tmdb.org/t/p/w500/family_genre.jpg"
+    }
+  ],
+  "categories": [
+    {
+      "id": 1,
+      "title": "Movies",
+      "description": "Latest movies collection"
+    },
+    {
+      "id": 2,
+      "title": "TV Series",
+      "description": "Popular TV series"
+    },
+    {
+      "id": 3,
+      "title": "Animation",
+      "description": "Animated content"
+    }
+  ],
+  "countries": [
+    {
+      "id": 1,
+      "title": "United States",
+      "code": "US"
+    },
+    {
+      "id": 2,
+      "title": "Netherlands",
+      "code": "NL"
+    }
+  ],
+  "subscription_plans": [
+    {
+      "id": 1,
+      "title": "Free Plan",
+      "description": "Access to free content",
+      "price": "0",
+      "currency": "USD",
+      "duration": "lifetime",
+      "features": ["Free Movies", "Free TV Shows", "Standard Quality"]
+    }
+  ],
+  "video_sources": {
+    "big_buck_bunny": {
+      "title": "Big Buck Bunny",
+      "description": "Open source test movie",
+      "urls": {
+        "1080p": "https://download.blender.org/peach/bigbuckbunny_movies/big_buck_bunny_1080p_h264.mov",
+        "720p": "https://download.blender.org/peach/bigbuckbunny_movies/big_buck_bunny_720p_h264.mov",
+        "480p": "https://download.blender.org/peach/bigbuckbunny_movies/big_buck_bunny_480p_h264.mov"
+      },
+      "duration": "10:34",
+      "size": "698 MB",
+      "license": "Creative Commons"
+    },
+    "elephants_dream": {
+      "title": "Elephants Dream",
+      "description": "Another open source test movie",
+      "urls": {
+        "1080p": "https://download.blender.org/ED/ED_1080p.mov",
+        "720p": "https://download.blender.org/ED/ED_720p.mov",
+        "480p": "https://download.blender.org/ED/ED_480p.mov"
+      },
+      "duration": "10:53",
+      "size": "725 MB",
+      "license": "Creative Commons"
+    },
+    "live_streams": {
+      "test_hls": {
+        "title": "Test HLS Stream",
+        "description": "Sample HLS live stream",
+        "url": "https://demo.unified-streaming.com/k8s/features/stable/video/tears-of-steel/tears-of-steel.ism/.m3u8",
+        "quality": "HD",
+        "type": "hls"
+      }
+    }
+  },
+  "ads_config": {
+    "admob": {
+      "banner_id": "ca-app-pub-3940256099942544/6300978111",
+      "interstitial_id": "ca-app-pub-3940256099942544/1033173712",
+      "rewarded_id": "ca-app-pub-3940256099942544/5224354917",
+      "native_id": "ca-app-pub-3940256099942544/2247696110",
+      "app_id": "ca-app-pub-3940256099942544~3347511713"
+    },
+    "facebook": {
+      "banner_id": "FACEBOOK_BANNER_ID",
+      "interstitial_id": "FACEBOOK_INTERSTITIAL_ID",
+      "rewarded_id": "FACEBOOK_REWARDED_ID",
+      "native_id": "FACEBOOK_NATIVE_ID"
+    },
+    "settings": {
+      "banner_enabled": true,
+      "interstitial_enabled": true,
+      "rewarded_enabled": true,
+      "native_enabled": true,
+      "interstitial_clicks": 3,
+      "native_lines": 5,
+      "banner_type": "admob",
+      "interstitial_type": "admob",
+      "native_type": "admob"
+    }
+  }
+}
