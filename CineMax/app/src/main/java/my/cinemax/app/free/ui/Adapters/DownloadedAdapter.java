@@ -70,25 +70,31 @@ public class DownloadedAdapter extends   RecyclerView.Adapter<RecyclerView.ViewH
                 Picasso.with(activity).load(downloadItem.getImage()).into(downloadedHolder.image_view_item_download_image);
                 downloadedHolder.text_view_item_download_duration.setText(downloadItem.getDuration());
                 downloadedHolder.text_view_item_download_size.setText(downloadItem.getSize());
-                Log.log(downloadItem.getId()+"");
-                
-                // Show progress for active downloads
+                // Always show file size, but for active downloads, show real-time progress
                 if (downloadItem.isDownloading() && downloadItem.getDownloadid() != null) {
                     downloadedHolder.progress_bar_download.setVisibility(View.VISIBLE);
                     downloadedHolder.text_view_download_status.setVisibility(View.VISIBLE);
                     downloadedHolder.image_view_item_download_play.setVisibility(View.GONE);
-                    
+
                     // Set progress
                     downloadedHolder.progress_bar_download.setProgress(downloadItem.getProgress());
-                    
-                    // Set status text
+
+                    // Set status text with formatted file size
                     String statusText = downloadItem.getProgress() + "%";
                     if (downloadItem.getTotalBytes() > 0) {
-                        statusText += " (" + formatFileSize(downloadItem.getDownloadedBytes()) + 
+                        statusText += " (" + formatFileSize(downloadItem.getDownloadedBytes()) +
                                     " / " + formatFileSize(downloadItem.getTotalBytes()) + ")";
+                        // Also update the main file size text to show real-time progress
+                        downloadedHolder.text_view_item_download_size.setText(
+                            formatFileSize(downloadItem.getDownloadedBytes()) + " / " + formatFileSize(downloadItem.getTotalBytes())
+                        );
+                    } else {
+                        // Fallback if total size is unknown
+                        statusText += " (" + formatFileSize(downloadItem.getDownloadedBytes()) + ")";
+                        downloadedHolder.text_view_item_download_size.setText(formatFileSize(downloadItem.getDownloadedBytes()));
                     }
                     downloadedHolder.text_view_download_status.setText(statusText);
-                    
+
                     // Disable click actions during download
                     downloadedHolder.relative_layout_item_download.setClickable(false);
                     downloadedHolder.image_view_item_download_play.setClickable(false);
@@ -99,7 +105,10 @@ public class DownloadedAdapter extends   RecyclerView.Adapter<RecyclerView.ViewH
                     downloadedHolder.progress_bar_download.setVisibility(View.GONE);
                     downloadedHolder.text_view_download_status.setVisibility(View.GONE);
                     downloadedHolder.image_view_item_download_play.setVisibility(View.VISIBLE);
-                    
+
+                    // Show static file size for completed downloads
+                    downloadedHolder.text_view_item_download_size.setText(downloadItem.getSize());
+
                     // Enable click actions for completed downloads
                     downloadedHolder.relative_layout_item_download.setClickable(true);
                     downloadedHolder.image_view_item_download_play.setClickable(true);
