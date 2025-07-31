@@ -243,9 +243,7 @@ public class MoviesFragment extends Fragment {
                 movieList.clear();
                 movieList.add(new Poster().setTypeView(2));
                 adapter.notifyDataSetChanged();
-                // Don't load data here - it will be loaded by HomeActivity
-                // loadMovies();
-
+                loadMovies();
             }
         });
         button_try_again.setOnClickListener(new View.OnClickListener() {
@@ -257,9 +255,7 @@ public class MoviesFragment extends Fragment {
                 movieList.clear();
                 movieList.add(new Poster().setTypeView(2));
                 adapter.notifyDataSetChanged();
-                // Don't load data here - it will be loaded by HomeActivity
-                // loadMovies();
-
+                loadMovies();
             }
         });
         recycler_view_movies_fragment.addOnScrollListener(new RecyclerView.OnScrollListener()
@@ -410,7 +406,7 @@ public class MoviesFragment extends Fragment {
                                 } else if (poster.getGenres() != null && !poster.getGenres().isEmpty()) {
                                     // Check if poster has the selected genre
                                     for (Genre genre : poster.getGenres()) {
-                                        if (genre.getId() != null && genre.getId().equals(genreSelected)) {
+                                        if (genre.getId() != null && genre.getId().intValue() == genreSelected) {
                                             matchesGenre = true;
                                             break;
                                         }
@@ -441,6 +437,36 @@ public class MoviesFragment extends Fragment {
                                         }
                                     });
                                     break;
+                                case "imdb":
+                                    Collections.sort(filteredMovies, new Comparator<Poster>() {
+                                        @Override
+                                        public int compare(Poster p1, Poster p2) {
+                                            String imdb1 = p1.getImdb();
+                                            String imdb2 = p2.getImdb();
+                                            if (imdb1 == null) imdb1 = "0";
+                                            if (imdb2 == null) imdb2 = "0";
+                                            try {
+                                                float rating1 = Float.parseFloat(imdb1);
+                                                float rating2 = Float.parseFloat(imdb2);
+                                                return Float.compare(rating2, rating1); // Descending
+                                            } catch (NumberFormatException e) {
+                                                return 0;
+                                            }
+                                        }
+                                    });
+                                    break;
+                                case "title":
+                                    Collections.sort(filteredMovies, new Comparator<Poster>() {
+                                        @Override
+                                        public int compare(Poster p1, Poster p2) {
+                                            String title1 = p1.getTitle();
+                                            String title2 = p2.getTitle();
+                                            if (title1 == null) title1 = "";
+                                            if (title2 == null) title2 = "";
+                                            return title1.compareToIgnoreCase(title2); // Ascending
+                                        }
+                                    });
+                                    break;
                                 case "year":
                                     Collections.sort(filteredMovies, new Comparator<Poster>() {
                                         @Override
@@ -453,15 +479,15 @@ public class MoviesFragment extends Fragment {
                                         }
                                     });
                                     break;
-                                case "name":
+                                case "views":
                                     Collections.sort(filteredMovies, new Comparator<Poster>() {
                                         @Override
                                         public int compare(Poster p1, Poster p2) {
-                                            String title1 = p1.getTitle();
-                                            String title2 = p2.getTitle();
-                                            if (title1 == null) title1 = "";
-                                            if (title2 == null) title2 = "";
-                                            return title1.compareToIgnoreCase(title2); // Ascending
+                                            Integer views1 = p1.getViews();
+                                            Integer views2 = p2.getViews();
+                                            if (views1 == null) views1 = 0;
+                                            if (views2 == null) views2 = 0;
+                                            return views2.compareTo(views1); // Descending
                                         }
                                     });
                                     break;
@@ -495,10 +521,6 @@ public class MoviesFragment extends Fragment {
                             linear_layout_page_error_movies_fragment.setVisibility(View.GONE);
                             recycler_view_movies_fragment.setVisibility(View.VISIBLE);
                             image_view_empty_list.setVisibility(View.GONE);
-                            
-                            adapter.notifyDataSetChanged();
-                            page++;
-                            loading = true;
                         } else {
                             if (page == 0) {
                                 linear_layout_page_error_movies_fragment.setVisibility(View.GONE);
@@ -506,6 +528,10 @@ public class MoviesFragment extends Fragment {
                                 image_view_empty_list.setVisibility(View.VISIBLE);
                             }
                         }
+                        
+                        adapter.notifyDataSetChanged();
+                        page++;
+                        loading = true;
                     } else {
                         if (page == 0) {
                             linear_layout_page_error_movies_fragment.setVisibility(View.GONE);
@@ -529,7 +555,7 @@ public class MoviesFragment extends Fragment {
                 recycler_view_movies_fragment.setVisibility(View.GONE);
                 image_view_empty_list.setVisibility(View.GONE);
                 relative_layout_load_more_movies_fragment.setVisibility(View.GONE);
-                swipe_refresh_layout_movies_fragment.setVisibility(View.GONE);
+                swipe_refresh_layout_movies_fragment.setRefreshing(false);
                 linear_layout_load_movies_fragment.setVisibility(View.GONE);
             }
         });

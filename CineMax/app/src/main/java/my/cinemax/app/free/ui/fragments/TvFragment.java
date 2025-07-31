@@ -260,8 +260,7 @@ public class TvFragment extends Fragment {
                 channelList.clear();
                 channelList.add(new Channel().setTypeView(2));
                 adapter.notifyDataSetChanged();
-                // Don't load data here - it will be loaded by HomeActivity
-                // loadChannels();
+                loadChannels();
             }
         });
         button_try_again.setOnClickListener(new View.OnClickListener() {
@@ -273,8 +272,7 @@ public class TvFragment extends Fragment {
                 channelList.clear();
                 channelList.add(new Channel().setTypeView(2));
                 adapter.notifyDataSetChanged();
-                // Don't load data here - it will be loaded by HomeActivity
-                // loadChannels();
+                loadChannels();
             }
         });
         recycler_view_channel_fragment.addOnScrollListener(new RecyclerView.OnScrollListener()
@@ -294,8 +292,7 @@ public class TvFragment extends Fragment {
                         if ( (visibleItemCount + pastVisiblesItems) >= totalItemCount)
                         {
                             loading = false;
-                            // Don't load data here - it will be loaded by HomeActivity
-                            // loadChannels();
+                            loadChannels();
                         }
                     }
                 }else{
@@ -392,77 +389,131 @@ public class TvFragment extends Fragment {
 
     }
     private void loadChannels() {
-        // Don't load channels from old API - they will be loaded from JSON data
-        // if (page==0){
-        //     linear_layout_load_channel_fragment.setVisibility(View.VISIBLE);
-        // }else{
-        //     relative_layout_load_more_channel_fragment.setVisibility(View.VISIBLE);
-        // }
-        // swipe_refresh_layout_channel_fragment.setRefreshing(false);
-        // Retrofit retrofit = apiClient.getClient();
-        // apiRest service = retrofit.create(apiRest.class);
-        // Call<List<Channel>> call = service.getChannelsByFiltres(categorySelected,countrySelected,page);
-        // call.enqueue(new Callback<List<Channel>>() {
-        //     @Override
-        //     public void onResponse(Call<List<Channel>> call, final Response<List<Channel>> response) {
-        //         if (response.isSuccessful()){
-        //             if (response.body().size()>0){
-        //                 for (int i = 0; i < response.body().size(); i++) {
-        //                     channelList.add(response.body().get(i));
-        //                     if (native_ads_enabled){
-        //                         item++;
-        //                         if (item == lines_beetween_ads ){
-        //                             item= 0;
-        //                             if (prefManager.getString("ADMIN_NATIVE_TYPE").equals("FACEBOOK")) {
-        //                             channelList.add(new Channel().setTypeView(3));
-        //                         }else if (prefManager.getString("ADMIN_NATIVE_TYPE").equals("ADMOB")){
-        //                             channelList.add(new Channel().setTypeView(4));
-        //                         } else if (prefManager.getString("ADMIN_NATIVE_TYPE").equals("BOTH")){
-        //                             if (type_ads == 0) {
-        //                                 channelList.add(new Channel().setTypeView(3));
-        //                                 type_ads = 1;
-        //                             }else if (type_ads == 1){
-        //                                 channelList.add(new Channel().setTypeView(4));
-        //                                 type_ads = 0;
-        //                             }
-        //                         }
-        //                     }
-        //                 }
-        //                 linear_layout_page_error_channel_fragment.setVisibility(View.GONE);
-        //                 recycler_view_channel_fragment.setVisibility(View.VISIBLE);
-        //                 image_view_empty_list.setVisibility(View.GONE);
+        // Load channels from GitHub JSON API with filtering
+        if (page == 0) {
+            linear_layout_load_channel_fragment.setVisibility(View.VISIBLE);
+        } else {
+            relative_layout_load_more_channel_fragment.setVisibility(View.VISIBLE);
+        }
+        swipe_refresh_layout_channel_fragment.setRefreshing(false);
+        
+        apiClient.getJsonApiData(new retrofit2.Callback<my.cinemax.app.free.entity.JsonApiResponse>() {
+            @Override
+            public void onResponse(Call<my.cinemax.app.free.entity.JsonApiResponse> call, retrofit2.Response<my.cinemax.app.free.entity.JsonApiResponse> response) {
+                if (response.isSuccessful() && response.body() != null) {
+                    my.cinemax.app.free.entity.JsonApiResponse apiResponse = response.body();
+                    
+                    if (apiResponse.getChannels() != null && apiResponse.getChannels().size() > 0) {
+                        List<Channel> filteredChannels = new ArrayList<>();
+                        
+                        for (Channel channel : apiResponse.getChannels()) {
+                            // Apply category filtering
+                            boolean matchesCategory = false;
+                            if (categorySelected == 0) {
+                                // Show all categories
+                                matchesCategory = true;
+                            } else if (channel.getCategories() != null && !channel.getCategories().isEmpty()) {
+                                // Check if channel has the selected category
+                                for (Category category : channel.getCategories()) {
+                                    if (category.getId() != null && category.getId().intValue() == categorySelected) {
+                                        matchesCategory = true;
+                                        break;
+                                    }
+                                }
+                            }
+                            
+                            // Apply country filtering
+                            boolean matchesCountry = false;
+                            if (countrySelected == 0) {
+                                // Show all countries
+                                matchesCountry = true;
+                            } else if (channel.getCountries() != null && !channel.getCountries().isEmpty()) {
+                                // Check if channel has the selected country
+                                for (Country country : channel.getCountries()) {
+                                    if (country.getId() != null && country.getId().intValue() == countrySelected) {
+                                        matchesCountry = true;
+                                        break;
+                                    }
+                                }
+                            } else {
+                                // Fallback: use sublabel for country matching if countries list is empty
+                                String sublabel = channel.getSublabel();
+                                if (sublabel != null && !sublabel.isEmpty()) {
+                                    // Simple country matching - can be enhanced
+                                    matchesCountry = true;
+                                }
+                            }
+                            
+                            if (matchesCategory && matchesCountry) {
+                                filteredChannels.add(channel);
+                            }
+                        }
+                        
+                        if (!filteredChannels.isEmpty()) {
+                            for (Channel channel : filteredChannels) {
+                                channelList.add(channel);
+                                
+                                if (native_ads_enabled) {
+                                    item++;
+                                    if (item == lines_beetween_ads) {
+                                        item = 0;
+                                        if (prefManager.getString("ADMIN_NATIVE_TYPE").equals("FACEBOOK")) {
+                                            channelList.add(new Channel().setTypeView(3));
+                                        } else if (prefManager.getString("ADMIN_NATIVE_TYPE").equals("ADMOB")) {
+                                            channelList.add(new Channel().setTypeView(4));
+                                        } else if (prefManager.getString("ADMIN_NATIVE_TYPE").equals("BOTH")) {
+                                            if (type_ads == 0) {
+                                                channelList.add(new Channel().setTypeView(3));
+                                                type_ads = 1;
+                                            } else if (type_ads == 1) {
+                                                channelList.add(new Channel().setTypeView(4));
+                                                type_ads = 0;
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                            linear_layout_page_error_channel_fragment.setVisibility(View.GONE);
+                            recycler_view_channel_fragment.setVisibility(View.VISIBLE);
+                            image_view_empty_list.setVisibility(View.GONE);
+                        } else {
+                            if (page == 0) {
+                                linear_layout_page_error_channel_fragment.setVisibility(View.GONE);
+                                recycler_view_channel_fragment.setVisibility(View.GONE);
+                                image_view_empty_list.setVisibility(View.VISIBLE);
+                            }
+                        }
+                        
+                        adapter.notifyDataSetChanged();
+                        page++;
+                        loading = true;
+                    } else {
+                        if (page == 0) {
+                            linear_layout_page_error_channel_fragment.setVisibility(View.GONE);
+                            recycler_view_channel_fragment.setVisibility(View.GONE);
+                            image_view_empty_list.setVisibility(View.VISIBLE);
+                        }
+                    }
+                } else {
+                    linear_layout_page_error_channel_fragment.setVisibility(View.VISIBLE);
+                    recycler_view_channel_fragment.setVisibility(View.GONE);
+                    image_view_empty_list.setVisibility(View.GONE);
+                }
+                relative_layout_load_more_channel_fragment.setVisibility(View.GONE);
+                swipe_refresh_layout_channel_fragment.setRefreshing(false);
+                linear_layout_load_channel_fragment.setVisibility(View.GONE);
+            }
 
-        //                 adapter.notifyDataSetChanged();
-        //                 page++;
-        //                 loading=true;
-        //             }else{
-        //                 if (page==0) {
-        //                     linear_layout_page_error_channel_fragment.setVisibility(View.GONE);
-        //                     recycler_view_channel_fragment.setVisibility(View.GONE);
-        //                     image_view_empty_list.setVisibility(View.VISIBLE);
-        //                 }
-        //             }
-        //         }else{
-        //             linear_layout_page_error_channel_fragment.setVisibility(View.VISIBLE);
-        //             recycler_view_channel_fragment.setVisibility(View.GONE);
-        //             image_view_empty_list.setVisibility(View.GONE);
-        //         }
-        //         relative_layout_load_more_channel_fragment.setVisibility(View.GONE);
-        //         swipe_refresh_layout_channel_fragment.setRefreshing(false);
-        //         linear_layout_load_channel_fragment.setVisibility(View.GONE);
-        //     }
-
-        //     @Override
-        //     public void onFailure(Call<List<Channel>> call, Throwable t) {
-        //         linear_layout_page_error_channel_fragment.setVisibility(View.VISIBLE);
-        //         recycler_view_channel_fragment.setVisibility(View.GONE);
-        //         image_view_empty_list.setVisibility(View.GONE);
-        //         relative_layout_load_more_channel_fragment.setVisibility(View.GONE);
-        //         swipe_refresh_layout_channel_fragment.setVisibility(View.GONE);
-        //         linear_layout_load_channel_fragment.setVisibility(View.GONE);
-
-        //     }
-        // });
+            @Override
+            public void onFailure(Call<my.cinemax.app.free.entity.JsonApiResponse> call, Throwable t) {
+                linear_layout_page_error_channel_fragment.setVisibility(View.VISIBLE);
+                recycler_view_channel_fragment.setVisibility(View.GONE);
+                image_view_empty_list.setVisibility(View.GONE);
+                relative_layout_load_more_channel_fragment.setVisibility(View.GONE);
+                swipe_refresh_layout_channel_fragment.setRefreshing(false);
+                linear_layout_load_channel_fragment.setVisibility(View.GONE);
+            }
+        });
     }
     
     // Method to update fragment with JSON data
