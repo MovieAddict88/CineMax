@@ -359,8 +359,15 @@ public class ChannelActivity extends AppCompatActivity {
         text_view_activity_channel_sub_title.setText(channel.getTitle());
         text_view_activity_channel_description.setText(channel.getDescription());
         text_view_activity_channel_classification.setText(channel.getClassification());
-        rating_bar_activity_channel_rating.setRating(channel.getRating());
-        rating_bar_activity_channel_rating.setVisibility(channel.getRating()==0 ? View.GONE:View.VISIBLE);
+        // Fix null rating crash
+        Float rating = channel.getRating();
+        if (rating != null) {
+            rating_bar_activity_channel_rating.setRating(rating);
+            rating_bar_activity_channel_rating.setVisibility(rating == 0 ? View.GONE : View.VISIBLE);
+        } else {
+            rating_bar_activity_channel_rating.setRating(0.0f);
+            rating_bar_activity_channel_rating.setVisibility(View.GONE);
+        }
 
         if (channel.getCategories()!=null){
             if (channel.getCategories().size()>0){

@@ -533,8 +533,15 @@ public class MovieActivity extends AppCompatActivity {
         }
 
 
-        rating_bar_activity_movie_rating.setRating(poster.getRating());
-        linear_layout_activity_movie_rating.setVisibility(poster.getRating()==0 ? View.GONE:View.VISIBLE);
+        // Fix null rating crash
+        Float rating = poster.getRating();
+        if (rating != null) {
+            rating_bar_activity_movie_rating.setRating(rating);
+            linear_layout_activity_movie_rating.setVisibility(rating == 0 ? View.GONE : View.VISIBLE);
+        } else {
+            rating_bar_activity_movie_rating.setRating(0.0f);
+            linear_layout_activity_movie_rating.setVisibility(View.GONE);
+        }
 
         this.linearLayoutManagerGenre=  new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false);
         this.genreAdapter =new GenreAdapter(poster.getGenres(),this);

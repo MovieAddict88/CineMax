@@ -188,7 +188,7 @@ public class TMDBService {
                 poster.setRating(Float.valueOf((float) rating));
             } else {
                 poster.setImdb("0.0");
-                poster.setRating(0.0f);
+                poster.setRating(Float.valueOf(0.0f));
             }
         
             // Runtime
