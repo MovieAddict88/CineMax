@@ -79,6 +79,18 @@ public class Poster implements Parcelable {
     @Expose
     private List<Genre> genres = new ArrayList<>();
 
+    @SerializedName("actors")
+    @Expose
+    private List<Actor> actors = new ArrayList<>();
+
+    @SerializedName("views")
+    @Expose
+    private Integer views;
+
+    @SerializedName("created_at")
+    @Expose
+    private String createdAt;
+
     @SerializedName("sources")
     @Expose
     private List<Source> sources = new ArrayList<>();
@@ -121,6 +133,13 @@ public class Poster implements Parcelable {
         image = in.readString();
         cover = in.readString();
         genres = in.createTypedArrayList(Genre.CREATOR);
+        actors = in.createTypedArrayList(Actor.CREATOR);
+        if (in.readByte() == 0) {
+            views = null;
+        } else {
+            views = in.readInt();
+        }
+        createdAt = in.readString();
         sources = in.createTypedArrayList(Source.CREATOR);
         trailer = in.readParcelable(Source.class.getClassLoader());
         typeView = in.readInt();
@@ -155,6 +174,14 @@ public class Poster implements Parcelable {
         dest.writeString(image);
         dest.writeString(cover);
         dest.writeTypedList(genres);
+        dest.writeTypedList(actors);
+        if (views == null) {
+            dest.writeByte((byte) 0);
+        } else {
+            dest.writeByte((byte) 1);
+            dest.writeInt(views);
+        }
+        dest.writeString(createdAt);
         dest.writeTypedList(sources);
         dest.writeParcelable(trailer, flags);
         dest.writeInt(typeView);
@@ -255,6 +282,30 @@ public class Poster implements Parcelable {
 
     public List<Genre> getGenres() {
         return genres;
+    }
+
+    public List<Actor> getActors() {
+        return actors;
+    }
+
+    public void setActors(List<Actor> actors) {
+        this.actors = actors;
+    }
+
+    public Integer getViews() {
+        return views;
+    }
+
+    public void setViews(Integer views) {
+        this.views = views;
+    }
+
+    public String getCreatedAt() {
+        return createdAt;
+    }
+
+    public void setCreatedAt(String createdAt) {
+        this.createdAt = createdAt;
     }
 
     public void setSources(List<Source> sources) {

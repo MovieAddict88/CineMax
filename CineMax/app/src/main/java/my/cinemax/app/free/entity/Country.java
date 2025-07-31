@@ -82,4 +82,9 @@ public class Country implements Parcelable {
     public void setImage(String image) {
         this.image = image;
     }
+    
+    @Override
+    public String toString() {
+        return title != null ? title : "";
+    }
 }
