@@ -32,6 +32,7 @@ import my.cinemax.app.free.api.apiRest;
 import my.cinemax.app.free.entity.Genre;
 import my.cinemax.app.free.entity.Poster;
 import my.cinemax.app.free.ui.Adapters.PosterAdapter;
+import my.cinemax.app.free.Utils.TmdbRatingManager;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -508,32 +509,95 @@ public class MoviesFragment extends Fragment {
                         }
                         
                         if (!filteredMovies.isEmpty()) {
-                            for (Poster poster : filteredMovies) {
-                                movieList.add(poster);
-                                
-                                if (native_ads_enabled) {
-                                    item++;
-                                    if (item == lines_beetween_ads) {
-                                        item = 0;
-                                        if (prefManager.getString("ADMIN_NATIVE_TYPE").equals("FACEBOOK")) {
-                                            movieList.add(new Poster().setTypeView(4));
-                                        } else if (prefManager.getString("ADMIN_NATIVE_TYPE").equals("ADMOB")) {
-                                            movieList.add(new Poster().setTypeView(5));
-                                        } else if (prefManager.getString("ADMIN_NATIVE_TYPE").equals("BOTH")) {
-                                            if (type_ads == 0) {
-                                                movieList.add(new Poster().setTypeView(4));
-                                                type_ads = 1;
-                                            } else if (type_ads == 1) {
-                                                movieList.add(new Poster().setTypeView(5));
-                                                type_ads = 0;
+                            // Update ratings from TMDB
+                            TmdbRatingManager.updateMoviesRatings(filteredMovies, new TmdbRatingManager.RatingUpdateCallback() {
+                                @Override
+                                public void onSuccess(Object item) {
+                                    // Add movies to list after rating update
+                                    for (Poster poster : filteredMovies) {
+                                        movieList.add(poster);
+                                        
+                                        if (native_ads_enabled) {
+                                            item++;
+                                            if (item == lines_beetween_ads) {
+                                                item = 0;
+                                                if (prefManager.getString("ADMIN_NATIVE_TYPE").equals("FACEBOOK")) {
+                                                    movieList.add(new Poster().setTypeView(4));
+                                                } else if (prefManager.getString("ADMIN_NATIVE_TYPE").equals("ADMOB")) {
+                                                    movieList.add(new Poster().setTypeView(5));
+                                                } else if (prefManager.getString("ADMIN_NATIVE_TYPE").equals("BOTH")) {
+                                                    if (type_ads == 0) {
+                                                        movieList.add(new Poster().setTypeView(4));
+                                                        type_ads = 1;
+                                                    } else if (type_ads == 1) {
+                                                        movieList.add(new Poster().setTypeView(5));
+                                                        type_ads = 0;
+                                                    }
+                                                }
                                             }
                                         }
                                     }
+                                    
+                                    // Update UI on main thread
+                                    if (getActivity() != null) {
+                                        getActivity().runOnUiThread(new Runnable() {
+                                            @Override
+                                            public void run() {
+                                                linear_layout_page_error_movies_fragment.setVisibility(View.GONE);
+                                                recycler_view_movies_fragment.setVisibility(View.VISIBLE);
+                                                image_view_empty_list.setVisibility(View.GONE);
+                                                adapter.notifyDataSetChanged();
+                                                page++;
+                                                loading = true;
+                                            }
+                                        });
+                                    }
                                 }
-                            }
-                            linear_layout_page_error_movies_fragment.setVisibility(View.GONE);
-                            recycler_view_movies_fragment.setVisibility(View.VISIBLE);
-                            image_view_empty_list.setVisibility(View.GONE);
+                                
+                                @Override
+                                public void onError(String error) {
+                                    Log.w("MoviesFragment", "Failed to update ratings: " + error);
+                                    // Still show movies even if rating update fails
+                                    for (Poster poster : filteredMovies) {
+                                        movieList.add(poster);
+                                        
+                                        if (native_ads_enabled) {
+                                            item++;
+                                            if (item == lines_beetween_ads) {
+                                                item = 0;
+                                                if (prefManager.getString("ADMIN_NATIVE_TYPE").equals("FACEBOOK")) {
+                                                    movieList.add(new Poster().setTypeView(4));
+                                                } else if (prefManager.getString("ADMIN_NATIVE_TYPE").equals("ADMOB")) {
+                                                    movieList.add(new Poster().setTypeView(5));
+                                                } else if (prefManager.getString("ADMIN_NATIVE_TYPE").equals("BOTH")) {
+                                                    if (type_ads == 0) {
+                                                        movieList.add(new Poster().setTypeView(4));
+                                                        type_ads = 1;
+                                                    } else if (type_ads == 1) {
+                                                        movieList.add(new Poster().setTypeView(5));
+                                                        type_ads = 0;
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }
+                                    
+                                    // Update UI on main thread
+                                    if (getActivity() != null) {
+                                        getActivity().runOnUiThread(new Runnable() {
+                                            @Override
+                                            public void run() {
+                                                linear_layout_page_error_movies_fragment.setVisibility(View.GONE);
+                                                recycler_view_movies_fragment.setVisibility(View.VISIBLE);
+                                                image_view_empty_list.setVisibility(View.GONE);
+                                                adapter.notifyDataSetChanged();
+                                                page++;
+                                                loading = true;
+                                            }
+                                        });
+                                    }
+                                }
+                            });
                         } else {
                             if (page == 0) {
                                 linear_layout_page_error_movies_fragment.setVisibility(View.GONE);
@@ -541,10 +605,6 @@ public class MoviesFragment extends Fragment {
                                 image_view_empty_list.setVisibility(View.VISIBLE);
                             }
                         }
-                        
-                        adapter.notifyDataSetChanged();
-                        page++;
-                        loading = true;
                     } else {
                         if (page == 0) {
                             linear_layout_page_error_movies_fragment.setVisibility(View.GONE);
