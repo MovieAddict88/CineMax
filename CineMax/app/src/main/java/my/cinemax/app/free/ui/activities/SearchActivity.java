@@ -165,7 +165,11 @@ public class SearchActivity extends AppCompatActivity {
                 
                 // Initialize adapter with null check
                 if (recycler_view_activity_search != null) {
-                    adapter = new PosterAdapter(posterArrayList != null ? posterArrayList : new ArrayList<>(), this);
+                    adapter = new PosterAdapter(
+                        posterArrayList != null ? posterArrayList : new ArrayList<>(),
+                        channelArrayList != null ? channelArrayList : new ArrayList<>(),
+                        this
+                    );
                     recycler_view_activity_search.setHasFixedSize(true);
                     recycler_view_activity_search.setAdapter(adapter);
                     Log.d("SearchActivity", "Adapter initialized successfully");
@@ -655,7 +659,11 @@ public class SearchActivity extends AppCompatActivity {
                             if (recycler_view_activity_search == null) {
                                 recycler_view_activity_search = findViewById(R.id.recycler_view_activity_search);
                                 if (recycler_view_activity_search != null) {
-                                    adapter = new PosterAdapter(posterArrayList != null ? posterArrayList : new ArrayList<>(), this);
+                                    adapter = new PosterAdapter(
+                                        posterArrayList != null ? posterArrayList : new ArrayList<>(),
+                                        channelArrayList != null ? channelArrayList : new ArrayList<>(),
+                                        this
+                                    );
                                     recycler_view_activity_search.setHasFixedSize(true);
                                     recycler_view_activity_search.setAdapter(adapter);
                                     Log.d("SearchActivity", "RecyclerView initialized");
@@ -675,7 +683,11 @@ public class SearchActivity extends AppCompatActivity {
                             Log.w("SearchActivity", "Adapter is null");
                             // Try to create adapter if it's null
                             if (recycler_view_activity_search != null) {
-                                adapter = new PosterAdapter(posterArrayList != null ? posterArrayList : new ArrayList<>(), this);
+                                adapter = new PosterAdapter(
+                                    posterArrayList != null ? posterArrayList : new ArrayList<>(),
+                                    channelArrayList != null ? channelArrayList : new ArrayList<>(),
+                                    this
+                                );
                                 recycler_view_activity_search.setAdapter(adapter);
                                 Log.d("SearchActivity", "Adapter created and set");
                             }
