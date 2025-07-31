@@ -116,9 +116,11 @@ public class DownloadsFragment extends Fragment  implements DownloadedAdapter.Do
         long downloadedBytes = intent.getLongExtra("downloadedBytes", 0);
         long totalBytes = intent.getLongExtra("totalBytes", 0);
         String type = intent.getStringExtra("type");
+        long downloadSpeed = intent.getLongExtra("downloadSpeed", 0);
+        String eta = intent.getStringExtra("eta");
 
         // Update the download item in the list
-        updateDownloadProgress(downloadId, progress, downloadedBytes, totalBytes);
+        updateDownloadProgress(downloadId, progress, downloadedBytes, totalBytes, downloadSpeed, eta);
     }
 
     private void handleDownloadCompleted(Intent intent) {
@@ -140,7 +142,7 @@ public class DownloadsFragment extends Fragment  implements DownloadedAdapter.Do
         loadDownloadsList();
     }
 
-    private void updateDownloadProgress(Long downloadId, int progress, long downloadedBytes, long totalBytes) {
+    private void updateDownloadProgress(Long downloadId, int progress, long downloadedBytes, long totalBytes, long downloadSpeed, String eta) {
         // Find the download item in the list and update its progress
         for (int i = 0; i < downloadItemArrayList.size(); i++) {
             DownloadItem item = downloadItemArrayList.get(i);
@@ -148,6 +150,8 @@ public class DownloadsFragment extends Fragment  implements DownloadedAdapter.Do
                 item.setProgress(progress);
                 item.setDownloadedBytes(downloadedBytes);
                 item.setTotalBytes(totalBytes);
+                item.setDownloadSpeed(downloadSpeed);
+                item.setEta(eta);
                 item.setDownloading(true);
                 
                 // Update the adapter

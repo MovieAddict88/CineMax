@@ -51,6 +51,8 @@ public class DownloadItem implements Parcelable {
     private long downloadedBytes = 0;
     private long totalBytes = 0;
     private boolean isDownloading = false;
+    private long downloadSpeed = 0; // bytes per second
+    private String eta = ""; // estimated time remaining
 
     private int typeView = 1;
 
@@ -257,6 +259,22 @@ public class DownloadItem implements Parcelable {
     public DownloadItem setTypeView(int typeView) {
         this.typeView = typeView;
         return this;
+    }
+
+    public long getDownloadSpeed() {
+        return downloadSpeed;
+    }
+
+    public void setDownloadSpeed(long downloadSpeed) {
+        this.downloadSpeed = downloadSpeed;
+    }
+
+    public String getEta() {
+        return eta;
+    }
+
+    public void setEta(String eta) {
+        this.eta = eta;
     }
 }
 

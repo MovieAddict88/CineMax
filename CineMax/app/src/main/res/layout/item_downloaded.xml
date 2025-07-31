@@ -113,7 +113,7 @@
                 android:id="@+id/progress_bar_download"
                 style="?android:attr/progressBarStyleHorizontal"
                 android:layout_width="match_parent"
-                android:layout_height="3dp"
+                android:layout_height="4dp"
                 android:layout_alignParentBottom="true"
                 android:layout_marginLeft="100dp"
                 android:layout_marginRight="50dp"
@@ -136,6 +136,8 @@
                 android:textSize="4pt"
                 android:textStyle="bold"
                 android:visibility="gone"
+                android:maxLines="3"
+                android:lineSpacingExtra="2dp"
                 android:text="0%" />
         </RelativeLayout>
     </androidx.cardview.widget.CardView>

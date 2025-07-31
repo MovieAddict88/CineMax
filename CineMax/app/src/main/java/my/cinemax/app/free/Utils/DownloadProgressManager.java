@@ -29,6 +29,8 @@ public class DownloadProgressManager {
     private Runnable progressRunnable;
     private boolean isPolling = false;
     private Map<Long, DownloadItem> activeDownloads = new HashMap<>();
+    private Map<Long, Long> lastDownloadedBytes = new HashMap<>();
+    private Map<Long, Long> lastUpdateTime = new HashMap<>();
     
     public DownloadProgressManager(Context context) {
         this.context = context;
@@ -68,9 +70,13 @@ public class DownloadProgressManager {
         List<DownloadItem> tempDownloads = Hawk.get("my_downloads_temp");
         if (tempDownloads != null) {
             activeDownloads.clear();
+            lastDownloadedBytes.clear();
+            lastUpdateTime.clear();
             for (DownloadItem item : tempDownloads) {
                 if (item.getDownloadid() != null) {
                     activeDownloads.put(item.getDownloadid(), item);
+                    lastDownloadedBytes.put(item.getDownloadid(), 0L);
+                    lastUpdateTime.put(item.getDownloadid(), System.currentTimeMillis());
                 }
             }
         }
@@ -105,23 +111,35 @@ public class DownloadProgressManager {
                         progress = (int) ((downloadedBytes * 100) / totalBytes);
                     }
                     
+                    // Calculate download speed and ETA
+                    long downloadSpeed = calculateDownloadSpeed(downloadId, downloadedBytes);
+                    String eta = calculateETA(downloadId, downloadedBytes, totalBytes, downloadSpeed);
+                    
                     // Update download item with current progress
                     downloadItem.setProgress(progress);
                     downloadItem.setDownloadedBytes(downloadedBytes);
                     downloadItem.setTotalBytes(totalBytes);
                     downloadItem.setDownloading(true);
                     
-                    // Send progress update
-                    sendProgressUpdate(downloadItem, status, progress);
+                    // Store current values for next calculation
+                    lastDownloadedBytes.put(downloadId, downloadedBytes);
+                    lastUpdateTime.put(downloadId, System.currentTimeMillis());
+                    
+                    // Send progress update with speed and ETA
+                    sendProgressUpdate(downloadItem, status, progress, downloadSpeed, eta);
                     
                     // Check if download is complete
                     if (status == DownloadManager.STATUS_SUCCESSFUL) {
                         Log.d(TAG, "Download completed: " + downloadItem.getTitle());
                         activeDownloads.remove(downloadId);
+                        lastDownloadedBytes.remove(downloadId);
+                        lastUpdateTime.remove(downloadId);
                         moveToCompletedDownloads(downloadItem);
                     } else if (status == DownloadManager.STATUS_FAILED) {
                         Log.d(TAG, "Download failed: " + downloadItem.getTitle());
                         activeDownloads.remove(downloadId);
+                        lastDownloadedBytes.remove(downloadId);
+                        lastUpdateTime.remove(downloadId);
                         sendDownloadFailed(downloadItem);
                     }
                 }
@@ -134,7 +152,44 @@ public class DownloadProgressManager {
         updateTempDownloads();
     }
     
-    private void sendProgressUpdate(DownloadItem downloadItem, int status, int progress) {
+    private long calculateDownloadSpeed(long downloadId, long currentBytes) {
+        Long lastBytes = lastDownloadedBytes.get(downloadId);
+        Long lastTime = lastUpdateTime.get(downloadId);
+        
+        if (lastBytes == null || lastTime == null) {
+            return 0;
+        }
+        
+        long bytesDiff = currentBytes - lastBytes;
+        long timeDiff = System.currentTimeMillis() - lastTime;
+        
+        if (timeDiff > 0) {
+            return (bytesDiff * 1000) / timeDiff; // bytes per second
+        }
+        
+        return 0;
+    }
+    
+    private String calculateETA(long downloadId, long downloadedBytes, long totalBytes, long downloadSpeed) {
+        if (downloadSpeed <= 0 || totalBytes <= 0) {
+            return "Calculating...";
+        }
+        
+        long remainingBytes = totalBytes - downloadedBytes;
+        long remainingSeconds = remainingBytes / downloadSpeed;
+        
+        if (remainingSeconds < 60) {
+            return remainingSeconds + "s";
+        } else if (remainingSeconds < 3600) {
+            return (remainingSeconds / 60) + "m " + (remainingSeconds % 60) + "s";
+        } else {
+            long hours = remainingSeconds / 3600;
+            long minutes = (remainingSeconds % 3600) / 60;
+            return hours + "h " + minutes + "m";
+        }
+    }
+    
+    private void sendProgressUpdate(DownloadItem downloadItem, int status, int progress, long downloadSpeed, String eta) {
         Intent intent = new Intent(DOWNLOAD_PROGRESS_UPDATE);
         intent.putExtra("action", "progress_update");
         intent.putExtra("downloadId", downloadItem.getDownloadid());
@@ -144,6 +199,8 @@ public class DownloadProgressManager {
         intent.putExtra("downloadedBytes", downloadItem.getDownloadedBytes());
         intent.putExtra("totalBytes", downloadItem.getTotalBytes());
         intent.putExtra("type", downloadItem.getType());
+        intent.putExtra("downloadSpeed", downloadSpeed);
+        intent.putExtra("eta", eta);
         
         LocalBroadcastManager.getInstance(context).sendBroadcast(intent);
     }
@@ -203,6 +260,8 @@ public class DownloadProgressManager {
                 if (downloadId != -1 && activeDownloads.containsKey(downloadId)) {
                     DownloadItem downloadItem = activeDownloads.get(downloadId);
                     activeDownloads.remove(downloadId);
+                    lastDownloadedBytes.remove(downloadId);
+                    lastUpdateTime.remove(downloadId);
                     moveToCompletedDownloads(downloadItem);
                 }
             }
@@ -213,11 +272,25 @@ public class DownloadProgressManager {
     public void addActiveDownload(DownloadItem downloadItem) {
         if (downloadItem.getDownloadid() != null) {
             activeDownloads.put(downloadItem.getDownloadid(), downloadItem);
+            lastDownloadedBytes.put(downloadItem.getDownloadid(), 0L);
+            lastUpdateTime.put(downloadItem.getDownloadid(), System.currentTimeMillis());
             updateTempDownloads();
+            
+            // Send broadcast to notify Download Fragment about new download
+            Intent intent = new Intent(DOWNLOAD_PROGRESS_UPDATE);
+            intent.putExtra("action", "download_started");
+            intent.putExtra("downloadId", downloadItem.getDownloadid());
+            intent.putExtra("title", downloadItem.getTitle());
+            intent.putExtra("type", downloadItem.getType());
+            
+            LocalBroadcastManager.getInstance(context).sendBroadcast(intent);
         }
     }
     
     public void cleanup() {
         stopPolling();
+        activeDownloads.clear();
+        lastDownloadedBytes.clear();
+        lastUpdateTime.clear();
     }
 }
