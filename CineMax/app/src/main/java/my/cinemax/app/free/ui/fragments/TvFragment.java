@@ -99,10 +99,10 @@ public class TvFragment extends Fragment {
                 loaded=true;
                 page = 0;
                 loading = true;
-                // Don't load data here - it will be loaded by HomeActivity
-                // getCountiesList();
-                // getCategoriesList();
-                // loadChannels();
+                // Load data when fragment becomes visible
+                getCountiesList();
+                getCategoriesList();
+                loadChannels();
             }
         }
     }
@@ -147,9 +147,11 @@ public class TvFragment extends Fragment {
                         spinner_fragement_channel_countries_list.setAdapter(filtresAdapter);
                         relative_layout_frament_channel_countries.setVisibility(View.VISIBLE);
                         
+                        Log.d("TvFragment", "Loaded " + countriesList.size() + " countries");
 
                     } else {
                         relative_layout_frament_channel_countries.setVisibility(View.GONE);
+                        Log.d("TvFragment", "No countries found in API response");
                     }
                 }
             }
@@ -158,6 +160,7 @@ public class TvFragment extends Fragment {
             public void onFailure(Call<my.cinemax.app.free.entity.JsonApiResponse> call, Throwable t) {
                 // Hide country filter if loading fails
                 relative_layout_frament_channel_countries.setVisibility(View.GONE);
+                Log.e("TvFragment", "Failed to load countries: " + t.getMessage());
             }
         });
     }
@@ -188,9 +191,11 @@ public class TvFragment extends Fragment {
                         spinner_fragement_channel_categories_list.setAdapter(filtresAdapter);
                         relative_layout_frament_channel_categories.setVisibility(View.VISIBLE);
                         
+                        Log.d("TvFragment", "Loaded " + categoryList.size() + " categories");
 
                     } else {
                         relative_layout_frament_channel_categories.setVisibility(View.GONE);
+                        Log.d("TvFragment", "No categories found in API response");
                     }
                 }
             }
@@ -199,6 +204,7 @@ public class TvFragment extends Fragment {
             public void onFailure(Call<my.cinemax.app.free.entity.JsonApiResponse> call, Throwable t) {
                 // Hide category filter if loading fails
                 relative_layout_frament_channel_categories.setVisibility(View.GONE);
+                Log.e("TvFragment", "Failed to load categories: " + t.getMessage());
             }
         });
     }
@@ -231,6 +237,7 @@ public class TvFragment extends Fragment {
                            countrySelected = 0;
                        }
                    }
+                   Log.d("TvFragment", "Country selected: " + countrySelected);
                    item = 0;
                    page = 0;
                    loading = true;
@@ -267,6 +274,7 @@ public class TvFragment extends Fragment {
                             categorySelected = 0;
                         }
                     }
+                    Log.d("TvFragment", "Category selected: " + categorySelected);
                     item = 0;
                     page = 0;
                     loading = true;
@@ -461,11 +469,20 @@ public class TvFragment extends Fragment {
                             if (countrySelected == 0) {
                                 // Show all countries
                                 matchesCountry = true;
+                            } else if (channel.getCountries() != null && !channel.getCountries().isEmpty()) {
+                                // Check if channel has the selected country
+                                for (Country country : channel.getCountries()) {
+                                    if (country.getId() != null && country.getId().intValue() == countrySelected) {
+                                        matchesCountry = true;
+                                        break;
+                                    }
+                                }
                             } else {
-                                // Simple country matching - check sublabel first
+                                // Fallback: use sublabel for country matching if countries list is empty
                                 String sublabel = channel.getSublabel();
                                 if (sublabel != null && !sublabel.isEmpty()) {
                                     String sublabelLower = sublabel.toLowerCase();
+                                    // Enhanced country matching based on sublabel
                                     if (countrySelected == 1 && (sublabelLower.contains("usa") || sublabelLower.contains("united states"))) {
                                         matchesCountry = true;
                                     } else if (countrySelected == 2 && (sublabelLower.contains("uk") || sublabelLower.contains("united kingdom"))) {
@@ -474,8 +491,8 @@ public class TvFragment extends Fragment {
                                         matchesCountry = true;
                                     } else if (countrySelected == 4 && sublabelLower.contains("germany")) {
                                         matchesCountry = true;
-                                    } else if (sublabelLower.contains("ph") || sublabelLower.contains("philippines")) {
-                                        // Show Philippines channels for any country selection
+                                    } else if (countrySelected == 5 && (sublabelLower.contains("ph") || sublabelLower.contains("philippines"))) {
+                                        // Handle Philippines channels
                                         matchesCountry = true;
                                     }
                                 }
@@ -486,7 +503,8 @@ public class TvFragment extends Fragment {
                             }
                         }
                         
-
+                        Log.d("TvFragment", "Total channels found: " + filteredChannels.size() + 
+                              " (Category: " + categorySelected + ", Country: " + countrySelected + ")");
                         
                         if (!filteredChannels.isEmpty()) {
                             // Only add channels if this is the first page or if we're loading more
