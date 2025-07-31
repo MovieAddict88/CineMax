@@ -79,8 +79,10 @@ import my.cinemax.app.free.api.apiClient;
 import my.cinemax.app.free.api.apiRest;
 import my.cinemax.app.free.config.Global;
 import my.cinemax.app.free.entity.ApiResponse;
+import my.cinemax.app.free.entity.Category;
 import my.cinemax.app.free.entity.Channel;
 import my.cinemax.app.free.entity.Comment;
+import my.cinemax.app.free.entity.JsonApiResponse;
 import my.cinemax.app.free.entity.Source;
 import my.cinemax.app.free.event.CastSessionEndedEvent;
 import my.cinemax.app.free.event.CastSessionStartedEvent;
@@ -1184,26 +1186,44 @@ public class ChannelActivity extends AppCompatActivity {
                 .build();
         return mediaInfo;
     }
-    private void getRandomChannels() {
-        String categories_list = "";
-        for (int i = 0; i < channel.getCategories().size(); i++) {
-            if (channel.getCategories().size()-1 == i){
-                categories_list+=channel.getCategories().get(i).getId();
-            }else{
-                categories_list+=channel.getCategories().get(i).getId()+",";
-            }
-        }
-        Retrofit retrofit = apiClient.getClient();
-        apiRest service = retrofit.create(apiRest.class);
-
-        Call<List<Channel>> call = service.getRandomChannel(categories_list);
-        call.enqueue(new Callback<List<Channel>>() {
+    /**
+     * Load random channels from GitHub JSON API instead of old server API
+     */
+    private void getRandomChannelsFromJson() {
+        // Load data from GitHub JSON API
+        apiClient.getJsonApiData(new apiClient.JsonApiCallback() {
             @Override
-            public void onResponse(Call<List<Channel>> call, Response<List<Channel>> response) {
-                if (response.isSuccessful()){
-                    if (response.body().size()>0) {
+            public void onSuccess(JsonApiResponse jsonResponse) {
+                if (jsonResponse != null && jsonResponse.getChannels() != null) {
+                    List<Channel> similarChannels = new ArrayList<>();
+                    
+                    // Filter channels by categories and exclude current channel
+                    for (Channel ch : jsonResponse.getChannels()) {
+                        if (ch.getId() != null && !ch.getId().equals(channel.getId())) {
+                            // Check if channel has any matching categories
+                            if (ch.getCategories() != null && channel.getCategories() != null) {
+                                for (Category chCategory : ch.getCategories()) {
+                                    for (Category channelCategory : channel.getCategories()) {
+                                        if (chCategory.getId() != null && channelCategory.getId() != null &&
+                                            chCategory.getId().equals(channelCategory.getId())) {
+                                            similarChannels.add(ch);
+                                            break;
+                                        }
+                                    }
+                                    if (similarChannels.contains(ch)) break;
+                                }
+                            }
+                        }
+                    }
+                    
+                    // Limit to 10 similar channels
+                    if (similarChannels.size() > 10) {
+                        similarChannels = similarChannels.subList(0, 10);
+                    }
+                    
+                    if (similarChannels.size() > 0) {
                         linearLayoutManagerMoreChannel = new LinearLayoutManager(getApplicationContext(), LinearLayoutManager.HORIZONTAL, false);
-                        ChannelAdapter channelAdapter  = new ChannelAdapter(response.body(), ChannelActivity.this);
+                        ChannelAdapter channelAdapter = new ChannelAdapter(similarChannels, ChannelActivity.this);
                         recycle_view_activity_activity_channel_more_channels.setHasFixedSize(true);
                         recycle_view_activity_activity_channel_more_channels.setAdapter(channelAdapter);
                         recycle_view_activity_activity_channel_more_channels.setLayoutManager(linearLayoutManagerMoreChannel);
@@ -1211,10 +1231,21 @@ public class ChannelActivity extends AppCompatActivity {
                     }
                 }
             }
+            
             @Override
-            public void onFailure(Call<List<Channel>> call, Throwable t) {
+            public void onError(String error) {
+                Log.e("ChannelActivity", "Error loading random channels: " + error);
             }
         });
+    }
+
+    /**
+     * @deprecated Old API method - replaced with getRandomChannelsFromJson()
+     */
+    @Deprecated
+    private void getRandomChannels() {
+        // This method is kept for backward compatibility but now redirects to JSON API
+        getRandomChannelsFromJson();
     }
     @Override
     public void onBackPressed(){

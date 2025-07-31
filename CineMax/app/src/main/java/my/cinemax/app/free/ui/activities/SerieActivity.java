@@ -123,6 +123,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
+import my.cinemax.app.free.Utils.DownloadProgressManager;
 
 public class SerieActivity extends AppCompatActivity implements PlaylistDownloader.DownloadListener {
     private  static String TAG= "SerieActivity";
@@ -2189,17 +2190,14 @@ public class SerieActivity extends AppCompatActivity implements PlaylistDownload
     public void Download(Source source){
         my.cinemax.app.free.Utils.Log.log("Android P<=");
 
-        final int min = 1000;
-        final int max = 9999;
-        final int random = new Random().nextInt((max - min) + 1) + min;
-        File fileName = new File(Environment.getExternalStorageDirectory() + "/" + getResources().getString(R.string.download_foler) + "/", poster.getTitle().replace(" ", "_").replace(".", "").replaceAll("[^\\.A-Za-z0-9_]", "") + selectedEpisode.getTitle().replace(" ", "_").replaceAll("[^\\.A-Za-z0-9_]", "") + "_" + source.getId() + "_" + random + "." + source.getType());
+        File fileName = new File(Environment.getExternalStorageDirectory() + "/" + getResources().getString(R.string.download_foler) + "/", poster.getTitle().replace(" ", "_").replace(".", "").replaceAll("[^\\.A-Za-z0-9_]", "") + "_" + source.getId() + "." + source.getType());
         DownloadManager.Request request = new DownloadManager.Request(Uri.parse(source.getUrl()))
-                .setTitle(poster.getTitle())// Title of the Download Notification
+                .setTitle(poster.getTitle()+" - "+selectedEpisode.getTitle())// Title of the Download Notification
                 .setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED)
                 .setDescription("Downloading")// Description of the Download Notification
                 .setVisibleInDownloadsUi(true)
-                .setDestinationUri(Uri.fromFile(fileName));// Uri of the destination file
 
+                .setDestinationUri(Uri.fromFile(fileName));// Uri of the destination file
         DownloadManager downloadManager = (DownloadManager) getSystemService(DOWNLOAD_SERVICE);
         long downloadId = downloadManager.enqueue(request);// enqueue puts the download request in the queue.
         if (!isMyServiceRunning(SerieActivity.class)) {
@@ -2207,7 +2205,9 @@ public class SerieActivity extends AppCompatActivity implements PlaylistDownload
         }
         Toasty.info(this, "Download has been started ...", Toast.LENGTH_LONG).show();
         expandPanel(this);
-        DownloadItem downloadItem = new DownloadItem(source.getId(), poster.getTitle() + " - " + selectedEpisode.getTitle(), "episode", Uri.fromFile(fileName).getPath(), selectedEpisode.getImage(), "", "", selectedEpisode.getId(), downloadId);
+
+
+        DownloadItem downloadItem = new DownloadItem(source.getId(), poster.getTitle()+" - "+selectedEpisode.getTitle(), "episode", Uri.fromFile(fileName).getPath(), selectedEpisode.getImage(), "", "", selectedEpisode.getId(), downloadId);
         if (selectedEpisode.getDuration() != null)
             downloadItem.setDuration(selectedEpisode.getDuration());
         else
@@ -2225,18 +2225,24 @@ public class SerieActivity extends AppCompatActivity implements PlaylistDownload
         }
         my_downloads_temp.add(downloadItem);
         Hawk.put("my_downloads_temp", my_downloads_temp);
+        
+        // Add to progress manager for tracking
+        DownloadProgressManager progressManager = new DownloadProgressManager(this);
+        progressManager.addActiveDownload(downloadItem);
+
+        // Notify DownloadsFragment to reload
+        Intent reloadIntent = new Intent("reload_downloads_list");
+        androidx.localbroadcastmanager.content.LocalBroadcastManager.getInstance(this).sendBroadcast(reloadIntent);
     }
     public void DownloadQ(Source source){
-        final int min = 1000;
-        final int max = 9999;
-        final int random = new Random().nextInt((max - min) + 1) + min;
-        File fileName = new File(Environment.getExternalStorageDirectory() + "/" + Environment.DIRECTORY_DOWNLOADS+"/"  , poster.getTitle().replace(" ", "_").replace(".", "").replaceAll("[^\\.A-Za-z0-9_]", "") + selectedEpisode.getTitle().replace(" ", "_").replaceAll("[^\\.A-Za-z0-9_]", "").replace(".", "")+ "_" + source.getId() + "_" + random + "." + source.getType());
+        my.cinemax.app.free.Utils.Log.log("Android Q");
+        File fileName = new File(Environment.getExternalStorageDirectory() +"/"+ Environment.DIRECTORY_DOWNLOADS+"/", poster.getTitle().replace(" ", "_").replace(".", "").replaceAll("[^\\.A-Za-z0-9_]", "") + "_" + source.getId() + "." + source.getType());
         DownloadManager.Request request = new DownloadManager.Request(Uri.parse(source.getUrl()))
                 .setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED)
-                .setTitle(poster.getTitle())// Title of the Download Notification
+                .setTitle(poster.getTitle()+" - "+selectedEpisode.getTitle())// Title of the Download Notification
                 .setDescription("Downloading")// Description of the Download Notification
                 .setVisibleInDownloadsUi(true)
-                .setDestinationInExternalPublicDir(Environment.DIRECTORY_DOWNLOADS,poster.getTitle().replace(" ", "_").replace(".", "").replaceAll("[^\\.A-Za-z0-9_]", "").replace(".", "_") + selectedEpisode.getTitle().replace(" ", "_").replaceAll("[^\\.A-Za-z0-9_]", "").replace(".", "")+ "_" + source.getId() + "_" + random + "." + source.getType());// Uri of the destination file
+                .setDestinationInExternalPublicDir(Environment.DIRECTORY_DOWNLOADS,poster.getTitle().replace(" ", "_").replace(".", "").replaceAll("[^\\.A-Za-z0-9_]", "") + "_" + source.getId() + "." + source.getType());// Uri of the destination file
         DownloadManager downloadManager = (DownloadManager) getSystemService(DOWNLOAD_SERVICE);
         long downloadId = downloadManager.enqueue(request);// enqueue puts the download request in the queue.
         if (!isMyServiceRunning(SerieActivity.class)) {
@@ -2244,7 +2250,9 @@ public class SerieActivity extends AppCompatActivity implements PlaylistDownload
         }
         Toasty.info(this, "Download has been started ...", Toast.LENGTH_LONG).show();
         expandPanel(this);
-        DownloadItem downloadItem = new DownloadItem(source.getId(), poster.getTitle() + " - " + selectedEpisode.getTitle(), "episode", Uri.fromFile(fileName).getPath(), selectedEpisode.getImage(), "", "", selectedEpisode.getId(), downloadId);
+
+
+        DownloadItem downloadItem = new DownloadItem(source.getId(), poster.getTitle()+" - "+selectedEpisode.getTitle(), "episode", Uri.fromFile(fileName).getPath(), selectedEpisode.getImage(), "", "", selectedEpisode.getId(), downloadId);
         if (selectedEpisode.getDuration() != null)
             downloadItem.setDuration(selectedEpisode.getDuration());
         else
@@ -2262,6 +2270,14 @@ public class SerieActivity extends AppCompatActivity implements PlaylistDownload
         }
         my_downloads_temp.add(downloadItem);
         Hawk.put("my_downloads_temp", my_downloads_temp);
+        
+        // Add to progress manager for tracking
+        DownloadProgressManager progressManager = new DownloadProgressManager(this);
+        progressManager.addActiveDownload(downloadItem);
+
+        // Notify DownloadsFragment to reload
+        Intent reloadIntent = new Intent("reload_downloads_list");
+        androidx.localbroadcastmanager.content.LocalBroadcastManager.getInstance(this).sendBroadcast(reloadIntent);
     }
 
     public void openLink(int position){

@@ -31,6 +31,7 @@ import my.cinemax.app.free.api.apiClient;
 import my.cinemax.app.free.api.apiRest;
 import my.cinemax.app.free.entity.Genre;
 import my.cinemax.app.free.entity.Poster;
+import my.cinemax.app.free.entity.JsonApiResponse;
 import my.cinemax.app.free.ui.Adapters.PosterAdapter;
 
 import java.util.ArrayList;
@@ -66,6 +67,10 @@ public class GenreActivity extends AppCompatActivity {
     private int type_ads = 0;
     private PrefManager prefManager;
 
+    // JSON API data cache
+    private JsonApiResponse cachedJsonResponse = null;
+    private List<Poster> allMovies = new ArrayList<>();
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -73,11 +78,21 @@ public class GenreActivity extends AppCompatActivity {
         setContentView(R.layout.activity_genre);
         prefManager= new PrefManager(getApplicationContext());
 
-        getGenre();
-        initView();
-        initAction();
-        loadPosters();
-        showAdsBanner();
+        try {
+            getGenre();
+            if (genre == null) {
+                Log.e("GenreActivity", "Genre is null after getGenre(), finishing activity");
+                finish();
+                return;
+            }
+            initView();
+            initAction();
+            loadPostersFromJson();
+            showAdsBanner();
+        } catch (Exception e) {
+            Log.e("GenreActivity", "Error in onCreate: " + e.getMessage(), e);
+            finish();
+        }
     }
 
 
@@ -116,7 +131,7 @@ public class GenreActivity extends AppCompatActivity {
                 loading = true;
                 posterArrayList.clear();
                 adapter.notifyDataSetChanged();
-                loadPosters();
+                loadPostersFromJson();
                 return true;
             case R.id.nav_rating:
                 SelectedOrder = "rating";
@@ -125,7 +140,7 @@ public class GenreActivity extends AppCompatActivity {
                 loading = true;
                 posterArrayList.clear();
                 adapter.notifyDataSetChanged();
-                loadPosters();
+                loadPostersFromJson();
                 return true;
             case R.id.nav_views:
                 SelectedOrder = "views";
@@ -134,7 +149,7 @@ public class GenreActivity extends AppCompatActivity {
                 loading = true;
                 posterArrayList.clear();
                 adapter.notifyDataSetChanged();
-                loadPosters();
+                loadPostersFromJson();
                 return true;
             case R.id.nav_year:
                 SelectedOrder = "year";
@@ -143,7 +158,7 @@ public class GenreActivity extends AppCompatActivity {
                 loading = true;
                 posterArrayList.clear();
                 adapter.notifyDataSetChanged();
-                loadPosters();
+                loadPostersFromJson();
                 return true;
             case R.id.nav_title:
                 SelectedOrder = "title";
@@ -152,7 +167,7 @@ public class GenreActivity extends AppCompatActivity {
                 loading = true;
                 posterArrayList.clear();
                 adapter.notifyDataSetChanged();
-                loadPosters();
+                loadPostersFromJson();
                 return true;
             case R.id.nav_imdb:
                 SelectedOrder = "imdb";
@@ -161,96 +176,237 @@ public class GenreActivity extends AppCompatActivity {
                 loading = true;
                 posterArrayList.clear();
                 adapter.notifyDataSetChanged();
-                loadPosters();
+                loadPostersFromJson();
 
                 return true;
         }
         return super.onOptionsItemSelected(itemMenu);
     }
     private void getGenre() {
-        genre = getIntent().getParcelableExtra("genre");
+        // Get genre info from intent extras instead of Parcelable
+        Integer genreId = getIntent().getIntExtra("genre_id", -1);
+        String genreTitle = getIntent().getStringExtra("genre_title");
         from = getIntent().getStringExtra("from");
-
+        
+        // Create a new Genre object with the received data
+        if (genreId != null && genreTitle != null) {
+            genre = new Genre();
+            genre.setId(genreId);
+            genre.setTitle(genreTitle);
+            Log.d("GenreActivity", "Received genre: " + genreTitle + " (ID: " + genreId + ")");
+        } else {
+            Log.e("GenreActivity", "Genre ID or title is null, finishing activity");
+            finish();
+            return;
+        }
     }
 
-
-    private void loadPosters() {
+    /**
+     * Load posters from GitHub JSON API instead of old server API
+     */
+    private void loadPostersFromJson() {
         if (page==0){
             linear_layout_load_genre_activity.setVisibility(View.VISIBLE);
         }else{
             relative_layout_load_more.setVisibility(View.VISIBLE);
         }
         swipe_refresh_layout_list_genre_search.setRefreshing(false);
-        Retrofit retrofit = apiClient.getClient();
-        apiRest service = retrofit.create(apiRest.class);
-        Call<List<Poster>> call = service.getPostersByFiltres(genre.getId(),SelectedOrder,page);
-        call.enqueue(new Callback<List<Poster>>() {
+        
+        // If we already have cached data, use it
+        if (cachedJsonResponse != null && !allMovies.isEmpty()) {
+            filterAndDisplayMovies();
+            return;
+        }
+        
+        // Load data from GitHub JSON API
+        apiClient.getJsonApiData(new apiClient.JsonApiCallback() {
             @Override
-            public void onResponse(Call<List<Poster>> call, final Response<List<Poster>> response) {
-                if (response.isSuccessful()){
-                    if (response.body().size()>0){
-                        for (int i = 0; i < response.body().size(); i++) {
-                            posterArrayList.add(response.body().get(i));
-                            if (native_ads_enabled){
-                                item++;
-                                if (item == lines_beetween_ads ){
-                                    item= 0;
-                                    if (prefManager.getString("ADMIN_NATIVE_TYPE").equals("FACEBOOK")) {
-                                        posterArrayList.add(new Poster().setTypeView(4));
-                                    }else if (prefManager.getString("ADMIN_NATIVE_TYPE").equals("ADMOB")){
-                                        posterArrayList.add(new Poster().setTypeView(5));
-                                    } else if (prefManager.getString("ADMIN_NATIVE_TYPE").equals("BOTH")){
-                                        if (type_ads == 0) {
-                                            posterArrayList.add(new Poster().setTypeView(4));
-                                            type_ads = 1;
-                                        }else if (type_ads == 1){
-                                            posterArrayList.add(new Poster().setTypeView(5));
-                                            type_ads = 0;
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                        linear_layout_layout_error.setVisibility(View.GONE);
-                        recycler_view_activity_genre.setVisibility(View.VISIBLE);
-                        image_view_empty_list.setVisibility(View.GONE);
-
-                        adapter.notifyDataSetChanged();
-                        page++;
-                        loading=true;
-                    }else{
-                        if (page==0) {
-                            linear_layout_layout_error.setVisibility(View.GONE);
-                            recycler_view_activity_genre.setVisibility(View.GONE);
-                            image_view_empty_list.setVisibility(View.VISIBLE);
-                        }
-                    }
-                }else{
-                    linear_layout_layout_error.setVisibility(View.VISIBLE);
-                    recycler_view_activity_genre.setVisibility(View.GONE);
-                    image_view_empty_list.setVisibility(View.GONE);
+            public void onSuccess(JsonApiResponse jsonResponse) {
+                if (jsonResponse != null && jsonResponse.getMovies() != null) {
+                    cachedJsonResponse = jsonResponse;
+                    allMovies = jsonResponse.getMovies();
+                    Log.d("GenreActivity", "Loaded " + allMovies.size() + " movies/series");
+                    filterAndDisplayMovies();
+                } else {
+                    Log.e("GenreActivity", "JSON response or movies is null");
+                    showError();
                 }
-                relative_layout_load_more.setVisibility(View.GONE);
-                swipe_refresh_layout_list_genre_search.setRefreshing(false);
-                linear_layout_load_genre_activity.setVisibility(View.GONE);
             }
-
+            
             @Override
-            public void onFailure(Call<List<Poster>> call, Throwable t) {
-                linear_layout_layout_error.setVisibility(View.VISIBLE);
-                recycler_view_activity_genre.setVisibility(View.GONE);
-                image_view_empty_list.setVisibility(View.GONE);
-                relative_layout_load_more.setVisibility(View.GONE);
-                swipe_refresh_layout_list_genre_search.setVisibility(View.GONE);
-                linear_layout_load_genre_activity.setVisibility(View.GONE);
-
+            public void onError(String error) {
+                Log.e("GenreActivity", "Error loading JSON data: " + error);
+                showError();
             }
         });
     }
+    
+    /**
+     * Filter movies and series by genre and order, then display them
+     */
+    private void filterAndDisplayMovies() {
+        try {
+            List<Poster> filteredMovies = new ArrayList<>();
+            
+            Log.d("GenreActivity", "Filtering for genre ID: " + genre.getId() + ", title: " + genre.getTitle());
+            Log.d("GenreActivity", "Total movies/series to filter: " + allMovies.size());
+            
+            // Filter movies and series by genre
+            for (Poster movie : allMovies) {
+            if (genre.getId() == -1) {
+                // Special case for "Top Rated" - show all movies and series
+                filteredMovies.add(movie);
+            } else if (genre.getId() == 0) {
+                // Special case for "Most Viewed" - show all movies and series
+                filteredMovies.add(movie);
+            } else if (genre.getId() == -2) {
+                // Special case for "My List" - show all movies and series (or implement actual my list logic)
+                filteredMovies.add(movie);
+            } else {
+                // Filter by actual genre
+                if (movie.getGenres() != null) {
+                    for (Genre movieGenre : movie.getGenres()) {
+                        if (movieGenre.getId() != null && movieGenre.getId().equals(genre.getId())) {
+                            filteredMovies.add(movie);
+                            break;
+                        }
+                    }
+                }
+            }
+        }
+        
+        Log.d("GenreActivity", "Found " + filteredMovies.size() + " movies/series for genre: " + genre.getTitle());
+        
+        // Sort movies by selected order
+        sortMoviesByOrder(filteredMovies, SelectedOrder);
+        
+        // Apply pagination
+        int startIndex = page * 20; // 20 items per page
+        int endIndex = Math.min(startIndex + 20, filteredMovies.size());
+        
+        if (startIndex < filteredMovies.size()) {
+            List<Poster> pageMovies = filteredMovies.subList(startIndex, endIndex);
+            
+            // Add movies to the list
+            for (Poster movie : pageMovies) {
+                posterArrayList.add(movie);
+                if (native_ads_enabled){
+                    item++;
+                    if (item == lines_beetween_ads ){
+                        item= 0;
+                        if (prefManager.getString("ADMIN_NATIVE_TYPE").equals("FACEBOOK")) {
+                            posterArrayList.add(new Poster().setTypeView(4));
+                        }else if (prefManager.getString("ADMIN_NATIVE_TYPE").equals("ADMOB")){
+                            posterArrayList.add(new Poster().setTypeView(5));
+                        } else if (prefManager.getString("ADMIN_NATIVE_TYPE").equals("BOTH")){
+                            if (type_ads == 0) {
+                                posterArrayList.add(new Poster().setTypeView(4));
+                                type_ads = 1;
+                            }else if (type_ads == 1){
+                                posterArrayList.add(new Poster().setTypeView(5));
+                                type_ads = 0;
+                            }
+                        }
+                    }
+                }
+            }
+            
+            linear_layout_layout_error.setVisibility(View.GONE);
+            recycler_view_activity_genre.setVisibility(View.VISIBLE);
+            image_view_empty_list.setVisibility(View.GONE);
+
+            if (adapter != null) {
+                adapter.notifyDataSetChanged();
+            }
+            page++;
+            loading=true;
+        } else {
+            if (page==0) {
+                linear_layout_layout_error.setVisibility(View.GONE);
+                recycler_view_activity_genre.setVisibility(View.GONE);
+                image_view_empty_list.setVisibility(View.VISIBLE);
+            }
+        }
+        
+        relative_layout_load_more.setVisibility(View.GONE);
+        swipe_refresh_layout_list_genre_search.setRefreshing(false);
+        linear_layout_load_genre_activity.setVisibility(View.GONE);
+        
+        } catch (Exception e) {
+            Log.e("GenreActivity", "Error in filterAndDisplayMovies: " + e.getMessage(), e);
+            showError();
+        }
+    }
+    
+    /**
+     * Sort movies by the selected order
+     */
+    private void sortMoviesByOrder(List<Poster> movies, String order) {
+        switch (order) {
+            case "rating":
+                movies.sort((m1, m2) -> {
+                    Float rating1 = m1.getRating() != null ? m1.getRating() : 0f;
+                    Float rating2 = m2.getRating() != null ? m2.getRating() : 0f;
+                    return rating2.compareTo(rating1); // Descending order
+                });
+                break;
+            case "views":
+                movies.sort((m1, m2) -> {
+                    Integer views1 = m1.getViews() != null ? m1.getViews() : 0;
+                    Integer views2 = m2.getViews() != null ? m2.getViews() : 0;
+                    return views2.compareTo(views1); // Descending order
+                });
+                break;
+            case "year":
+                movies.sort((m1, m2) -> {
+                    String year1 = m1.getYear() != null ? m1.getYear() : "";
+                    String year2 = m2.getYear() != null ? m2.getYear() : "";
+                    return year2.compareTo(year1); // Descending order
+                });
+                break;
+            case "title":
+                movies.sort((m1, m2) -> {
+                    String title1 = m1.getTitle() != null ? m1.getTitle() : "";
+                    String title2 = m2.getTitle() != null ? m2.getTitle() : "";
+                    return title1.compareToIgnoreCase(title2); // Ascending order
+                });
+                break;
+            case "imdb":
+                movies.sort((m1, m2) -> {
+                    String imdb1 = m1.getImdb() != null ? m1.getImdb() : "";
+                    String imdb2 = m2.getImdb() != null ? m2.getImdb() : "";
+                    return imdb2.compareTo(imdb1); // Descending order
+                });
+                break;
+            case "created":
+            default:
+                // Keep original order (most recent first)
+                break;
+        }
+    }
+    
+    /**
+     * Show error state
+     */
+    private void showError() {
+        linear_layout_layout_error.setVisibility(View.VISIBLE);
+        recycler_view_activity_genre.setVisibility(View.GONE);
+        image_view_empty_list.setVisibility(View.GONE);
+        relative_layout_load_more.setVisibility(View.GONE);
+        swipe_refresh_layout_list_genre_search.setVisibility(View.GONE);
+        linear_layout_load_genre_activity.setVisibility(View.GONE);
+    }
+
+    /**
+     * @deprecated Old API method - replaced with loadPostersFromJson()
+     */
+    @Deprecated
+    private void loadPosters() {
+        // This method is kept for backward compatibility but now redirects to JSON API
+        loadPostersFromJson();
+    }
 
     private void initAction() {
-
-
 
         swipe_refresh_layout_list_genre_search.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
             @Override
@@ -259,8 +415,10 @@ public class GenreActivity extends AppCompatActivity {
                 page = 0;
                 loading = true;
                 posterArrayList.clear();
-                adapter.notifyDataSetChanged();
-                loadPosters();
+                if (adapter != null) {
+                    adapter.notifyDataSetChanged();
+                }
+                loadPostersFromJson();
             }
         });
         button_try_again.setOnClickListener(new View.OnClickListener() {
@@ -270,8 +428,10 @@ public class GenreActivity extends AppCompatActivity {
                 page = 0;
                 loading = true;
                 posterArrayList.clear();
-                adapter.notifyDataSetChanged();
-                loadPosters();
+                if (adapter != null) {
+                    adapter.notifyDataSetChanged();
+                }
+                loadPostersFromJson();
             }
         });
         recycler_view_activity_genre.addOnScrollListener(new RecyclerView.OnScrollListener()
@@ -291,7 +451,7 @@ public class GenreActivity extends AppCompatActivity {
                         if ( (visibleItemCount + pastVisiblesItems) >= totalItemCount)
                         {
                             loading = false;
-                            loadPosters();
+                            loadPostersFromJson();
                         }
                     }
                 }else{

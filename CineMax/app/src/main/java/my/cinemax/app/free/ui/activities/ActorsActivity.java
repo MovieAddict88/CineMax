@@ -11,6 +11,7 @@ import retrofit2.Response;
 import retrofit2.Retrofit;
 
 import android.os.Bundle;
+import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
@@ -28,6 +29,7 @@ import my.cinemax.app.free.R;
 import my.cinemax.app.free.api.apiClient;
 import my.cinemax.app.free.api.apiRest;
 import my.cinemax.app.free.entity.Actor;
+import my.cinemax.app.free.entity.JsonApiResponse;
 import my.cinemax.app.free.ui.Adapters.ActorAdapter;
 
 import java.util.ArrayList;
@@ -57,6 +59,9 @@ public class ActorsActivity extends AppCompatActivity {
     private EditText edit_text_actors_activity_actors;
     private String searchtext = "null";
 
+    // JSON API data cache
+    private JsonApiResponse cachedJsonResponse = null;
+    private List<Actor> allActors = new ArrayList<>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -68,122 +73,163 @@ public class ActorsActivity extends AppCompatActivity {
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         initView();
         initAction();
-        loadActors();
+        loadActorsFromJson();
         showAdsBanner();
     }
 
-    private void loadActors() {
+    /**
+     * Load actors from GitHub JSON API instead of old server API
+     */
+    private void loadActorsFromJson() {
         if (page==0){
             linear_layout_load_actors_activity.setVisibility(View.VISIBLE);
         }else{
             relative_layout_load_more.setVisibility(View.VISIBLE);
         }
         swipe_refresh_layout_list_actors_search.setRefreshing(false);
-        Retrofit retrofit = apiClient.getClient();
-        apiRest service = retrofit.create(apiRest.class);
-        Call<List<Actor>> call = service.getActorsList(page,searchtext);
-        call.enqueue(new Callback<List<Actor>>() {
+        
+        // If we already have cached data, use it
+        if (cachedJsonResponse != null && !allActors.isEmpty()) {
+            filterAndDisplayActors();
+            return;
+        }
+        
+        // Load data from GitHub JSON API
+        apiClient.getJsonApiData(new apiClient.JsonApiCallback() {
             @Override
-            public void onResponse(Call<List<Actor>> call, final Response<List<Actor>> response) {
-                if (response.isSuccessful()){
-                    if (response.body().size()>0){
-                        for (int i = 0; i < response.body().size(); i++) {
-                            actorArrayList.add(response.body().get(i));
-                        }
-                        linear_layout_layout_error.setVisibility(View.GONE);
-                        recycler_view_activity_actors.setVisibility(View.VISIBLE);
-                        image_view_empty_list.setVisibility(View.GONE);
-
-                        adapter.notifyDataSetChanged();
-                        page++;
-                        loading=true;
-                    }else{
-                        if (page==0) {
-                            linear_layout_layout_error.setVisibility(View.GONE);
-                            recycler_view_activity_actors.setVisibility(View.GONE);
-                            image_view_empty_list.setVisibility(View.VISIBLE);
-                        }
-                    }
-                }else{
-                    linear_layout_layout_error.setVisibility(View.VISIBLE);
-                    recycler_view_activity_actors.setVisibility(View.GONE);
-                    image_view_empty_list.setVisibility(View.GONE);
+            public void onSuccess(JsonApiResponse jsonResponse) {
+                if (jsonResponse != null && jsonResponse.getActors() != null) {
+                    cachedJsonResponse = jsonResponse;
+                    allActors = jsonResponse.getActors();
+                    filterAndDisplayActors();
+                } else {
+                    showError();
                 }
-                relative_layout_load_more.setVisibility(View.GONE);
-                swipe_refresh_layout_list_actors_search.setRefreshing(false);
-                linear_layout_load_actors_activity.setVisibility(View.GONE);
             }
-
+            
             @Override
-            public void onFailure(Call<List<Actor>> call, Throwable t) {
-                linear_layout_layout_error.setVisibility(View.VISIBLE);
-                recycler_view_activity_actors.setVisibility(View.GONE);
-                image_view_empty_list.setVisibility(View.GONE);
-                relative_layout_load_more.setVisibility(View.GONE);
-                swipe_refresh_layout_list_actors_search.setVisibility(View.GONE);
-                linear_layout_load_actors_activity.setVisibility(View.GONE);
-
+            public void onError(String error) {
+                Log.e("ActorsActivity", "Error loading JSON data: " + error);
+                showError();
             }
         });
     }
+    
+    /**
+     * Filter actors by search text and display them
+     */
+    private void filterAndDisplayActors() {
+        List<Actor> filteredActors = new ArrayList<>();
+        
+        // Filter actors by search text
+        if ("null".equals(searchtext) || searchtext.isEmpty()) {
+            filteredActors = new ArrayList<>(allActors);
+        } else {
+            for (Actor actor : allActors) {
+                if (actor.getName() != null && 
+                    actor.getName().toLowerCase().contains(searchtext.toLowerCase())) {
+                    filteredActors.add(actor);
+                }
+            }
+        }
+        
+        // Apply pagination
+        int startIndex = page * 20; // 20 items per page
+        int endIndex = Math.min(startIndex + 20, filteredActors.size());
+        
+        if (startIndex < filteredActors.size()) {
+            List<Actor> pageActors = filteredActors.subList(startIndex, endIndex);
+            
+            // Add actors to the list
+            for (Actor actor : pageActors) {
+                actorArrayList.add(actor);
+            }
+            
+            linear_layout_layout_error.setVisibility(View.GONE);
+            recycler_view_activity_actors.setVisibility(View.VISIBLE);
+            image_view_empty_list.setVisibility(View.GONE);
+
+            adapter.notifyDataSetChanged();
+            page++;
+            loading=true;
+        } else {
+            if (page==0) {
+                linear_layout_layout_error.setVisibility(View.GONE);
+                recycler_view_activity_actors.setVisibility(View.GONE);
+                image_view_empty_list.setVisibility(View.VISIBLE);
+            }
+        }
+        
+        relative_layout_load_more.setVisibility(View.GONE);
+        swipe_refresh_layout_list_actors_search.setRefreshing(false);
+        linear_layout_load_actors_activity.setVisibility(View.GONE);
+    }
+    
+    /**
+     * Show error state
+     */
+    private void showError() {
+        linear_layout_layout_error.setVisibility(View.VISIBLE);
+        recycler_view_activity_actors.setVisibility(View.GONE);
+        image_view_empty_list.setVisibility(View.GONE);
+        relative_layout_load_more.setVisibility(View.GONE);
+        swipe_refresh_layout_list_actors_search.setVisibility(View.GONE);
+        linear_layout_load_actors_activity.setVisibility(View.GONE);
+    }
+
+    /**
+     * @deprecated Old API method - replaced with loadActorsFromJson()
+     */
+    @Deprecated
+    private void loadActors() {
+        // This method is kept for backward compatibility but now redirects to JSON API
+        loadActorsFromJson();
+    }
 
     private void initAction() {
-        edit_text_actors_activity_actors.setOnEditorActionListener((v,actionId,event) -> {
-            if (edit_text_actors_activity_actors.getText().length()>2){
-                item = 0;
-                page = 0;
-                loading = true;
-                actorArrayList.clear();
-                adapter.notifyDataSetChanged();
-                searchtext = edit_text_actors_activity_actors.getText().toString().trim();
-                loadActors();
-                image_view_activity_actors_close_search.setVisibility(View.VISIBLE);
 
-            } return false;
-        });
-        image_view_activity_actors_close_search.setOnClickListener(v->{
-            item = 0;
-            page = 0;
-            loading = true;
-            actorArrayList.clear();
-            adapter.notifyDataSetChanged();
-            this.searchtext = "null";
-            edit_text_actors_activity_actors.setText("");
-            loadActors();
-            image_view_activity_actors_close_search.setVisibility(View.GONE);
-        });
-        image_view_activity_actors_search.setOnClickListener(v->{
-            if (edit_text_actors_activity_actors.getText().length()>2) {
-                item = 0;
+        image_view_activity_actors_search.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                searchtext = edit_text_actors_activity_actors.getText().toString();
                 page = 0;
                 loading = true;
                 actorArrayList.clear();
                 adapter.notifyDataSetChanged();
-                this.searchtext = edit_text_actors_activity_actors.getText().toString().trim();
-                loadActors();
-                image_view_activity_actors_close_search.setVisibility(View.VISIBLE);
+                loadActorsFromJson();
             }
         });
+        image_view_activity_actors_close_search.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                searchtext = "null";
+                edit_text_actors_activity_actors.setText("");
+                page = 0;
+                loading = true;
+                actorArrayList.clear();
+                adapter.notifyDataSetChanged();
+                loadActorsFromJson();
+            }
+        });
+
         swipe_refresh_layout_list_actors_search.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
             @Override
             public void onRefresh() {
-                item = 0;
                 page = 0;
                 loading = true;
                 actorArrayList.clear();
                 adapter.notifyDataSetChanged();
-                loadActors();
+                loadActorsFromJson();
             }
         });
         button_try_again.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                item = 0;
                 page = 0;
                 loading = true;
                 actorArrayList.clear();
                 adapter.notifyDataSetChanged();
-                loadActors();
+                loadActorsFromJson();
             }
         });
         recycler_view_activity_actors.addOnScrollListener(new RecyclerView.OnScrollListener()
@@ -203,7 +249,7 @@ public class ActorsActivity extends AppCompatActivity {
                         if ( (visibleItemCount + pastVisiblesItems) >= totalItemCount)
                         {
                             loading = false;
-                            loadActors();
+                            loadActorsFromJson();
                         }
                     }
                 }else{
@@ -214,9 +260,7 @@ public class ActorsActivity extends AppCompatActivity {
     }
 
     private void initView() {
-        this.image_view_activity_actors_search=findViewById(R.id.image_view_activity_actors_search);
-        this.image_view_activity_actors_close_search=findViewById(R.id.image_view_activity_actors_close_search);
-        this.edit_text_actors_activity_actors=findViewById(R.id.edit_text_actors_activity_actors);
+
         this.linear_layout_load_actors_activity=findViewById(R.id.linear_layout_load_actors_activity);
         this.relative_layout_load_more=findViewById(R.id.relative_layout_load_more);
         this.swipe_refresh_layout_list_actors_search=findViewById(R.id.swipe_refresh_layout_list_actors_search);
@@ -224,14 +268,16 @@ public class ActorsActivity extends AppCompatActivity {
         image_view_empty_list       = findViewById(R.id.image_view_empty_list);
         linear_layout_layout_error  = findViewById(R.id.linear_layout_layout_error);
         recycler_view_activity_actors          = findViewById(R.id.recycler_view_activity_actors);
+        this.image_view_activity_actors_search=findViewById(R.id.image_view_activity_actors_search);
+        this.image_view_activity_actors_close_search=findViewById(R.id.image_view_activity_actors_close_search);
+        this.edit_text_actors_activity_actors=findViewById(R.id.edit_text_actors_activity_actors);
         adapter = new ActorAdapter(actorArrayList, this);
-        gridLayoutManager = new GridLayoutManager(this,3);
+        this.gridLayoutManager=  new GridLayoutManager(getApplicationContext(),3,RecyclerView.VERTICAL,false);
         recycler_view_activity_actors.setHasFixedSize(true);
         recycler_view_activity_actors.setAdapter(adapter);
         recycler_view_activity_actors.setLayoutManager(gridLayoutManager);
 
     }
-
     public boolean checkSUBSCRIBED(){
         PrefManager prefManager= new PrefManager(getApplicationContext());
         if (!prefManager.getString("SUBSCRIBED").equals("TRUE") && !prefManager.getString("NEW_SUBSCRIBE_ENABLED").equals("TRUE")) {
@@ -242,13 +288,13 @@ public class ActorsActivity extends AppCompatActivity {
     @Override
     public void onBackPressed(){
         super.onBackPressed();
-        return;
     }
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case android.R.id.home:
                 super.onBackPressed();
+                return true;
         }
         return super.onOptionsItemSelected(item);
     }
@@ -276,6 +322,7 @@ public class ActorsActivity extends AppCompatActivity {
             public void onAdLoaded() {
                 super.onAdLoaded();
                 mAdView.setVisibility(View.VISIBLE);
+
             }
         });
     }
