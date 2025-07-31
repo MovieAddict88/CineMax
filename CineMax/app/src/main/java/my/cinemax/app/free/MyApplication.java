@@ -1,5 +1,10 @@
 package my.cinemax.app.free;
 
+// Force IDE to recognize TMDB classes
+import my.cinemax.app.free.entity.TmdbMovieResponse;
+import my.cinemax.app.free.entity.TmdbTvResponse;
+import my.cinemax.app.free.entity.TmdbSearchResponse;
+
 import android.content.Context;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
