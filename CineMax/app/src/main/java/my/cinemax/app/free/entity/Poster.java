@@ -100,6 +100,30 @@ public class Poster implements Parcelable {
     @Expose
     private Source trailer ;
 
+    @SerializedName("tmdb_id")
+    @Expose
+    private Integer tmdbId;
+
+    @SerializedName("original_title")
+    @Expose
+    private String originalTitle;
+
+    @SerializedName("country")
+    @Expose
+    private String country;
+
+    @SerializedName("popularity")
+    @Expose
+    private Float popularity;
+
+    @SerializedName("poster_path")
+    @Expose
+    private String posterPath;
+
+    @SerializedName("backdrop_path")
+    @Expose
+    private String backdropPath;
+
     private int typeView = 1;
 
     public Poster() {
