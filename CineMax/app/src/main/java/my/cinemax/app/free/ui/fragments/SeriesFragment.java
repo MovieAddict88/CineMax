@@ -172,11 +172,10 @@ public class SeriesFragment extends Fragment {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
                 if (!firstLoadGenre) {
-                    if (id==0){
-                        genreSelected  =0;
-
-                    }else{
-                        genreSelected  = genreList.get((int) id).getId();
+                    if (id == 0) {
+                        genreSelected = 0;
+                    } else {
+                        genreSelected = genreList.get((int) id).getId().intValue();
                     }
                     item = 0;
                     page = 0;
@@ -185,7 +184,7 @@ public class SeriesFragment extends Fragment {
                     movieList.add(new Poster().setTypeView(2));
                     adapter.notifyDataSetChanged();
                     loadSeries();
-                }else{
+                } else {
                     firstLoadGenre = false;
                 }
             }

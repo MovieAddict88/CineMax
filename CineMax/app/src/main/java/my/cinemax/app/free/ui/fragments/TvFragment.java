@@ -121,71 +121,76 @@ public class TvFragment extends Fragment {
         return view;
     }
     private void getCountiesList() {
-        // Don't load countries from old API - they will be loaded from JSON data
-        // Retrofit retrofit = apiClient.getClient();
-        // apiRest service = retrofit.create(apiRest.class);
-        // Call<List<Country>> call = service.getCountiesList();
-        // call.enqueue(new Callback<List<Country>>() {
-        //     @Override
-        //     public void onResponse(Call<List<Country>> call, Response<List<Country>> response) {
-        //         if (response.isSuccessful()){
-        //             if (response.body().size()>0) {
-        //                 final String[] countryCodes = new String[response.body().size()+1];
-        //                 countryCodes[0] = "All countries";
-        //                 countriesList.add(new Country());
-
-        //                 for (int i = 0; i < response.body().size(); i++) {
-        //                     countryCodes[i+1] = response.body().get(i).getTitle();
-        //                     countriesList.add(response.body().get(i));
-        //                 }
-        //                 ArrayAdapter<String> filtresAdapter = new ArrayAdapter<String>(getActivity(),
-        //                         R.layout.spinner_layout,R.id.textView,countryCodes);
-
-        //                 filtresAdapter.setDropDownViewResource(R.layout.simple_spinner_dropdown_item);
-        //                 spinner_fragement_channel_countries_list.setAdapter(filtresAdapter);
-        //                 relative_layout_frament_channel_countries.setVisibility(View.VISIBLE);
-        //             }else{
-        //                 relative_layout_frament_channel_countries.setVisibility(View.GONE);
-        //             }
-        //         }
-        //     }
-        //     @Override
-        //     public void onFailure(Call<List<Country>> call, Throwable t) {
-        //     }
-        // });
+        // Load countries from GitHub JSON API
+        apiClient.getJsonApiData(new retrofit2.Callback<my.cinemax.app.free.entity.JsonApiResponse>() {
+            @Override
+            public void onResponse(Call<my.cinemax.app.free.entity.JsonApiResponse> call, retrofit2.Response<my.cinemax.app.free.entity.JsonApiResponse> response) {
+                if (response.isSuccessful() && response.body() != null) {
+                    my.cinemax.app.free.entity.JsonApiResponse apiResponse = response.body();
+                    
+                    if (apiResponse.getCountries() != null && apiResponse.getCountries().size() > 0) {
+                        final String[] countryCodes = new String[apiResponse.getCountries().size() + 1];
+                        countryCodes[0] = "All countries";
+                        countriesList.add(new Country()); // Add "All countries" option
+                        
+                        for (int i = 0; i < apiResponse.getCountries().size(); i++) {
+                            countryCodes[i + 1] = apiResponse.getCountries().get(i).getTitle();
+                            countriesList.add(apiResponse.getCountries().get(i));
+                        }
+                        
+                        ArrayAdapter<String> filtresAdapter = new ArrayAdapter<String>(getActivity(),
+                                R.layout.spinner_layout, R.id.textView, countryCodes);
+                        filtresAdapter.setDropDownViewResource(R.layout.simple_spinner_dropdown_item);
+                        spinner_fragement_channel_countries_list.setAdapter(filtresAdapter);
+                        relative_layout_frament_channel_countries.setVisibility(View.VISIBLE);
+                    } else {
+                        relative_layout_frament_channel_countries.setVisibility(View.GONE);
+                    }
+                }
+            }
+            
+            @Override
+            public void onFailure(Call<my.cinemax.app.free.entity.JsonApiResponse> call, Throwable t) {
+                // Hide country filter if loading fails
+                relative_layout_frament_channel_countries.setVisibility(View.GONE);
+            }
+        });
     }
     private void getCategoriesList() {
-        // Don't load categories from old API - they will be loaded from JSON data
-        // Retrofit retrofit = apiClient.getClient();
-        // apiRest service = retrofit.create(apiRest.class);
-        // Call<List<Category>> call = service.getCategoriesList();
-        // call.enqueue(new Callback<List<Category>>() {
-        //     @Override
-        //     public void onResponse(Call<List<Category>> call, Response<List<Category>> response) {
-        //         if (response.isSuccessful()){
-        //             if (response.body().size()>0) {
-        //                 final String[] categoryCodes = new String[response.body().size()+1];
-        //                 categoryCodes[0] = "All categories";
-        //                 categoryList.add(new Category());
-
-        //                 for (int i = 0; i < response.body().size(); i++) {
-        //                     categoryCodes[i+1] = response.body().get(i).getTitle();
-        //                     categoryList.add(response.body().get(i));
-        //                 }
-        //                 ArrayAdapter<String> filtresAdapter = new ArrayAdapter<String>(getActivity(),
-        //                         R.layout.spinner_layout,R.id.textView,categoryCodes);
-        //                 filtresAdapter.setDropDownViewResource(R.layout.simple_spinner_dropdown_item);
-        //                 spinner_fragement_channel_categories_list.setAdapter(filtresAdapter);
-        //                 relative_layout_frament_channel_categories.setVisibility(View.VISIBLE);
-        //             }else{
-        //                 relative_layout_frament_channel_categories.setVisibility(View.GONE);
-        //             }
-        //         }
-        //     }
-        //     @Override
-        //     public void onFailure(Call<List<Category>> call, Throwable t) {
-        //     }
-        // });
+        // Load categories from GitHub JSON API
+        apiClient.getJsonApiData(new retrofit2.Callback<my.cinemax.app.free.entity.JsonApiResponse>() {
+            @Override
+            public void onResponse(Call<my.cinemax.app.free.entity.JsonApiResponse> call, retrofit2.Response<my.cinemax.app.free.entity.JsonApiResponse> response) {
+                if (response.isSuccessful() && response.body() != null) {
+                    my.cinemax.app.free.entity.JsonApiResponse apiResponse = response.body();
+                    
+                    if (apiResponse.getCategories() != null && apiResponse.getCategories().size() > 0) {
+                        final String[] categoryCodes = new String[apiResponse.getCategories().size() + 1];
+                        categoryCodes[0] = "All categories";
+                        categoryList.add(new Category()); // Add "All categories" option
+                        
+                        for (int i = 0; i < apiResponse.getCategories().size(); i++) {
+                            categoryCodes[i + 1] = apiResponse.getCategories().get(i).getTitle();
+                            categoryList.add(apiResponse.getCategories().get(i));
+                        }
+                        
+                        ArrayAdapter<String> filtresAdapter = new ArrayAdapter<String>(getActivity(),
+                                R.layout.spinner_layout, R.id.textView, categoryCodes);
+                        filtresAdapter.setDropDownViewResource(R.layout.simple_spinner_dropdown_item);
+                        spinner_fragement_channel_categories_list.setAdapter(filtresAdapter);
+                        relative_layout_frament_channel_categories.setVisibility(View.VISIBLE);
+                    } else {
+                        relative_layout_frament_channel_categories.setVisibility(View.GONE);
+                    }
+                }
+            }
+            
+            @Override
+            public void onFailure(Call<my.cinemax.app.free.entity.JsonApiResponse> call, Throwable t) {
+                // Hide category filter if loading fails
+                relative_layout_frament_channel_categories.setVisibility(View.GONE);
+            }
+        });
     }
 
     private void initActon() {
@@ -204,7 +209,7 @@ public class TvFragment extends Fragment {
                    if (id == 0) {
                        countrySelected = 0;
                    } else {
-                       countrySelected = countriesList.get((int) id).getId();
+                       countrySelected = countriesList.get((int) id).getId().intValue();
                    }
                    item = 0;
                    page = 0;
@@ -213,7 +218,7 @@ public class TvFragment extends Fragment {
                    channelList.add(new Channel().setTypeView(2));
                    adapter.notifyDataSetChanged();
                    loadChannels();
-               }else{
+               } else {
                    firstLoadCountries = false;
                }
             }
@@ -227,10 +232,10 @@ public class TvFragment extends Fragment {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
                 if (!firstLoadCategories) {
-                    if (id==0){
-                    categorySelected  =0;
-                    }else{
-                        categorySelected  = categoryList.get((int) id).getId();
+                    if (id == 0) {
+                        categorySelected = 0;
+                    } else {
+                        categorySelected = categoryList.get((int) id).getId().intValue();
                     }
                     item = 0;
                     page = 0;
@@ -238,9 +243,8 @@ public class TvFragment extends Fragment {
                     channelList.clear();
                     channelList.add(new Channel().setTypeView(2));
                     adapter.notifyDataSetChanged();
-
                     loadChannels();
-                }else{
+                } else {
                     firstLoadCategories = false;
                 }
             }
