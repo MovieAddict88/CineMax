@@ -1,0 +1,261 @@
+{
+  "api_info": {
+    "version": "2.1",
+    "description": "Auto-Detection API with TMDB Integration",
+    "last_updated": "2024-01-15",
+    "auto_detection": true,
+    "manual_input_required": false
+  },
+  "workflow": {
+    "input_required": [
+      "title",
+      "type (movie/tv)"
+    ],
+    "auto_detected_from_tmdb": [
+      "rating",
+      "actors",
+      "country", 
+      "views/popularity",
+      "duration",
+      "poster images",
+      "backdrop images",
+      "thumbnails",
+      "seasons",
+      "episodes", 
+      "descriptions",
+      "release_dates",
+      "genres",
+      "production_companies",
+      "networks",
+      "spoken_languages"
+    ],
+    "auto_generated": [
+      "vidsrc.net streaming URLs",
+      "multiple source options",
+      "episode streaming links"
+    ]
+  },
+  "examples": {
+    "input_example": {
+      "title": "The Dark Knight",
+      "type": "movie"
+    },
+    "auto_detected_output": {
+      "id": 1,
+      "title": "The Dark Knight",
+      "type": "movie",
+      "tmdb_id": 155,
+      "original_title": "The Dark Knight",
+      "description": "Batman raises the stakes in his war on crime. With the help of Lt. Jim Gordon and District Attorney Harvey Dent, Batman sets out to dismantle the remaining criminal organizations that plague the streets. The partnership proves to be effective, but they soon find themselves prey to a reign of chaos unleashed by a rising criminal mastermind known to the terrified citizens of Gotham as the Joker.",
+      "rating": 8.5,
+      "vote_count": 32000,
+      "popularity": 123.456,
+      "country": "United States",
+      "release_date": "2008-07-18",
+      "duration": "152 min",
+      "poster_tmdb": "https://image.tmdb.org/t/p/w500/qJ2tW6WMUDux911r6m7haRef0WH.jpg",
+      "backdrop": "https://image.tmdb.org/t/p/w1280/hqkIcbrOHL86UncnHIsHVcVmzue.jpg",
+      "adult": false,
+      "original_language": "en",
+      "status": "Released",
+      "production_companies": ["Warner Bros. Pictures", "Legendary Pictures", "Syncopy"],
+      "spoken_languages": ["English"],
+      "genres": [
+        {
+          "id": 28,
+          "title": "Action"
+        },
+        {
+          "id": 80,
+          "title": "Crime"
+        },
+        {
+          "id": 18,
+          "title": "Drama"
+        }
+      ],
+      "actors": [
+        {
+          "id": 3894,
+          "name": "Christian Bale",
+          "title": "Bruce Wayne / Batman",
+          "image": "https://image.tmdb.org/t/p/w500/3qx2QFUbG6t6IlzR0F9k3Z6Yhf7.jpg"
+        },
+        {
+          "id": 1895,
+          "name": "Heath Ledger",
+          "title": "The Joker",
+          "image": "https://image.tmdb.org/t/p/w500/5Y9HnYYa9jF4NunY9lSgJGjSe8E.jpg"
+        },
+        {
+          "id": 64,
+          "name": "Gary Oldman",
+          "title": "James Gordon",
+          "image": "https://image.tmdb.org/t/p/w500/2v9FVVBUrrkW2m3QOcYkuhq9A6o.jpg"
+        }
+      ],
+      "sources": [
+        {
+          "id": 1,
+          "type": "embed",
+          "title": "VidSrc Player",
+          "quality": "1080p",
+          "kind": "external",
+          "premium": "free",
+          "external": true,
+          "url": "https://vidsrc.net/embed/movie/155"
+        },
+        {
+          "id": 2,
+          "type": "embed",
+          "title": "Backup Player",
+          "quality": "720p", 
+          "kind": "external",
+          "premium": "free",
+          "external": true,
+          "url": "https://vidsrc.me/embed/movie/155"
+        }
+      ]
+    }
+  },
+  "tv_series_example": {
+    "input": {
+      "title": "Breaking Bad",
+      "type": "tv"
+    },
+    "auto_detected_output": {
+      "id": 2,
+      "title": "Breaking Bad",
+      "type": "tv",
+      "tmdb_id": 1396,
+      "original_title": "Breaking Bad",
+      "description": "A high school chemistry teacher diagnosed with inoperable lung cancer turns to manufacturing and selling methamphetamine in order to secure his family's future.",
+      "rating": 9.5,
+      "vote_count": 12847,
+      "popularity": 451.738,
+      "country": "United States",
+      "first_air_date": "2008-01-20",
+      "last_air_date": "2013-09-29",
+      "number_of_seasons": 5,
+      "number_of_episodes": 62,
+      "status": "Ended",
+      "duration": "47 min",
+      "poster_tmdb": "https://image.tmdb.org/t/p/w500/ggFHVNu6YYI5L9pCfOacjizRGt.jpg",
+      "backdrop": "https://image.tmdb.org/t/p/w1280/tsRy63Mu5cu8etL1X7ZLyf7UP1M.jpg",
+      "original_language": "en",
+      "production_companies": ["High Bridge Productions", "Gran Via Productions", "Sony Pictures Television"],
+      "networks": ["AMC"],
+      "spoken_languages": ["English", "Spanish"],
+      "genres": [
+        {
+          "id": 18,
+          "title": "Drama"
+        },
+        {
+          "id": 80,
+          "title": "Crime"
+        }
+      ],
+      "actors": [
+        {
+          "id": 17419,
+          "name": "Bryan Cranston",
+          "title": "Walter White",
+          "image": "https://image.tmdb.org/t/p/w500/7Jahy5LZX2Fo8fGJNUoYrSYuRz9.jpg"
+        },
+        {
+          "id": 84497,
+          "name": "Aaron Paul",
+          "title": "Jesse Pinkman",
+          "image": "https://image.tmdb.org/t/p/w500/lOhc9ePVVCqhSNcnZmVnllHGGvH.jpg"
+        }
+      ],
+      "seasons": [
+        {
+          "id": 1,
+          "title": "Season 1",
+          "episodes": [
+            {
+              "id": 1,
+              "title": "Episode 1",
+              "description": "Auto-generated episode description. Full details will be enriched from TMDB episode data.",
+              "duration": "47 min",
+              "playas": "episode",
+              "sources": [
+                {
+                  "id": 1,
+                  "type": "embed",
+                  "title": "VidSrc Player",
+                  "quality": "1080p",
+                  "kind": "external",
+                  "premium": "free",
+                  "external": true,
+                  "url": "https://vidsrc.net/embed/tv/1396/1/1"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": 2,
+          "title": "Season 2",
+          "episodes": [
+            {
+              "id": 1,
+              "title": "Episode 1",
+              "description": "Auto-generated episode description. Full details will be enriched from TMDB episode data.",
+              "duration": "47 min",
+              "playas": "episode",
+              "sources": [
+                {
+                  "id": 1,
+                  "type": "embed",
+                  "title": "VidSrc Player",
+                  "quality": "1080p",
+                  "kind": "external",
+                  "premium": "free",
+                  "external": true,
+                  "url": "https://vidsrc.net/embed/tv/1396/2/1"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  },
+  "usage_instructions": {
+    "step_1": "Call AutoEnrichmentService.autoDetectMetadata(title, type, callback)",
+    "step_2": "TMDB API automatically finds movie/series by title",
+    "step_3": "All metadata is auto-filled from TMDB",
+    "step_4": "Streaming URLs are auto-generated using TMDB ID",
+    "step_5": "For TV series, seasons/episodes are auto-created",
+    "result": "Complete movie/TV data with zero manual image input"
+  },
+  "code_example": {
+    "java": "// NO MANUAL IMAGES NEEDED!\nAutoEnrichmentService.autoDetectMetadata(\"Avengers\", \"movie\", new AutoEnrichmentCallback() {\n    @Override\n    public void onSuccess(Poster movie) {\n        // movie now has ALL metadata from TMDB:\n        // - Poster: movie.getPosterTmdb() \n        // - Backdrop: movie.getBackdrop()\n        // - Rating: movie.getRating()\n        // - Actors: movie.getActors()\n        // - Country: movie.getCountry()\n        // - Streaming: \"https://vidsrc.net/embed/movie/\" + movie.getTmdbId()\n    }\n});"
+  },
+  "comparison": {
+    "old_way": {
+      "input_required": [
+        "title",
+        "description", 
+        "rating",
+        "poster_image_url",
+        "backdrop_image_url",
+        "actor_names",
+        "actor_images",
+        "country",
+        "duration",
+        "streaming_urls"
+      ],
+      "manual_work": "Very high - need to find and input all data manually"
+    },
+    "new_auto_detection": {
+      "input_required": [
+        "title only"
+      ],
+      "manual_work": "Zero - everything auto-detected from TMDB"
+    }
+  }
+}
