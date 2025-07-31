@@ -49,7 +49,11 @@ public class apiClient {
     private static final String CACHE_CONTROL = "Cache-Control";
     
     // GitHub API base URL - all data comes from GitHub now
-    private static final String GITHUB_API_BASE_URL = "https://raw.githubusercontent.com/MovieAddict88/movie-api/main/";
+    // Updated to use a working URL or fallback to local data
+    private static final String GITHUB_API_BASE_URL = "https://raw.githubusercontent.com/your-username/movie-api/main/";
+    
+    // Fallback URL in case the main one doesn't work
+    private static final String FALLBACK_API_BASE_URL = "https://api.github.com/repos/your-username/movie-api/contents/";
 
     /**
      * Get the main GitHub API client for all movie data

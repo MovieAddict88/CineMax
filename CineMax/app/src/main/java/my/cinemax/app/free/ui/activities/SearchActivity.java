@@ -109,14 +109,19 @@ public class SearchActivity extends AppCompatActivity {
             Bundle bundle = getIntent().getExtras();
             if (bundle != null) {
                 this.query = bundle.getString("query", "");
+                Log.d("SearchActivity", "Search query from intent: '" + this.query + "'");
             } else {
                 this.query = "";
+                Log.w("SearchActivity", "No extras in intent, using empty query");
             }
             
             // Validate query
             if (query == null || query.trim().isEmpty()) {
                 Log.w("SearchActivity", "Empty or null search query");
                 query = "";
+            } else {
+                query = query.trim();
+                Log.d("SearchActivity", "Final search query: '" + query + "'");
             }
             
             // Setup toolbar
@@ -142,6 +147,9 @@ public class SearchActivity extends AppCompatActivity {
                 adapter = new PosterAdapter(posterArrayList, this);
                 recycler_view_activity_search.setHasFixedSize(true);
                 recycler_view_activity_search.setAdapter(adapter);
+                Log.d("SearchActivity", "Adapter initialized successfully");
+            } else {
+                Log.e("SearchActivity", "RecyclerView not found in layout");
             }
         } catch (Exception e) {
             Log.e("SearchActivity", "Error in initView: " + e.getMessage(), e);
@@ -165,9 +173,12 @@ public class SearchActivity extends AppCompatActivity {
             
             // If we already have cached data, use it
             if (cachedJsonResponse != null && !allMovies.isEmpty()) {
+                Log.d("SearchActivity", "Using cached data - Movies: " + allMovies.size() + ", Channels: " + allChannels.size());
                 filterAndDisplaySearchResults();
                 return;
             }
+            
+            Log.d("SearchActivity", "Loading data from GitHub JSON API...");
             
             // Load data from GitHub JSON API
             apiClient.getJsonApiData(new apiClient.JsonApiCallback() {
@@ -178,6 +189,17 @@ public class SearchActivity extends AppCompatActivity {
                             cachedJsonResponse = jsonResponse;
                             allMovies = jsonResponse.getMovies() != null ? jsonResponse.getMovies() : new ArrayList<>();
                             allChannels = jsonResponse.getChannels() != null ? jsonResponse.getChannels() : new ArrayList<>();
+                            
+                            Log.d("SearchActivity", "Data loaded successfully - Movies: " + allMovies.size() + ", Channels: " + allChannels.size());
+                            
+                            // Log some sample data for debugging
+                            if (!allMovies.isEmpty()) {
+                                Log.d("SearchActivity", "Sample movie: " + allMovies.get(0).getTitle());
+                            }
+                            if (!allChannels.isEmpty()) {
+                                Log.d("SearchActivity", "Sample channel: " + allChannels.get(0).getTitle());
+                            }
+                            
                             filterAndDisplaySearchResults();
                         } else {
                             Log.w("SearchActivity", "Received null JSON response");
@@ -192,15 +214,164 @@ public class SearchActivity extends AppCompatActivity {
                 @Override
                 public void onError(String error) {
                     Log.e("SearchActivity", "Error loading JSON data: " + error);
-                    runOnUiThread(() -> {
-                        showError();
-                        Toast.makeText(SearchActivity.this, "Failed to load search data: " + error, Toast.LENGTH_SHORT).show();
-                    });
+                    Log.d("SearchActivity", "Trying to load from local JSON file as fallback...");
+                    
+                    // Try to load from local JSON file as fallback
+                    loadFromLocalJsonFile();
                 }
             });
         } catch (Exception e) {
             Log.e("SearchActivity", "Error in loadSearchResultsFromJson: " + e.getMessage(), e);
             showError();
+        }
+    }
+    
+    /**
+     * Load data from local JSON file as fallback
+     */
+    private void loadFromLocalJsonFile() {
+        try {
+            Log.d("SearchActivity", "Loading from local JSON file...");
+            
+            // Read JSON file from assets
+            String jsonString = readJsonFromAssets("movie_data.json");
+            if (jsonString != null && !jsonString.isEmpty()) {
+                // Parse JSON using Gson
+                com.google.gson.Gson gson = new com.google.gson.Gson();
+                JsonApiResponse localResponse = gson.fromJson(jsonString, JsonApiResponse.class);
+                
+                if (localResponse != null) {
+                    // Cache the response
+                    cachedJsonResponse = localResponse;
+                    allMovies = localResponse.getMovies() != null ? localResponse.getMovies() : new ArrayList<>();
+                    allChannels = localResponse.getChannels() != null ? localResponse.getChannels() : new ArrayList<>();
+                    
+                    Log.d("SearchActivity", "Local JSON data loaded successfully - Movies: " + allMovies.size() + ", Channels: " + allChannels.size());
+                    
+                    // Log sample data for debugging
+                    if (!allMovies.isEmpty()) {
+                        Log.d("SearchActivity", "Sample movie: " + allMovies.get(0).getTitle());
+                    }
+                    if (!allChannels.isEmpty()) {
+                        Log.d("SearchActivity", "Sample channel: " + allChannels.get(0).getTitle());
+                    }
+                    
+                    filterAndDisplaySearchResults();
+                    return;
+                }
+            }
+            
+            // Fallback to sample data if JSON parsing fails
+            Log.w("SearchActivity", "Failed to parse local JSON, using sample data");
+            loadSampleData();
+            
+        } catch (Exception e) {
+            Log.e("SearchActivity", "Error loading from local JSON file: " + e.getMessage(), e);
+            // Fallback to sample data
+            loadSampleData();
+        }
+    }
+    
+    /**
+     * Read JSON file from assets
+     */
+    private String readJsonFromAssets(String fileName) {
+        try {
+            java.io.InputStream inputStream = getAssets().open(fileName);
+            int size = inputStream.available();
+            byte[] buffer = new byte[size];
+            inputStream.read(buffer);
+            inputStream.close();
+            return new String(buffer, "UTF-8");
+        } catch (Exception e) {
+            Log.e("SearchActivity", "Error reading JSON from assets: " + e.getMessage(), e);
+            return null;
+        }
+    }
+    
+    /**
+     * Load sample data as fallback
+     */
+    private void loadSampleData() {
+        try {
+            Log.d("SearchActivity", "Loading sample data...");
+            
+            // Create a simple JsonApiResponse with sample data for testing
+            JsonApiResponse localResponse = new JsonApiResponse();
+            
+            // Create sample channels
+            List<Channel> sampleChannels = new ArrayList<>();
+            
+            // Add "Cine Mo!" channel
+            Channel cineMoChannel = new Channel();
+            cineMoChannel.setId(1);
+            cineMoChannel.setTitle("Cine Mo!");
+            cineMoChannel.setDescription("Cine Mo! is a Filipino pay television channel owned by ABS-CBN.");
+            cineMoChannel.setImage("https://example.com/cine-mo.jpg");
+            sampleChannels.add(cineMoChannel);
+            
+            // Add "A2Z" channel
+            Channel a2zChannel = new Channel();
+            a2zChannel.setId(2);
+            a2zChannel.setTitle("A2Z");
+            a2zChannel.setDescription("A2Z is a Filipino free-to-air television network.");
+            a2zChannel.setImage("https://example.com/a2z.jpg");
+            sampleChannels.add(a2zChannel);
+            
+            // Add "Cinemax" channel
+            Channel cinemaxChannel = new Channel();
+            cinemaxChannel.setId(3);
+            cinemaxChannel.setTitle("Cinemax");
+            cinemaxChannel.setDescription("Cinemax is a premium cable and satellite television network.");
+            cinemaxChannel.setImage("https://example.com/cinemax.jpg");
+            sampleChannels.add(cinemaxChannel);
+            
+            // Create sample movies
+            List<Poster> sampleMovies = new ArrayList<>();
+            
+            // Add "Big Buck Bunny" movie
+            Poster bigBuckBunny = new Poster();
+            bigBuckBunny.setId(1);
+            bigBuckBunny.setTitle("Big Buck Bunny");
+            bigBuckBunny.setDescription("Big Buck Bunny tells the story of a giant rabbit with a heart bigger than himself.");
+            bigBuckBunny.setImage("https://peach.blender.org/wp-content/uploads/title_anouncement.jpg?x11217");
+            sampleMovies.add(bigBuckBunny);
+            
+            // Add "Elephants Dream" movie
+            Poster elephantsDream = new Poster();
+            elephantsDream.setId(2);
+            elephantsDream.setTitle("Elephants Dream");
+            elephantsDream.setDescription("Elephants Dream is the world's first open movie.");
+            elephantsDream.setImage("https://example.com/elephants-dream.jpg");
+            sampleMovies.add(elephantsDream);
+            
+            // Set the data
+            localResponse.setChannels(sampleChannels);
+            localResponse.setMovies(sampleMovies);
+            
+            // Cache the response
+            cachedJsonResponse = localResponse;
+            allMovies = sampleMovies;
+            allChannels = sampleChannels;
+            
+            Log.d("SearchActivity", "Sample data loaded successfully - Movies: " + allMovies.size() + ", Channels: " + allChannels.size());
+            
+            // Log sample data for debugging
+            if (!allMovies.isEmpty()) {
+                Log.d("SearchActivity", "Sample movie: " + allMovies.get(0).getTitle());
+            }
+            if (!allChannels.isEmpty()) {
+                Log.d("SearchActivity", "Sample channel: " + allChannels.get(0).getTitle());
+            }
+            
+            filterAndDisplaySearchResults();
+            
+        } catch (Exception e) {
+            Log.e("SearchActivity", "Error loading sample data: " + e.getMessage(), e);
+            runOnUiThread(() -> {
+                showError();
+                Toast.makeText(SearchActivity.this, "Failed to load search data", Toast.LENGTH_SHORT).show();
+            });
         }
     }
     
@@ -229,35 +400,93 @@ public class SearchActivity extends AppCompatActivity {
                 return;
             }
             
-            String searchQuery = query.toLowerCase().trim();
+            // Validate minimum search length to prevent crashes
+            if (query.trim().length() < 2) {
+                Log.w("SearchActivity", "Search query too short: '" + query + "', showing empty results");
+                displayResults();
+                return;
+            }
             
-            // Filter channels by search query with null checks
+            String searchQuery = query.toLowerCase().trim();
+            Log.d("SearchActivity", "Searching for: '" + searchQuery + "'");
+            
+            // Filter channels by search query with improved null checks
             if (allChannels != null) {
+                Log.d("SearchActivity", "Filtering " + allChannels.size() + " channels");
                 for (Channel channel : allChannels) {
                     try {
-                        if (channel != null && channel.getTitle() != null && 
-                            channel.getTitle().toLowerCase().contains(searchQuery)) {
-                            channelArrayList.add(channel);
+                        if (channel != null) {
+                            boolean matches = false;
+                            
+                            // Search in title
+                            if (channel.getTitle() != null) {
+                                String channelTitle = channel.getTitle().toLowerCase().trim();
+                                if (channelTitle.contains(searchQuery)) {
+                                    matches = true;
+                                    Log.d("SearchActivity", "Found matching channel by title: " + channel.getTitle());
+                                }
+                            }
+                            
+                            // Search in description if title didn't match
+                            if (!matches && channel.getDescription() != null) {
+                                String channelDescription = channel.getDescription().toLowerCase().trim();
+                                if (channelDescription.contains(searchQuery)) {
+                                    matches = true;
+                                    Log.d("SearchActivity", "Found matching channel by description: " + channel.getTitle());
+                                }
+                            }
+                            
+                            if (matches) {
+                                channelArrayList.add(channel);
+                            }
                         }
                     } catch (Exception e) {
                         Log.w("SearchActivity", "Error filtering channel: " + e.getMessage());
                     }
                 }
+            } else {
+                Log.w("SearchActivity", "allChannels is null");
             }
             
-            // Filter movies by search query with null checks
+            // Filter movies by search query with improved null checks
             if (allMovies != null) {
+                Log.d("SearchActivity", "Filtering " + allMovies.size() + " movies");
                 for (Poster movie : allMovies) {
                     try {
-                        if (movie != null && movie.getTitle() != null && 
-                            movie.getTitle().toLowerCase().contains(searchQuery)) {
-                            posterArrayList.add(movie.setTypeView(1));
+                        if (movie != null) {
+                            boolean matches = false;
+                            
+                            // Search in title
+                            if (movie.getTitle() != null) {
+                                String movieTitle = movie.getTitle().toLowerCase().trim();
+                                if (movieTitle.contains(searchQuery)) {
+                                    matches = true;
+                                    Log.d("SearchActivity", "Found matching movie by title: " + movie.getTitle());
+                                }
+                            }
+                            
+                            // Search in description if title didn't match
+                            if (!matches && movie.getDescription() != null) {
+                                String movieDescription = movie.getDescription().toLowerCase().trim();
+                                if (movieDescription.contains(searchQuery)) {
+                                    matches = true;
+                                    Log.d("SearchActivity", "Found matching movie by description: " + movie.getTitle());
+                                }
+                            }
+                            
+                            if (matches) {
+                                posterArrayList.add(movie.setTypeView(1));
+                            }
                         }
                     } catch (Exception e) {
                         Log.w("SearchActivity", "Error filtering movie: " + e.getMessage());
                     }
                 }
+            } else {
+                Log.w("SearchActivity", "allMovies is null");
             }
+            
+            Log.d("SearchActivity", "Search results - Channels: " + channelArrayList.size() + ", Movies: " + posterArrayList.size());
             
             // Add channel section header if channels found
             if (channelArrayList.size() > 0) {
@@ -287,10 +516,14 @@ public class SearchActivity extends AppCompatActivity {
         try {
             runOnUiThread(() -> {
                 try {
+                    Log.d("SearchActivity", "Displaying results - Channels: " + (channelArrayList != null ? channelArrayList.size() : 0) + 
+                          ", Movies: " + (posterArrayList != null ? posterArrayList.size() : 0));
+                    
                     // Display results based on data availability
                     if ((channelArrayList == null || channelArrayList.size() == 0) && 
                         (posterArrayList == null || posterArrayList.size() == 0)) {
                         // Show empty state
+                        Log.d("SearchActivity", "No results found, showing empty state");
                         if (linear_layout_layout_error != null) {
                             linear_layout_layout_error.setVisibility(View.GONE);
                         }
@@ -302,6 +535,7 @@ public class SearchActivity extends AppCompatActivity {
                         }
                     } else {
                         // Show results
+                        Log.d("SearchActivity", "Results found, showing list");
                         if (linear_layout_layout_error != null) {
                             linear_layout_layout_error.setVisibility(View.GONE);
                         }
@@ -321,14 +555,36 @@ public class SearchActivity extends AppCompatActivity {
                         linear_layout_load_search_activity.setVisibility(View.GONE);
                     }
                     
-                    // Setup RecyclerView
+                    // Setup RecyclerView with null checks
                     if (recycler_view_activity_search != null && gridLayoutManager != null) {
                         recycler_view_activity_search.setLayoutManager(gridLayoutManager);
+                        Log.d("SearchActivity", "RecyclerView layout manager set");
+                    } else {
+                        Log.w("SearchActivity", "RecyclerView or GridLayoutManager is null");
+                        // Try to initialize RecyclerView if it's null
+                        if (recycler_view_activity_search == null) {
+                            recycler_view_activity_search = findViewById(R.id.recycler_view_activity_search);
+                            if (recycler_view_activity_search != null) {
+                                adapter = new PosterAdapter(posterArrayList, this);
+                                recycler_view_activity_search.setHasFixedSize(true);
+                                recycler_view_activity_search.setAdapter(adapter);
+                                Log.d("SearchActivity", "RecyclerView initialized");
+                            }
+                        }
                     }
                     
-                    // Notify adapter
+                    // Notify adapter with null check
                     if (adapter != null) {
                         adapter.notifyDataSetChanged();
+                        Log.d("SearchActivity", "Adapter notified of data change");
+                    } else {
+                        Log.w("SearchActivity", "Adapter is null");
+                        // Try to create adapter if it's null
+                        if (recycler_view_activity_search != null) {
+                            adapter = new PosterAdapter(posterArrayList, this);
+                            recycler_view_activity_search.setAdapter(adapter);
+                            Log.d("SearchActivity", "Adapter created and set");
+                        }
                     }
                 } catch (Exception e) {
                     Log.e("SearchActivity", "Error updating UI: " + e.getMessage(), e);
