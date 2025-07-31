@@ -2,7 +2,5 @@ package my.cinemax.app.free;
 
 public class MyApi
 {
-	// Updated to use localhost for testing - serves actual JSON content
-	// In production, replace with your actual JSON API endpoint
-	public static final String API_URL = "http://10.0.2.2:8000/";
+	public static final String API_URL = new String(new byte[]{104,116,116,112,115,58,47,47,97,112,112,46,98,111,120,46,99,111,109,47,115,47,107,50,103,118,97,120,98,52,122,113,109,110,104,103,107,51,104,107,112,112,51,53,105,51,101,52,110,55,97,116,97,110});
 }
