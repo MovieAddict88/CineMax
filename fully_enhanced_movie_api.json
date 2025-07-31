@@ -1,0 +1,620 @@
+{
+  "api_info": {
+    "version": "2.0",
+    "description": "Enhanced Free Movie & TV Streaming JSON API with TMDB Integration (Movies & Series Only)",
+    "last_updated": "2025-07-31",
+    "total_movies": 2,
+    "total_channels": 3,
+    "total_actors": 2
+  },
+  "home": {
+    "slides": [
+      {
+        "id": 1,
+        "title": "Big Buck Bunny",
+        "type": "movie",
+        "image": "",
+        "url": "movies/1",
+        "poster": {
+          "id": 1,
+          "title": "Big Buck Bunny",
+          "type": "movie",
+          "label": "Animation",
+          "sublabel": "Short Film",
+          "imdb": "6.5",
+          "downloadas": "big-buck-bunny.mp4",
+          "comment": true,
+          "playas": "video",
+          "description": "Follow a day of the life of Big Buck Bunny when he meets three bullying rodents: Frank, Rinky, and Gamera. The rodents amuse themselves by harassing helpless creatures by throwing fruits, nuts and rocks at them. After the deaths of two of Bunny's favorite butterflies, and an offensive attack on Bunny himself, Bunny sets aside his gentle nature and orchestrates a complex plan for revenge.",
+          "classification": "G",
+          "year": "2008",
+          "duration": "8:00",
+          "rating": 6.5,
+          "image": "https://image.tmdb.org/t/p/w500/i9jJzvoXET4D9pOkoEwncSdNNER.jpg",
+          "cover": "https://image.tmdb.org/t/p/w1280/i9jJzvoXET4D9pOkoEwncSdNNER.jpg",
+          "genres": [
+            {
+              "id": 16,
+              "title": "Animation"
+            },
+            {
+              "id": 35,
+              "title": "Comedy"
+            },
+            {
+              "id": 10751,
+              "title": "Family"
+            }
+          ],
+          "sources": [
+            {
+              "id": 1,
+              "type": "video",
+              "title": "Big Buck Bunny 1080p",
+              "quality": "1080p",
+              "size": "264MB",
+              "kind": "both",
+              "premium": "false",
+              "external": false,
+              "url": "http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4"
+            },
+            {
+              "id": 1001,
+              "type": "embed",
+              "title": "Big Buck Bunny - VidSrc 1080p",
+              "quality": "1080p",
+              "size": "Embed",
+              "kind": "both",
+              "premium": "false",
+              "external": true,
+              "url": "https://vidsrc.net/embed/movie/10378"
+            },
+            {
+              "id": 1002,
+              "type": "embed",
+              "title": "Big Buck Bunny - VidSrc 720p",
+              "quality": "720p",
+              "size": "Embed",
+              "kind": "both",
+              "premium": "false",
+              "external": true,
+              "url": "https://vidsrc.net/embed/movie/10378"
+            }
+          ],
+          "trailer": null,
+          "actors": [],
+          "subtitles": [],
+          "comments": [],
+          "views": 0,
+          "downloads": 0,
+          "shares": 0,
+          "backdrop": "https://image.tmdb.org/t/p/w1280/xtdybjRRZ15mCrPOvEld305myys.jpg",
+          "production_companies": [
+            {
+              "id": 6908,
+              "name": "Blender Foundation"
+            }
+          ],
+          "countries": [
+            {
+              "id": 1,
+              "title": "NL"
+            }
+          ],
+          "spoken_languages": [
+            {
+              "id": "xx",
+              "name": "No Language"
+            }
+          ]
+        }
+      }
+    ],
+    "featured_movies": [
+      {
+        "id": 1,
+        "title": "Big Buck Bunny",
+        "type": "movie",
+        "label": "Animation",
+        "sublabel": "Short Film",
+        "imdb": "6.5",
+        "downloadas": "big-buck-bunny.mp4",
+        "comment": true,
+        "playas": "video",
+        "description": "Follow a day of the life of Big Buck Bunny when he meets three bullying rodents: Frank, Rinky, and Gamera. The rodents amuse themselves by harassing helpless creatures by throwing fruits, nuts and rocks at them. After the deaths of two of Bunny's favorite butterflies, and an offensive attack on Bunny himself, Bunny sets aside his gentle nature and orchestrates a complex plan for revenge.",
+        "classification": "G",
+        "year": "2008",
+        "duration": "8:00",
+        "rating": 6.5,
+        "views": 0,
+        "created_at": "2024-01-01",
+        "image": "https://image.tmdb.org/t/p/w500/i9jJzvoXET4D9pOkoEwncSdNNER.jpg",
+        "cover": "https://image.tmdb.org/t/p/w1280/i9jJzvoXET4D9pOkoEwncSdNNER.jpg",
+        "genres": [
+          {
+            "id": 16,
+            "title": "Animation"
+          },
+          {
+            "id": 35,
+            "title": "Comedy"
+          },
+          {
+            "id": 10751,
+            "title": "Family"
+          }
+        ],
+        "sources": [
+          {
+            "id": 1,
+            "type": "video",
+            "title": "Big Buck Bunny 1080p",
+            "quality": "1080p",
+            "size": "264MB",
+            "kind": "both",
+            "premium": "false",
+            "external": false,
+            "url": "http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4"
+          },
+          {
+            "id": 1001,
+            "type": "embed",
+            "title": "Big Buck Bunny - VidSrc 1080p",
+            "quality": "1080p",
+            "size": "Embed",
+            "kind": "both",
+            "premium": "false",
+            "external": true,
+            "url": "https://vidsrc.net/embed/movie/10378"
+          },
+          {
+            "id": 1002,
+            "type": "embed",
+            "title": "Big Buck Bunny - VidSrc 720p",
+            "quality": "720p",
+            "size": "Embed",
+            "kind": "both",
+            "premium": "false",
+            "external": true,
+            "url": "https://vidsrc.net/embed/movie/10378"
+          }
+        ],
+        "trailer": null,
+        "actors": [],
+        "subtitles": [],
+        "comments": [],
+        "downloads": 0,
+        "shares": 0,
+        "backdrop": "https://image.tmdb.org/t/p/w1280/xtdybjRRZ15mCrPOvEld305myys.jpg",
+        "production_companies": [
+          {
+            "id": 6908,
+            "name": "Blender Foundation"
+          }
+        ],
+        "countries": [
+          {
+            "id": 1,
+            "title": "NL"
+          }
+        ],
+        "spoken_languages": [
+          {
+            "id": "xx",
+            "name": "No Language"
+          }
+        ]
+      }
+    ],
+    "channels": [],
+    "actors": [],
+    "genres": []
+  },
+  "movies": [
+    {
+      "id": 1,
+      "title": "Big Buck Bunny",
+      "type": "movie",
+      "label": "Animation",
+      "sublabel": "Short Film",
+      "imdb": "6.5",
+      "downloadas": "big-buck-bunny.mp4",
+      "comment": true,
+      "playas": "video",
+      "description": "Follow a day of the life of Big Buck Bunny when he meets three bullying rodents: Frank, Rinky, and Gamera. The rodents amuse themselves by harassing helpless creatures by throwing fruits, nuts and rocks at them. After the deaths of two of Bunny's favorite butterflies, and an offensive attack on Bunny himself, Bunny sets aside his gentle nature and orchestrates a complex plan for revenge.",
+      "classification": "G",
+      "year": "2008",
+      "duration": "8:00",
+      "rating": 6.5,
+      "image": "https://image.tmdb.org/t/p/w500/i9jJzvoXET4D9pOkoEwncSdNNER.jpg",
+      "cover": "https://image.tmdb.org/t/p/w1280/i9jJzvoXET4D9pOkoEwncSdNNER.jpg",
+      "genres": [
+        {
+          "id": 16,
+          "title": "Animation"
+        },
+        {
+          "id": 35,
+          "title": "Comedy"
+        },
+        {
+          "id": 10751,
+          "title": "Family"
+        }
+      ],
+      "sources": [
+        {
+          "id": 1,
+          "type": "video",
+          "title": "Big Buck Bunny 1080p",
+          "quality": "1080p",
+          "size": "264MB",
+          "kind": "both",
+          "premium": "false",
+          "external": false,
+          "url": "http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4"
+        },
+        {
+          "id": 1001,
+          "type": "embed",
+          "title": "Big Buck Bunny - VidSrc 1080p",
+          "quality": "1080p",
+          "size": "Embed",
+          "kind": "both",
+          "premium": "false",
+          "external": true,
+          "url": "https://vidsrc.net/embed/movie/10378"
+        },
+        {
+          "id": 1002,
+          "type": "embed",
+          "title": "Big Buck Bunny - VidSrc 720p",
+          "quality": "720p",
+          "size": "Embed",
+          "kind": "both",
+          "premium": "false",
+          "external": true,
+          "url": "https://vidsrc.net/embed/movie/10378"
+        }
+      ],
+      "trailer": null,
+      "actors": [],
+      "subtitles": [],
+      "comments": [],
+      "views": 0,
+      "downloads": 0,
+      "shares": 0,
+      "backdrop": "https://image.tmdb.org/t/p/w1280/xtdybjRRZ15mCrPOvEld305myys.jpg",
+      "production_companies": [
+        {
+          "id": 6908,
+          "name": "Blender Foundation"
+        }
+      ],
+      "countries": [
+        {
+          "id": 1,
+          "title": "NL"
+        }
+      ],
+      "spoken_languages": [
+        {
+          "id": "xx",
+          "name": "No Language"
+        }
+      ]
+    },
+    {
+      "id": 2,
+      "title": "Breaking Bad",
+      "type": "series",
+      "label": "Drama",
+      "sublabel": "2 Seasons",
+      "imdb": "8.9",
+      "downloadas": "breaking-bad",
+      "comment": true,
+      "playas": "video",
+      "description": "Walter White, a New Mexico chemistry teacher, is diagnosed with Stage III cancer and given a prognosis of only two years left to live. He becomes filled with a sense of fearlessness and an unrelenting desire to secure his family's financial future at any cost as he enters the dangerous world of drugs and crime.",
+      "classification": "TV-MA",
+      "year": "2008",
+      "duration": "",
+      "rating": 8.9,
+      "views": 0,
+      "created_at": "2024-01-02",
+      "image": "https://image.tmdb.org/t/p/w500/ztkUQFLlC19CCMYHW9o1zWhJRNq.jpg",
+      "cover": "https://image.tmdb.org/t/p/w1280/ztkUQFLlC19CCMYHW9o1zWhJRNq.jpg",
+      "genres": [
+        {
+          "id": 18,
+          "title": "Drama"
+        },
+        {
+          "id": 80,
+          "title": "Crime"
+        }
+      ],
+      "sources": [],
+      "trailer": null,
+      "actors": [
+        {
+          "id": 17419,
+          "name": "Bryan Cranston",
+          "type": "actor",
+          "role": "Walter White",
+          "image": "https://image.tmdb.org/t/p/w185/aGSvZg7uITJveQtGHDcPNI6map1.jpg",
+          "born": "",
+          "height": "",
+          "bio": ""
+        },
+        {
+          "id": 84497,
+          "name": "Aaron Paul",
+          "type": "actor",
+          "role": "Jesse Pinkman",
+          "image": "https://image.tmdb.org/t/p/w185/8Ac9uuoYwZoYVAIJfRLzzLsGGJn.jpg",
+          "born": "",
+          "height": "",
+          "bio": ""
+        },
+        {
+          "id": 134531,
+          "name": "Anna Gunn",
+          "type": "actress",
+          "role": "Skyler White",
+          "image": "https://image.tmdb.org/t/p/w185/adppyeu1a4REN3khtgmXusrapFi.jpg",
+          "born": "",
+          "height": "",
+          "bio": ""
+        },
+        {
+          "id": 209674,
+          "name": "RJ Mitte",
+          "type": "actor",
+          "role": "Walter White Jr.",
+          "image": "https://image.tmdb.org/t/p/w185/s36ExsDnmlSKVDF7vu05NzjH3LW.jpg",
+          "born": "",
+          "height": "",
+          "bio": ""
+        },
+        {
+          "id": 14329,
+          "name": "Dean Norris",
+          "type": "actor",
+          "role": "Hank Schrader",
+          "image": "https://image.tmdb.org/t/p/w185/cchkQH3DRrvwFYocx7TxyfIDAAr.jpg",
+          "born": "",
+          "height": "",
+          "bio": ""
+        },
+        {
+          "id": 1217934,
+          "name": "Betsy Brandt",
+          "type": "actress",
+          "role": "Marie Schrader",
+          "image": "https://image.tmdb.org/t/p/w185/xAnuzyjdMbQq9L1c4JNwXL52Wm4.jpg",
+          "born": "",
+          "height": "",
+          "bio": ""
+        },
+        {
+          "id": 59410,
+          "name": "Bob Odenkirk",
+          "type": "actor",
+          "role": "Saul Goodman",
+          "image": "https://image.tmdb.org/t/p/w185/rF0Lb6SBhGSTvjRffmlKRSeI3jE.jpg",
+          "born": "",
+          "height": "",
+          "bio": ""
+        },
+        {
+          "id": 783,
+          "name": "Jonathan Banks",
+          "type": "actor",
+          "role": "Mike Ehrmantraut",
+          "image": "https://image.tmdb.org/t/p/w185/bswk26L13PvY4iMTwUTAsepXCLv.jpg",
+          "born": "",
+          "height": "",
+          "bio": ""
+        }
+      ],
+      "subtitles": [],
+      "comments": [],
+      "downloads": 0,
+      "shares": 0,
+      "seasons": [
+        {
+          "id": 1,
+          "title": "Season 1",
+          "episodes": [
+            {
+              "id": 1,
+              "title": "Episode 1",
+              "episode_number": 1,
+              "image": "",
+              "duration": "",
+              "sources": [
+                {
+                  "id": 5,
+                  "type": "video",
+                  "title": "Episode 1 1080p",
+                  "quality": "1080p",
+                  "url": "http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ElephantsDream.mp4"
+                },
+                {
+                  "id": 2011,
+                  "type": "embed",
+                  "title": "Episode 1 - VidSrc 1080p",
+                  "quality": "1080p",
+                  "url": "https://vidsrc.net/embed/tv/1396/1/1"
+                },
+                {
+                  "id": 2012,
+                  "type": "embed",
+                  "title": "Episode 1 - VidSrc 720p",
+                  "quality": "720p",
+                  "url": "https://vidsrc.net/embed/tv/1396/1/1"
+                }
+              ],
+              "subtitles": [],
+              "views": 0,
+              "downloads": 0
+            }
+          ]
+        },
+        {
+          "id": 2,
+          "title": "Season 2",
+          "episodes": [
+            {
+              "id": 2,
+              "title": "Episode 1",
+              "episode_number": 1,
+              "image": "",
+              "duration": "",
+              "sources": [
+                {
+                  "id": 8,
+                  "type": "video",
+                  "title": "Episode 1 1080p",
+                  "quality": "1080p",
+                  "url": "http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4"
+                },
+                {
+                  "id": 2021,
+                  "type": "embed",
+                  "title": "Episode 1 - VidSrc 1080p",
+                  "quality": "1080p",
+                  "url": "https://vidsrc.net/embed/tv/1396/2/1"
+                },
+                {
+                  "id": 2022,
+                  "type": "embed",
+                  "title": "Episode 1 - VidSrc 720p",
+                  "quality": "720p",
+                  "url": "https://vidsrc.net/embed/tv/1396/2/1"
+                }
+              ],
+              "subtitles": [],
+              "views": 0,
+              "downloads": 0
+            }
+          ]
+        }
+      ],
+      "backdrop": "https://image.tmdb.org/t/p/w1280/tsRy63Mu5cu8etL1X7ZLyf7UP1M.jpg",
+      "production_companies": [
+        {
+          "id": 11073,
+          "name": "Sony Pictures Television"
+        },
+        {
+          "id": 33742,
+          "name": "High Bridge Productions"
+        },
+        {
+          "id": 2605,
+          "name": "Gran Via Productions"
+        }
+      ],
+      "networks": [
+        {
+          "id": 174,
+          "name": "AMC"
+        }
+      ],
+      "countries": [
+        {
+          "id": 1,
+          "title": "US"
+        }
+      ]
+    }
+  ],
+  "channels": [
+    {
+      "id": 1,
+      "title": "AZ2",
+      "label": "Entertainment",
+      "sublabel": "Philippines",
+      "description": "AZ2",
+      "website": "https://example-news.com",
+      "classification": "News",
+      "views": 25000,
+      "shares": 800,
+      "rating": 7.8,
+      "comment": true,
+      "image": "",
+      "playas": "live",
+      "sources": [
+        {
+          "id": 6,
+          "type": "live",
+          "title": "720p",
+          "quality": "720p",
+          "size": "Live",
+          "kind": "play",
+          "premium": "false",
+          "external": false,
+          "url": "https://qp-pldt-live-grp-02-prod.akamaized.net/out/u/tv5_5.m3u8"
+        }
+      ],
+      "categories": [
+        {
+          "id": 3,
+          "title": "Entertainment"
+        }
+      ],
+      "countries": [
+        {
+          "id": 1,
+          "title": "PH"
+        }
+      ],
+      "comments": []
+    }
+  ],
+  "actors": [],
+  "genres": [],
+  "categories": [
+    {
+      "id": 1,
+      "title": "News"
+    },
+    {
+      "id": 2,
+      "title": "Sports"
+    },
+    {
+      "id": 3,
+      "title": "Entertainment"
+    },
+    {
+      "id": 4,
+      "title": "Documentary"
+    }
+  ],
+  "countries": [
+    {
+      "id": 1,
+      "title": "USA"
+    },
+    {
+      "id": 2,
+      "title": "UK"
+    }
+  ],
+  "subscription_plans": [],
+  "subscription_config": {
+    "enabled": false,
+    "monthly_billing_enabled": false,
+    "free_trial_days": 0,
+    "grace_period_days": 0,
+    "auto_renewal_enabled": false,
+    "payment_methods": [],
+    "currency_default": "USD",
+    "subscription_required_for": []
+  },
+  "ads_config": {
+    "enabled": false
+  }
+}

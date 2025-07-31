@@ -331,14 +331,15 @@ class SimpleTMDBIntegrator:
         return enhanced_data
     
     def process_json_file(self, input_file: str, output_file: str):
-        """Process the entire JSON file and enhance metadata"""
+        """Process the entire JSON file and enhance metadata for movies and TV series only"""
         try:
             with open(input_file, 'r', encoding='utf-8') as f:
                 data = json.load(f)
             
-            print("Starting TMDB metadata enhancement...")
+            print("Starting TMDB metadata enhancement for movies and TV series only...")
+            print("Live TV channels will remain untouched.")
             
-            # Process movies
+            # Process movies and TV series only
             if 'movies' in data:
                 for i, movie in enumerate(data['movies']):
                     if movie.get('type') == 'movie':
@@ -349,25 +350,46 @@ class SimpleTMDBIntegrator:
                         print(f"Processing TV series {i+1}/{len(data['movies'])}: {movie.get('title', 'Unknown')}")
                         data['movies'][i] = self.enhance_tv_metadata(movie)
                         time.sleep(0.25)  # Rate limiting
+                    else:
+                        print(f"Skipping non-movie/series item: {movie.get('title', 'Unknown')} (type: {movie.get('type', 'unknown')})")
             
-            # Process featured movies in home section
+            # Process featured movies in home section (movies and series only)
             if 'home' in data and 'featured_movies' in data['home']:
                 for i, movie in enumerate(data['home']['featured_movies']):
-                    print(f"Processing featured movie {i+1}: {movie.get('title', 'Unknown')}")
-                    data['home']['featured_movies'][i] = self.enhance_movie_metadata(movie)
-                    time.sleep(0.25)  # Rate limiting
+                    if movie.get('type') == 'movie':
+                        print(f"Processing featured movie {i+1}: {movie.get('title', 'Unknown')}")
+                        data['home']['featured_movies'][i] = self.enhance_movie_metadata(movie)
+                        time.sleep(0.25)  # Rate limiting
+                    elif movie.get('type') == 'series':
+                        print(f"Processing featured TV series {i+1}: {movie.get('title', 'Unknown')}")
+                        data['home']['featured_movies'][i] = self.enhance_tv_metadata(movie)
+                        time.sleep(0.25)  # Rate limiting
+                    else:
+                        print(f"Skipping featured non-movie/series item: {movie.get('title', 'Unknown')}")
             
-            # Process slides in home section
+            # Process slides in home section (movies and series only)
             if 'home' in data and 'slides' in data['home']:
                 for i, slide in enumerate(data['home']['slides']):
                     if slide.get('type') == 'movie' and 'poster' in slide:
                         print(f"Processing slide movie {i+1}: {slide['poster'].get('title', 'Unknown')}")
                         data['home']['slides'][i]['poster'] = self.enhance_movie_metadata(slide['poster'])
                         time.sleep(0.25)  # Rate limiting
+                    elif slide.get('type') == 'series' and 'poster' in slide:
+                        print(f"Processing slide TV series {i+1}: {slide['poster'].get('title', 'Unknown')}")
+                        data['home']['slides'][i]['poster'] = self.enhance_tv_metadata(slide['poster'])
+                        time.sleep(0.25)  # Rate limiting
+                    elif slide.get('type') == 'channel':
+                        print(f"Skipping live TV channel slide: {slide.get('title', 'Unknown')} (channels remain untouched)")
+                    else:
+                        print(f"Skipping slide item: {slide.get('title', 'Unknown')} (type: {slide.get('type', 'unknown')})")
+            
+            # Note: Completely skip processing 'channels' section - leave it untouched
+            if 'channels' in data:
+                print(f"Skipping {len(data['channels'])} live TV channels - they remain completely untouched")
             
             # Update API info
             data['api_info']['last_updated'] = time.strftime('%Y-%m-%d')
-            data['api_info']['description'] = "Enhanced Free Movie & TV Streaming JSON API with Full TMDB Integration"
+            data['api_info']['description'] = "Enhanced Free Movie & TV Streaming JSON API with TMDB Integration (Movies & Series Only)"
             
             # Save enhanced data
             with open(output_file, 'w', encoding='utf-8') as f:
