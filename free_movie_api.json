@@ -1,37 +1,37 @@
 {
   "api_info": {
     "version": "2.0",
-    "description": "Enhanced Free Movie & TV Streaming JSON API with Full TMDB Integration",
-    "last_updated": "2025-07-31",
+    "description": "Enhanced Free Movie & TV Streaming JSON API with Full Actor Support",
+    "last_updated": "2024-01-15",
     "total_movies": 2,
     "total_channels": 26,
-    "total_actors": 7
+    "total_actors": 2
   },
   "home": {
     "slides": [
       {
         "id": 1,
-        "title": "The Avengers",
+        "title": "Big Buck Bunny",
         "type": "movie",
-        "image": "https://image.tmdb.org/t/p/w500/RYMX2wcKCBAr24UyPD7xwmjaTn.jpg",
+        "image": "https://peach.blender.org/wp-content/uploads/title_anouncement.jpg?x11217",
         "url": "movies/1",
         "poster": {
           "id": 1,
-          "title": "The Avengers",
+          "title": "Big Buck Bunny",
           "type": "movie",
-          "label": "Action",
-          "sublabel": "Superhero",
-          "imdb": "7.8",
-          "downloadas": "the-avengers-2012.mp4",
+          "label": "Animation",
+          "sublabel": "Short Film",
+          "imdb": "8.5",
+          "downloadas": "big-buck-bunny.mp4",
           "comment": true,
           "playas": "video",
-          "description": "When an unexpected enemy emerges and threatens global safety and security, Nick Fury, director of the international peacekeeping agency known as S.H.I.E.L.D., finds himself in need of a team to pull the world back from the brink of disaster. Spanning the globe, a daring recruitment effort begins!",
-          "classification": "PG-13",
-          "year": "2012",
-          "duration": "2:23",
-          "rating": 7.8,
-          "image": "https://image.tmdb.org/t/p/w500/RYMX2wcKCBAr24UyPD7xwmjaTn.jpg",
-          "cover": "https://image.tmdb.org/t/p/w1280/9BBTo63ANSmhC4e6r62OJFuK2GL.jpg",
+          "description": "Big Buck Bunny tells the story of a giant rabbit with a heart bigger than himself. When one sunny day three rodents rudely harass him by throwing nuts, hitting his flowers, and destroying his home, he snaps and goes after them.",
+          "classification": "G",
+          "year": "2008",
+          "duration": "10:00",
+          "rating": 8.5,
+          "image": "https://peach.blender.org/wp-content/uploads/title_anouncement.jpg?x11217",
+          "cover": "https://peach.blender.org/wp-content/uploads/title_anouncement.jpg?x11217",
           "genres": [
             {
               "id": 6,
@@ -316,23 +316,23 @@
     "featured_movies": [
       {
         "id": 1,
-        "title": "The Avengers",
+        "title": "Big Buck Bunny",
         "type": "movie",
-        "label": "Action",
-        "sublabel": "Superhero",
-        "imdb": "7.8",
-        "downloadas": "the-avengers-2012.mp4",
+        "label": "Animation",
+        "sublabel": "Short Film",
+        "imdb": "8.5",
+        "downloadas": "big-buck-bunny.mp4",
         "comment": true,
         "playas": "video",
-        "description": "When an unexpected enemy emerges and threatens global safety and security, Nick Fury, director of the international peacekeeping agency known as S.H.I.E.L.D., finds himself in need of a team to pull the world back from the brink of disaster. Spanning the globe, a daring recruitment effort begins!",
-        "classification": "PG-13",
-        "year": "2012",
-        "duration": "2:23",
-        "rating": 7.8,
+        "description": "Big Buck Bunny tells the story of a giant rabbit with a heart bigger than himself. When one sunny day three rodents rudely harass him by throwing nuts, hitting his flowers, and destroying his home, he snaps and goes after them.",
+        "classification": "G",
+        "year": "2008",
+        "duration": "10:00",
+        "rating": 8.5,
         "views": 15000,
         "created_at": "2024-01-01",
-        "image": "https://image.tmdb.org/t/p/w500/RYMX2wcKCBAr24UyPD7xwmjaTn.jpg",
-        "cover": "https://image.tmdb.org/t/p/w1280/9BBTo63ANSmhC4e6r62OJFuK2GL.jpg",
+        "image": "https://peach.blender.org/wp-content/uploads/title_anouncement.jpg?x11217",
+        "cover": "https://peach.blender.org/wp-content/uploads/title_anouncement.jpg?x11217",
         "genres": [
           {
             "id": 6,
@@ -420,6 +420,7 @@
             "created_at": "2024-01-14T15:45:00Z"
           }
         ],
+        "views": 15000,
         "downloads": 5000,
         "shares": 1200
       }
@@ -511,34 +512,25 @@
   "movies": [
     {
       "id": 1,
-      "title": "The Avengers",
+      "title": "Big Buck Bunny",
       "type": "movie",
-      "label": "Action",
-      "sublabel": "Superhero",
-      "imdb": "7.8",
-      "downloadas": "the-avengers-2012.mp4",
+      "label": "Animation",
+      "sublabel": "Short Film",
+      "imdb": "8.5",
+      "downloadas": "big-buck-bunny.mp4",
       "comment": true,
       "playas": "video",
-      "description": "When an unexpected enemy emerges and threatens global safety and security, Nick Fury, director of the international peacekeeping agency known as S.H.I.E.L.D., finds himself in need of a team to pull the world back from the brink of disaster. Spanning the globe, a daring recruitment effort begins!",
-      "classification": "PG-13",
-      "year": "2012",
-      "duration": "2:23",
-      "rating": 7.8,
-      "tmdb_id": 24428,
-      "image": "",
-      "cover": "",
+      "description": "Big Buck Bunny tells the story of a giant rabbit with a heart bigger than himself. When one sunny day three rodents rudely harass him by throwing nuts, hitting his flowers, and destroying his home, he snaps and goes after them.",
+      "classification": "G",
+      "year": "2008",
+      "duration": "10:00",
+      "rating": 8.5,
+      "image": "https://peach.blender.org/wp-content/uploads/title_anouncement.jpg?x11217",
+      "cover": "https://peach.blender.org/wp-content/uploads/title_anouncement.jpg?x11217",
       "genres": [
         {
-          "id": 878,
-          "title": "Science Fiction"
-        },
-        {
-          "id": 28,
-          "title": "Action"
-        },
-        {
-          "id": 12,
-          "title": "Adventure"
+          "id": 6,
+          "title": "Animation"
         }
       ],
       "sources": [
@@ -574,17 +566,6 @@
           "premium": "false",
           "external": false,
           "url": "http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4"
-        },
-        {
-          "id": 4,
-          "type": "embed",
-          "title": "VidSrc Embed",
-          "quality": "HD",
-          "size": "Stream",
-          "kind": "external",
-          "premium": "false",
-          "external": true,
-          "url": "https://vidsrc.net/embed/movie/24428"
         }
       ],
       "trailer": {
@@ -596,53 +577,13 @@
       "actors": [
         {
           "id": 1,
-          "name": "Robert Downey Jr.",
+          "name": "Tom Hanks",
           "type": "actor",
-          "role": "Tony Stark / Iron Man",
-          "image": "https://image.tmdb.org/t/p/w500/5qHNjhtjMD4YWH3UP0rm4tKwxCL.jpg",
-          "born": "1965-04-04",
-          "height": "5'8\"",
-          "bio": "American actor and producer"
-        },
-        {
-          "id": 2,
-          "name": "Chris Evans",
-          "type": "actor",
-          "role": "Steve Rogers / Captain America",
-          "image": "https://image.tmdb.org/t/p/w500/3bOGNsHlrswhyW79uvIHH1V43JI.jpg",
-          "born": "1981-06-13",
+          "role": "Lead Actor",
+          "image": "https://example.com/tom-hanks.jpg",
+          "born": "1956-07-09",
           "height": "6'0\"",
-          "bio": "American actor"
-        },
-        {
-          "id": 3,
-          "name": "Mark Ruffalo",
-          "type": "actor",
-          "role": "Bruce Banner / Hulk",
-          "image": "https://image.tmdb.org/t/p/w500/z3dvKqMNDQWk3QLxzumloQVR0pv.jpg",
-          "born": "1967-11-22",
-          "height": "5'8\"",
-          "bio": "American actor and producer"
-        },
-        {
-          "id": 4,
-          "name": "Chris Hemsworth",
-          "type": "actor",
-          "role": "Thor",
-          "image": "https://image.tmdb.org/t/p/w500/jpurJ9jAcLCYjgHHfYF32m3zJYm.jpg",
-          "born": "1983-08-11",
-          "height": "6'3\"",
-          "bio": "Australian actor"
-        },
-        {
-          "id": 5,
-          "name": "Scarlett Johansson",
-          "type": "actress",
-          "role": "Natasha Romanoff / Black Widow",
-          "image": "https://image.tmdb.org/t/p/w500/6NsMbJXRlDZuDzatN2akFdGuTvx.jpg",
-          "born": "1984-11-22",
-          "height": "5'3\"",
-          "bio": "American actress"
+          "bio": "American actor and filmmaker"
         }
       ],
       "subtitles": [
@@ -691,10 +632,10 @@
       "classification": "TV-14",
       "year": "2023",
       "duration": "45:00",
-      "rating": 8.2,
-      "views": 8000,
-      "created_at": "2024-01-02",
-      "image": "https://example.com/sample-series.jpg",
+              "rating": 8.2,
+        "views": 8000,
+        "created_at": "2024-01-02",
+        "image": "https://example.com/sample-series.jpg",
       "cover": "https://example.com/sample-series-cover.jpg",
       "genres": [
         {
@@ -725,6 +666,7 @@
           "created_at": "2024-01-15T12:00:00Z"
         }
       ],
+      "views": 8000,
       "downloads": 2000,
       "shares": 500,
       "seasons": [
