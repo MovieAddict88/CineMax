@@ -100,6 +100,10 @@ public class Poster implements Parcelable {
     @Expose
     private Source trailer ;
 
+    @SerializedName("seasons")
+    @Expose
+    private List<Season> seasons;
+
     private int typeView = 1;
 
     public Poster() {
@@ -391,6 +395,14 @@ public class Poster implements Parcelable {
 
     public String getSublabel() {
         return sublabel;
+    }
+
+    public List<Season> getSeasons() {
+        return seasons;
+    }
+
+    public void setSeasons(List<Season> seasons) {
+        this.seasons = seasons;
     }
 }
 

@@ -43,6 +43,8 @@ import org.json.JSONObject;
 
 import java.util.Properties;
 import java.io.FileInputStream;
+import my.cinemax.app.free.entity.Season;
+import my.cinemax.app.free.entity.Episode;
 
 /**
  * Created by Tamim on 28/09/2019.
@@ -352,24 +354,45 @@ public class apiClient {
                 } catch (Exception ignored) {}
             }
         }
-        // Enrich TV series (if you have a similar list for TV)
-        if (apiResponse.getCategories() != null) {
-            for (Object tvObj : apiResponse.getCategories()) {
+        // Enrich TV series (for Poster objects with type 'serie' or 'series')
+        if (apiResponse.getMovies() != null) {
+            for (Poster tv : apiResponse.getMovies()) {
                 try {
-                    // This assumes your TV series objects have a getMeta() method with tmdb_id, seasons, etc.
-                    // You may need to adjust this based on your actual data model.
-                    // Pseudocode for enrichment:
-                    // 1. Fetch series metadata
-                    // 2. For each season, fetch season metadata
-                    // 3. For each episode, fetch episode metadata
-                    // Example assumes a structure similar to the JSON you provided
-                    // (You may need to cast or adapt this for your actual model)
-                    // JSONObject meta = ...
-                    // int tmdbId = meta.getInt("tmdb_id");
-                    // JSONObject seriesMeta = TmdbMetadataUtil.fetchTvMetadata(tmdbId, tmdbApiKey);
-                    // ... fill series fields ...
-                    // JSONArray seasons = meta.getJSONArray("seasons");
-                    // for (int i = 0; i < seasons.length(); i++) { ... fetch season ... for each episode ... fetch episode ... }
+                    if (tv.getType() != null && (tv.getType().equalsIgnoreCase("serie") || tv.getType().equalsIgnoreCase("series") || tv.getType().equalsIgnoreCase("tv"))) {
+                        Integer tmdbId = null;
+                        try { tmdbId = Integer.valueOf(tv.getId()); } catch (Exception ignore) {}
+                        if (tmdbId != null) {
+                            JSONObject seriesMeta = TmdbMetadataUtil.fetchTvMetadata(tmdbId, tmdbApiKey);
+                            if (seriesMeta != null) {
+                                if (tv.getDescription() == null && seriesMeta.has("overview")) tv.setDescription(seriesMeta.getString("overview"));
+                                if (tv.getImage() == null && seriesMeta.has("poster_path")) tv.setImage("https://image.tmdb.org/t/p/w500" + seriesMeta.getString("poster_path"));
+                                if (tv.getCover() == null && seriesMeta.has("backdrop_path")) tv.setCover("https://image.tmdb.org/t/p/w780" + seriesMeta.getString("backdrop_path"));
+                                if (tv.getYear() == null && seriesMeta.has("first_air_date")) tv.setYear(seriesMeta.getString("first_air_date"));
+                                if (tv.getRating() == null && seriesMeta.has("vote_average")) tv.setRating((float) seriesMeta.getDouble("vote_average"));
+                            }
+                            // Enrich seasons
+                            if (tv.getSeasons() != null) {
+                                for (Season season : tv.getSeasons()) {
+                                    JSONObject seasonMeta = TmdbMetadataUtil.fetchTvSeasonMetadata(tmdbId, season.getId(), tmdbApiKey);
+                                    if (seasonMeta != null) {
+                                        if (season.getTitle() == null && seasonMeta.has("name")) season.setTitle(seasonMeta.getString("name"));
+                                        // Enrich episodes
+                                        if (season.getEpisodes() != null) {
+                                            for (Episode episode : season.getEpisodes()) {
+                                                JSONObject episodeMeta = TmdbMetadataUtil.fetchTvEpisodeMetadata(tmdbId, season.getId(), episode.getId(), tmdbApiKey);
+                                                if (episodeMeta != null) {
+                                                    if (episode.getTitle() == null && episodeMeta.has("name")) episode.setTitle(episodeMeta.getString("name"));
+                                                    if (episode.getDescription() == null && episodeMeta.has("overview")) episode.setDescription(episodeMeta.getString("overview"));
+                                                    if (episode.getImage() == null && episodeMeta.has("still_path")) episode.setImage("https://image.tmdb.org/t/p/w500" + episodeMeta.getString("still_path"));
+                                                    if (episode.getDuration() == null && episodeMeta.has("runtime")) episode.setDuration(String.valueOf(episodeMeta.getInt("runtime")));
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
                 } catch (Exception ignored) {}
             }
         }
