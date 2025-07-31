@@ -1,0 +1,283 @@
+{
+  "api_info": {
+    "version": "2.0",
+    "description": "Free Movie API with TMDB Integration",
+    "last_updated": "2024-01-15",
+    "total_movies": 1,
+    "total_channels": 1,
+    "total_actors": 0
+  },
+  "home": {
+    "slides": [
+      {
+        "id": 1,
+        "title": "Big Buck Bunny",
+        "image": "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/images/BigBuckBunny.jpg",
+        "url": "https://vidsrc.net/embed/movie/big-buck-bunny"
+      }
+    ],
+    "featured_movies": [
+      {
+        "id": 1,
+        "title": "Big Buck Bunny",
+        "type": "movie",
+        "image": "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/images/BigBuckBunny.jpg"
+      }
+    ],
+    "channels": [
+      {
+        "id": 1,
+        "title": "Sample TV Series"
+      }
+    ],
+    "actors": [],
+    "genres": [
+      {
+        "id": 1,
+        "title": "Animation"
+      },
+      {
+        "id": 2,
+        "title": "Family"
+      }
+    ]
+  },
+  "movies": [
+    {
+      "id": 1,
+      "title": "Big Buck Bunny",
+      "type": "movie",
+      "label": "HD",
+      "sublabel": "Free",
+      "imdb": "",
+      "downloadas": "Big Buck Bunny",
+      "comment": true,
+      "playas": "Big Buck Bunny",
+      "description": "",
+      "classification": "",
+      "year": "",
+      "duration": "",
+      "rating": null,
+      "image": "",
+      "cover": "",
+      "genres": [],
+      "actors": [],
+      "views": 0,
+      "created_at": "2024-01-15",
+      "sources": [
+        {
+          "id": 1,
+          "type": "embed",
+          "title": "VidSrc",
+          "quality": "HD",
+          "size": "Unknown",
+          "kind": "external",
+          "premium": "false",
+          "external": true,
+          "url": "https://vidsrc.net/embed/movie/big-buck-bunny"
+        },
+        {
+          "id": 2,
+          "type": "direct",
+          "title": "Direct MP4",
+          "quality": "1080p",
+          "size": "596MB",
+          "kind": "direct",
+          "premium": "false",
+          "external": false,
+          "url": "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4"
+        }
+      ],
+      "trailer": {
+        "id": 3,
+        "type": "youtube",
+        "title": "Trailer",
+        "quality": "HD",
+        "size": "Unknown",
+        "kind": "trailer",
+        "premium": "false",
+        "external": true,
+        "url": "https://www.youtube.com/watch?v=YE7VzlLtp-4"
+      }
+    }
+  ],
+  "channels": [
+    {
+      "id": 1,
+      "title": "Sample TV Series",
+      "label": "HD",
+      "sublabel": "Free",
+      "description": "",
+      "website": "",
+      "classification": "",
+      "views": 0,
+      "shares": 0,
+      "rating": null,
+      "comment": true,
+      "image": "",
+      "playas": "Sample TV Series",
+      "sources": [],
+      "categories": [],
+      "countries": [],
+      "seasons": [
+        {
+          "id": 1,
+          "title": "Season 1",
+          "episodes": [
+            {
+              "id": 1,
+              "title": "Episode 1",
+              "description": "",
+              "downloadas": "Sample TV Series S01E01",
+              "playas": "Sample TV Series S01E01",
+              "duration": "",
+              "image": "",
+              "sources": [
+                {
+                  "id": 1,
+                  "type": "embed",
+                  "title": "VidSrc",
+                  "quality": "HD",
+                  "size": "Unknown",
+                  "kind": "external",
+                  "premium": "false",
+                  "external": true,
+                  "url": "https://vidsrc.net/embed/tv/sample-series/1/1"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": 2,
+          "title": "Season 2", 
+          "episodes": [
+            {
+              "id": 2,
+              "title": "Episode 1",
+              "description": "",
+              "downloadas": "Sample TV Series S02E01",
+              "playas": "Sample TV Series S02E01",
+              "duration": "",
+              "image": "",
+              "sources": [
+                {
+                  "id": 2,
+                  "type": "embed",
+                  "title": "VidSrc",
+                  "quality": "HD",
+                  "size": "Unknown", 
+                  "kind": "external",
+                  "premium": "false",
+                  "external": true,
+                  "url": "https://vidsrc.net/embed/tv/sample-series/2/1"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "actors": [],
+  "genres": [
+    {
+      "id": 1,
+      "title": "Animation",
+      "posters": []
+    },
+    {
+      "id": 2,
+      "title": "Family",
+      "posters": []
+    },
+    {
+      "id": 3,
+      "title": "Comedy",
+      "posters": []
+    },
+    {
+      "id": 4,
+      "title": "Adventure",
+      "posters": []
+    }
+  ],
+  "categories": [
+    {
+      "id": 1,
+      "title": "Movies"
+    },
+    {
+      "id": 2,
+      "title": "TV Series"
+    }
+  ],
+  "countries": [
+    {
+      "id": 1,
+      "title": "United States"
+    }
+  ],
+  "subscription_plans": [],
+  "video_sources": {
+    "big_buck_bunny": {
+      "title": "Big Buck Bunny",
+      "description": "A large and lovable rabbit deals with three tiny bullies, led by a flying squirrel, who are determined to squelch his happiness.",
+      "urls": {
+        "1080p": "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4",
+        "720p": "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4",
+        "480p": "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4"
+      },
+      "duration": "10:34",
+      "size": "596MB",
+      "license": "Creative Commons"
+    },
+    "elephants_dream": {
+      "title": "Elephant's Dream",
+      "description": "The first Blender Open Movie from 2006",
+      "urls": {
+        "1080p": "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ElephantsDream.mp4",
+        "720p": "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ElephantsDream.mp4",
+        "480p": "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ElephantsDream.mp4"
+      },
+      "duration": "10:53",
+      "size": "343MB",
+      "license": "Creative Commons"
+    },
+    "live_streams": {
+      "test_hls": {
+        "title": "Test HLS Stream",
+        "description": "Sample HLS stream for testing",
+        "url": "https://cph-p2p-msl.akamaized.net/hls/live/2000341/test/master.m3u8",
+        "quality": "HD",
+        "type": "hls"
+      }
+    }
+  },
+  "ads_config": {
+    "admob": {
+      "banner_id": "ca-app-pub-3940256099942544/6300978111",
+      "interstitial_id": "ca-app-pub-3940256099942544/1033173712",
+      "rewarded_id": "ca-app-pub-3940256099942544/5224354917",
+      "native_id": "ca-app-pub-3940256099942544/2247696110",
+      "app_id": "ca-app-pub-3940256099942544~3347511713"
+    },
+    "facebook": {
+      "banner_id": "YOUR_PLACEMENT_ID",
+      "interstitial_id": "YOUR_PLACEMENT_ID",
+      "rewarded_id": "YOUR_PLACEMENT_ID",
+      "native_id": "YOUR_PLACEMENT_ID"
+    },
+    "settings": {
+      "banner_enabled": true,
+      "interstitial_enabled": true,
+      "rewarded_enabled": true,
+      "native_enabled": true,
+      "interstitial_clicks": 3,
+      "native_lines": 10,
+      "banner_type": "admob",
+      "interstitial_type": "admob",
+      "native_type": "admob"
+    }
+  }
+}
