@@ -528,16 +528,11 @@ public class MovieActivity extends AppCompatActivity {
                 text_view_activity_movie_duration.setVisibility(View.VISIBLE);
             }
         }
-        if (poster.getImdb()!=null){
-            if (!poster.getImdb().isEmpty()){
-                text_view_activity_movie_imdb_rating.setText(poster.getImdb());
-                linear_layout_activity_movie_imdb.setVisibility(View.VISIBLE);
-            }
-        }
+        // IMDB rating will be set automatically from TMDB API along with description
 
 
-        rating_bar_activity_movie_rating.setRating(poster.getRating());
-        linear_layout_activity_movie_rating.setVisibility(poster.getRating()==0 ? View.GONE:View.VISIBLE);
+        // Rating will be set automatically from TMDB API along with description
+        // Visibility will be set when TMDB data is received
 
         this.linearLayoutManagerGenre=  new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false);
         this.genreAdapter =new GenreAdapter(poster.getGenres(),this);
@@ -2139,14 +2134,16 @@ public class MovieActivity extends AppCompatActivity {
     }
     
     /**
-     * Fetch movie description from TMDB API
-     * This method searches for the movie by title and sets the description from TMDB
+     * Fetch movie description and rating from TMDB API
+     * This method searches for the movie by title and sets both description and rating from TMDB
      * 
      * @param movieTitle The title of the movie to search for
      */
     private void fetchMovieDescriptionFromTmdb(String movieTitle) {
-        // Set a loading placeholder
+        // Set loading placeholders
         text_view_activity_movie_description.setText("Loading description...");
+        rating_bar_activity_movie_rating.setRating(0f);
+        linear_layout_activity_movie_rating.setVisibility(View.GONE);
         
         // Check if movie title is valid
         if (movieTitle == null || movieTitle.trim().isEmpty()) {
@@ -2154,15 +2151,16 @@ public class MovieActivity extends AppCompatActivity {
             return;
         }
         
-        Log.d(TAG, "Fetching description from TMDB for: " + movieTitle);
+        Log.d(TAG, "Fetching description and rating from TMDB for: " + movieTitle);
         
-        // Use TMDB API to fetch description
-        TmdbApiClient.getInstance().getMovieDescription(movieTitle, new TmdbApiClient.MovieDescriptionCallback() {
+        // Use TMDB API to fetch both description and rating efficiently
+        TmdbApiClient.getInstance().getMovieDescriptionAndRating(movieTitle, new TmdbApiClient.MovieDescriptionAndRatingCallback() {
             @Override
-            public void onSuccess(String description) {
+            public void onSuccess(String description, Float rating) {
                 runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
+                        // Set description
                         if (description != null && !description.trim().isEmpty()) {
                             Log.d(TAG, "Successfully fetched TMDB description for: " + movieTitle);
                             text_view_activity_movie_description.setText(description);
@@ -2170,22 +2168,47 @@ public class MovieActivity extends AppCompatActivity {
                             Log.w(TAG, "Empty description received from TMDB for: " + movieTitle);
                             text_view_activity_movie_description.setText("Description not available");
                         }
+                        
+                        // Set rating
+                        if (rating != null && rating > 0) {
+                            Log.d(TAG, "Successfully fetched TMDB rating for: " + movieTitle + " - " + rating);
+                            rating_bar_activity_movie_rating.setRating(rating);
+                            linear_layout_activity_movie_rating.setVisibility(View.VISIBLE);
+                            
+                                                         // Also update the IMDB rating text view if it exists
+                             if (text_view_activity_movie_imdb_rating != null) {
+                                 text_view_activity_movie_imdb_rating.setText(String.format("%.1f", rating));
+                                 text_view_activity_movie_imdb_rating.setVisibility(View.VISIBLE);
+                                 linear_layout_activity_movie_imdb.setVisibility(View.VISIBLE);
+                             }
+                        } else {
+                            Log.w(TAG, "No rating received from TMDB for: " + movieTitle);
+                            linear_layout_activity_movie_rating.setVisibility(View.GONE);
+                        }
                     }
                 });
             }
             
             @Override
             public void onError(String error) {
-                Log.e(TAG, "Failed to fetch TMDB description for " + movieTitle + ": " + error);
+                Log.e(TAG, "Failed to fetch TMDB data for " + movieTitle + ": " + error);
                 runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
-                        // Fallback to original description if available, otherwise show fallback message
+                        // Fallback to original data if available
                         String fallbackDescription = poster.getDescription();
                         if (fallbackDescription != null && !fallbackDescription.trim().isEmpty()) {
                             text_view_activity_movie_description.setText(fallbackDescription);
                         } else {
                             text_view_activity_movie_description.setText("Description not available");
+                        }
+                        
+                        // For rating, try to get from poster (though we removed it from JSON)
+                        if (poster.getRating() != null && poster.getRating() > 0) {
+                            rating_bar_activity_movie_rating.setRating(poster.getRating());
+                            linear_layout_activity_movie_rating.setVisibility(View.VISIBLE);
+                        } else {
+                            linear_layout_activity_movie_rating.setVisibility(View.GONE);
                         }
                     }
                 });

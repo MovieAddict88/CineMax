@@ -51,6 +51,22 @@ public class TmdbApiClient {
     }
     
     /**
+     * Interface for handling movie rating callbacks
+     */
+    public interface MovieRatingCallback {
+        void onSuccess(Float rating);
+        void onError(String error);
+    }
+    
+    /**
+     * Interface for handling movie description and rating callbacks together
+     */
+    public interface MovieDescriptionAndRatingCallback {
+        void onSuccess(String description, Float rating);
+        void onError(String error);
+    }
+    
+    /**
      * Interface for handling movie search callbacks
      */
     public interface MovieSearchCallback {
@@ -209,6 +225,143 @@ public class TmdbApiClient {
             @Override
             public void onError(String error) {
                 callback.onError(error);
+            }
+        });
+    }
+    
+    /**
+     * Get movie rating by searching for the movie title
+     * 
+     * @param movieTitle The title of the movie to search for
+     * @param callback Callback to handle the result
+     */
+    public void getMovieRating(String movieTitle, MovieRatingCallback callback) {
+        Log.d(TAG, "Fetching rating from TMDB for: " + movieTitle);
+        
+        Call<TmdbSearchResponse> call = apiService.searchMovies(TMDB_API_KEY, movieTitle, 1);
+        call.enqueue(new Callback<TmdbSearchResponse>() {
+            @Override
+            public void onResponse(Call<TmdbSearchResponse> call, Response<TmdbSearchResponse> response) {
+                if (response.isSuccessful() && response.body() != null) {
+                    TmdbSearchResponse searchResponse = response.body();
+                    
+                    if (searchResponse.getResults() != null && !searchResponse.getResults().isEmpty()) {
+                        TmdbSearchResponse.TmdbSearchResult firstResult = searchResponse.getResults().get(0);
+                        Float rating = firstResult.getVoteAverage();
+                        
+                        if (rating != null && rating > 0) {
+                            Log.d(TAG, "Found rating for: " + movieTitle + " - " + rating);
+                            callback.onSuccess(rating);
+                        } else {
+                            getMovieDetailsById(firstResult.getId(), new MovieDetailsCallback() {
+                                @Override
+                                public void onSuccess(TmdbMovie movie) {
+                                    Float detailedRating = movie.getVoteAverage();
+                                    if (detailedRating != null && detailedRating > 0) {
+                                        callback.onSuccess(detailedRating);
+                                    } else {
+                                        callback.onError("No rating available for this movie");
+                                    }
+                                }
+                                
+                                @Override
+                                public void onError(String error) {
+                                    callback.onError("Failed to get detailed movie rating: " + error);
+                                }
+                            });
+                        }
+                    } else {
+                        callback.onError("Movie not found in TMDB database");
+                    }
+                } else {
+                    Log.e(TAG, "Rating search request failed: " + response.code() + " - " + response.message());
+                    callback.onError("Failed to search for movie rating: " + response.message());
+                }
+            }
+            
+            @Override
+            public void onFailure(Call<TmdbSearchResponse> call, Throwable t) {
+                Log.e(TAG, "Rating search request failed", t);
+                callback.onError("Network error: " + t.getMessage());
+            }
+        });
+    }
+    
+    /**
+     * Get both movie description and rating by searching for the movie title
+     * This is more efficient than making separate calls
+     * 
+     * @param movieTitle The title of the movie to search for
+     * @param callback Callback to handle the result
+     */
+    public void getMovieDescriptionAndRating(String movieTitle, MovieDescriptionAndRatingCallback callback) {
+        Log.d(TAG, "Fetching description and rating from TMDB for: " + movieTitle);
+        
+        Call<TmdbSearchResponse> call = apiService.searchMovies(TMDB_API_KEY, movieTitle, 1);
+        call.enqueue(new Callback<TmdbSearchResponse>() {
+            @Override
+            public void onResponse(Call<TmdbSearchResponse> call, Response<TmdbSearchResponse> response) {
+                if (response.isSuccessful() && response.body() != null) {
+                    TmdbSearchResponse searchResponse = response.body();
+                    
+                    if (searchResponse.getResults() != null && !searchResponse.getResults().isEmpty()) {
+                        TmdbSearchResponse.TmdbSearchResult firstResult = searchResponse.getResults().get(0);
+                        String overview = firstResult.getOverview();
+                        Float rating = firstResult.getVoteAverage();
+                        
+                        // If we have both description and rating from search, use them
+                        if (overview != null && !overview.trim().isEmpty() && rating != null && rating > 0) {
+                            Log.d(TAG, "Found description and rating for: " + movieTitle);
+                            callback.onSuccess(overview, rating);
+                        } else {
+                            // Get detailed info if search results are incomplete
+                            getMovieDetailsById(firstResult.getId(), new MovieDetailsCallback() {
+                                @Override
+                                public void onSuccess(TmdbMovie movie) {
+                                    String detailedOverview = movie.getOverview();
+                                    Float detailedRating = movie.getVoteAverage();
+                                    
+                                    // Use the best available data
+                                    String finalOverview = (detailedOverview != null && !detailedOverview.trim().isEmpty()) 
+                                        ? detailedOverview 
+                                        : (overview != null && !overview.trim().isEmpty()) ? overview : null;
+                                    
+                                    Float finalRating = (detailedRating != null && detailedRating > 0) 
+                                        ? detailedRating 
+                                        : (rating != null && rating > 0) ? rating : null;
+                                    
+                                    if (finalOverview != null || finalRating != null) {
+                                        callback.onSuccess(finalOverview, finalRating);
+                                    } else {
+                                        callback.onError("No description or rating available for this movie");
+                                    }
+                                }
+                                
+                                @Override
+                                public void onError(String error) {
+                                    // Fallback to search results if detail fetch fails
+                                    if (overview != null && !overview.trim().isEmpty() || rating != null && rating > 0) {
+                                        callback.onSuccess(overview, rating);
+                                    } else {
+                                        callback.onError("Failed to get detailed movie information: " + error);
+                                    }
+                                }
+                            });
+                        }
+                    } else {
+                        Log.w(TAG, "No search results found for: " + movieTitle);
+                        callback.onError("Movie not found in TMDB database");
+                    }
+                } else {
+                    Log.e(TAG, "Search request failed: " + response.code() + " - " + response.message());
+                    callback.onError("Failed to search for movie: " + response.message());
+                }
+            }
+            
+            @Override
+            public void onFailure(Call<TmdbSearchResponse> call, Throwable t) {
+                Log.e(TAG, "Search request failed", t);
+                callback.onError("Network error: " + t.getMessage());
             }
         });
     }
