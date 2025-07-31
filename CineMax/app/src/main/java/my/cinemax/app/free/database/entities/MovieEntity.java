@@ -1,6 +1,7 @@
 package my.cinemax.app.free.database.entities;
 
 import androidx.room.Entity;
+import androidx.room.Ignore;
 import androidx.room.PrimaryKey;
 import androidx.room.TypeConverters;
 
@@ -41,6 +42,7 @@ public class MovieEntity {
     // Constructors
     public MovieEntity() {}
 
+    @Ignore
     public MovieEntity(int id, String title, String type, String label, String sublabel, 
                       String imdb, String downloadas, boolean comment, String playas, 
                       String description, String classification, String year, String duration, 

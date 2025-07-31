@@ -26,6 +26,7 @@ import com.unity3d.ads.UnityAds;
 import my.cinemax.app.free.BuildConfig;
 import my.cinemax.app.free.R;
 import my.cinemax.app.free.database.DataManager;
+import my.cinemax.app.free.database.DatabaseTestHelper;
 
 /**
  * Created by Tamim on 28/09/2019.
@@ -116,6 +117,11 @@ public class MyApplication extends MultiDexApplication {
             
             // Clean old data on app start (optional)
             dataManager.cleanOldData();
+            
+            // Test database functionality (only in debug mode)
+            if (BuildConfig.DEBUG) {
+                DatabaseTestHelper.testDatabaseConnection(this);
+            }
             
             android.util.Log.d("MyApplication", "Database initialized successfully");
         } catch (Exception e) {

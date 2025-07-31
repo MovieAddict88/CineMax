@@ -1,6 +1,7 @@
 package my.cinemax.app.free.database.entities;
 
 import androidx.room.Entity;
+import androidx.room.Ignore;
 import androidx.room.PrimaryKey;
 import androidx.room.TypeConverters;
 
@@ -30,6 +31,7 @@ public class ChannelEntity {
     // Constructors
     public ChannelEntity() {}
 
+    @Ignore
     public ChannelEntity(int id, String name, String description, String image, String cover,
                         String streamUrl, String type, String classification, float rating,
                         int views, String categories, String country, String language,

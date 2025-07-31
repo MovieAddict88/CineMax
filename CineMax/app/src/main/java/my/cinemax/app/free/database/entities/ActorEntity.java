@@ -1,6 +1,7 @@
 package my.cinemax.app.free.database.entities;
 
 import androidx.room.Entity;
+import androidx.room.Ignore;
 import androidx.room.PrimaryKey;
 
 @Entity(tableName = "actors")
@@ -18,6 +19,7 @@ public class ActorEntity {
     // Constructors
     public ActorEntity() {}
 
+    @Ignore
     public ActorEntity(int id, String name, String image, String biography, 
                       String birthDate, String birthPlace, String nationality, long lastUpdated) {
         this.id = id;

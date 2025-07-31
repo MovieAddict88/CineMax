@@ -91,14 +91,6 @@ public class TypeConverterUtils {
         return gson.fromJson(value, listType);
     }
 
-    // Generic JSON string conversion
-    @TypeConverter
-    public static String fromObject(Object value) {
-        return gson.toJson(value);
-    }
-
-    @TypeConverter
-    public static <T> T toObject(String value, Class<T> classOfT) {
-        return gson.fromJson(value, classOfT);
-    }
+    // Note: Generic converters removed as Room doesn't support them
+    // Use specific converters above for each type
 }
