@@ -63,13 +63,13 @@ public class CategoryActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_category);
-        getCategory();
+        getCategories();
         initView();
         initAction();
         loadChannelsFromJson();
     }
 
-    private void getCategory() {
+    private void getCategories() {
         category = getIntent().getParcelableExtra("category");
         from = getIntent().getStringExtra("from");
     }
@@ -148,10 +148,14 @@ public class CategoryActivity extends AppCompatActivity {
         
         // Filter channels by category
         for (Channel channel : allChannels) {
-            if (channel.getCategory() != null && 
-                channel.getCategory().getId() != null && 
-                channel.getCategory().getId().equals(category.getId())) {
-                filteredChannels.add(channel);
+            if (channel.getCategories() != null) {
+                for (Category channelCategory : channel.getCategories()) {
+                    if (channelCategory.getId() != null && 
+                        channelCategory.getId().equals(category.getId())) {
+                        filteredChannels.add(channel);
+                        break;
+                    }
+                }
             }
         }
         

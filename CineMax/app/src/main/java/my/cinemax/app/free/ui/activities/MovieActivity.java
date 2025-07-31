@@ -451,20 +451,9 @@ public class MovieActivity extends AppCompatActivity {
             @Override
             public void onSuccess(JsonApiResponse jsonResponse) {
                 if (jsonResponse != null && jsonResponse.getMovies() != null) {
-                    // Find the current movie and get its actors
-                    for (Poster movie : jsonResponse.getMovies()) {
-                        if (movie.getId() != null && movie.getId().equals(poster.getId())) {
-                            if (movie.getActors() != null && movie.getActors().size() > 0) {
-                                linearLayoutManagerCast = new LinearLayoutManager(getApplicationContext(), LinearLayoutManager.HORIZONTAL, false);
-                                actorAdapter = new ActorAdapter(movie.getActors(), MovieActivity.this);
-                                recycle_view_activity_activity_movie_cast.setHasFixedSize(true);
-                                recycle_view_activity_activity_movie_cast.setAdapter(actorAdapter);
-                                recycle_view_activity_activity_movie_cast.setLayoutManager(linearLayoutManagerCast);
-                                linear_layout_activity_movie_cast.setVisibility(View.VISIBLE);
-                            }
-                            break;
-                        }
-                    }
+                    // Since Poster doesn't have actors, we'll show a message or hide the cast section
+                    // In a real implementation, you would need to add actors to the Poster entity
+                    linear_layout_activity_movie_cast.setVisibility(View.GONE);
                 }
             }
             

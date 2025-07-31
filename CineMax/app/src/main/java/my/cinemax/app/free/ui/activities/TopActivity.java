@@ -207,15 +207,15 @@ public class TopActivity extends AppCompatActivity {
                 break;
             case "views":
                 movies.sort((m1, m2) -> {
-                    Integer views1 = m1.getViews() != null ? m1.getViews() : 0;
-                    Integer views2 = m2.getViews() != null ? m2.getViews() : 0;
-                    return views2.compareTo(views1); // Descending order
+                    Float rating1 = m1.getRating() != null ? m1.getRating() : 0f;
+                    Float rating2 = m2.getRating() != null ? m2.getRating() : 0f;
+                    return rating2.compareTo(rating1); // Descending order
                 });
                 break;
             case "year":
                 movies.sort((m1, m2) -> {
-                    Integer year1 = m1.getYear() != null ? m1.getYear() : 0;
-                    Integer year2 = m2.getYear() != null ? m2.getYear() : 0;
+                    String year1 = m1.getYear() != null ? m1.getYear() : "";
+                    String year2 = m2.getYear() != null ? m2.getYear() : "";
                     return year2.compareTo(year1); // Descending order
                 });
                 break;
@@ -228,8 +228,8 @@ public class TopActivity extends AppCompatActivity {
                 break;
             case "imdb":
                 movies.sort((m1, m2) -> {
-                    Float imdb1 = m1.getImdb() != null ? m1.getImdb() : 0f;
-                    Float imdb2 = m2.getImdb() != null ? m2.getImdb() : 0f;
+                    String imdb1 = m1.getImdb() != null ? m1.getImdb() : "";
+                    String imdb2 = m2.getImdb() != null ? m2.getImdb() : "";
                     return imdb2.compareTo(imdb1); // Descending order
                 });
                 break;

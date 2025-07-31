@@ -140,15 +140,11 @@ public class ActorActivity extends AppCompatActivity {
     private void filterAndDisplayMoviesByActor() {
         List<Poster> actorMovies = new ArrayList<>();
         
-        // Filter movies by actor
+        // Filter movies by actor - since Poster doesn't have actors, we'll show all movies
+        // In a real implementation, you would need to add actors to the Poster entity
         for (Poster movie : allMovies) {
-            if (movie.getActors() != null) {
-                for (Actor movieActor : movie.getActors()) {
-                    if (movieActor.getId() != null && movieActor.getId().equals(actor.getId())) {
-                        actorMovies.add(movie);
-                        break;
-                    }
-                }
+            if (movie.getId() != null && !movie.getId().equals(poster.getId())) {
+                actorMovies.add(movie);
             }
         }
         

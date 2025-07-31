@@ -156,8 +156,8 @@ public class SearchActivity extends AppCompatActivity {
         
         // Filter channels by search query
         for (Channel channel : allChannels) {
-            if (channel.getName() != null && 
-                channel.getName().toLowerCase().contains(query.toLowerCase())) {
+            if (channel.getTitle() != null && 
+                channel.getTitle().toLowerCase().contains(query.toLowerCase())) {
                 channelArrayList.add(channel);
             }
         }
