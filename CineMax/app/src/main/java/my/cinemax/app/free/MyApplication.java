@@ -25,8 +25,7 @@ import com.unity3d.ads.UnityAds;
 
 import my.cinemax.app.free.BuildConfig;
 import my.cinemax.app.free.R;
-import my.cinemax.app.free.database.DataManager;
-import my.cinemax.app.free.database.DatabaseTestHelper;
+import my.cinemax.app.free.database.SimpleDataManager;
 
 /**
  * Created by Tamim on 28/09/2019.
@@ -112,18 +111,23 @@ public class MyApplication extends MultiDexApplication {
      */
     private void initializeDatabase() {
         try {
-            // Initialize DataManager which will create the database
-            DataManager dataManager = DataManager.getInstance(this);
+            // Initialize SimpleDataManager which will create the database
+            SimpleDataManager dataManager = SimpleDataManager.getInstance(this);
             
             // Clean old data on app start (optional)
             dataManager.cleanOldData();
             
             // Test database functionality (only in debug mode)
             if (BuildConfig.DEBUG) {
-                DatabaseTestHelper.testDatabaseConnection(this);
+                dataManager.checkDatabaseStatus(new SimpleDataManager.DatabaseStatusCallback() {
+                    @Override
+                    public void onStatus(boolean hasData, int itemCount) {
+                        android.util.Log.d("MyApplication", "Database status - Has data: " + hasData + ", Item count: " + itemCount);
+                    }
+                });
             }
             
-            android.util.Log.d("MyApplication", "Database initialized successfully");
+            android.util.Log.d("MyApplication", "Simple database initialized successfully");
         } catch (Exception e) {
             android.util.Log.e("MyApplication", "Error initializing database: " + e.getMessage(), e);
         }

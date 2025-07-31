@@ -62,23 +62,16 @@ android {
         targetCompatibility JavaVersion.VERSION_1_8
     }
     
-    // Handle dependency conflicts
-    configurations.all {
-        resolutionStrategy {
-            force 'androidx.lifecycle:lifecycle-viewmodel:2.3.1'
-            force 'androidx.lifecycle:lifecycle-livedata:2.3.1'
-            force 'androidx.lifecycle:lifecycle-common-java8:2.3.1'
-        }
-    }
+
 
 }
 
 dependencies {
     coreLibraryDesugaring 'com.android.tools:desugar_jdk_libs:1.1.5'
 
-    // Room Database dependencies with compatible versions
-    implementation 'androidx.room:room-runtime:2.3.0'
-    annotationProcessor 'androidx.room:room-compiler:2.3.0'
+    // SQLite database with manual implementation (AndroidIDE compatible)
+    implementation 'androidx.sqlite:sqlite:2.1.0'
+    implementation 'androidx.sqlite:sqlite-framework:2.1.0'
     
     // Lifecycle components for ViewModel and LiveData (compatible versions)
     implementation 'androidx.lifecycle:lifecycle-viewmodel:2.3.1'
