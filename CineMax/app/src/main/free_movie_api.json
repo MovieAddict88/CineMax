@@ -1,0 +1,77 @@
+[
+  {
+    "type": "movie",
+    "title": "Big Buck Bunny",
+    "sources": [
+      {
+        "type": "embed",
+        "url": "https://vidsrc.net/embed/movie/10346"
+      },
+      {
+        "type": "direct",
+        "url": "https://download.blender.org/peach/bbb.mp4"
+      }
+    ],
+    "meta": {
+      "tmdb_id": 10346,
+      "title": null,
+      "overview": null,
+      "release_date": null,
+      "poster_path": null,
+      "backdrop_path": null,
+      "genres": null,
+      "runtime": null,
+      "vote_average": null
+    }
+  },
+  {
+    "type": "tv",
+    "title": "Sample TV Series",
+    "meta": {
+      "tmdb_id": 1399,
+      "name": null,
+      "overview": null,
+      "first_air_date": null,
+      "poster_path": null,
+      "backdrop_path": null,
+      "genres": null,
+      "vote_average": null,
+      "seasons": [
+        {
+          "season_number": 1,
+          "episodes": [
+            {
+              "episode_number": 1,
+              "title": null,
+              "overview": null,
+              "air_date": null,
+              "sources": [
+                {
+                  "type": "embed",
+                  "url": "https://vidsrc.net/embed/tv/1399/1-1"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "season_number": 2,
+          "episodes": [
+            {
+              "episode_number": 1,
+              "title": null,
+              "overview": null,
+              "air_date": null,
+              "sources": [
+                {
+                  "type": "embed",
+                  "url": "https://vidsrc.net/embed/tv/1399/2-1"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  }
+]
