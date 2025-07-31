@@ -312,26 +312,26 @@ public class SearchActivity extends AppCompatActivity {
             // Create a simple JsonApiResponse with sample data for testing
             JsonApiResponse localResponse = new JsonApiResponse();
             
-            // Create sample channels
+            // Create sample channels based on actual GitHub data
             List<Channel> sampleChannels = new ArrayList<>();
             
-            // Add "Cine Mo!" channel
+            // Add "Cine Mo!" channel (exists in GitHub data)
             Channel cineMoChannel = new Channel();
             cineMoChannel.setId(1);
             cineMoChannel.setTitle("Cine Mo!");
             cineMoChannel.setDescription("Cine Mo! is a Filipino pay television channel owned by ABS-CBN.");
-            cineMoChannel.setImage("https://example.com/cine-mo.jpg");
+            cineMoChannel.setImage("https://i.imgur.com/KUwrSOH.png");
             sampleChannels.add(cineMoChannel);
             
-            // Add "A2Z" channel
-            Channel a2zChannel = new Channel();
-            a2zChannel.setId(2);
-            a2zChannel.setTitle("A2Z");
-            a2zChannel.setDescription("A2Z is a Filipino free-to-air television network.");
-            a2zChannel.setImage("https://example.com/a2z.jpg");
-            sampleChannels.add(a2zChannel);
+            // Add "AZ2" channel (exists in GitHub data, not "A2Z")
+            Channel az2Channel = new Channel();
+            az2Channel.setId(2);
+            az2Channel.setTitle("AZ2");
+            az2Channel.setDescription("AZ2 is a Filipino entertainment channel.");
+            az2Channel.setImage("https://example.com/az2.jpg");
+            sampleChannels.add(az2Channel);
             
-            // Add "Cinemax" channel
+            // Add "Cinemax" channel (exists in GitHub data)
             Channel cinemaxChannel = new Channel();
             cinemaxChannel.setId(3);
             cinemaxChannel.setTitle("Cinemax");
@@ -339,24 +339,24 @@ public class SearchActivity extends AppCompatActivity {
             cinemaxChannel.setImage("https://example.com/cinemax.jpg");
             sampleChannels.add(cinemaxChannel);
             
+            // Add "Kapamilya Channel" (exists in GitHub data)
+            Channel kapamilyaChannel = new Channel();
+            kapamilyaChannel.setId(4);
+            kapamilyaChannel.setTitle("Kapamilya Channel");
+            kapamilyaChannel.setDescription("Kapamilya Channel is a Filipino free-to-air television network.");
+            kapamilyaChannel.setImage("https://i.imgur.com/Dcys2TG.png");
+            sampleChannels.add(kapamilyaChannel);
+            
             // Create sample movies
             List<Poster> sampleMovies = new ArrayList<>();
             
-            // Add "Big Buck Bunny" movie
+            // Add "Big Buck Bunny" movie (exists in GitHub data)
             Poster bigBuckBunny = new Poster();
             bigBuckBunny.setId(1);
             bigBuckBunny.setTitle("Big Buck Bunny");
             bigBuckBunny.setDescription("Big Buck Bunny tells the story of a giant rabbit with a heart bigger than himself.");
             bigBuckBunny.setImage("https://peach.blender.org/wp-content/uploads/title_anouncement.jpg?x11217");
             sampleMovies.add(bigBuckBunny);
-            
-            // Add "Elephants Dream" movie
-            Poster elephantsDream = new Poster();
-            elephantsDream.setId(2);
-            elephantsDream.setTitle("Elephants Dream");
-            elephantsDream.setDescription("Elephants Dream is the world's first open movie.");
-            elephantsDream.setImage("https://example.com/elephants-dream.jpg");
-            sampleMovies.add(elephantsDream);
             
             // Set the data
             localResponse.setChannels(sampleChannels);
@@ -414,7 +414,7 @@ public class SearchActivity extends AppCompatActivity {
             }
             
             // Validate minimum search length to prevent crashes
-            if (query.trim().length() < 2) {
+            if (query.trim().length() < 1) {
                 Log.w("SearchActivity", "Search query too short: '" + query + "', showing empty results");
                 displayResults();
                 return;
