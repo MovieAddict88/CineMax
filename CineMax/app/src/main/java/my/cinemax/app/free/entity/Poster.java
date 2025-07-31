@@ -166,6 +166,20 @@ public class Poster implements Parcelable {
         createdAt = in.readString();
         sources = in.createTypedArrayList(Source.CREATOR);
         trailer = in.readParcelable(Source.class.getClassLoader());
+        if (in.readByte() == 0) {
+            tmdbId = null;
+        } else {
+            tmdbId = in.readInt();
+        }
+        originalTitle = in.readString();
+        country = in.readString();
+        if (in.readByte() == 0) {
+            popularity = null;
+        } else {
+            popularity = in.readFloat();
+        }
+        posterPath = in.readString();
+        backdropPath = in.readString();
         typeView = in.readInt();
     }
 
@@ -208,6 +222,22 @@ public class Poster implements Parcelable {
         dest.writeString(createdAt);
         dest.writeTypedList(sources);
         dest.writeParcelable(trailer, flags);
+        if (tmdbId == null) {
+            dest.writeByte((byte) 0);
+        } else {
+            dest.writeByte((byte) 1);
+            dest.writeInt(tmdbId);
+        }
+        dest.writeString(originalTitle);
+        dest.writeString(country);
+        if (popularity == null) {
+            dest.writeByte((byte) 0);
+        } else {
+            dest.writeByte((byte) 1);
+            dest.writeFloat(popularity);
+        }
+        dest.writeString(posterPath);
+        dest.writeString(backdropPath);
         dest.writeInt(typeView);
     }
 
@@ -415,6 +445,55 @@ public class Poster implements Parcelable {
 
     public String getSublabel() {
         return sublabel;
+    }
+
+    // TMDB-related getter/setter methods
+    public Integer getTmdbId() {
+        return tmdbId;
+    }
+
+    public void setTmdbId(Integer tmdbId) {
+        this.tmdbId = tmdbId;
+    }
+
+    public String getOriginalTitle() {
+        return originalTitle;
+    }
+
+    public void setOriginalTitle(String originalTitle) {
+        this.originalTitle = originalTitle;
+    }
+
+    public String getCountry() {
+        return country;
+    }
+
+    public void setCountry(String country) {
+        this.country = country;
+    }
+
+    public Float getPopularity() {
+        return popularity;
+    }
+
+    public void setPopularity(Float popularity) {
+        this.popularity = popularity;
+    }
+
+    public String getPosterPath() {
+        return posterPath;
+    }
+
+    public void setPosterPath(String posterPath) {
+        this.posterPath = posterPath;
+    }
+
+    public String getBackdropPath() {
+        return backdropPath;
+    }
+
+    public void setBackdropPath(String backdropPath) {
+        this.backdropPath = backdropPath;
     }
 }
 
