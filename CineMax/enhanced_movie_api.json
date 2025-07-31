@@ -1,0 +1,843 @@
+{
+  "api_info": {
+    "version": "2.0",
+    "description": "Enhanced Free Movie & TV Streaming JSON API with Full Actor Support",
+    "last_updated": "2024-01-15",
+    "total_movies": 3,
+    "total_channels": 26,
+    "total_actors": 5
+  },
+  "home": {
+    "slides": [
+      {
+        "id": 1,
+        "title": "Big Buck Bunny",
+        "type": "movie",
+        "image": "https://peach.blender.org/wp-content/uploads/title_anouncement.jpg?x11217",
+        "url": "movies/1",
+        "poster": {
+          "id": 1,
+          "title": "Big Buck Bunny",
+          "type": "movie",
+          "label": "Animation",
+          "sublabel": "Short Film",
+          "imdb": "8.5",
+          "downloadas": "big-buck-bunny.mp4",
+          "comment": true,
+          "playas": "video",
+          "description": "Big Buck Bunny tells the story of a giant rabbit with a heart bigger than himself. When one sunny day three rodents rudely harass him by throwing nuts, hitting his flowers, and destroying his home, he snaps and goes after them.",
+          "classification": "G",
+          "year": "2008",
+          "duration": "10:00",
+          "rating": 8.5,
+          "views": 15000,
+          "created_at": "2024-01-01",
+          "image": "https://peach.blender.org/wp-content/uploads/title_anouncement.jpg?x11217",
+          "cover": "https://peach.blender.org/wp-content/uploads/title_anouncement.jpg?x11217",
+          "genres": [
+            {
+              "id": 6,
+              "title": "Animation"
+            }
+          ],
+          "actors": [
+            {
+              "id": 1,
+              "name": "Tom Hanks",
+              "type": "actor",
+              "role": "Lead Actor",
+              "image": "https://example.com/tom-hanks.jpg",
+              "born": "1956-07-09",
+              "height": "6'0\"",
+              "bio": "American actor and filmmaker"
+            }
+          ],
+          "sources": [
+            {
+              "id": 1,
+              "type": "video",
+              "title": "Big Buck Bunny 1080p",
+              "quality": "1080p",
+              "size": "264MB",
+              "kind": "both",
+              "premium": "false",
+              "external": false,
+              "url": "http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4"
+            },
+            {
+              "id": 2,
+              "type": "video",
+              "title": "Big Buck Bunny 720p",
+              "quality": "720p",
+              "size": "128MB",
+              "kind": "both",
+              "premium": "false",
+              "external": false,
+              "url": "http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4"
+            },
+            {
+              "id": 3,
+              "type": "video",
+              "title": "Big Buck Bunny 480p",
+              "quality": "480p",
+              "size": "64MB",
+              "kind": "both",
+              "premium": "false",
+              "external": false,
+              "url": "http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4"
+            }
+          ],
+          "trailer": {
+            "id": 4,
+            "type": "video",
+            "title": "Big Buck Bunny Trailer",
+            "url": "http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4"
+          },
+          "subtitles": [
+            {
+              "id": 1,
+              "title": "English",
+              "language": "en",
+              "url": "https://example.com/subtitles/big-buck-bunny-en.vtt"
+            },
+            {
+              "id": 2,
+              "title": "Spanish",
+              "language": "es",
+              "url": "https://example.com/subtitles/big-buck-bunny-es.vtt"
+            }
+          ],
+          "comments": [
+            {
+              "id": 1,
+              "user": "John Doe",
+              "comment": "Amazing animation! Love this movie.",
+              "created_at": "2024-01-15T10:30:00Z"
+            },
+            {
+              "id": 2,
+              "user": "Jane Smith",
+              "comment": "Great for kids and adults alike!",
+              "created_at": "2024-01-14T15:45:00Z"
+            }
+          ],
+          "downloads": 5000,
+          "shares": 1200
+        }
+      },
+      {
+        "id": 2,
+        "title": "Elephants Dream",
+        "type": "movie",
+        "image": "https://upload.wikimedia.org/wikipedia/commons/e/e7/Elephants_Dream_s_blue_elephant.png",
+        "url": "movies/2",
+        "poster": {
+          "id": 2,
+          "title": "Elephants Dream",
+          "type": "movie",
+          "label": "Animation",
+          "sublabel": "Short Film",
+          "imdb": "7.8",
+          "downloadas": "elephants-dream.mp4",
+          "comment": true,
+          "playas": "video",
+          "description": "The world's first open movie, Elephants Dream is a story about two characters exploring a capricious and seemingly infinite machine.",
+          "classification": "PG",
+          "year": "2006",
+          "duration": "10:53",
+          "rating": 7.8,
+          "views": 12000,
+          "created_at": "2024-01-02",
+          "image": "https://upload.wikimedia.org/wikipedia/commons/e/e7/Elephants_Dream_s_blue_elephant.png",
+          "cover": "https://upload.wikimedia.org/wikipedia/commons/e/e7/Elephants_Dream_s_blue_elephant.png",
+          "genres": [
+            {
+              "id": 6,
+              "title": "Animation"
+            },
+            {
+              "id": 5,
+              "title": "Sci-Fi"
+            }
+          ],
+          "actors": [
+            {
+              "id": 2,
+              "name": "Emma Watson",
+              "type": "actress",
+              "role": "Lead Actress",
+              "image": "https://example.com/emma-watson.jpg",
+              "born": "1990-04-15",
+              "height": "5'5\"",
+              "bio": "English actress and activist"
+            }
+          ],
+          "sources": [
+            {
+              "id": 4,
+              "type": "video",
+              "title": "Elephants Dream 1080p",
+              "quality": "1080p",
+              "size": "300MB",
+              "kind": "both",
+              "premium": "false",
+              "external": false,
+              "url": "http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ElephantsDream.mp4"
+            }
+          ],
+          "trailer": {
+            "id": 5,
+            "type": "video",
+            "title": "Elephants Dream Trailer",
+            "url": "http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ElephantsDream.mp4"
+          }
+        }
+      }
+    ],
+    "featured_movies": [
+      {
+        "id": 1,
+        "title": "Big Buck Bunny",
+        "description": "Big Buck Bunny tells the story of a giant rabbit with a heart bigger than himself.",
+        "year": "2008",
+        "duration": "10:00",
+        "rating": 8.5,
+        "imdb": "8.5",
+        "views": 15000,
+        "created_at": "2024-01-01",
+        "image": "https://peach.blender.org/wp-content/uploads/title_anouncement.jpg?x11217",
+        "cover": "https://peach.blender.org/wp-content/uploads/title_anouncement.jpg?x11217",
+        "classification": "G",
+        "genres": [
+          {
+            "id": 6,
+            "title": "Animation"
+          }
+        ],
+        "actors": [
+          {
+            "id": 1,
+            "name": "Tom Hanks",
+            "image": "https://example.com/tom-hanks.jpg",
+            "bio": "American actor and filmmaker",
+            "height": "6'0\"",
+            "born": "1956-07-09",
+            "type": "Actor"
+          }
+        ],
+        "sources": [
+          {
+            "id": 1,
+            "title": "1080p",
+            "size": "264MB",
+            "type": "mp4",
+            "quality": "1080p",
+            "url": "http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4"
+          }
+        ]
+      }
+    ],
+    "channels": [
+      {
+        "id": 1,
+        "title": "AZ2",
+        "description": "AZ2 Entertainment Channel",
+        "image": "https://i.imgur.com/1zsdloF.png",
+        "views": 25000,
+        "rating": 7.8,
+        "categories": [
+          {
+            "id": 3,
+            "title": "Entertainment"
+          }
+        ]
+      }
+    ],
+    "actors": [
+      {
+        "id": 1,
+        "name": "Tom Hanks",
+        "image": "https://example.com/tom-hanks.jpg",
+        "bio": "American actor and filmmaker",
+        "height": "6'0\"",
+        "born": "1956-07-09",
+        "type": "Actor"
+      },
+      {
+        "id": 2,
+        "name": "Emma Watson",
+        "image": "https://example.com/emma-watson.jpg",
+        "bio": "English actress and activist",
+        "height": "5'5\"",
+        "born": "1990-04-15",
+        "type": "Actress"
+      }
+    ],
+    "genres": [
+      {
+        "id": 1,
+        "title": "Action"
+      },
+      {
+        "id": 2,
+        "title": "Comedy"
+      },
+      {
+        "id": 3,
+        "title": "Drama"
+      },
+      {
+        "id": 4,
+        "title": "Horror"
+      },
+      {
+        "id": 5,
+        "title": "Sci-Fi"
+      },
+      {
+        "id": 6,
+        "title": "Animation"
+      }
+    ]
+  },
+  "movies": [
+    {
+      "id": 1,
+      "title": "Big Buck Bunny",
+      "type": "movie",
+      "label": "Animation",
+      "sublabel": "Short Film",
+      "imdb": "8.5",
+      "downloadas": "big-buck-bunny.mp4",
+      "comment": true,
+      "playas": "video",
+      "description": "Big Buck Bunny tells the story of a giant rabbit with a heart bigger than himself. When one sunny day three rodents rudely harass him by throwing nuts, hitting his flowers, and destroying his home, he snaps and goes after them.",
+      "classification": "G",
+      "year": "2008",
+      "duration": "10:00",
+      "rating": 8.5,
+      "views": 15000,
+      "created_at": "2024-01-01",
+      "image": "https://peach.blender.org/wp-content/uploads/title_anouncement.jpg?x11217",
+      "cover": "https://peach.blender.org/wp-content/uploads/title_anouncement.jpg?x11217",
+      "genres": [
+        {
+          "id": 6,
+          "title": "Animation"
+        }
+      ],
+      "actors": [
+        {
+          "id": 1,
+          "name": "Tom Hanks",
+          "type": "actor",
+          "role": "Lead Actor",
+          "image": "https://example.com/tom-hanks.jpg",
+          "born": "1956-07-09",
+          "height": "6'0\"",
+          "bio": "American actor and filmmaker"
+        }
+      ],
+      "sources": [
+        {
+          "id": 1,
+          "type": "video",
+          "title": "Big Buck Bunny 1080p",
+          "quality": "1080p",
+          "size": "264MB",
+          "kind": "both",
+          "premium": "false",
+          "external": false,
+          "url": "http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4"
+        },
+        {
+          "id": 2,
+          "type": "video",
+          "title": "Big Buck Bunny 720p",
+          "quality": "720p",
+          "size": "128MB",
+          "kind": "both",
+          "premium": "false",
+          "external": false,
+          "url": "http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4"
+        },
+        {
+          "id": 3,
+          "type": "video",
+          "title": "Big Buck Bunny 480p",
+          "quality": "480p",
+          "size": "64MB",
+          "kind": "both",
+          "premium": "false",
+          "external": false,
+          "url": "http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4"
+        }
+      ],
+      "trailer": {
+        "id": 4,
+        "type": "video",
+        "title": "Big Buck Bunny Trailer",
+        "url": "http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4"
+      }
+    },
+    {
+      "id": 2,
+      "title": "Elephants Dream",
+      "type": "movie",
+      "label": "Animation",
+      "sublabel": "Short Film",
+      "imdb": "7.8",
+      "downloadas": "elephants-dream.mp4",
+      "comment": true,
+      "playas": "video",
+      "description": "The world's first open movie, Elephants Dream is a story about two characters exploring a capricious and seemingly infinite machine.",
+      "classification": "PG",
+      "year": "2006",
+      "duration": "10:53",
+      "rating": 7.8,
+      "views": 12000,
+      "created_at": "2024-01-02",
+      "image": "https://upload.wikimedia.org/wikipedia/commons/e/e7/Elephants_Dream_s_blue_elephant.png",
+      "cover": "https://upload.wikimedia.org/wikipedia/commons/e/e7/Elephants_Dream_s_blue_elephant.png",
+      "genres": [
+        {
+          "id": 6,
+          "title": "Animation"
+        },
+        {
+          "id": 5,
+          "title": "Sci-Fi"
+        }
+      ],
+      "actors": [
+        {
+          "id": 2,
+          "name": "Emma Watson",
+          "type": "actress",
+          "role": "Lead Actress",
+          "image": "https://example.com/emma-watson.jpg",
+          "born": "1990-04-15",
+          "height": "5'5\"",
+          "bio": "English actress and activist"
+        }
+      ],
+      "sources": [
+        {
+          "id": 4,
+          "type": "video",
+          "title": "Elephants Dream 1080p",
+          "quality": "1080p",
+          "size": "300MB",
+          "kind": "both",
+          "premium": "false",
+          "external": false,
+          "url": "http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ElephantsDream.mp4"
+        }
+      ],
+      "trailer": {
+        "id": 5,
+        "type": "video",
+        "title": "Elephants Dream Trailer",
+        "url": "http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ElephantsDream.mp4"
+      }
+    },
+    {
+      "id": 3,
+      "title": "Sample Action Movie",
+      "type": "movie",
+      "label": "Action",
+      "sublabel": "Blockbuster",
+      "imdb": "8.2",
+      "downloadas": "sample-action.mp4",
+      "comment": true,
+      "playas": "video",
+      "description": "An exciting action movie with amazing stunts and thrilling sequences.",
+      "classification": "PG-13",
+      "year": "2023",
+      "duration": "120:00",
+      "rating": 8.2,
+      "views": 25000,
+      "created_at": "2024-01-03",
+      "image": "https://example.com/sample-action.jpg",
+      "cover": "https://example.com/sample-action-cover.jpg",
+      "genres": [
+        {
+          "id": 1,
+          "title": "Action"
+        },
+        {
+          "id": 3,
+          "title": "Drama"
+        }
+      ],
+      "actors": [
+        {
+          "id": 1,
+          "name": "Tom Hanks",
+          "type": "actor",
+          "role": "Lead Actor",
+          "image": "https://example.com/tom-hanks.jpg",
+          "born": "1956-07-09",
+          "height": "6'0\"",
+          "bio": "American actor and filmmaker"
+        },
+        {
+          "id": 3,
+          "name": "Leonardo DiCaprio",
+          "type": "actor",
+          "role": "Supporting Actor",
+          "image": "https://example.com/leonardo-dicaprio.jpg",
+          "born": "1974-11-11",
+          "height": "6'0\"",
+          "bio": "American actor, film producer, and environmentalist"
+        }
+      ],
+      "sources": [
+        {
+          "id": 6,
+          "type": "video",
+          "title": "Sample Action Movie 1080p",
+          "quality": "1080p",
+          "size": "2.5GB",
+          "kind": "both",
+          "premium": "false",
+          "external": false,
+          "url": "https://example.com/sample-action-1080p.mp4"
+        }
+      ],
+      "trailer": {
+        "id": 7,
+        "type": "video",
+        "title": "Sample Action Movie Trailer",
+        "url": "https://example.com/sample-action-trailer.mp4"
+      }
+    }
+  ],
+  "channels": [
+    {
+      "id": 1,
+      "title": "AZ2",
+      "label": "Entertainment",
+      "sublabel": "Philippines",
+      "description": "AZ2",
+      "website": "https://example-news.com",
+      "classification": "News",
+      "views": 25000,
+      "shares": 800,
+      "rating": 7.8,
+      "comment": true,
+      "image": "https://i.imgur.com/1zsdloF.png",
+      "playas": "live",
+      "categories": [
+        {
+          "id": 3,
+          "title": "Entertainment"
+        }
+      ],
+      "sources": [
+        {
+          "id": 6,
+          "type": "live",
+          "title": "720p",
+          "quality": "720p",
+          "size": "Live",
+          "kind": "play",
+          "premium": "false",
+          "external": false,
+          "url": "https://qp-pldt-live-grp-02-prod.akamaized.net/out/u/tv5_5.m3u8"
+        },
+        {
+          "id": 7,
+          "type": "live",
+          "title": "480p",
+          "quality": "480p",
+          "size": "Live",
+          "kind": "play",
+          "premium": "false",
+          "external": false,
+          "url": "https://qp-pldt-live-grp-02-prod.akamaized.net/out/u/tv5_4.m3u8"
+        },
+        {
+          "id": 8,
+          "type": "live",
+          "title": "360p",
+          "quality": "360p",
+          "size": "Live",
+          "kind": "play",
+          "premium": "false",
+          "external": false,
+          "url": "https://qp-pldt-live-grp-02-prod.akamaized.net/out/u/tv5_3.m3u8"
+        },
+        {
+          "id": 9,
+          "type": "live",
+          "title": "240p",
+          "quality": "240p",
+          "size": "Live",
+          "kind": "play",
+          "premium": "false",
+          "external": false,
+          "url": "https://qp-pldt-live-grp-02-prod.akamaized.net/out/u/tv5_2.m3u8"
+        },
+        {
+          "id": 10,
+          "type": "live",
+          "title": "144p",
+          "quality": "144p",
+          "size": "Live",
+          "kind": "play",
+          "premium": "false",
+          "external": false,
+          "url": "https://qp-pldt-live-grp-02-prod.akamaized.net/out/u/tv5_1.m3u8"
+        }
+      ]
+    }
+  ],
+  "actors": [
+    {
+      "id": 1,
+      "name": "Tom Hanks",
+      "type": "actor",
+      "role": "Lead Actor",
+      "image": "https://example.com/tom-hanks.jpg",
+      "born": "1956-07-09",
+      "height": "6'0\"",
+      "bio": "American actor and filmmaker",
+      "movies": [
+        {
+          "id": 1,
+          "title": "Big Buck Bunny",
+          "image": "https://peach.blender.org/wp-content/uploads/title_anouncement.jpg?x11217",
+          "year": "2008"
+        },
+        {
+          "id": 3,
+          "title": "Sample Action Movie",
+          "image": "https://example.com/sample-action.jpg",
+          "year": "2023"
+        }
+      ]
+    },
+    {
+      "id": 2,
+      "name": "Emma Watson",
+      "type": "actress",
+      "role": "Lead Actress",
+      "image": "https://example.com/emma-watson.jpg",
+      "born": "1990-04-15",
+      "height": "5'5\"",
+      "bio": "English actress and activist",
+      "movies": [
+        {
+          "id": 2,
+          "title": "Elephants Dream",
+          "image": "https://upload.wikimedia.org/wikipedia/commons/e/e7/Elephants_Dream_s_blue_elephant.png",
+          "year": "2006"
+        }
+      ]
+    },
+    {
+      "id": 3,
+      "name": "Leonardo DiCaprio",
+      "type": "actor",
+      "role": "Lead Actor",
+      "image": "https://example.com/leonardo-dicaprio.jpg",
+      "born": "1974-11-11",
+      "height": "6'0\"",
+      "bio": "American actor, film producer, and environmentalist",
+      "movies": [
+        {
+          "id": 3,
+          "title": "Sample Action Movie",
+          "image": "https://example.com/sample-action.jpg",
+          "year": "2023"
+        }
+      ]
+    }
+  ],
+  "genres": [
+    {
+      "id": 1,
+      "title": "Action",
+      "posters": [
+        {
+          "id": 3,
+          "title": "Sample Action Movie",
+          "image": "https://example.com/sample-action.jpg"
+        }
+      ]
+    },
+    {
+      "id": 2,
+      "title": "Comedy",
+      "posters": []
+    },
+    {
+      "id": 3,
+      "title": "Drama",
+      "posters": [
+        {
+          "id": 3,
+          "title": "Sample Action Movie",
+          "image": "https://example.com/sample-action.jpg"
+        }
+      ]
+    },
+    {
+      "id": 4,
+      "title": "Horror",
+      "posters": []
+    },
+    {
+      "id": 5,
+      "title": "Sci-Fi",
+      "posters": [
+        {
+          "id": 2,
+          "title": "Elephants Dream",
+          "image": "https://upload.wikimedia.org/wikipedia/commons/e/e7/Elephants_Dream_s_blue_elephant.png"
+        }
+      ]
+    },
+    {
+      "id": 6,
+      "title": "Animation",
+      "posters": [
+        {
+          "id": 1,
+          "title": "Big Buck Bunny",
+          "image": "https://peach.blender.org/wp-content/uploads/title_anouncement.jpg?x11217"
+        },
+        {
+          "id": 2,
+          "title": "Elephants Dream",
+          "image": "https://upload.wikimedia.org/wikipedia/commons/e/e7/Elephants_Dream_s_blue_elephant.png"
+        }
+      ]
+    }
+  ],
+  "categories": [
+    {
+      "id": 1,
+      "title": "News"
+    },
+    {
+      "id": 2,
+      "title": "Sports"
+    },
+    {
+      "id": 3,
+      "title": "Entertainment"
+    },
+    {
+      "id": 4,
+      "title": "Documentary"
+    }
+  ],
+  "countries": [
+    {
+      "id": 1,
+      "title": "USA"
+    },
+    {
+      "id": 2,
+      "title": "UK"
+    },
+    {
+      "id": 3,
+      "title": "Canada"
+    },
+    {
+      "id": 4,
+      "title": "Australia"
+    }
+  ],
+  "subscription_plans": [
+    {
+      "id": 1,
+      "title": "Basic",
+      "price": 9.99,
+      "currency": "USD",
+      "duration": "month",
+      "features": [
+        "HD Quality",
+        "No Ads",
+        "Watch on 1 Device"
+      ]
+    },
+    {
+      "id": 2,
+      "title": "Premium",
+      "price": 14.99,
+      "currency": "USD",
+      "duration": "month",
+      "features": [
+        "4K Quality",
+        "No Ads",
+        "Watch on 4 Devices",
+        "Download Movies"
+      ]
+    }
+  ],
+  "video_sources": {
+    "big_buck_bunny": {
+      "title": "Big Buck Bunny",
+      "description": "A giant rabbit with a heart bigger than himself.",
+      "urls": {
+        "1080p": "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4",
+        "720p": "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny_720p.mp4",
+        "480p": "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny_480p.mp4"
+      },
+      "duration": "10:34",
+      "size": "25 MB",
+      "license": "Creative Commons"
+    },
+    "elephants_dream": {
+      "title": "Elephants Dream",
+      "description": "The world's first open movie.",
+      "urls": {
+        "1080p": "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ElephantsDream.mp4",
+        "720p": "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ElephantsDream_720p.mp4",
+        "480p": "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ElephantsDream_480p.mp4"
+      },
+      "duration": "10:53",
+      "size": "30 MB",
+      "license": "Creative Commons"
+    },
+    "live_streams": {
+      "test_hls": {
+        "title": "Test HLS Stream",
+        "description": "A test HLS live stream for development",
+        "url": "https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8",
+        "quality": "1080p",
+        "type": "hls"
+      }
+    }
+  },
+  "ads_config": {
+    "admob": {
+      "banner_id": "ca-app-pub-3940256099942544/6300978111",
+      "interstitial_id": "ca-app-pub-3940256099942544/1033173712",
+      "rewarded_id": "ca-app-pub-3940256099942544/5224354917",
+      "native_id": "ca-app-pub-3940256099942544/2247696110",
+      "app_id": "ca-app-pub-3940256099942544~3347511713"
+    },
+    "facebook": {
+      "banner_id": "IMG_16_9_APP_INSTALL#YOUR_PLACEMENT_ID",
+      "interstitial_id": "VID_HD_16_9_15S_APP_INSTALL#YOUR_PLACEMENT_ID",
+      "rewarded_id": "VID_HD_16_9_15S_APP_INSTALL#YOUR_PLACEMENT_ID",
+      "native_id": "IMG_16_9_APP_INSTALL#YOUR_PLACEMENT_ID"
+    },
+    "settings": {
+      "banner_enabled": true,
+      "interstitial_enabled": true,
+      "rewarded_enabled": true,
+      "native_enabled": true,
+      "interstitial_clicks": 3,
+      "native_lines": 5,
+      "banner_type": "ADMOB",
+      "interstitial_type": "ADMOB",
+      "native_type": "ADMOB"
+    }
+  }
+}
