@@ -79,6 +79,10 @@ public class GenreActivity extends AppCompatActivity {
         prefManager= new PrefManager(getApplicationContext());
 
         getGenre();
+        if (genre == null) {
+            // If genre is null, finish the activity
+            return;
+        }
         initView();
         initAction();
         loadPostersFromJson();
@@ -175,7 +179,13 @@ public class GenreActivity extends AppCompatActivity {
     private void getGenre() {
         genre = getIntent().getParcelableExtra("genre");
         from = getIntent().getStringExtra("from");
-
+        
+        // Add null safety check
+        if (genre == null) {
+            Log.e("GenreActivity", "Genre is null, finishing activity");
+            finish();
+            return;
+        }
     }
 
     /**
@@ -202,8 +212,10 @@ public class GenreActivity extends AppCompatActivity {
                 if (jsonResponse != null && jsonResponse.getMovies() != null) {
                     cachedJsonResponse = jsonResponse;
                     allMovies = jsonResponse.getMovies();
+                    Log.d("GenreActivity", "Loaded " + allMovies.size() + " movies/series");
                     filterAndDisplayMovies();
                 } else {
+                    Log.e("GenreActivity", "JSON response or movies is null");
                     showError();
                 }
             }
@@ -217,21 +229,25 @@ public class GenreActivity extends AppCompatActivity {
     }
     
     /**
-     * Filter movies by genre and order, then display them
+     * Filter movies and series by genre and order, then display them
      */
     private void filterAndDisplayMovies() {
-        List<Poster> filteredMovies = new ArrayList<>();
-        
-        // Filter movies by genre
-        for (Poster movie : allMovies) {
+        try {
+            List<Poster> filteredMovies = new ArrayList<>();
+            
+            Log.d("GenreActivity", "Filtering for genre ID: " + genre.getId() + ", title: " + genre.getTitle());
+            Log.d("GenreActivity", "Total movies/series to filter: " + allMovies.size());
+            
+            // Filter movies and series by genre
+            for (Poster movie : allMovies) {
             if (genre.getId() == -1) {
-                // Special case for "Top Rated" - show all movies
+                // Special case for "Top Rated" - show all movies and series
                 filteredMovies.add(movie);
             } else if (genre.getId() == 0) {
-                // Special case for "Most Viewed" - show all movies
+                // Special case for "Most Viewed" - show all movies and series
                 filteredMovies.add(movie);
             } else if (genre.getId() == -2) {
-                // Special case for "My List" - show all movies (or implement actual my list logic)
+                // Special case for "My List" - show all movies and series (or implement actual my list logic)
                 filteredMovies.add(movie);
             } else {
                 // Filter by actual genre
@@ -245,6 +261,8 @@ public class GenreActivity extends AppCompatActivity {
                 }
             }
         }
+        
+        Log.d("GenreActivity", "Found " + filteredMovies.size() + " movies/series for genre: " + genre.getTitle());
         
         // Sort movies by selected order
         sortMoviesByOrder(filteredMovies, SelectedOrder);
@@ -284,7 +302,9 @@ public class GenreActivity extends AppCompatActivity {
             recycler_view_activity_genre.setVisibility(View.VISIBLE);
             image_view_empty_list.setVisibility(View.GONE);
 
-            adapter.notifyDataSetChanged();
+            if (adapter != null) {
+                adapter.notifyDataSetChanged();
+            }
             page++;
             loading=true;
         } else {
@@ -298,6 +318,10 @@ public class GenreActivity extends AppCompatActivity {
         relative_layout_load_more.setVisibility(View.GONE);
         swipe_refresh_layout_list_genre_search.setRefreshing(false);
         linear_layout_load_genre_activity.setVisibility(View.GONE);
+        } catch (Exception e) {
+            Log.e("GenreActivity", "Error in filterAndDisplayMovies: " + e.getMessage(), e);
+            showError();
+        }
     }
     
     /**
@@ -313,11 +337,10 @@ public class GenreActivity extends AppCompatActivity {
                 });
                 break;
             case "views":
-                // Since Poster doesn't have views, we'll sort by rating instead
                 movies.sort((m1, m2) -> {
-                    Float rating1 = m1.getRating() != null ? m1.getRating() : 0f;
-                    Float rating2 = m2.getRating() != null ? m2.getRating() : 0f;
-                    return rating2.compareTo(rating1); // Descending order
+                    Integer views1 = m1.getViews() != null ? m1.getViews() : 0;
+                    Integer views2 = m2.getViews() != null ? m2.getViews() : 0;
+                    return views2.compareTo(views1); // Descending order
                 });
                 break;
             case "year":
@@ -378,7 +401,9 @@ public class GenreActivity extends AppCompatActivity {
                 page = 0;
                 loading = true;
                 posterArrayList.clear();
-                adapter.notifyDataSetChanged();
+                if (adapter != null) {
+                    adapter.notifyDataSetChanged();
+                }
                 loadPostersFromJson();
             }
         });
@@ -389,7 +414,9 @@ public class GenreActivity extends AppCompatActivity {
                 page = 0;
                 loading = true;
                 posterArrayList.clear();
-                adapter.notifyDataSetChanged();
+                if (adapter != null) {
+                    adapter.notifyDataSetChanged();
+                }
                 loadPostersFromJson();
             }
         });
