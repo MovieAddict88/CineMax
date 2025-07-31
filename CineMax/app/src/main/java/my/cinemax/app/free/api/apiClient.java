@@ -50,6 +50,9 @@ public class apiClient {
     
     // GitHub API base URL - all data comes from GitHub now
     private static final String GITHUB_API_BASE_URL = "https://raw.githubusercontent.com/MovieAddict88/movie-api/main/";
+    
+    // Fallback URL in case the main one doesn't work
+    private static final String FALLBACK_API_BASE_URL = "https://api.github.com/repos/your-username/movie-api/contents/";
 
     /**
      * Get the main GitHub API client for all movie data
@@ -270,19 +273,35 @@ public class apiClient {
      * Get GitHub JSON API data with custom callback
      */
     public static void getJsonApiData(JsonApiCallback callback) {
+        Log.d("API_CLIENT", "Attempting to load data from: " + GITHUB_API_BASE_URL + "free_movie_api.json");
+        
         getJsonApiData(new Callback<JsonApiResponse>() {
             @Override
             public void onResponse(Call<JsonApiResponse> call, retrofit2.Response<JsonApiResponse> response) {
+                Log.d("API_CLIENT", "Response received - Success: " + response.isSuccessful() + ", Code: " + response.code());
+                
                 if (response.isSuccessful() && response.body() != null) {
+                    Log.d("API_CLIENT", "Successfully loaded JSON data");
                     callback.onSuccess(response.body());
                 } else {
-                    callback.onError("Failed to load data from GitHub JSON API");
+                    String errorMsg = "Failed to load data from GitHub JSON API. Response code: " + response.code();
+                    if (response.errorBody() != null) {
+                        try {
+                            errorMsg += ", Error: " + response.errorBody().string();
+                        } catch (IOException e) {
+                            errorMsg += ", Error body could not be read";
+                        }
+                    }
+                    Log.e("API_CLIENT", errorMsg);
+                    callback.onError(errorMsg);
                 }
             }
             
             @Override
             public void onFailure(Call<JsonApiResponse> call, Throwable t) {
-                callback.onError("Network error: " + t.getMessage());
+                String errorMsg = "Network error: " + t.getMessage();
+                Log.e("API_CLIENT", errorMsg, t);
+                callback.onError(errorMsg);
             }
         });
     }
