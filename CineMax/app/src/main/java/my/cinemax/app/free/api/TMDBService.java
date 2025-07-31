@@ -153,66 +153,119 @@ public class TMDBService {
     private Poster createMoviePoster(JsonObject movieDetails) {
         Poster poster = new Poster();
         
-        // Basic information
-        poster.setId(movieDetails.get("id").getAsInt());
-        poster.setTitle(movieDetails.get("title").getAsString());
-        poster.setType("movie");
-        poster.setDescription(movieDetails.has("overview") ? movieDetails.get("overview").getAsString() : "");
-        poster.setYear(movieDetails.has("release_date") ? 
-                      movieDetails.get("release_date").getAsString().substring(0, 4) : "");
-        poster.setImdb(String.valueOf(movieDetails.get("vote_average").getAsDouble()));
-        poster.setRating(Float.valueOf(movieDetails.get("vote_average").getAsFloat()));
-        
-        // Runtime
-        if (movieDetails.has("runtime")) {
-            int runtime = movieDetails.get("runtime").getAsInt();
-            poster.setDuration(runtime + ":00");
-        }
-        
-        // Genres
-        if (movieDetails.has("genres")) {
-            JsonArray genresArray = movieDetails.getAsJsonArray("genres");
-            List<Genre> genres = new ArrayList<>();
-            for (int i = 0; i < genresArray.size(); i++) {
-                JsonObject genreObj = genresArray.get(i).getAsJsonObject();
-                Genre genre = new Genre();
-                genre.setId(genreObj.get("id").getAsInt());
-                genre.setTitle(genreObj.get("name").getAsString());
-                genres.add(genre);
+        try {
+            // Basic information with null checks
+            if (movieDetails.has("id") && !movieDetails.get("id").isJsonNull()) {
+                poster.setId(movieDetails.get("id").getAsInt());
             }
-            poster.setGenres(genres);
             
-            // Set label as primary genre
-            if (!genres.isEmpty()) {
-                poster.setLabel(genres.get(0).getTitle());
+            if (movieDetails.has("title") && !movieDetails.get("title").isJsonNull()) {
+                poster.setTitle(movieDetails.get("title").getAsString());
+            } else {
+                poster.setTitle("Unknown Movie");
             }
-        }
-        
-        // Cast/Actors
-        if (movieDetails.has("credits")) {
-            JsonObject credits = movieDetails.getAsJsonObject("credits");
-            if (credits.has("cast")) {
-                JsonArray castArray = credits.getAsJsonArray("cast");
-                List<Actor> actors = new ArrayList<>();
-                
-                // Get top 5 actors
-                int maxActors = Math.min(5, castArray.size());
-                for (int i = 0; i < maxActors; i++) {
-                    JsonObject castMember = castArray.get(i).getAsJsonObject();
-                    Actor actor = new Actor();
-                    actor.setId(castMember.get("id").getAsInt());
-                    actor.setName(castMember.get("name").getAsString());
-                    actor.setType("actor");
-                    if (castMember.has("character")) {
-                        actor.setRole(castMember.get("character").getAsString());
-                    }
-                    // No image links as requested
-                    actor.setImage("");
-                    actors.add(actor);
+            
+            poster.setType("movie");
+            
+            if (movieDetails.has("overview") && !movieDetails.get("overview").isJsonNull()) {
+                poster.setDescription(movieDetails.get("overview").getAsString());
+            } else {
+                poster.setDescription("");
+            }
+            
+            if (movieDetails.has("release_date") && !movieDetails.get("release_date").isJsonNull()) {
+                String releaseDate = movieDetails.get("release_date").getAsString();
+                if (releaseDate.length() >= 4) {
+                    poster.setYear(releaseDate.substring(0, 4));
                 }
-                poster.setActors(actors);
+            } else {
+                poster.setYear("");
             }
-        }
+            
+            if (movieDetails.has("vote_average") && !movieDetails.get("vote_average").isJsonNull()) {
+                double rating = movieDetails.get("vote_average").getAsDouble();
+                poster.setImdb(String.valueOf(rating));
+                poster.setRating(Float.valueOf((float) rating));
+            } else {
+                poster.setImdb("0.0");
+                poster.setRating(0.0f);
+            }
+        
+            // Runtime
+            if (movieDetails.has("runtime") && !movieDetails.get("runtime").isJsonNull()) {
+                int runtime = movieDetails.get("runtime").getAsInt();
+                poster.setDuration(runtime + ":00");
+            } else {
+                poster.setDuration("120:00"); // Default duration
+            }
+            
+            // Genres
+            if (movieDetails.has("genres") && !movieDetails.get("genres").isJsonNull()) {
+                JsonArray genresArray = movieDetails.getAsJsonArray("genres");
+                List<Genre> genres = new ArrayList<>();
+                for (int i = 0; i < genresArray.size(); i++) {
+                    JsonObject genreObj = genresArray.get(i).getAsJsonObject();
+                    if (genreObj != null) {
+                        Genre genre = new Genre();
+                        if (genreObj.has("id") && !genreObj.get("id").isJsonNull()) {
+                            genre.setId(genreObj.get("id").getAsInt());
+                        }
+                        if (genreObj.has("name") && !genreObj.get("name").isJsonNull()) {
+                            genre.setTitle(genreObj.get("name").getAsString());
+                        }
+                        genres.add(genre);
+                    }
+                }
+                poster.setGenres(genres);
+                
+                // Set label as primary genre
+                if (!genres.isEmpty() && genres.get(0).getTitle() != null) {
+                    poster.setLabel(genres.get(0).getTitle());
+                } else {
+                    poster.setLabel("Movie");
+                }
+            } else {
+                poster.setLabel("Movie");
+            }
+        
+            // Cast/Actors
+            if (movieDetails.has("credits") && !movieDetails.get("credits").isJsonNull()) {
+                JsonObject credits = movieDetails.getAsJsonObject("credits");
+                if (credits.has("cast") && !credits.get("cast").isJsonNull()) {
+                    JsonArray castArray = credits.getAsJsonArray("cast");
+                    List<Actor> actors = new ArrayList<>();
+                    
+                    // Get top 5 actors
+                    int maxActors = Math.min(5, castArray.size());
+                    for (int i = 0; i < maxActors; i++) {
+                        JsonObject castMember = castArray.get(i).getAsJsonObject();
+                        if (castMember != null) {
+                            Actor actor = new Actor();
+                            if (castMember.has("id") && !castMember.get("id").isJsonNull()) {
+                                actor.setId(castMember.get("id").getAsInt());
+                            }
+                            if (castMember.has("name") && !castMember.get("name").isJsonNull()) {
+                                actor.setName(castMember.get("name").getAsString());
+                            } else {
+                                actor.setName("Unknown Actor");
+                            }
+                            actor.setType("actor");
+                            if (castMember.has("character") && !castMember.get("character").isJsonNull()) {
+                                actor.setRole(castMember.get("character").getAsString());
+                            } else {
+                                actor.setRole("");
+                            }
+                            // No image links as requested
+                            actor.setImage("");
+                            actor.setBorn("");
+                            actor.setHeight("");
+                            actor.setBio("");
+                            actors.add(actor);
+                        }
+                    }
+                    poster.setActors(actors);
+                }
+            }
         
         // Trailer
         if (movieDetails.has("videos")) {
