@@ -44,6 +44,9 @@ public class Source implements Parcelable {
     @Expose
     private String url;
 
+    public Source() {
+        // Default constructor
+    }
 
     protected Source(Parcel in) {
         if (in.readByte() == 0) {
