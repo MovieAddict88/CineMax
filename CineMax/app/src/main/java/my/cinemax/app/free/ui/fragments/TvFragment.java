@@ -129,17 +129,26 @@ public class TvFragment extends Fragment {
                     my.cinemax.app.free.entity.JsonApiResponse apiResponse = response.body();
                     
                     if (apiResponse.getCountries() != null && apiResponse.getCountries().size() > 0) {
-                        final String[] countryCodes = new String[apiResponse.getCountries().size() + 1];
-                        countryCodes[0] = "All countries";
-                        countriesList.add(new Country()); // Add "All countries" option
+                        countriesList.clear();
+                        // Add "All countries" option with proper ID using setter methods
+                        Country allCountries = new Country();
+                        allCountries.setId(0);
+                        allCountries.setTitle("All countries");
+                        countriesList.add(allCountries);
                         
-                        for (int i = 0; i < apiResponse.getCountries().size(); i++) {
-                            countryCodes[i + 1] = apiResponse.getCountries().get(i).getTitle();
-                            countriesList.add(apiResponse.getCountries().get(i));
+                        for (Country country : apiResponse.getCountries()) {
+                            countriesList.add(country);
                         }
                         
-                        ArrayAdapter<String> filtresAdapter = new ArrayAdapter<String>(getActivity(),
-                                R.layout.spinner_layout, R.id.textView, countryCodes);
+                        // Use Country object adapter for proper ID mapping
+                        ArrayAdapter<Country> filtresAdapter = new ArrayAdapter<Country>(getActivity(),
+                                R.layout.spinner_layout, R.id.textView, countriesList) {
+                            @Override
+                            public String getItem(int position) {
+                                Country country = super.getItem(position);
+                                return country != null ? country.getTitle() : "";
+                            }
+                        };
                         filtresAdapter.setDropDownViewResource(R.layout.simple_spinner_dropdown_item);
                         spinner_fragement_channel_countries_list.setAdapter(filtresAdapter);
                         relative_layout_frament_channel_countries.setVisibility(View.VISIBLE);
@@ -165,17 +174,26 @@ public class TvFragment extends Fragment {
                     my.cinemax.app.free.entity.JsonApiResponse apiResponse = response.body();
                     
                     if (apiResponse.getCategories() != null && apiResponse.getCategories().size() > 0) {
-                        final String[] categoryCodes = new String[apiResponse.getCategories().size() + 1];
-                        categoryCodes[0] = "All categories";
-                        categoryList.add(new Category()); // Add "All categories" option
+                        categoryList.clear();
+                        // Add "All categories" option with proper ID using setter methods
+                        Category allCategories = new Category();
+                        allCategories.setId(0);
+                        allCategories.setTitle("All categories");
+                        categoryList.add(allCategories);
                         
-                        for (int i = 0; i < apiResponse.getCategories().size(); i++) {
-                            categoryCodes[i + 1] = apiResponse.getCategories().get(i).getTitle();
-                            categoryList.add(apiResponse.getCategories().get(i));
+                        for (Category category : apiResponse.getCategories()) {
+                            categoryList.add(category);
                         }
                         
-                        ArrayAdapter<String> filtresAdapter = new ArrayAdapter<String>(getActivity(),
-                                R.layout.spinner_layout, R.id.textView, categoryCodes);
+                        // Use Category object adapter for proper ID mapping
+                        ArrayAdapter<Category> filtresAdapter = new ArrayAdapter<Category>(getActivity(),
+                                R.layout.spinner_layout, R.id.textView, categoryList) {
+                            @Override
+                            public String getItem(int position) {
+                                Category category = super.getItem(position);
+                                return category != null ? category.getTitle() : "";
+                            }
+                        };
                         filtresAdapter.setDropDownViewResource(R.layout.simple_spinner_dropdown_item);
                         spinner_fragement_channel_categories_list.setAdapter(filtresAdapter);
                         relative_layout_frament_channel_categories.setVisibility(View.VISIBLE);
@@ -206,13 +224,12 @@ public class TvFragment extends Fragment {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
                if (!firstLoadCountries) {
-                   if (id == 0) {
+                   if (position == 0) {
                        countrySelected = 0;
                    } else {
-                       // Fix: Ensure proper integer conversion and bounds checking
-                       int index = (int) id;
-                       if (index >= 0 && index < countriesList.size()) {
-                           Country selectedCountry = countriesList.get(index);
+                       // Fix: Use position for proper indexing with Country object adapter
+                       if (position >= 0 && position < countriesList.size()) {
+                           Country selectedCountry = countriesList.get(position);
                            if (selectedCountry != null && selectedCountry.getId() != null) {
                                countrySelected = selectedCountry.getId().intValue();
                            } else {
@@ -243,13 +260,12 @@ public class TvFragment extends Fragment {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
                 if (!firstLoadCategories) {
-                    if (id == 0) {
+                    if (position == 0) {
                         categorySelected = 0;
                     } else {
-                        // Fix: Ensure proper integer conversion and bounds checking
-                        int index = (int) id;
-                        if (index >= 0 && index < categoryList.size()) {
-                            Category selectedCategory = categoryList.get(index);
+                        // Fix: Use position for proper indexing with Category object adapter
+                        if (position >= 0 && position < categoryList.size()) {
+                            Category selectedCategory = categoryList.get(position);
                             if (selectedCategory != null && selectedCategory.getId() != null) {
                                 categorySelected = selectedCategory.getId().intValue();
                             } else {

@@ -132,7 +132,11 @@ public class SeriesFragment extends Fragment {
                     
                     if (apiResponse.getGenres() != null && apiResponse.getGenres().size() > 0) {
                         genreList.clear();
-                        genreList.add(new Genre(0, "All genres")); // Add "All genres" option with proper ID
+                        // Add "All genres" option with proper ID using setter methods
+                        Genre allGenres = new Genre();
+                        allGenres.setId(0);
+                        allGenres.setTitle("All genres");
+                        genreList.add(allGenres);
                         
                         for (Genre genre : apiResponse.getGenres()) {
                             genreList.add(genre);
@@ -140,7 +144,13 @@ public class SeriesFragment extends Fragment {
                         
                         // Use Genre object adapter for proper ID mapping
                         ArrayAdapter<Genre> filtresAdapter = new ArrayAdapter<Genre>(getActivity(),
-                                R.layout.spinner_layout, R.id.textView, genreList);
+                                R.layout.spinner_layout, R.id.textView, genreList) {
+                            @Override
+                            public String getItem(int position) {
+                                Genre genre = super.getItem(position);
+                                return genre != null ? genre.getTitle() : "";
+                            }
+                        };
                         filtresAdapter.setDropDownViewResource(R.layout.simple_spinner_dropdown_item);
                         spinner_fragement_series_genre_list.setAdapter(filtresAdapter);
                         relative_layout_frament_series_genres.setVisibility(View.VISIBLE);
@@ -178,13 +188,12 @@ public class SeriesFragment extends Fragment {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
                 if (!firstLoadGenre) {
-                    if (id == 0) {
+                    if (position == 0) {
                         genreSelected = 0;
                     } else {
-                        // Fix: Ensure proper integer conversion and bounds checking
-                        int index = (int) id;
-                        if (index >= 0 && index < genreList.size()) {
-                            Genre selectedGenre = genreList.get(index);
+                        // Fix: Use position for proper indexing with Genre object adapter
+                        if (position >= 0 && position < genreList.size()) {
+                            Genre selectedGenre = genreList.get(position);
                             if (selectedGenre != null && selectedGenre.getId() != null) {
                                 genreSelected = selectedGenre.getId().intValue();
                             } else {

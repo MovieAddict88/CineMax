@@ -129,17 +129,26 @@ public class MoviesFragment extends Fragment {
                     my.cinemax.app.free.entity.JsonApiResponse apiResponse = response.body();
                     
                     if (apiResponse.getGenres() != null && apiResponse.getGenres().size() > 0) {
-                        final String[] genreNames = new String[apiResponse.getGenres().size() + 1];
-                        genreNames[0] = "All genres";
-                        genreList.add(new Genre()); // Add "All genres" option
+                        genreList.clear();
+                        // Add "All genres" option with proper ID using setter methods
+                        Genre allGenres = new Genre();
+                        allGenres.setId(0);
+                        allGenres.setTitle("All genres");
+                        genreList.add(allGenres);
                         
-                        for (int i = 0; i < apiResponse.getGenres().size(); i++) {
-                            genreNames[i + 1] = apiResponse.getGenres().get(i).getTitle();
-                            genreList.add(apiResponse.getGenres().get(i));
+                        for (Genre genre : apiResponse.getGenres()) {
+                            genreList.add(genre);
                         }
                         
-                        ArrayAdapter<String> filtresAdapter = new ArrayAdapter<String>(getActivity(),
-                                R.layout.spinner_layout, R.id.textView, genreNames);
+                        // Use Genre object adapter for proper ID mapping
+                        ArrayAdapter<Genre> filtresAdapter = new ArrayAdapter<Genre>(getActivity(),
+                                R.layout.spinner_layout, R.id.textView, genreList) {
+                            @Override
+                            public String getItem(int position) {
+                                Genre genre = super.getItem(position);
+                                return genre != null ? genre.getTitle() : "";
+                            }
+                        };
                         filtresAdapter.setDropDownViewResource(R.layout.simple_spinner_dropdown_item);
                         spinner_fragement_movies_genre_list.setAdapter(filtresAdapter);
                         relative_layout_frament_movies_genres.setVisibility(View.VISIBLE);
@@ -170,13 +179,12 @@ public class MoviesFragment extends Fragment {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
                 if (!firstLoadGenre) {
-                    if (id == 0) {
+                    if (position == 0) {
                         genreSelected = 0;
                     } else {
-                        // Fix: Ensure proper integer conversion and bounds checking
-                        int index = (int) id;
-                        if (index >= 0 && index < genreList.size()) {
-                            Genre selectedGenre = genreList.get(index);
+                        // Fix: Use position for proper indexing with Genre object adapter
+                        if (position >= 0 && position < genreList.size()) {
+                            Genre selectedGenre = genreList.get(position);
                             if (selectedGenre != null && selectedGenre.getId() != null) {
                                 genreSelected = selectedGenre.getId().intValue();
                             } else {
