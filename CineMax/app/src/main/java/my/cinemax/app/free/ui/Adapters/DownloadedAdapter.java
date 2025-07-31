@@ -8,6 +8,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
+import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
@@ -18,6 +19,7 @@ import my.cinemax.app.free.entity.DownloadItem;
 import com.squareup.picasso.Picasso;
 
 import java.io.File;
+import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -30,6 +32,7 @@ public class DownloadedAdapter extends   RecyclerView.Adapter<RecyclerView.ViewH
     private final DownloadListener downloadListener;
     private List<DownloadItem> downloadItemList;
     private Activity activity;
+    
     public DownloadedAdapter(List<DownloadItem> downloadItemList, Activity activity,DownloadListener downloadListener) {
         this.downloadItemList = downloadItemList;
         this.activity = activity;
@@ -61,59 +64,111 @@ public class DownloadedAdapter extends   RecyclerView.Adapter<RecyclerView.ViewH
         switch (getItemViewType(position)){
             case 1:
                 DownloadedHolder downloadedHolder =  (DownloadedHolder) holder;
-                downloadedHolder.text_view_item_download_title.setText(downloadItemList.get(position).getTitle());
-                Picasso.with(activity).load(downloadItemList.get(position).getImage()).into(downloadedHolder.image_view_item_download_image);
-                downloadedHolder.text_view_item_download_duration.setText(downloadItemList.get(position).getDuration());
-                downloadedHolder.text_view_item_download_size.setText(downloadItemList.get(position).getSize());
-                Log.log(downloadItemList.get(position).getId()+"");
-                downloadedHolder.image_view_item_download_delete.setOnClickListener(v->{
-                    List<DownloadItem> my_downloads_list =Hawk.get("my_downloads_list");
-                    if (my_downloads_list == null) {
-                        my_downloads_list = new ArrayList<>();
-                    }
-                    for (int i = 0; i < my_downloads_list.size(); i++) {
-                        if (my_downloads_list.get(i).getId().equals(downloadItemList.get(position).getId()) ) {
-                            String path = downloadItemList.get(position).getPath();
+                DownloadItem downloadItem = downloadItemList.get(position);
+                
+                downloadedHolder.text_view_item_download_title.setText(downloadItem.getTitle());
+                Picasso.with(activity).load(downloadItem.getImage()).into(downloadedHolder.image_view_item_download_image);
+                downloadedHolder.text_view_item_download_duration.setText(downloadItem.getDuration());
+                downloadedHolder.text_view_item_download_size.setText(downloadItem.getSize());
+                // Always show file size, but for active downloads, show real-time progress
+                if (downloadItem.isDownloading() && downloadItem.getDownloadid() != null) {
+                    downloadedHolder.progress_bar_download.setVisibility(View.VISIBLE);
+                    downloadedHolder.text_view_download_status.setVisibility(View.VISIBLE);
+                    downloadedHolder.image_view_item_download_play.setVisibility(View.GONE);
 
-                            my_downloads_list.remove(my_downloads_list.get(i));
-                            Hawk.put("my_downloads_list",my_downloads_list);
-                            File file = new File(path);
-                            if (file.exists()){
-                                my.cinemax.app.free.Utils.Log.log( "EXISTR");
-                                try {
-                                    Uri imageUri = FileProvider.getUriForFile(activity,
-                                            activity.getApplicationContext()
-                                                    .getPackageName() + ".provider", file);
-                                    ContentResolver contentResolver = activity.getContentResolver();
-                                    int deletefile = contentResolver.delete(imageUri, null, null);
-                                } catch (Exception e) {
-                                    e.printStackTrace();
+                    // Set progress
+                    downloadedHolder.progress_bar_download.setProgress(downloadItem.getProgress());
+
+                    // Set status text with formatted file size
+                    String statusText = downloadItem.getProgress() + "%";
+                    if (downloadItem.getTotalBytes() > 0) {
+                        statusText += " (" + formatFileSize(downloadItem.getDownloadedBytes()) +
+                                    " / " + formatFileSize(downloadItem.getTotalBytes()) + ")";
+                        // Also update the main file size text to show real-time progress
+                        downloadedHolder.text_view_item_download_size.setText(
+                            formatFileSize(downloadItem.getDownloadedBytes()) + " / " + formatFileSize(downloadItem.getTotalBytes())
+                        );
+                    } else {
+                        // Fallback if total size is unknown
+                        statusText += " (" + formatFileSize(downloadItem.getDownloadedBytes()) + ")";
+                        downloadedHolder.text_view_item_download_size.setText(formatFileSize(downloadItem.getDownloadedBytes()));
+                    }
+                    downloadedHolder.text_view_download_status.setText(statusText);
+
+                    // Disable click actions during download
+                    downloadedHolder.relative_layout_item_download.setClickable(false);
+                    downloadedHolder.image_view_item_download_play.setClickable(false);
+                    downloadedHolder.image_view_item_download_delete.setClickable(false);
+                    downloadedHolder.image_view_item_download_finder.setClickable(false);
+                } else {
+                    // Show normal completed download UI
+                    downloadedHolder.progress_bar_download.setVisibility(View.GONE);
+                    downloadedHolder.text_view_download_status.setVisibility(View.GONE);
+                    downloadedHolder.image_view_item_download_play.setVisibility(View.VISIBLE);
+
+                    // Show static file size for completed downloads
+                    downloadedHolder.text_view_item_download_size.setText(downloadItem.getSize());
+
+                    // Enable click actions for completed downloads
+                    downloadedHolder.relative_layout_item_download.setClickable(true);
+                    downloadedHolder.image_view_item_download_play.setClickable(true);
+                    downloadedHolder.image_view_item_download_delete.setClickable(true);
+                    downloadedHolder.image_view_item_download_finder.setClickable(true);
+                }
+                
+                downloadedHolder.image_view_item_download_delete.setOnClickListener(v->{
+                    if (!downloadItem.isDownloading()) {
+                        List<DownloadItem> my_downloads_list =Hawk.get("my_downloads_list");
+                        if (my_downloads_list == null) {
+                            my_downloads_list = new ArrayList<>();
+                        }
+                        for (int i = 0; i < my_downloads_list.size(); i++) {
+                            if (my_downloads_list.get(i).getId().equals(downloadItem.getId()) ) {
+                                String path = downloadItem.getPath();
+
+                                my_downloads_list.remove(my_downloads_list.get(i));
+                                Hawk.put("my_downloads_list",my_downloads_list);
+                                File file = new File(path);
+                                if (file.exists()){
+                                    my.cinemax.app.free.Utils.Log.log( "EXISTR");
+                                    try {
+                                        Uri imageUri = FileProvider.getUriForFile(activity,
+                                                activity.getApplicationContext()
+                                                        .getPackageName() + ".provider", file);
+                                        ContentResolver contentResolver = activity.getContentResolver();
+                                        int deletefile = contentResolver.delete(imageUri, null, null);
+                                    } catch (Exception e) {
+                                        e.printStackTrace();
+                                    }
+                                    file.delete();
                                 }
-                                file.delete();
                             }
                         }
+                        downloadListener.OnUpdated();
                     }
-                    downloadListener.OnUpdated();
-
                 });
                 downloadedHolder.image_view_item_download_finder.setOnClickListener(v->{
+                    if (!downloadItem.isDownloading()) {
+                        String path = downloadItem.getPath();
 
-                    String path = downloadItemList.get(position).getPath();
+                        Uri imageUri = FileProvider.getUriForFile(activity, activity.getApplicationContext().getPackageName() + ".provider", new File(path));
 
-                    Uri imageUri = FileProvider.getUriForFile(activity, activity.getApplicationContext().getPackageName() + ".provider", new File(path));
-
-                    Intent intent = new Intent();
-                    intent.addCategory(Intent.CATEGORY_OPENABLE);
-                    intent.setType("file/*");
-                    intent.setData(imageUri);
-                    activity.startActivity(intent);
+                        Intent intent = new Intent();
+                        intent.addCategory(Intent.CATEGORY_OPENABLE);
+                        intent.setType("file/*");
+                        intent.setData(imageUri);
+                        activity.startActivity(intent);
+                    }
                 });
                 downloadedHolder.relative_layout_item_download.setOnClickListener(v->{
-                    downloadListener.OnPlay(downloadItemList.get(position));
+                    if (!downloadItem.isDownloading()) {
+                        downloadListener.OnPlay(downloadItem);
+                    }
                 });
                 downloadedHolder.image_view_item_download_play.setOnClickListener(v->{
-                    downloadListener.OnPlay(downloadItemList.get(position));
-
+                    if (!downloadItem.isDownloading()) {
+                        downloadListener.OnPlay(downloadItem);
+                    }
                 });
                 break;
             case 2:
@@ -137,6 +192,8 @@ public class DownloadedAdapter extends   RecyclerView.Adapter<RecyclerView.ViewH
         private final TextView text_view_item_download_title;
         private final TextView text_view_item_download_size;
         private final TextView text_view_item_download_duration;
+        private final ProgressBar progress_bar_download;
+        private final TextView text_view_download_status;
 
         public DownloadedHolder(@NonNull View itemView) {
             super(itemView);
@@ -148,6 +205,8 @@ public class DownloadedAdapter extends   RecyclerView.Adapter<RecyclerView.ViewH
             this.text_view_item_download_duration=(TextView) itemView.findViewById(R.id.text_view_item_download_duration);
             this.text_view_item_download_size=(TextView) itemView.findViewById(R.id.text_view_item_download_size);
             this.text_view_item_download_title=(TextView) itemView.findViewById(R.id.text_view_item_download_title);
+            this.progress_bar_download=(ProgressBar) itemView.findViewById(R.id.progress_bar_download);
+            this.text_view_download_status=(TextView) itemView.findViewById(R.id.text_view_download_status);
         }
     }
     public class EmptyHolder extends RecyclerView.ViewHolder {
@@ -160,6 +219,14 @@ public class DownloadedAdapter extends   RecyclerView.Adapter<RecyclerView.ViewH
     public int getItemViewType(int position) {
         return downloadItemList.get(position).getTypeView();
     }
+    
+    private String formatFileSize(long size) {
+        if (size <= 0) return "0 B";
+        final String[] units = new String[] { "B", "KB", "MB", "GB", "TB" };
+        int digitGroups = (int) (Math.log10(size) / Math.log10(1024));
+        return new DecimalFormat("#,##0.#").format(size / Math.pow(1024, digitGroups)) + " " + units[digitGroups];
+    }
+    
     private String fileExt(String url) {
         if (url.indexOf("?") > -1) {
             url = url.substring(0, url.indexOf("?"));
