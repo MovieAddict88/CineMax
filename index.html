@@ -3369,16 +3369,45 @@
                 
                 // Check movies structure
                 if (jsonData.movies && jsonData.movies.length > 0) {
-                    jsonData.movies.forEach((movie, index) => {
-                        if (!movie.id) errors.push(`Movie ${index + 1}: Missing id`);
-                        if (!movie.title) errors.push(`Movie ${index + 1}: Missing title`);
-                        if (!movie.sources || movie.sources.length === 0) {
-                            warnings.push(`Movie "${movie.title}": No sources defined`);
+                    let movieCount = 0;
+                    let seriesCount = 0;
+                    
+                    jsonData.movies.forEach((item, index) => {
+                        if (!item.id) errors.push(`Item ${index + 1}: Missing id`);
+                        if (!item.title) errors.push(`Item ${index + 1}: Missing title`);
+                        
+                        if (item.type === 'series') {
+                            seriesCount++;
+                            // For series, check if seasons/episodes have sources
+                            if (!item.seasons || item.seasons.length === 0) {
+                                warnings.push(`Series "${item.title}": No seasons defined`);
+                            } else {
+                                let hasEpisodeSources = false;
+                                item.seasons.forEach(season => {
+                                    if (season.episodes && season.episodes.length > 0) {
+                                        season.episodes.forEach(episode => {
+                                            if (episode.sources && episode.sources.length > 0) {
+                                                hasEpisodeSources = true;
+                                            }
+                                        });
+                                    }
+                                });
+                                if (!hasEpisodeSources) {
+                                    warnings.push(`Series "${item.title}": No episode sources found`);
+                                }
+                            }
+                        } else {
+                            // For movies, check direct sources
+                            movieCount++;
+                            if (!item.sources || item.sources.length === 0) {
+                                warnings.push(`Movie "${item.title}": No sources defined`);
+                            }
                         }
                     });
-                    info.push(`${jsonData.movies.length} movies validated`);
+                    
+                    info.push(`${movieCount} movies and ${seriesCount} series validated`);
                 } else {
-                    warnings.push('No movies in API');
+                    warnings.push('No movies/series in API');
                 }
                 
                 // Check channels structure
