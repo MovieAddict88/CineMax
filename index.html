@@ -657,6 +657,7 @@
                     <label for="jsonTextInput">Or paste JSON content:</label>
                     <textarea id="jsonTextInput" rows="5" placeholder='{"movies": [], "channels": []}'></textarea>
                     <button id="loadTextButton"><i class="fas fa-file-import"></i> Load from Text</button>
+                    <button id="testDataButton" style="background-color: var(--success);"><i class="fas fa-vial"></i> Load Test Data</button>
                 </div>
             </div>
         </div>
@@ -992,6 +993,7 @@
             const fileInfo = document.getElementById('fileInfo');
             const jsonTextInput = document.getElementById('jsonTextInput');
             const loadTextButton = document.getElementById('loadTextButton');
+            const testDataButton = document.getElementById('testDataButton');
             const editorDiv = document.getElementById('editor');
             const saveSectionDiv = document.getElementById('save-section');
             const entryListDiv = document.getElementById('entryList');
@@ -2021,71 +2023,493 @@
                 const text = jsonTextInput.value.trim();
                 if (text) {
                     try {
+                        console.log('🔄 Starting data import from text...');
                         loadData(text);
-                        showNotification('Data loaded successfully from text!', true);
+                        
+                        // Show success notification with details
+                        const movieCount = jsonData.movies ? jsonData.movies.length : 0;
+                        const channelCount = jsonData.channels ? jsonData.channels.length : 0;
+                        const totalItems = movieCount + channelCount;
+                        
+                        showNotification(`✅ Data loaded successfully! Found ${totalItems} items (${movieCount} movies, ${channelCount} channels)`, true);
+                        
+                        // Clear the text area after successful import
+                        jsonTextInput.value = '';
+                        
+                        // Add debug info to console
+                        debugDataStructure();
+                        
                     } catch (error) {
-                        showNotification(`Error parsing JSON from text: ${error.message}`, false);
+                        console.error('❌ Error parsing JSON from text:', error);
+                        showNotification(`❌ Error parsing JSON: ${error.message}. Check console for details.`, false);
+                        
+                        // Provide helpful error messages
+                        if (error.message.includes('Unexpected token')) {
+                            showNotification('💡 Tip: Make sure your JSON is properly formatted. Check for missing commas, brackets, or quotes.', false);
+                        }
                     }
                 } else {
-                    showNotification('Text area is empty.', false);
+                    showNotification('⚠️ Text area is empty. Please paste your JSON data first.', false);
                 }
             });
+            
+            // Test data button for debugging
+            testDataButton.addEventListener('click', () => {
+                const testData = {
+                    "api_info": {
+                        "version": "2.0",
+                        "description": "Test data for CineMax API",
+                        "last_updated": new Date().toISOString().split('T')[0],
+                        "total_movies": 2,
+                        "total_channels": 1,
+                        "total_actors": 2
+                    },
+                    "home": {
+                        "slides": [],
+                        "featured_movies": [],
+                        "channels": [],
+                        "actors": [],
+                        "genres": []
+                    },
+                    "movies": [
+                        {
+                            "id": 1,
+                            "title": "Test Movie 1",
+                            "type": "movie",
+                            "label": "Movie",
+                            "sublabel": "2023",
+                            "imdb": "8.5",
+                            "downloadas": "test-movie-1",
+                            "comment": true,
+                            "playas": "video",
+                            "description": "This is a test movie for debugging the import functionality.",
+                            "classification": "PG-13",
+                            "year": "2023",
+                            "duration": "02:15",
+                            "rating": 8.5,
+                            "image": "https://via.placeholder.com/300x450/3498db/ffffff?text=Test+Movie+1",
+                            "cover": "https://via.placeholder.com/800x450/2c3e50/ffffff?text=Test+Movie+1+Cover",
+                            "genres": [],
+                            "actors": [],
+                            "views": 1500,
+                            "created_at": new Date().toISOString().split('T')[0],
+                            "sources": [
+                                {
+                                    "id": 101,
+                                    "type": "video",
+                                    "title": "Test Movie 1 - HD",
+                                    "quality": "HD",
+                                    "size": "2.5 GB",
+                                    "kind": "movie",
+                                    "premium": "false",
+                                    "external": false,
+                                    "url": "https://sample-videos.com/zip/10/mp4/SampleVideo_1280x720_1mb.mp4"
+                                }
+                            ],
+                            "trailer": null
+                        }
+                    ],
+                    "channels": [
+                        {
+                            "id": 2,
+                            "title": "Test TV Channel",
+                            "label": "Live TV",
+                            "sublabel": "News",
+                            "description": "24/7 test news channel for debugging.",
+                            "website": "https://example.com",
+                            "classification": "G",
+                            "views": 5000,
+                            "shares": 100,
+                            "rating": 4.2,
+                            "comment": true,
+                            "image": "https://via.placeholder.com/200x100/f39c12/ffffff?text=TEST+TV",
+                            "playas": "stream",
+                            "sources": [
+                                {
+                                    "id": 201,
+                                    "type": "stream",
+                                    "title": "Test TV Channel - Live Stream",
+                                    "quality": "HD",
+                                    "size": "0 MB",
+                                    "kind": "live",
+                                    "premium": "false",
+                                    "external": false,
+                                    "url": "https://cph-p2p-msl.akamaized.net/hls/live/2000341/test/master.m3u8"
+                                }
+                            ],
+                            "categories": [],
+                            "countries": []
+                        }
+                    ],
+                    "actors": [],
+                    "genres": [],
+                    "categories": [],
+                    "countries": [],
+                    "subscription_plans": [],
+                    "video_sources": {},
+                    "ads_config": {}
+                };
+                
+                try {
+                    console.log('🧪 Loading test data...');
+                    loadData(JSON.stringify(testData, null, 2));
+                    showNotification('🧪 Test data loaded successfully! You should now see 1 movie and 1 channel.', true);
+                } catch (error) {
+                    console.error('❌ Error loading test data:', error);
+                    showNotification(`❌ Error loading test data: ${error.message}`, false);
+                }
+            });
+            
+            // Debug function to help troubleshoot data issues
+            function debugDataStructure() {
+                console.log('🔍 DEBUG: Current data structure analysis:');
+                console.log('='.repeat(50));
+                
+                if (!jsonData) {
+                    console.log('❌ jsonData is null or undefined');
+                    return;
+                }
+                
+                console.log('📊 Root level properties:', Object.keys(jsonData));
+                
+                // Check movies
+                if (jsonData.movies) {
+                    console.log(`🎬 Movies: ${jsonData.movies.length} items`);
+                    if (jsonData.movies.length > 0) {
+                        const firstMovie = jsonData.movies[0];
+                        console.log('   First movie structure:', Object.keys(firstMovie));
+                        console.log('   Sample movie:', {
+                            id: firstMovie.id,
+                            title: firstMovie.title,
+                            type: firstMovie.type,
+                            hasImage: !!firstMovie.image,
+                            hasSources: !!(firstMovie.sources && firstMovie.sources.length > 0)
+                        });
+                    }
+                } else {
+                    console.log('❌ No movies array found');
+                }
+                
+                // Check channels
+                if (jsonData.channels) {
+                    console.log(`📺 Channels: ${jsonData.channels.length} items`);
+                    if (jsonData.channels.length > 0) {
+                        const firstChannel = jsonData.channels[0];
+                        console.log('   First channel structure:', Object.keys(firstChannel));
+                        console.log('   Sample channel:', {
+                            id: firstChannel.id,
+                            title: firstChannel.title,
+                            hasImage: !!firstChannel.image,
+                            hasSources: !!(firstChannel.sources && firstChannel.sources.length > 0)
+                        });
+                    }
+                } else {
+                    console.log('❌ No channels array found');
+                }
+                
+                // Check other arrays
+                ['actors', 'genres', 'categories', 'countries'].forEach(key => {
+                    if (jsonData[key]) {
+                        console.log(`📋 ${key}: ${jsonData[key].length} items`);
+                    } else {
+                        console.log(`❌ No ${key} array found`);
+                    }
+                });
+                
+                // Check home structure
+                if (jsonData.home) {
+                    console.log('🏠 Home structure:');
+                    Object.keys(jsonData.home).forEach(key => {
+                        const value = jsonData.home[key];
+                        if (Array.isArray(value)) {
+                            console.log(`   ${key}: ${value.length} items`);
+                        } else {
+                            console.log(`   ${key}: ${typeof value}`);
+                        }
+                    });
+                } else {
+                    console.log('❌ No home structure found');
+                }
+                
+                console.log('='.repeat(50));
+                console.log('✅ Debug analysis complete. Check above for any issues.');
+            }
             
             function loadData(jsonString) {
                 try {
                     console.log('Loading JSON data...');
                     console.log('JSON string length:', jsonString.length);
                     
-                    jsonData = JSON.parse(jsonString);
-                    console.log('Parsed JSON data:', jsonData);
+                    const importedData = JSON.parse(jsonString);
+                    console.log('Parsed JSON data:', importedData);
                     
-                    if (!jsonData.movies) {
-                        console.log('No movies array found, creating empty array');
-                        jsonData.movies = [];
+                    // Initialize jsonData structure if it doesn't exist
+                    if (!jsonData) {
+                        jsonData = {
+                            api_info: {},
+                            home: { slides: [], featured_movies: [], channels: [], actors: [], genres: [] },
+                            movies: [],
+                            channels: [],
+                            actors: [],
+                            genres: [],
+                            categories: [],
+                            countries: [],
+                            subscription_plans: [],
+                            video_sources: {},
+                            ads_config: {}
+                        };
                     }
-                    if (!jsonData.channels) {
-                        console.log('No channels array found, creating empty array');
-                        jsonData.channels = [];
-                    }
+                    
+                    // Merge imported data with existing structure
+                    jsonData = {
+                        ...jsonData,
+                        ...importedData
+                    };
+                    
+                    // Ensure all required arrays exist
+                    if (!jsonData.movies) jsonData.movies = [];
+                    if (!jsonData.channels) jsonData.channels = [];
+                    if (!jsonData.actors) jsonData.actors = [];
+                    if (!jsonData.genres) jsonData.genres = [];
+                    if (!jsonData.categories) jsonData.categories = [];
+                    if (!jsonData.countries) jsonData.countries = [];
+                    if (!jsonData.subscription_plans) jsonData.subscription_plans = [];
+                    
+                    // Ensure home structure exists
+                    if (!jsonData.home) jsonData.home = {};
+                    if (!jsonData.home.slides) jsonData.home.slides = [];
+                    if (!jsonData.home.featured_movies) jsonData.home.featured_movies = [];
+                    if (!jsonData.home.channels) jsonData.home.channels = [];
+                    if (!jsonData.home.actors) jsonData.home.actors = [];
+                    if (!jsonData.home.genres) jsonData.home.genres = [];
                     
                     // CLEAN EMPTY ENTRIES IMMEDIATELY to prevent crashes
                     console.log('🧹 Cleaning empty entries from loaded data...');
-                    jsonData.movies = jsonData.movies.filter(m => m.title && m.title.trim() !== '');
-                    jsonData.channels = jsonData.channels.filter(c => c.title && c.title.trim() !== '');
+                    jsonData.movies = jsonData.movies.filter(m => m && m.title && m.title.trim() !== '');
+                    jsonData.channels = jsonData.channels.filter(c => c && c.title && c.title.trim() !== '');
                     
                     if (jsonData.home) {
                         if (jsonData.home.slides) {
-                            jsonData.home.slides = jsonData.home.slides.filter(s => s.title && s.title.trim() !== '');
+                            jsonData.home.slides = jsonData.home.slides.filter(s => s && s.title && s.title.trim() !== '');
                         }
                         if (jsonData.home.featured_movies) {
-                            jsonData.home.featured_movies = jsonData.home.featured_movies.filter(f => f.title && f.title.trim() !== '');
+                            jsonData.home.featured_movies = jsonData.home.featured_movies.filter(f => f && f.title && f.title.trim() !== '');
                         }
                     }
                     if (jsonData.actors) {
-                        jsonData.actors = jsonData.actors.filter(a => a.name && a.name.trim() !== '');
+                        jsonData.actors = jsonData.actors.filter(a => a && a.name && a.name.trim() !== '');
                     }
                     if (jsonData.genres) {
-                        jsonData.genres = jsonData.genres.filter(g => g.title && g.title.trim() !== '');
+                        jsonData.genres = jsonData.genres.filter(g => g && g.title && g.title.trim() !== '');
                     }
+                    
+                    // Fix missing IDs in imported data
+                    console.log('🔧 Fixing missing IDs in imported data...');
+                    fixMissingIds();
+                    
+                    // Validate and fix data structure
+                    console.log('✅ Validating and fixing data structure...');
+                    validateAndFixDataStructure();
                     
                     console.log('Movies count:', jsonData.movies.length);
                     console.log('Channels count:', jsonData.channels.length);
+                    console.log('Actors count:', jsonData.actors.length);
+                    console.log('Genres count:', jsonData.genres.length);
                     
                     // AUTO-GENERATE IMMEDIATELY AFTER LOADING DATA
                     console.log('🔄 Auto-generating related content after data load...');
                     autoGenerateRelatedContent();
                     
+                    // Show the editor and save sections
                     editorDiv.style.display = 'block';
                     saveSectionDiv.style.display = 'block';
+                    
+                    // Force render entries
+                    console.log('🎨 Rendering entries...');
                     renderEntries();
                     
-                    const totalItems = (jsonData.movies?.length || 0) + (jsonData.channels?.length || 0);
-                    showNotification(`Data loaded successfully! Found ${totalItems} items.`, true);
-                    console.log('Data loading completed successfully');
+                    // Update statistics
+                    updateStats();
+                    
+                    console.log('✅ Data loaded and rendered successfully!');
+                    
                 } catch (error) {
-                    console.error('Error loading data:', error);
-                    showNotification(`Failed to load data: ${error.message}`, false);
+                    console.error('❌ Error loading data:', error);
                     throw error;
+                }
+            }
+            
+            // New function to fix missing IDs
+            function fixMissingIds() {
+                let maxId = 0;
+                
+                // Find the highest existing ID
+                const findMaxId = (items) => {
+                    if (!items || !Array.isArray(items)) return;
+                    items.forEach(item => {
+                        if (item && item.id && typeof item.id === 'number') {
+                            maxId = Math.max(maxId, item.id);
+                        }
+                    });
+                };
+                
+                findMaxId(jsonData.movies);
+                findMaxId(jsonData.channels);
+                findMaxId(jsonData.actors);
+                findMaxId(jsonData.genres);
+                findMaxId(jsonData.categories);
+                findMaxId(jsonData.countries);
+                
+                // Assign IDs to items that don't have them
+                const assignIds = (items) => {
+                    if (!items || !Array.isArray(items)) return;
+                    items.forEach(item => {
+                        if (item && (!item.id || typeof item.id !== 'number')) {
+                            item.id = ++maxId;
+                            console.log(`Assigned ID ${item.id} to item: ${item.title || item.name || 'Unknown'}`);
+                        }
+                    });
+                };
+                
+                assignIds(jsonData.movies);
+                assignIds(jsonData.channels);
+                assignIds(jsonData.actors);
+                assignIds(jsonData.genres);
+                assignIds(jsonData.categories);
+                assignIds(jsonData.countries);
+                
+                // Fix nested IDs (sources, episodes, etc.)
+                jsonData.movies.forEach(movie => {
+                    if (movie.sources && Array.isArray(movie.sources)) {
+                        movie.sources.forEach(source => {
+                            if (!source.id || typeof source.id !== 'number') {
+                                source.id = ++maxId;
+                            }
+                        });
+                    }
+                    if (movie.seasons && Array.isArray(movie.seasons)) {
+                        movie.seasons.forEach(season => {
+                            if (!season.id || typeof season.id !== 'number') {
+                                season.id = ++maxId;
+                            }
+                            if (season.episodes && Array.isArray(season.episodes)) {
+                                season.episodes.forEach(episode => {
+                                    if (!episode.id || typeof episode.id !== 'number') {
+                                        episode.id = ++maxId;
+                                    }
+                                    if (episode.sources && Array.isArray(episode.sources)) {
+                                        episode.sources.forEach(source => {
+                                            if (!source.id || typeof source.id !== 'number') {
+                                                source.id = ++maxId;
+                                            }
+                                        });
+                                    }
+                                });
+                            }
+                        });
+                    }
+                });
+                
+                jsonData.channels.forEach(channel => {
+                    if (channel.sources && Array.isArray(channel.sources)) {
+                        channel.sources.forEach(source => {
+                            if (!source.id || typeof source.id !== 'number') {
+                                source.id = ++maxId;
+                            }
+                        });
+                    }
+                });
+            }
+            
+            // New function to validate and fix data structure
+            function validateAndFixDataStructure() {
+                // Fix movies structure
+                jsonData.movies.forEach(movie => {
+                    if (!movie.type) movie.type = movie.seasons ? 'series' : 'movie';
+                    if (!movie.label) movie.label = movie.type === 'series' ? 'Series' : 'Movie';
+                    if (!movie.sublabel) movie.sublabel = movie.year || 'N/A';
+                    if (!movie.imdb) movie.imdb = movie.rating ? movie.rating.toString() : '0.0';
+                    if (!movie.downloadas) movie.downloadas = movie.title.toLowerCase().replace(/[^a-z0-9]/g, '-');
+                    if (movie.comment === undefined) movie.comment = true;
+                    if (!movie.playas) movie.playas = 'video';
+                    if (!movie.classification) movie.classification = 'N/A';
+                    if (!movie.duration) movie.duration = '00:00';
+                    if (typeof movie.rating !== 'number') movie.rating = parseFloat(movie.rating) || 0.0;
+                    if (!movie.genres) movie.genres = [];
+                    if (!movie.actors) movie.actors = [];
+                    if (typeof movie.views !== 'number') movie.views = parseInt(movie.views) || 0;
+                    if (!movie.created_at) movie.created_at = new Date().toISOString().split('T')[0];
+                    if (!movie.sources) movie.sources = [];
+                    
+                    // Fix sources structure
+                    movie.sources.forEach(source => {
+                        if (!source.type) source.type = 'video';
+                        if (!source.title) source.title = `${movie.title} - ${source.quality || 'HD'}`;
+                        if (!source.quality) source.quality = 'HD';
+                        if (!source.size) source.size = '0 MB';
+                        if (!source.kind) source.kind = movie.type === 'series' ? 'episode' : 'movie';
+                        if (!source.premium) source.premium = 'false';
+                        if (typeof source.external !== 'boolean') source.external = false;
+                    });
+                });
+                
+                // Fix channels structure
+                jsonData.channels.forEach(channel => {
+                    if (!channel.label) channel.label = 'Live TV';
+                    if (!channel.sublabel) channel.sublabel = 'Channel';
+                    if (!channel.website) channel.website = '';
+                    if (!channel.classification) channel.classification = 'G';
+                    if (typeof channel.views !== 'number') channel.views = parseInt(channel.views) || 0;
+                    if (typeof channel.shares !== 'number') channel.shares = parseInt(channel.shares) || 0;
+                    if (typeof channel.rating !== 'number') channel.rating = parseFloat(channel.rating) || 0.0;
+                    if (channel.comment === undefined) channel.comment = true;
+                    if (!channel.playas) channel.playas = 'stream';
+                    if (!channel.sources) channel.sources = [];
+                    if (!channel.categories) channel.categories = [];
+                    if (!channel.countries) channel.countries = [];
+                    
+                    // Fix channel sources structure
+                    channel.sources.forEach(source => {
+                        if (!source.type) source.type = 'stream';
+                        if (!source.title) source.title = `${channel.title} - Live Stream`;
+                        if (!source.quality) source.quality = 'HD';
+                        if (!source.size) source.size = '0 MB';
+                        if (!source.kind) source.kind = 'live';
+                        if (!source.premium) source.premium = 'false';
+                        if (typeof source.external !== 'boolean') source.external = false;
+                    });
+                });
+                
+                // Fix actors structure
+                jsonData.actors.forEach(actor => {
+                    if (!actor.type) actor.type = 'actor';
+                    if (!actor.role) actor.role = 'Actor';
+                    if (!actor.born) actor.born = '';
+                    if (!actor.height) actor.height = '';
+                    if (!actor.bio) actor.bio = '';
+                });
+                
+                // Fix genres structure
+                jsonData.genres.forEach(genre => {
+                    if (!genre.posters) genre.posters = [];
+                });
+            }
+            
+            // Enhanced updateStats function
+            function updateStats() {
+                const movieCount = jsonData.movies ? jsonData.movies.length : 0;
+                const channelCount = jsonData.channels ? jsonData.channels.length : 0;
+                const actorCount = jsonData.actors ? jsonData.actors.length : 0;
+                const genreCount = jsonData.genres ? jsonData.genres.length : 0;
+                
+                console.log(`📊 Stats - Movies: ${movieCount}, Channels: ${channelCount}, Actors: ${actorCount}, Genres: ${genreCount}`);
+                
+                // Update API info if it exists
+                if (jsonData.api_info) {
+                    jsonData.api_info.total_movies = movieCount;
+                    jsonData.api_info.total_channels = channelCount;
+                    jsonData.api_info.total_actors = actorCount;
+                    jsonData.api_info.last_updated = new Date().toISOString().split('T')[0];
                 }
             }
             
