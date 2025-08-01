@@ -51,6 +51,13 @@ public class MyApplication extends MultiDexApplication {
         UnityAds.initialize (this, getResources().getString(R.string.unity_ads_app_id));
 //        initCast();
         mUserAgent = Util.getUserAgent(this, "MyApplication");
+        
+        // Initialize embed proxy server for handling embedded video links
+        try {
+            my.cinemax.app.free.Provider.EmbedProxyServer.getInstance().startProxy();
+        } catch (Exception e) {
+            android.util.Log.e("MyApplication", "Failed to start embed proxy server", e);
+        }
     }
 
     private void initLogger() {

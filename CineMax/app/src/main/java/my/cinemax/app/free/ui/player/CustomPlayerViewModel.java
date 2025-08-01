@@ -196,14 +196,43 @@ public class CustomPlayerViewModel extends BaseObservable implements ExoPlayer.E
             // mediaSource1 = new HlsMediaSource(videoUri, dataSourceFactory,  new DefaultDashChunkSource.Factory(dataSourceFactory), null,null);
             sourceSize++;
         }else if (videoType.equals("embed")){
-            // For embed URLs, try to extract the actual video URL or handle as fallback
-            // For now, we'll try to play it as a regular video source
-            // If it fails, the error handler will show a fallback message
-            ExtractorsFactory extractorsFactory = new DefaultExtractorsFactory();
-            mediaSource1 =  new ProgressiveMediaSource.Factory(dataSourceFactory)
-                    .setExtractorsFactory(extractorsFactory)
-                    .createMediaSource(videoUri);
-            sourceSize++;
+            // For embed URLs, resolve to actual video stream URL first
+            Log.d("CustomPlayerViewModel", "Detected embed URL, attempting to resolve: " + mUrl);
+            
+            // Show loading indicator
+            isLoadingNow = true;
+            notifyPropertyChanged(BR.loaidingNow);
+            
+            my.cinemax.app.free.Provider.EmbedUrlResolver.resolveEmbedUrl(mUrl, 
+                new my.cinemax.app.free.Provider.EmbedUrlResolver.ResolverCallback() {
+                @Override
+                public void onResolved(String actualVideoUrl, String resolvedVideoType) {
+                    Log.d("CustomPlayerViewModel", "Resolved embed URL to: " + actualVideoUrl + " (type: " + resolvedVideoType + ")");
+                    
+                    // Update URL and type with resolved values
+                    mUrl = actualVideoUrl;
+                    videoType = resolvedVideoType;
+                    
+                    // Retry preparation with resolved URL
+                    mActivity.runOnUiThread(() -> {
+                        preparePlayer(subtitle, seekTo);
+                    });
+                }
+                
+                @Override
+                public void onError(String error) {
+                    Log.e("CustomPlayerViewModel", "Failed to resolve embed URL: " + error);
+                    
+                    mActivity.runOnUiThread(() -> {
+                        // Show fallback dialog for WebView playback
+                        isLoadingNow = false;
+                        notifyPropertyChanged(BR.loaidingNow);
+                        setLoadingComplete(false);
+                        showEmbedFallbackDialog();
+                    });
+                }
+            });
+            return; // Exit early, will continue after resolution
         }else{
             ExtractorsFactory extractorsFactory = new DefaultExtractorsFactory();
             //  mediaSource1 = new ExtractorMediaSource(videoUri, dataSourceFactory, extractorsFactory, null, null);
