@@ -302,13 +302,26 @@ public class ChannelActivity extends AppCompatActivity {
         if (channel != null && channel.getSources() != null) {
             for (int i = 0; i < channel.getSources().size(); i++) {
                 Source source = channel.getSources().get(i);
-                if (source != null && source.getKind() != null && 
-                    (source.getKind().equals("both") || source.getKind().equals("play"))) {
-                    playSources.add(source);
+                if (source != null && source.getUrl() != null && !source.getUrl().isEmpty()) {
+                    // Check if source is playable
+                    boolean isPlayable = false;
+                    
+                    // If kind is specified, check it
+                    if (source.getKind() != null) {
+                        isPlayable = source.getKind().equals("both") || source.getKind().equals("play");
+                    } else {
+                        // If no kind is specified, assume it's playable if it has a valid URL
+                        // This handles sources without the kind field
+                        isPlayable = true;
+                    }
+                    
+                    if (isPlayable) {
+                        playSources.add(source);
+                        Log.d("ChannelActivity", "Added playable source: " + source.getTitle() + " - " + source.getUrl());
+                    }
                 }
             }
         }
-
     }
     private void getChannel() {
         channel = getIntent().getParcelableExtra("channel");
