@@ -885,6 +885,13 @@ public class SerieActivity extends AppCompatActivity implements PlaylistDownload
         if (mCastSession != null) {
             loadSubtitles(position);
         } else {
+            // Add null checks to prevent crashes
+            if (selectedEpisode == null) {
+                Log.e("SerieActivity", "selectedEpisode is null in playSource");
+                Toast.makeText(this, "Episode data not available", Toast.LENGTH_SHORT).show();
+                return;
+            }
+            
             Intent intent = new Intent(SerieActivity.this,PlayerActivity.class);
             intent.putExtra("id",selectedEpisode.getId());
             intent.putExtra("url",url);
@@ -907,7 +914,24 @@ public class SerieActivity extends AppCompatActivity implements PlaylistDownload
             intent.putExtra("kind","episode");
             intent.putExtra("image",poster.getImage());
             intent.putExtra("title",poster.getTitle());
-            intent.putExtra("subtitle",seasonArrayList.get(spinner_activity_serie_season_list.getSelectedItemPosition()).getTitle()+" : "+selectedEpisode.getTitle());
+            
+            // Safe access to season and episode data
+            String subtitle = poster.getTitle();
+            try {
+                int seasonPosition = spinner_activity_serie_season_list.getSelectedItemPosition();
+                if (seasonArrayList != null && seasonPosition >= 0 && seasonPosition < seasonArrayList.size()) {
+                    String seasonTitle = seasonArrayList.get(seasonPosition).getTitle();
+                    String episodeTitle = selectedEpisode.getTitle();
+                    if (seasonTitle != null && episodeTitle != null) {
+                        subtitle = seasonTitle + " : " + episodeTitle;
+                    }
+                }
+            } catch (Exception e) {
+                Log.e("SerieActivity", "Error building subtitle", e);
+                // Use fallback subtitle
+                subtitle = poster.getTitle() + " - Episode";
+            }
+            intent.putExtra("subtitle", subtitle);
             startActivity(intent);
         }
 
