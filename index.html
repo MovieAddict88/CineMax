@@ -933,6 +933,9 @@
                     <div class="form-group">
                         <label>Seasons & Episodes</label>
                         <div id="seasonContainer"></div>
+                        <button type="button" id="generateDefaultSeasons" style="margin-top: 10px; padding: 8px 16px; background: var(--primary); color: white; border: none; border-radius: 4px; cursor: pointer;">
+                            <i class="fas fa-plus"></i> Generate Default Season
+                        </button>
                     </div>
                 </div>
                 
@@ -2446,6 +2449,34 @@
                 console.log('=== SAVING SERIES ===');
                 
                 const newId = id || generateNewId();
+                
+                // Ensure we have seasons data - generate default if none exist
+                let seasonsData = currentSeriesData.seasons || [];
+                if (seasonsData.length === 0) {
+                    console.log('No seasons found, generating default season...');
+                    seasonsData = [{
+                        id: generateNewId(),
+                        title: 'Season 1',
+                        episodes: [{
+                            id: generateNewId(),
+                            title: 'Episode 1',
+                            episode_number: 1,
+                            image: '',
+                            duration: '45:00',
+                            views: 0,
+                            downloads: 0,
+                            sources: [{
+                                id: generateNewId(),
+                                type: 'video',
+                                title: 'Episode 1 1080p',
+                                quality: '1080p',
+                                url: ''
+                            }],
+                            subtitles: []
+                        }]
+                    }];
+                }
+                
                 const seriesData = {
                     id: parseInt(newId),
                     type: 'series',
@@ -2462,7 +2493,7 @@
                     } : null,
                     sources: [],
                     label: 'Series',
-                    sublabel: `${(currentSeriesData.seasons || []).length} Seasons`,
+                    sublabel: `${seasonsData.length} Seasons`,
                     imdb: '0.0',
                     downloadas: seriesTitleInput.value.trim().toLowerCase().replace(/[^a-z0-9]/g, '-'),
                     comment: true,
@@ -2478,7 +2509,7 @@
                     views: 0,
                     downloads: 0,
                     shares: 0,
-                    seasons: currentSeriesData.seasons || []
+                    seasons: seasonsData
                 };
                 
                 console.log('Series data to save:', seriesData);
@@ -2771,6 +2802,11 @@
             async function fetchSeriesDetails(tmdbId) {
                 const seriesData = await fetchTMDbData('series', tmdbId);
                 
+                // Fetch seasons data
+                const seasonsUrl = `https://api.themoviedb.org/3/tv/${tmdbId}?api_key=${tmdbApiKey}&append_to_response=seasons`;
+                const seasonsRes = await fetch(seasonsUrl);
+                const seasonsData = seasonsRes.ok ? await seasonsRes.json() : { seasons: [] };
+                
                 // Fetch trailer
                 const videosUrl = `https://api.themoviedb.org/3/tv/${tmdbId}/videos?api_key=${tmdbApiKey}`;
                 const videosRes = await fetch(videosUrl);
@@ -2779,6 +2815,7 @@
                 
                 return {
                     ...seriesData,
+                    seasons: seasonsData.seasons || [],
                     trailer: trailer ? `https://www.youtube.com/watch?v=${trailer.key}` : ''
                 };
             }
