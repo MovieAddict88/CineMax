@@ -15,6 +15,7 @@ import android.widget.FrameLayout;
 import my.cinemax.app.free.R;
 
 import androidx.appcompat.app.AppCompatActivity;
+import android.util.Log;
 
 public class EmbedActivity extends AppCompatActivity {
     private WebView webView;
@@ -76,12 +77,24 @@ public class EmbedActivity extends AppCompatActivity {
         webView.getSettings().setBuiltInZoomControls(false);
         webView.getSettings().setSaveFormData(true);
         
+        // Additional settings for better video compatibility
+        webView.getSettings().setDomStorageEnabled(true);
+        webView.getSettings().setDatabaseEnabled(true);
+        webView.getSettings().setMediaPlaybackRequiresUserGesture(false);
+        webView.getSettings().setAllowFileAccess(true);
+        webView.getSettings().setAllowContentAccess(true);
+        webView.getSettings().setMixedContentMode(android.webkit.WebSettings.MIXED_CONTENT_ALWAYS_ALLOW);
+        
+        // Set user agent to avoid mobile redirects
+        webView.getSettings().setUserAgentString("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36");
+        
         // Add error handling for URL loading
         try {
+            Log.d("EmbedActivity", "Loading URL in WebView: " + url);
             webView.loadUrl(url);
         } catch (Exception e) {
             android.util.Log.e("EmbedActivity", "Error loading URL: " + url, e);
-            android.widget.Toast.makeText(this, "Error loading video. Please try again.", android.widget.Toast.LENGTH_LONG).show();
+            android.widget.Toast.makeText(this, "Error loading video. Please check your internet connection.", android.widget.Toast.LENGTH_LONG).show();
             finish();
         }
     }

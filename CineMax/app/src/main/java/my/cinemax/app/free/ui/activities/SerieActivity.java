@@ -861,12 +861,15 @@ public class SerieActivity extends AppCompatActivity implements PlaylistDownload
         // Add logging for debugging
         Log.d("SerieActivity", "Playing source: " + source.getTitle() + " URL: " + url + " Type: " + type);
 
-        // For embed URLs, try to play in video player first, with fallback to WebView
+        // Check if this is an embedded URL that should be played in WebView
         if (url != null && (url.contains("vidsrc.net") || url.contains("embed") || 
             url.contains("iframe") || url.contains("player") || "embed".equals(type))) {
-            Log.d("SerieActivity", "Attempting to play embed URL in video player: " + url);
-            // Set video type to embed so the player knows how to handle it
-            type = "embed";
+            Log.d("SerieActivity", "Opening embedded URL in WebView: " + url);
+            // Open embedded URLs directly in EmbedActivity (WebView)
+            Intent intent = new Intent(SerieActivity.this, EmbedActivity.class);
+            intent.putExtra("url", url);
+            startActivity(intent);
+            return;
         }
 
         if ("youtube".equals(type)){

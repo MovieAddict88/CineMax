@@ -563,22 +563,27 @@ public class CustomPlayerViewModel extends BaseObservable implements ExoPlayer.E
             Log.e("CustomPlayerViewModel", "Source error: " + error.getSourceException().getMessage());
             
             if (isEmbedUrl && mActivity != null) {
-                // For embed URLs, show option to open in WebView
-                showEmbedFallbackDialog();
+                // For embed URLs, automatically redirect to WebView
+                Log.d("CustomPlayerViewModel", "Automatically redirecting embed URL to WebView: " + mUrl);
+                openInEmbedActivity();
             } else {
                 // Show user-friendly error message
                 if (mActivity != null) {
-                    android.widget.Toast.makeText(mActivity, "Video source error. Please try again.", android.widget.Toast.LENGTH_LONG).show();
+                    android.widget.Toast.makeText(mActivity, "Video source error. Please try a different source.", android.widget.Toast.LENGTH_LONG).show();
                 }
             }
         } else if (error.type == ExoPlaybackException.TYPE_RENDERER) {
             Log.e("CustomPlayerViewModel", "Renderer error: " + error.getRendererException().getMessage());
-            if (mActivity != null) {
-                android.widget.Toast.makeText(mActivity, "Video playback error. Please try again.", android.widget.Toast.LENGTH_LONG).show();
+            if (isEmbedUrl && mActivity != null) {
+                openInEmbedActivity();
+            } else if (mActivity != null) {
+                android.widget.Toast.makeText(mActivity, "Video format not supported. Please try a different source.", android.widget.Toast.LENGTH_LONG).show();
             }
         } else if (error.type == ExoPlaybackException.TYPE_UNEXPECTED) {
             Log.e("CustomPlayerViewModel", "Unexpected error: " + error.getUnexpectedException().getMessage());
-            if (mActivity != null) {
+            if (isEmbedUrl && mActivity != null) {
+                openInEmbedActivity();
+            } else if (mActivity != null) {
                 android.widget.Toast.makeText(mActivity, "Unexpected error occurred. Please try again.", android.widget.Toast.LENGTH_LONG).show();
             }
         }
@@ -589,6 +594,23 @@ public class CustomPlayerViewModel extends BaseObservable implements ExoPlayer.E
         setLoadingComplete(false);
     }
     
+    private void openInEmbedActivity() {
+        if (mActivity == null || mUrl == null) return;
+        
+        try {
+            // Automatically open in EmbedActivity
+            android.content.Intent intent = new android.content.Intent(mActivity, 
+                my.cinemax.app.free.ui.activities.EmbedActivity.class);
+            intent.putExtra("url", mUrl);
+            mActivity.startActivity(intent);
+            // Close current player activity
+            mActivity.finish();
+        } catch (Exception e) {
+            Log.e("CustomPlayerViewModel", "Error opening EmbedActivity", e);
+            showEmbedFallbackDialog();
+        }
+    }
+    
     private void showEmbedFallbackDialog() {
         if (mActivity == null) return;
         
@@ -597,10 +619,15 @@ public class CustomPlayerViewModel extends BaseObservable implements ExoPlayer.E
             .setMessage("This video requires a different player. Would you like to open it in a web browser?")
             .setPositiveButton("Open in Browser", (dialog, which) -> {
                 // Open in EmbedActivity (WebView)
-                android.content.Intent intent = new android.content.Intent(mActivity, 
-                    my.cinemax.app.free.ui.activities.EmbedActivity.class);
-                intent.putExtra("url", mUrl);
-                mActivity.startActivity(intent);
+                try {
+                    android.content.Intent intent = new android.content.Intent(mActivity, 
+                        my.cinemax.app.free.ui.activities.EmbedActivity.class);
+                    intent.putExtra("url", mUrl);
+                    mActivity.startActivity(intent);
+                } catch (Exception e) {
+                    Log.e("CustomPlayerViewModel", "Failed to open WebView", e);
+                    android.widget.Toast.makeText(mActivity, "Unable to open video player", android.widget.Toast.LENGTH_LONG).show();
+                }
             })
             .setNegativeButton("Cancel", (dialog, which) -> {
                 dialog.dismiss();
