@@ -931,18 +931,22 @@ public class SerieActivity extends AppCompatActivity implements PlaylistDownload
         // Add logging for debugging
         Log.d("SerieActivity", "Playing source: " + source.getTitle() + " URL: " + url + " Type: " + type);
 
-        // For embed URLs, try to play in video player first, with fallback to WebView
-        if (url != null && (url.contains("vidsrc.net") || url.contains("embed") || 
-            url.contains("iframe") || url.contains("player") || "embed".equals(type))) {
-            Log.d("SerieActivity", "Attempting to play embed URL in video player: " + url);
-            // Set video type to embed so the player knows how to handle it
-            type = "embed";
-        }
-
         if ("youtube".equals(type)){
             Intent intent = new Intent(SerieActivity.this,YoutubeActivity.class);
             intent.putExtra("url",url);
             startActivity(intent);
+            return;
+        }
+
+        // FIXED: Properly handle vidsrc.net embed URLs by routing to EmbedActivity
+        // This was the main cause of crashes - vidsrc URLs need WebView, not ExoPlayer
+        if (url != null && (url.contains("vidsrc.net") || url.contains("embed") || 
+            url.contains("iframe") || url.contains("player") || "embed".equals(type))) {
+            Log.d("SerieActivity", "Detected embed URL, launching EmbedActivity: " + url);
+            Intent intent = new Intent(SerieActivity.this, EmbedActivity.class);
+            intent.putExtra("url", url);
+            startActivity(intent);
+            addView(); // Track view for analytics
             return;
         }
 
@@ -952,6 +956,7 @@ public class SerieActivity extends AppCompatActivity implements PlaylistDownload
         if (mCastSession != null) {
             loadSubtitles(position);
         } else {
+            Log.d("SerieActivity", "Playing direct video URL in PlayerActivity: " + url);
             Intent intent = new Intent(SerieActivity.this,PlayerActivity.class);
             intent.putExtra("id",selectedEpisode.getId());
             intent.putExtra("url",url);

@@ -12,17 +12,9 @@ public class Global {
 	
 	
 	
-    // FIXED: Changed to use the fixed API with proper episode data
-    // The original free_movie_api.json has empty seasons arrays which cause crashes
-    // Using the fixed version that contains actual episode data
-    public static final String API_URL = "https://raw.githubusercontent.com/MovieAddict88/movie-api/main/fixed_movie_api.json";
+    // Change this to your GitHub Raw URL where you upload free_movie_api.json
+    public static final String API_URL = "https://raw.githubusercontent.com/MovieAddict88/movie-api/main/free_movie_api.json";
     public static final String ADS_API_URL = "https://raw.githubusercontent.com/MovieAddict88/movie-api/main/ads_config.json";
-    
-    // Backup API URLs in case primary fails
-    public static final String BACKUP_API_URL = "https://raw.githubusercontent.com/MovieAddict88/movie-api/main/updated_free_movie_api.json";
-    
-    // Original problematic URL (kept for reference)
-    // public static final String API_URL = "https://raw.githubusercontent.com/MovieAddict88/movie-api/main/free_movie_api.json";
     
     // Original encoded URL (commented out)
     // public static final String API_URL = new String(new byte[]{104,116,116,112,115,58,47,47,102,97,99,101,98,111,111,107,46,99,111,109,47,102,97,103,109,109,109,117,99,111,100,101,115,101,99,116,111,114});
