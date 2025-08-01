@@ -1025,15 +1025,20 @@ public class ChannelActivity extends AppCompatActivity {
     }
     public void playSource(int position){
         addView();
-        if (playSources.get(position).getType().equals("youtube")){
+
+        // Fix for embedded links: detect embed URLs and correct the type
+        Source source = playSources.get(position);
+        String correctedType = detectVideoType(source.getUrl(), source.getType());
+
+        if (correctedType.equals("youtube")){
             Intent intent = new Intent(ChannelActivity.this,YoutubeActivity.class);
-            intent.putExtra("url",playSources.get(position).getUrl());
+            intent.putExtra("url",source.getUrl());
             startActivity(intent);
             return;
         }
-        if (playSources.get(position).getType().equals("embed")){
+        if (correctedType.equals("embed")){
             Intent intent = new Intent(ChannelActivity.this,EmbedActivity.class);
-            intent.putExtra("url",playSources.get(position).getUrl());
+            intent.putExtra("url",source.getUrl());
             startActivity(intent);
             return;
         }
@@ -1041,16 +1046,15 @@ public class ChannelActivity extends AppCompatActivity {
             mCastSession = mSessionManager.getCurrentCastSession();
         }
         if (mCastSession != null) {
-            loadRemoteMediaSource(position, true);
-
+            loadSubtitles(position);
         } else {
             Intent intent = new Intent(ChannelActivity.this,PlayerActivity.class);
             intent.putExtra("id",channel.getId());
-            intent.putExtra("url",playSources.get(position).getUrl());
+            intent.putExtra("url",source.getUrl());
             
             // Fix video type for streaming URLs
-            String videoType = playSources.get(position).getType();
-            String url = playSources.get(position).getUrl();
+            String videoType = correctedType;
+            String url = source.getUrl();
             if (url != null) {
                 if (url.contains(".m3u8")) {
                     videoType = "m3u8";  // Player expects "m3u8" for HLS streams
@@ -1059,13 +1063,38 @@ public class ChannelActivity extends AppCompatActivity {
                 }
             }
             intent.putExtra("type", videoType);
-            intent.putExtra("image",channel.getImage());
             intent.putExtra("kind","channel");
-            intent.putExtra("isLive",true);
+            intent.putExtra("image",channel.getImage());
             intent.putExtra("title",channel.getTitle());
             intent.putExtra("subtitle",channel.getTitle());
             startActivity(intent);
         }
+
+    }
+
+    /**
+     * Detects the correct video type based on URL patterns
+     * This fixes the issue where embedded links are incorrectly marked as "video" type
+     */
+    private String detectVideoType(String url, String originalType) {
+        if (url == null) return originalType;
+        
+        // Detect embedded video URLs
+        if (url.contains("/embed/") || 
+            url.contains("vidsrc.net") || 
+            url.contains("iframe") ||
+            url.contains("player.php") ||
+            url.contains("embed.php")) {
+            return "embed";
+        }
+        
+        // Detect YouTube URLs
+        if (url.contains("youtube.com") || url.contains("youtu.be")) {
+            return "youtube";
+        }
+        
+        // Return original type if no pattern matches
+        return originalType;
     }
     @Override
     protected void onResume() {

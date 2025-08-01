@@ -142,9 +142,12 @@ public class CustomPlayerViewModel extends BaseObservable implements ExoPlayer.E
 
     public void preparePlayer(Subtitle subtitle,long seekTo) {
 
-
-
-
+        // Validate URL - check if it's an embedded link that shouldn't be here
+        if (mUrl != null && isEmbeddedUrl(mUrl)) {
+            Log.e("CustomPlayerViewModel", "Embedded URL detected in PlayerActivity: " + mUrl);
+            onPlayerError("This content requires a web browser to play. Please check the video source configuration.");
+            return;
+        }
 
     // Produces Extractor instances for parsing the media data.
 //    ExtractorsFactory extractorsFactory = new DefaultExtractorsFactory();
@@ -164,32 +167,39 @@ public class CustomPlayerViewModel extends BaseObservable implements ExoPlayer.E
         MediaSource mediaSource1;
         int sourceSize = 0;
 
-        if (videoType.equals("mp4")){
-            ExtractorsFactory extractorsFactory = new DefaultExtractorsFactory();
-            //  mediaSource1 = new ExtractorMediaSource(videoUri, dataSourceFactory, extractorsFactory, null, null);
-            mediaSource1 =  new ProgressiveMediaSource.Factory(dataSourceFactory)
-                    .setExtractorsFactory(extractorsFactory)
-                    .createMediaSource(videoUri);
-            sourceSize++;
-        }else if (videoType.equals("dash")){
-           // mediaSource1 = new DashMediaSource(videoUri,dataSourceFactory, new DefaultDashChunkSource.Factory(dataSourceFactory),null,null);
-            mediaSource1=  new DashMediaSource.Factory(dataSourceFactory)
-                    .createMediaSource(videoUri);
-            sourceSize++;
-        }else if (videoType.equals("m3u8")){
+        try {
+            if (videoType.equals("mp4")){
+                ExtractorsFactory extractorsFactory = new DefaultExtractorsFactory();
+                //  mediaSource1 = new ExtractorMediaSource(videoUri, dataSourceFactory, extractorsFactory, null, null);
+                mediaSource1 =  new ProgressiveMediaSource.Factory(dataSourceFactory)
+                        .setExtractorsFactory(extractorsFactory)
+                        .createMediaSource(videoUri);
+                sourceSize++;
+            }else if (videoType.equals("dash")){
+               // mediaSource1 = new DashMediaSource(videoUri,dataSourceFactory, new DefaultDashChunkSource.Factory(dataSourceFactory),null,null);
+                mediaSource1=  new DashMediaSource.Factory(dataSourceFactory)
+                        .createMediaSource(videoUri);
+                sourceSize++;
+            }else if (videoType.equals("m3u8")){
 
-            mediaSource1 = new HlsMediaSource.Factory(dataSourceFactory)
-                     .createMediaSource(videoUri);
-            // mediaSource1 = new HlsMediaSource(videoUri, dataSourceFactory,  new DefaultDashChunkSource.Factory(dataSourceFactory), null,null);
-            sourceSize++;
-        }else{
-            ExtractorsFactory extractorsFactory = new DefaultExtractorsFactory();
-            //  mediaSource1 = new ExtractorMediaSource(videoUri, dataSourceFactory, extractorsFactory, null, null);
-            mediaSource1 =  new ProgressiveMediaSource.Factory(dataSourceFactory)
-                    .setExtractorsFactory(extractorsFactory)
-                    .createMediaSource(videoUri);
-            sourceSize++;
+                mediaSource1 = new HlsMediaSource.Factory(dataSourceFactory)
+                         .createMediaSource(videoUri);
+                // mediaSource1 = new HlsMediaSource(videoUri, dataSourceFactory,  new DefaultDashChunkSource.Factory(dataSourceFactory), null,null);
+                sourceSize++;
+            }else{
+                ExtractorsFactory extractorsFactory = new DefaultExtractorsFactory();
+                //  mediaSource1 = new ExtractorMediaSource(videoUri, dataSourceFactory, extractorsFactory, null, null);
+                mediaSource1 =  new ProgressiveMediaSource.Factory(dataSourceFactory)
+                        .setExtractorsFactory(extractorsFactory)
+                        .createMediaSource(videoUri);
+                sourceSize++;
+            }
+        } catch (Exception e) {
+            Log.e("CustomPlayerViewModel", "Error creating media source: " + e.getMessage());
+            onPlayerError("Unable to load video. Please check the video format and try again.");
+            return;
         }
+
         SingleSampleMediaSource subtitleSource = null;
         if (subtitle!=null){
             if (subtitle.getType().equals("srt")) {
@@ -218,10 +228,15 @@ public class CustomPlayerViewModel extends BaseObservable implements ExoPlayer.E
 
 
         // Prepare the player with the source.
-        mExoPlayer.prepare(mediaSource,false,false);
-        mExoPlayer.seekTo(seekTo);
-        mExoPlayer.addListener(this);
-        mExoPlayer.setPlayWhenReady(SHOULD_AUTO_PLAY);
+        try {
+            mExoPlayer.prepare(mediaSource,false,false);
+            mExoPlayer.seekTo(seekTo);
+            mExoPlayer.addListener(this);
+            mExoPlayer.setPlayWhenReady(SHOULD_AUTO_PLAY);
+        } catch (Exception e) {
+            Log.e("CustomPlayerViewModel", "Error preparing player: " + e.getMessage());
+            onPlayerError("Failed to initialize video player. Please try again.");
+        }
        // mExoPlayer.setPlayWhenReady(true);
 
     }
@@ -544,5 +559,33 @@ public class CustomPlayerViewModel extends BaseObservable implements ExoPlayer.E
 
     public void setSubtitilesList(ArrayList<Subtitle> _subtitlesForCast) {
         subtitlesForCast =  _subtitlesForCast;
+    }
+
+    /**
+     * Check if URL is an embedded link that shouldn't be played in ExoPlayer
+     */
+    private boolean isEmbeddedUrl(String url) {
+        if (url == null) return false;
+        return url.contains("/embed/") || 
+               url.contains("vidsrc.net") || 
+               url.contains("iframe") ||
+               url.contains("player.php") ||
+               url.contains("embed.php");
+    }
+
+    /**
+     * Handle player errors gracefully
+     */
+    private void onPlayerError(String message) {
+        Log.e("CustomPlayerViewModel", "Player error: " + message);
+        // You could show a toast or dialog here
+        if (mActivity != null) {
+            mActivity.runOnUiThread(() -> {
+                // Show error message to user
+                android.widget.Toast.makeText(mActivity, message, android.widget.Toast.LENGTH_LONG).show();
+                // Close the player activity
+                mActivity.finish();
+            });
+        }
     }
 }
