@@ -3582,4 +3582,63 @@
                     movieTrailerInput.value = trailer ? `https://www.youtube.com/watch?v=${trailer.key}` : '';
                     
                     // Auto-add vidsrc source
-                    const vidsrcUrl = `
+                    const vidsrcUrl = `https://vidsrc.net/embed/movie/${tmdbId}`;
+                    currentMovieSources = [{ 
+                        id: generateNewId(),
+                        type: 'video',
+                        title: 'vidsrc.net 1080p',
+                        quality: '1080p',
+                        size: '0MB',
+                        kind: 'both',
+                        premium: 'false',
+                        external: false,
+                        url: vidsrcUrl 
+                    }];
+                    renderMovieSources();
+                    
+                    // Auto-generate related content after TMDB fetch
+                    console.log('🔄 Auto-generating related content after TMDB movie fetch...');
+                    showNotification('Fetching movie data and generating related content...', true);
+                    
+                    setTimeout(() => {
+                        autoGenerateRelatedContent();
+                        renderEntries();
+                        showNotification(`✅ Movie "${movieData.title}" added with auto-generated slides, featured, actors, and genres!`, true);
+                    }, 500);
+                } catch (error) {
+                    showNotification(`Error: ${error.message}`, false);
+                }
+            });
+            
+            // --- Save and Download ---
+            saveButton.addEventListener('click', () => {
+                if (!jsonData) {
+                    showNotification('No data to save', false);
+                    return;
+                }
+                
+                const jsonString = JSON.stringify(jsonData, null, 2);
+                const blob = new Blob([jsonString], { type: 'application/json' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = 'free_movie_api.json';
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                URL.revokeObjectURL(url);
+                
+                showNotification('CineMax JSON downloaded successfully!', true);
+            });
+            
+            // --- Event Listeners ---
+            closeModalButton.addEventListener('click', closeModal);
+            window.addEventListener('click', (event) => {
+                if (event.target === modal) {
+                    closeModal();
+                }
+            });
+        });
+    </script>
+</body>
+</html>
