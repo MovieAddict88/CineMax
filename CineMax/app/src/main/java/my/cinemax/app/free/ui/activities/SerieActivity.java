@@ -442,25 +442,54 @@ public class SerieActivity extends AppCompatActivity implements PlaylistDownload
     private void setPlayableList(Episode episode) {
         selectedEpisode = episode;
         playableList.clear();
-        if (episode != null && episode.getSources() != null) {
+        
+        // Add comprehensive null checks
+        if (episode == null) {
+            Log.e("SerieActivity", "Episode is null in setPlayableList");
+            return;
+        }
+        
+        if (episode.getSources() != null && episode.getSources().size() > 0) {
             for (int i = 0; i < episode.getSources().size(); i++) {
                 Source source = episode.getSources().get(i);
-                if (source != null && source.getKind() != null && 
-                    (source.getKind().equals("both") || source.getKind().equals("play"))) {
-                    playableList.add(source);
+                if (source != null && source.getUrl() != null && !source.getUrl().isEmpty()) {
+                    // Check if source is playable (both or play kind)
+                    if (source.getKind() != null && 
+                        (source.getKind().equals("both") || source.getKind().equals("play"))) {
+                        playableList.add(source);
+                        Log.d("SerieActivity", "Added playable source: " + source.getTitle() + " - " + source.getUrl());
+                    }
+                } else {
+                    Log.w("SerieActivity", "Skipping invalid source at index " + i);
                 }
             }
+        } else {
+            Log.w("SerieActivity", "No sources found for episode: " + episode.getTitle());
         }
 
+        // Check if we have any playable sources
+        if (playableList.isEmpty()) {
+            Log.e("SerieActivity", "No playable sources found for episode: " + episode.getTitle());
+            // Show error message to user
+            android.widget.Toast.makeText(this, "No playable sources available for this episode", android.widget.Toast.LENGTH_LONG).show();
+            return;
+        }
+
+        // Handle subscription and ads logic
         if (checkSUBSCRIBED()){
             showSourcesPlayDialog();
-        }else{
-            if (selectedEpisode.getPlayas().equals("2")){
-                showDialog(false);
-            }else if(selectedEpisode.getPlayas().equals("3") ){
-                showDialog(true);
-                operationAfterAds = 200;
-            }else{
+        } else {
+            if (selectedEpisode.getPlayas() != null) {
+                if (selectedEpisode.getPlayas().equals("2")){
+                    showDialog(false);
+                } else if(selectedEpisode.getPlayas().equals("3")){
+                    showDialog(true);
+                    operationAfterAds = 200;
+                } else {
+                    showSourcesPlayDialog();
+                }
+            } else {
+                // Default to showing play dialog if playas is not set
                 showSourcesPlayDialog();
             }
         }
@@ -799,19 +828,23 @@ public class SerieActivity extends AppCompatActivity implements PlaylistDownload
             String videoType = playableList.get(position).getType();
             String url = playableList.get(position).getUrl();
             if (url != null) {
-                if (url.contains(".m3u8")) {
+                // Check for embed URLs first (vidsrc.net, embed links)
+                if (url.contains("vidsrc.net") || url.contains("embed") || 
+                    url.contains("iframe") || url.contains("player")) {
+                    // For embed URLs, redirect to embed activity
+                    Intent embedIntent = new Intent(SerieActivity.this,EmbedActivity.class);
+                    embedIntent.putExtra("url",url);
+                    startActivity(embedIntent);
+                    return;
+                } else if (url.contains(".m3u8")) {
                     videoType = "m3u8";  // Player expects "m3u8" for HLS streams
                 } else if (url.contains(".mpd")) {
                     videoType = "dash";  // Player expects "dash" for MPD/DASH streams
                 } else if (url.contains(".mp4") || url.contains(".avi") || url.contains(".mkv")) {
                     videoType = "mp4";  // Player expects "mp4" for direct video files
-                } else if (url.contains("vidsrc.net") || url.contains("embed")) {
-                    // For embed URLs, we need to handle them differently
-                    // Redirect to embed activity instead of direct player
-                    Intent embedIntent = new Intent(SerieActivity.this,EmbedActivity.class);
-                    embedIntent.putExtra("url",url);
-                    startActivity(embedIntent);
-                    return;
+                } else {
+                    // Default to mp4 for unknown formats
+                    videoType = "mp4";
                 }
             }
             intent.putExtra("type", videoType);

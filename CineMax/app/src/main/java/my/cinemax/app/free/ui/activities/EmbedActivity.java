@@ -45,11 +45,26 @@ public class EmbedActivity extends AppCompatActivity {
                 | View.SYSTEM_UI_FLAG_FULLSCREEN
                 | View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY);
 
-        Bundle bundle = getIntent().getExtras() ;
-        url = bundle.getString("url");
+        Bundle bundle = getIntent().getExtras();
+        if (bundle != null) {
+            url = bundle.getString("url");
+        }
+        
+        // Validate URL
+        if (url == null || url.isEmpty()) {
+            android.widget.Toast.makeText(this, "Invalid video URL", android.widget.Toast.LENGTH_LONG).show();
+            finish();
+            return;
+        }
 
         customViewContainer = (FrameLayout) findViewById(R.id.customViewContainer);
         webView = (WebView) findViewById(R.id.webView);
+
+        if (webView == null) {
+            android.widget.Toast.makeText(this, "Error initializing video player", android.widget.Toast.LENGTH_LONG).show();
+            finish();
+            return;
+        }
 
         mWebViewClient = new myWebViewClient();
         webView.setWebViewClient(mWebViewClient);
@@ -60,7 +75,15 @@ public class EmbedActivity extends AppCompatActivity {
         webView.getSettings().setAppCacheEnabled(true);
         webView.getSettings().setBuiltInZoomControls(false);
         webView.getSettings().setSaveFormData(true);
-        webView.loadUrl(url);
+        
+        // Add error handling for URL loading
+        try {
+            webView.loadUrl(url);
+        } catch (Exception e) {
+            android.util.Log.e("EmbedActivity", "Error loading URL: " + url, e);
+            android.widget.Toast.makeText(this, "Error loading video. Please try again.", android.widget.Toast.LENGTH_LONG).show();
+            finish();
+        }
     }
 
     public boolean inCustomView() {
@@ -165,7 +188,20 @@ public class EmbedActivity extends AppCompatActivity {
     class myWebViewClient extends WebViewClient {
         @Override
         public boolean shouldOverrideUrlLoading(WebView view, String url) {
-            return super.shouldOverrideUrlLoading(view, url);    //To change body of overridden methods use File | Settings | File Templates.
+            return super.shouldOverrideUrlLoading(view, url);
+        }
+        
+        @Override
+        public void onReceivedError(WebView view, int errorCode, String description, String failingUrl) {
+            super.onReceivedError(view, errorCode, description, failingUrl);
+            android.util.Log.e("EmbedActivity", "WebView error: " + errorCode + " - " + description);
+            android.widget.Toast.makeText(EmbedActivity.this, "Error loading video: " + description, android.widget.Toast.LENGTH_LONG).show();
+        }
+        
+        @Override
+        public void onPageFinished(WebView view, String url) {
+            super.onPageFinished(view, url);
+            android.util.Log.d("EmbedActivity", "Page loaded successfully: " + url);
         }
     }
 }
