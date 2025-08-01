@@ -446,9 +446,9 @@ public class SerieActivity extends AppCompatActivity implements PlaylistDownload
             showSourcesDownloadDialog();
         }else{
             if (selectedEpisode.getDownloadas() != null) {
-                if (selectedEpisode.getDownloadas().equals("2")){
+                if ("2".equals(selectedEpisode.getDownloadas())){
                     showDialog(false);
-                }else if(selectedEpisode.getDownloadas().equals("3") ){
+                }else if("3".equals(selectedEpisode.getDownloadas()) ){
                     showDialog(true);
                     operationAfterAds = 100;
                 }else{
@@ -479,7 +479,7 @@ public class SerieActivity extends AppCompatActivity implements PlaylistDownload
                     
                     // If kind is specified, check it
                     if (source.getKind() != null) {
-                        isPlayable = source.getKind().equals("both") || source.getKind().equals("play");
+                        isPlayable = "both".equals(source.getKind()) || "play".equals(source.getKind());
                     } else {
                         // If no kind is specified, assume it's playable if it has a valid URL
                         // This handles sources without the kind field (like vidsrc.net embeds)
@@ -513,12 +513,12 @@ public class SerieActivity extends AppCompatActivity implements PlaylistDownload
             showSourcesPlayDialog();
         } else {
             if (selectedEpisode.getPlayas() != null) {
-                if (selectedEpisode.getPlayas().equals("2")){
+                if ("2".equals(selectedEpisode.getPlayas())){
                     showDialog(false);
-                } else if(selectedEpisode.getPlayas().equals("3")){
+                } else if("3".equals(selectedEpisode.getPlayas())){
                     showDialog(true);
                     operationAfterAds = 200;
-                } else {
+                }else{
                     showSourcesPlayDialog();
                 }
             } else {
@@ -803,12 +803,17 @@ public class SerieActivity extends AppCompatActivity implements PlaylistDownload
                     if (checkSUBSCRIBED()){
                         showSourcesPlayDialog();
                     }else{
-                        if (selectedEpisode.getPlayas().equals("2")){
-                            showDialog(false);
-                        }else if(selectedEpisode.getPlayas().equals("3") ){
-                            showDialog(true);
-                            operationAfterAds = 200;
-                        }else{
+                        if (selectedEpisode.getPlayas() != null) {
+                            if ("2".equals(selectedEpisode.getPlayas())){
+                                showDialog(false);
+                            }else if("3".equals(selectedEpisode.getPlayas()) ){
+                                showDialog(true);
+                                operationAfterAds = 200;
+                            }else{
+                                showSourcesPlayDialog();
+                            }
+                        } else {
+                            // Default to showing play dialog if playas is not set
                             showSourcesPlayDialog();
                         }
                     }
@@ -1269,9 +1274,11 @@ public class SerieActivity extends AppCompatActivity implements PlaylistDownload
                     openDownloadLink(0);
                 }
             }else {
-                if (downloadableList.get(0).getPremium().equals("2")) {
+                // Add null check for getPremium()
+                String premium = downloadableList.get(0).getPremium();
+                if (premium != null && premium.equals("2")) {
                     showDialog(false);
-                } else if (downloadableList.get(0).getPremium().equals("3")) {
+                } else if (premium != null && premium.equals("3")) {
                     operationAfterAds = 400;
                     current_position_download = 0;
                     showDialog(true);
@@ -1340,9 +1347,11 @@ public class SerieActivity extends AppCompatActivity implements PlaylistDownload
                     openLink(0);
                 }
             }else {
-                if (playableList.get(0).getPremium().equals("2")) {
+                // Add null check for getPremium()
+                String premium = playableList.get(0).getPremium();
+                if (premium != null && premium.equals("2")) {
                     showDialog(false);
-                } else if (playableList.get(0).getPremium().equals("3")) {
+                } else if (premium != null && premium.equals("3")) {
                     operationAfterAds = 300;
                     current_position_play = 0;
                     showDialog(true);
@@ -1619,38 +1628,50 @@ public class SerieActivity extends AppCompatActivity implements PlaylistDownload
         }
         @Override
         public void onBindViewHolder(SourceAdapter.SourceHolder holder, final int position) {
-            if (playableList.get(position).getTitle() == null){
-                holder.text_view_item_source_type.setText(playableList.get(position).getType());
+            // Add bounds checking
+            if (position < 0 || position >= playableList.size()) {
+                Log.e("SerieActivity", "Invalid position in SourceAdapter: " + position);
+                return;
+            }
+            
+            Source source = playableList.get(position);
+            if (source == null) {
+                Log.e("SerieActivity", "Source is null at position: " + position);
+                return;
+            }
+            
+            if (source.getTitle() == null){
+                holder.text_view_item_source_type.setText(source.getType() != null ? source.getType() : "Unknown");
             }else{
-                holder.text_view_item_source_type.setText(playableList.get(position).getTitle());
+                holder.text_view_item_source_type.setText(source.getTitle());
             }
             holder.image_view_item_source_type_link.setVisibility(View.GONE);
             holder.image_view_item_source_type_play.setVisibility(View.VISIBLE);
-            if (playableList.get(position).getExternal() != null) {
-                if (playableList.get(position).getExternal()){
+            if (source.getExternal() != null) {
+                if (source.getExternal()){
                     holder.image_view_item_source_type_link.setVisibility(View.VISIBLE);
                     holder.image_view_item_source_type_play.setVisibility(View.GONE);
                 }
             }
             holder.image_view_item_source_premium.setVisibility(View.GONE);
-            if (playableList.get(position).getPremium() != null) {
-                if (!playableList.get(position).getPremium().equals("1")){
+            if (source.getPremium() != null) {
+                if (!"1".equals(source.getPremium())){
                     holder.image_view_item_source_premium.setVisibility(View.VISIBLE);
                 }
             }
 
             holder.text_view_item_source_size.setVisibility(View.GONE);
-            if (playableList.get(position).getSize() != null) {
-                if (playableList.get(position).getSize().length()>0){
+            if (source.getSize() != null) {
+                if (source.getSize().length()>0){
                     holder.text_view_item_source_size.setVisibility(View.VISIBLE);
-                    holder.text_view_item_source_size.setText(playableList.get(position).getSize());
+                    holder.text_view_item_source_size.setText(source.getSize());
                 }
             }
 
-            if (playableList.get(position).getQuality() != null) {
-                if (playableList.get(position).getQuality().length() >0 ){
+            if (source.getQuality() != null) {
+                if (source.getQuality().length() >0 ){
                     holder.text_view_item_source_quality.setVisibility(View.VISIBLE);
-                    holder.text_view_item_source_quality.setText(playableList.get(position).getQuality());
+                    holder.text_view_item_source_quality.setText(source.getQuality());
 
                 }else{
                     holder.text_view_item_source_quality.setVisibility(View.GONE);
@@ -1658,37 +1679,44 @@ public class SerieActivity extends AppCompatActivity implements PlaylistDownload
             }else{
                 holder.text_view_item_source_quality.setVisibility(View.GONE);
             }
-            switch (playableList.get(position).getType()){
-                case "mov":
-                    holder.image_view_item_source_type_image.setImageDrawable(getResources().getDrawable(R.drawable.ic_mov_file));
-                    break;
-                case "mp4":
-                    holder.image_view_item_source_type_image.setImageDrawable(getResources().getDrawable(R.drawable.ic_mp4_file));
-                    break;
-                case "mkv":
-                    holder.image_view_item_source_type_image.setImageDrawable(getResources().getDrawable(R.drawable.ic_mkv_file));
-                    break;
-                case "webm":
-                    holder.image_view_item_source_type_image.setImageDrawable(getResources().getDrawable(R.drawable.ic_webm_file));
-                    break;
-                case "m3u8":
-                    holder.image_view_item_source_type_image.setImageDrawable(getResources().getDrawable(R.drawable.ic_m3u_file));
-                    break;
-                case "youtube":
-                    holder.image_view_item_source_type_image.setImageDrawable(getResources().getDrawable(R.drawable.ic_youtube));
-                    break;
-                case "embed":
-                    holder.image_view_item_source_type_image.setImageDrawable(getResources().getDrawable(R.drawable.ic_embed_file));
-                    break;
+            String sourceType = source.getType();
+            if (sourceType != null) {
+                switch (sourceType){
+                    case "mov":
+                        holder.image_view_item_source_type_image.setImageDrawable(getResources().getDrawable(R.drawable.ic_mov_file));
+                        break;
+                    case "mp4":
+                        holder.image_view_item_source_type_image.setImageDrawable(getResources().getDrawable(R.drawable.ic_mp4_file));
+                        break;
+                    case "mkv":
+                        holder.image_view_item_source_type_image.setImageDrawable(getResources().getDrawable(R.drawable.ic_mkv_file));
+                        break;
+                    case "webm":
+                        holder.image_view_item_source_type_image.setImageDrawable(getResources().getDrawable(R.drawable.ic_webm_file));
+                        break;
+                    case "m3u8":
+                        holder.image_view_item_source_type_image.setImageDrawable(getResources().getDrawable(R.drawable.ic_m3u_file));
+                        break;
+                    case "youtube":
+                        holder.image_view_item_source_type_image.setImageDrawable(getResources().getDrawable(R.drawable.ic_youtube));
+                        break;
+                    case "embed":
+                        holder.image_view_item_source_type_image.setImageDrawable(getResources().getDrawable(R.drawable.ic_embed_file));
+                        break;
+                    default:
+                        holder.image_view_item_source_type_image.setImageDrawable(getResources().getDrawable(R.drawable.ic_mp4_file));
+                        break;
+                }
             }
 
             holder.image_view_item_source_type_play.setOnClickListener(v-> {
                 if (checkSUBSCRIBED()) {
                     playSource(position);
                 }else {
-                    if (playableList.get(position).getPremium().equals("2")) {
+                    String premium = source.getPremium();
+                    if (premium != null && premium.equals("2")) {
                         showDialog(false);
-                    } else if (playableList.get(position).getPremium().equals("3")) {
+                    } else if (premium != null && premium.equals("3")) {
                         operationAfterAds = 300;
                         current_position_play = position;
                         showDialog(true);
@@ -1702,9 +1730,10 @@ public class SerieActivity extends AppCompatActivity implements PlaylistDownload
                 if (checkSUBSCRIBED()) {
                     openLink(position);
                 }else {
-                    if (playableList.get(position).getPremium().equals("2")) {
+                    String premium = source.getPremium();
+                    if (premium != null && premium.equals("2")) {
                         showDialog(false);
-                    } else if (playableList.get(position).getPremium().equals("3")) {
+                    } else if (premium != null && premium.equals("3")) {
                         operationAfterAds = 300;
                         current_position_play = position;
                         showDialog(true);
@@ -1717,7 +1746,7 @@ public class SerieActivity extends AppCompatActivity implements PlaylistDownload
         }
         @Override
         public int getItemCount() {
-            return playableList.size();
+            return playableList != null ? playableList.size() : 0;
         }
         public class SourceHolder extends RecyclerView.ViewHolder {
             private final ImageView image_view_item_source_type_link;
@@ -1877,7 +1906,7 @@ public class SerieActivity extends AppCompatActivity implements PlaylistDownload
     public class EpisodeAdapter  extends  RecyclerView.Adapter<EpisodeAdapter.EpisodeHolder>{
         private List<Episode> episodeList;
         public EpisodeAdapter(List<Episode> episodeList) {
-            this.episodeList = episodeList;
+            this.episodeList = episodeList != null ? episodeList : new ArrayList<>();
         }
         @Override
         public EpisodeHolder onCreateViewHolder(ViewGroup parent, int viewType) {
@@ -1887,14 +1916,24 @@ public class SerieActivity extends AppCompatActivity implements PlaylistDownload
         }
         @Override
         public void onBindViewHolder(EpisodeHolder holder, final int position) {
-            if (episodeList.get(position).getImage()!=null){
-                Picasso.with(SerieActivity.this).load(episodeList.get(position).getImage()).into(holder.image_view_item_episode_thumbail);
+            // Add null check for episode
+            Episode episode = episodeList.get(position);
+            if (episode == null) {
+                Log.e("SerieActivity", "Episode is null at position: " + position);
+                holder.text_view_item_episode_title.setText("Unknown Episode");
+                holder.image_view_item_episode_play.setEnabled(false);
+                holder.image_view_item_episode_download.setEnabled(false);
+                return;
+            }
+            
+            if (episode.getImage()!=null){
+                Picasso.with(SerieActivity.this).load(episode.getImage()).into(holder.image_view_item_episode_thumbail);
             }else{
                 Picasso.with(SerieActivity.this).load(poster.getImage()).into(holder.image_view_item_episode_thumbail);
             }
-            holder.text_view_item_episode_title.setText(episodeList.get(position).getTitle());
-            if (episodeList.get(position).getDuration() !=  null){
-                holder.text_view_item_episode_duration.setText(episodeList.get(position).getDuration());
+            holder.text_view_item_episode_title.setText(episode.getTitle() != null ? episode.getTitle() : "Episode " + (position + 1));
+            if (episode.getDuration() !=  null){
+                holder.text_view_item_episode_duration.setText(episode.getDuration());
             }
 
             List<Episode> episodes_watched =Hawk.get("episodes_watched");
@@ -1904,8 +1943,11 @@ public class SerieActivity extends AppCompatActivity implements PlaylistDownload
             }
 
             for (int i = 0; i < episodes_watched.size(); i++) {
-                if (episodes_watched.get(i).getId().equals(episodeList.get(position).getId())) {
+                if (episodes_watched.get(i) != null && episode.getId() != null && 
+                    episodes_watched.get(i).getId() != null && 
+                    episodes_watched.get(i).getId().equals(episode.getId())) {
                     exist = true;
+                    break;
                 }
             }
 
@@ -1913,27 +1955,25 @@ public class SerieActivity extends AppCompatActivity implements PlaylistDownload
                 holder.image_view_item_episode_viewed.setVisibility(View.VISIBLE);
             }else {
                 holder.image_view_item_episode_viewed.setVisibility(View.GONE);
-
             }
 
-            holder.text_view_item_episode_description.setText(episodeList.get(position).getDescription());
+            holder.text_view_item_episode_description.setText(episode.getDescription() != null ? episode.getDescription() : "");
             holder.image_view_item_episode_download.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    setDownloadableList(episodeList.get(position));
+                    setDownloadableList(episode);
                 }
             });
             holder.image_view_item_episode_play.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    setPlayableList(episodeList.get(position));
-
+                    setPlayableList(episode);
                 }
             });
         }
         @Override
         public int getItemCount() {
-            return episodeList.size();
+            return episodeList != null ? episodeList.size() : 0;
         }
         public class EpisodeHolder extends RecyclerView.ViewHolder {
 
