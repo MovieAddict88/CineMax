@@ -145,15 +145,55 @@ public class PlayerActivity extends AppCompatActivity {
                 | View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY);
         mScaleGestureDetector = new ScaleGestureDetector(this, new ScaleListener());
         mCastContext = CastContext.getSharedInstance(this);
-        Bundle bundle = getIntent().getExtras() ;
-        vodeoId = bundle.getInt("id");
-        videoUrl = bundle.getString("url");
-        videoKind = bundle.getString("kind");
-        isLive = bundle.getBoolean("isLive");
-        videoType = bundle.getString("type");
-        videoTitle = bundle.getString("title");
-        videoSubTile = bundle.getString("subtitle");
-        videoImage = bundle.getString("image");
+        
+        // Add comprehensive null checks for bundle data
+        try {
+            Bundle bundle = getIntent().getExtras();
+            if (bundle == null) {
+                Log.e("PlayerActivity", "Intent extras bundle is null");
+                finish();
+                return;
+            }
+            
+            // Validate required bundle data
+            if (!bundle.containsKey("id") || !bundle.containsKey("url") || 
+                !bundle.containsKey("type") || !bundle.containsKey("kind")) {
+                Log.e("PlayerActivity", "Missing required bundle data");
+                finish();
+                return;
+            }
+            
+            vodeoId = bundle.getInt("id", -1);
+            videoUrl = bundle.getString("url");
+            videoKind = bundle.getString("kind");
+            isLive = bundle.getBoolean("isLive", false);
+            videoType = bundle.getString("type");
+            videoTitle = bundle.getString("title", "Unknown Title");
+            videoSubTile = bundle.getString("subtitle", "");
+            videoImage = bundle.getString("image", "");
+            
+            // Validate critical data
+            if (videoUrl == null || videoUrl.isEmpty()) {
+                Log.e("PlayerActivity", "Video URL is null or empty");
+                android.widget.Toast.makeText(this, "Unable to play video: Invalid URL", android.widget.Toast.LENGTH_LONG).show();
+                finish();
+                return;
+            }
+            
+            if (videoType == null || videoType.isEmpty()) {
+                Log.w("PlayerActivity", "Video type is null, defaulting to mp4");
+                videoType = "mp4";
+            }
+            
+            Log.d("PlayerActivity", "Starting playback - ID: " + vodeoId + ", URL: " + videoUrl + ", Type: " + videoType + ", Kind: " + videoKind);
+            
+        } catch (Exception e) {
+            Log.e("PlayerActivity", "Error processing bundle data", e);
+            android.widget.Toast.makeText(this, "Unable to start player: " + e.getMessage(), android.widget.Toast.LENGTH_LONG).show();
+            finish();
+            return;
+        }
+        
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
 
         if (savedInstanceState == null) {

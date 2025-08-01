@@ -467,46 +467,73 @@ public class SerieActivity extends AppCompatActivity implements PlaylistDownload
         // Add comprehensive null checks
         if (episode == null) {
             Log.e("SerieActivity", "Episode is null in setPlayableList");
+            selectedEpisode = null;
             return;
         }
         
+        // Enhanced logging for debugging
+        Log.d("SerieActivity", "Setting playable list for episode: " + 
+              (episode.getTitle() != null ? episode.getTitle() : "Unknown Episode"));
+        
         if (episode.getSources() != null && episode.getSources().size() > 0) {
+            Log.d("SerieActivity", "Episode has " + episode.getSources().size() + " sources");
+            
             for (int i = 0; i < episode.getSources().size(); i++) {
-                Source source = episode.getSources().get(i);
-                if (source != null && source.getUrl() != null && !source.getUrl().isEmpty()) {
-                    // Check if source is playable
-                    boolean isPlayable = false;
-                    
-                    // If kind is specified, check it
-                    if (source.getKind() != null) {
-                        isPlayable = source.getKind().equals("both") || source.getKind().equals("play");
+                try {
+                    Source source = episode.getSources().get(i);
+                    if (source != null && source.getUrl() != null && !source.getUrl().trim().isEmpty()) {
+                        // Check if source is playable
+                        boolean isPlayable = false;
+                        
+                        // If kind is specified, check it
+                        if (source.getKind() != null) {
+                            isPlayable = source.getKind().equals("both") || source.getKind().equals("play");
+                        } else {
+                            // If no kind is specified, assume it's playable if it has a valid URL
+                            // This handles sources without the kind field (like vidsrc.net embeds)
+                            isPlayable = true;
+                        }
+                        
+                        // Additional URL validation
+                        String url = source.getUrl().trim();
+                        if (url.startsWith("http://") || url.startsWith("https://")) {
+                            if (isPlayable) {
+                                playableList.add(source);
+                                Log.d("SerieActivity", "Added playable source " + (i+1) + ": " + 
+                                      (source.getTitle() != null ? source.getTitle() : "Unnamed") + " - " + url);
+                            } else {
+                                Log.d("SerieActivity", "Skipping non-playable source: " + 
+                                      (source.getTitle() != null ? source.getTitle() : "Unnamed"));
+                            }
+                        } else {
+                            Log.w("SerieActivity", "Invalid URL format for source " + (i+1) + ": " + url);
+                        }
                     } else {
-                        // If no kind is specified, assume it's playable if it has a valid URL
-                        // This handles sources without the kind field (like vidsrc.net embeds)
-                        isPlayable = true;
+                        Log.w("SerieActivity", "Skipping invalid source at index " + i + 
+                              " (source: " + (source != null ? "not null" : "null") + 
+                              ", url: " + (source != null && source.getUrl() != null ? source.getUrl() : "null") + ")");
                     }
-                    
-                    if (isPlayable) {
-                        playableList.add(source);
-                        Log.d("SerieActivity", "Added playable source: " + source.getTitle() + " - " + source.getUrl());
-                    } else {
-                        Log.d("SerieActivity", "Skipping non-playable source: " + source.getTitle());
-                    }
-                } else {
-                    Log.w("SerieActivity", "Skipping invalid source at index " + i);
+                } catch (Exception e) {
+                    Log.e("SerieActivity", "Error processing source at index " + i, e);
                 }
             }
         } else {
-            Log.w("SerieActivity", "No sources found for episode: " + episode.getTitle());
+            Log.w("SerieActivity", "No sources found for episode: " + 
+                  (episode.getTitle() != null ? episode.getTitle() : "Unknown Episode") + 
+                  " (sources: " + (episode.getSources() != null ? "empty array" : "null") + ")");
         }
 
         // Check if we have any playable sources
         if (playableList.isEmpty()) {
-            Log.e("SerieActivity", "No playable sources found for episode: " + episode.getTitle());
+            Log.e("SerieActivity", "No playable sources found for episode: " + 
+                  (episode.getTitle() != null ? episode.getTitle() : "Unknown Episode"));
             // Show error message to user
             android.widget.Toast.makeText(this, "No playable sources available for this episode", android.widget.Toast.LENGTH_LONG).show();
+            selectedEpisode = null; // Reset selected episode if no playable sources
             return;
         }
+        
+        Log.d("SerieActivity", "Successfully found " + playableList.size() + " playable sources");
 
         // Handle subscription and ads logic
         if (checkSUBSCRIBED()){
@@ -573,6 +600,21 @@ public class SerieActivity extends AppCompatActivity implements PlaylistDownload
                 }
             }
             
+            // Check if any season has episodes (fix for empty seasons issue)
+            boolean hasAnyEpisodes = false;
+            for (Season season : seasonArrayList) {
+                if (season != null && season.getEpisodes() != null && season.getEpisodes().size() > 0) {
+                    hasAnyEpisodes = true;
+                    break;
+                }
+            }
+            
+            if (!hasAnyEpisodes) {
+                Log.w("SerieActivity", "All seasons are empty for series: " + poster.getTitle());
+                showEmptySeasonsState("Episodes are being updated. Please check back later.");
+                return;
+            }
+            
             try {
                 ArrayAdapter<String> filtresAdapter = new ArrayAdapter<String>(SerieActivity.this,
                         R.layout.spinner_layout_season, R.id.textView, countryCodes);
@@ -580,7 +622,7 @@ public class SerieActivity extends AppCompatActivity implements PlaylistDownload
                 spinner_activity_serie_season_list.setAdapter(filtresAdapter);
                 spinner_activity_serie_season_list.setVisibility(View.VISIBLE);
                 
-                Log.d("SerieActivity", "Successfully loaded seasons spinner");
+                Log.d("SerieActivity", "Successfully loaded seasons spinner with episodes");
             } catch (Exception e) {
                 Log.e("SerieActivity", "Error setting up seasons adapter: " + e.getMessage());
                 e.printStackTrace();
@@ -785,29 +827,57 @@ public class SerieActivity extends AppCompatActivity implements PlaylistDownload
         floating_action_button_activity_serie_play.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-
-                if (selectedEpisode==null){
-                    if (seasonArrayList!=null){
-                        if (seasonArrayList.size()>0){
-                            if (seasonArrayList.get(0).getEpisodes()!=null){
-                                if (seasonArrayList.get(0).getEpisodes().size()>0) {
-                                    setPlayableList(seasonArrayList.get(0).getEpisodes().get(0));
+                
+                // Enhanced null checks for episode selection
+                if (selectedEpisode == null) {
+                    Log.d("SerieActivity", "No episode selected, attempting to auto-select first episode");
+                    
+                    if (seasonArrayList != null && seasonArrayList.size() > 0) {
+                        for (int i = 0; i < seasonArrayList.size(); i++) {
+                            if (seasonArrayList.get(i) != null && 
+                                seasonArrayList.get(i).getEpisodes() != null && 
+                                seasonArrayList.get(i).getEpisodes().size() > 0) {
+                                
+                                Episode firstEpisode = seasonArrayList.get(i).getEpisodes().get(0);
+                                if (firstEpisode != null && firstEpisode.getSources() != null && 
+                                    firstEpisode.getSources().size() > 0) {
+                                    setPlayableList(firstEpisode);
+                                    Log.d("SerieActivity", "Auto-selected first episode from season " + i);
+                                    break;
                                 }
                             }
                         }
                     }
+                    
+                    // If still no episode selected, show error
+                    if (selectedEpisode == null) {
+                        Log.e("SerieActivity", "No playable episodes found in any season");
+                        android.widget.Toast.makeText(SerieActivity.this, "No episodes available to play", android.widget.Toast.LENGTH_LONG).show();
+                        return;
+                    }
                 }
-                if(selectedEpisode==null){
+                
+                // Validate selected episode has playable sources
+                if (selectedEpisode.getSources() == null || selectedEpisode.getSources().isEmpty()) {
+                    Log.e("SerieActivity", "Selected episode has no sources");
+                    android.widget.Toast.makeText(SerieActivity.this, "This episode has no playable sources", android.widget.Toast.LENGTH_LONG).show();
+                    return;
+                }
+                
+                // Proceed with playback
+                if (checkSUBSCRIBED()) {
                     showSourcesPlayDialog();
-                }else{
-                    if (checkSUBSCRIBED()){
+                } else {
+                    // Add null check for getPlayas()
+                    String playas = selectedEpisode.getPlayas();
+                    if (playas == null) {
+                        // Default behavior if playas is null
                         showSourcesPlayDialog();
-                    }else{
-                        if (selectedEpisode.getPlayas().equals("2")){
-                            showDialog(false);
-                        }else if(selectedEpisode.getPlayas().equals("3") ){
-                            showDialog(true);
-                            operationAfterAds = 200;
+                    } else if (playas.equals("2")) {
+                        showDialog(false);
+                    } else if (playas.equals("3")) {
+                        showDialog(true);
+                        operationAfterAds = 200;
                         }else{
                             showSourcesPlayDialog();
                         }
