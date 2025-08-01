@@ -2738,13 +2738,44 @@
                             <div class="episode-header">
                                 <div class="episode-title">Episode ${episodeNumber}: ${episode.title || `Episode ${episodeNumber}`}</div>
                                 <div class="episode-meta">${episode.sources?.length || 0} source(s)</div>
+                                <button type="button" class="remove-episode-btn" data-season="${seasonNumber}" data-episode="${episodeNumber}" style="margin-left: 10px; padding: 2px 6px; font-size: 10px; background: var(--danger); color: white; border: none; border-radius: 2px; cursor: pointer;">Remove</button>
                             </div>
                             <div class="episode-sources">
                                 <input type="text" class="episode-source-input" 
                                        value="${episode.sources?.[0]?.url || ''}" 
-                                       placeholder="Episode source URL">
+                                       placeholder="Episode source URL"
+                                       data-season="${seasonNumber}" 
+                                       data-episode="${episodeNumber}">
                             </div>
                         `;
+                        
+                        // Add event listener for source URL changes
+                        const sourceInput = episodeItem.querySelector('.episode-source-input');
+                        sourceInput.addEventListener('input', (e) => {
+                            const seasonIdx = parseInt(e.target.dataset.season) - 1;
+                            const episodeIdx = parseInt(e.target.dataset.episode) - 1;
+                            
+                            if (currentSeriesData.seasons[seasonIdx] && 
+                                currentSeriesData.seasons[seasonIdx].episodes[episodeIdx]) {
+                                
+                                if (!currentSeriesData.seasons[seasonIdx].episodes[episodeIdx].sources) {
+                                    currentSeriesData.seasons[seasonIdx].episodes[episodeIdx].sources = [];
+                                }
+                                
+                                if (currentSeriesData.seasons[seasonIdx].episodes[episodeIdx].sources.length === 0) {
+                                    currentSeriesData.seasons[seasonIdx].episodes[episodeIdx].sources.push({
+                                        id: generateNewId(),
+                                        type: 'video',
+                                        title: `Episode ${episodeIdx + 1} 1080p`,
+                                        quality: '1080p',
+                                        url: ''
+                                    });
+                                }
+                                
+                                currentSeriesData.seasons[seasonIdx].episodes[episodeIdx].sources[0].url = e.target.value;
+                            }
+                        });
+                        
                         episodeList.appendChild(episodeItem);
                     }
                     
