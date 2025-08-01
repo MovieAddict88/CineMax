@@ -19,6 +19,10 @@ public class Episode implements Parcelable {
     @Expose
     private String description;
 
+    @SerializedName("episode_number")
+    @Expose
+    private Integer episodeNumber;
+
     @SerializedName("downloadas")
     @Expose
     private String downloadas;
@@ -49,6 +53,11 @@ public class Episode implements Parcelable {
         }
         title = in.readString();
         description = in.readString();
+        if (in.readByte() == 0) {
+            episodeNumber = null;
+        } else {
+            episodeNumber = in.readInt();
+        }
         downloadas = in.readString();
         playas = in.readString();
         duration = in.readString();
@@ -66,6 +75,12 @@ public class Episode implements Parcelable {
         }
         dest.writeString(title);
         dest.writeString(description);
+        if (episodeNumber == null) {
+            dest.writeByte((byte) 0);
+        } else {
+            dest.writeByte((byte) 1);
+            dest.writeInt(episodeNumber);
+        }
         dest.writeString(downloadas);
         dest.writeString(playas);
         dest.writeString(duration);
@@ -112,6 +127,14 @@ public class Episode implements Parcelable {
 
     public void setDescription(String description) {
         this.description = description;
+    }
+
+    public Integer getEpisodeNumber() {
+        return episodeNumber;
+    }
+
+    public void setEpisodeNumber(Integer episodeNumber) {
+        this.episodeNumber = episodeNumber;
     }
 
     public String getImage() {

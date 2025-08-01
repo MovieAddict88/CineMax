@@ -795,7 +795,7 @@ public class SerieActivity extends AppCompatActivity implements PlaylistDownload
             intent.putExtra("id",selectedEpisode.getId());
             intent.putExtra("url",playableList.get(position).getUrl());
             
-            // Fix video type for streaming URLs
+            // Enhanced video type detection for streaming URLs
             String videoType = playableList.get(position).getType();
             String url = playableList.get(position).getUrl();
             if (url != null) {
@@ -803,6 +803,15 @@ public class SerieActivity extends AppCompatActivity implements PlaylistDownload
                     videoType = "m3u8";  // Player expects "m3u8" for HLS streams
                 } else if (url.contains(".mpd")) {
                     videoType = "dash";  // Player expects "dash" for MPD/DASH streams
+                } else if (url.contains(".mp4") || url.contains(".avi") || url.contains(".mkv")) {
+                    videoType = "mp4";  // Player expects "mp4" for direct video files
+                } else if (url.contains("vidsrc.net") || url.contains("embed")) {
+                    // For embed URLs, we need to handle them differently
+                    // Redirect to embed activity instead of direct player
+                    Intent embedIntent = new Intent(SerieActivity.this,EmbedActivity.class);
+                    embedIntent.putExtra("url",url);
+                    startActivity(embedIntent);
+                    return;
                 }
             }
             intent.putExtra("type", videoType);

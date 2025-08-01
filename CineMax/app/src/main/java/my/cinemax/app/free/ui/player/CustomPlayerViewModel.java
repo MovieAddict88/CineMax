@@ -160,7 +160,20 @@ public class CustomPlayerViewModel extends BaseObservable implements ExoPlayer.E
                 Util.getUserAgent(mActivity, "ExoPlayer2"), bandwidthMeter);
         // Produces Extractor instances for parsing the media data.
         // This is the MediaSource representing the media to be played.
-        Uri videoUri = Uri.parse(mUrl);
+        Uri videoUri;
+        try {
+            videoUri = Uri.parse(mUrl);
+        } catch (Exception e) {
+            Log.e("CustomPlayerViewModel", "Invalid URL: " + mUrl, e);
+            if (mActivity != null) {
+                android.widget.Toast.makeText(mActivity, "Invalid video URL. Please try again.", android.widget.Toast.LENGTH_LONG).show();
+            }
+            isLoadingNow = false;
+            notifyPropertyChanged(BR.loaidingNow);
+            setLoadingComplete(false);
+            return;
+        }
+        
         MediaSource mediaSource1;
         int sourceSize = 0;
 
@@ -218,11 +231,21 @@ public class CustomPlayerViewModel extends BaseObservable implements ExoPlayer.E
 
 
         // Prepare the player with the source.
-        mExoPlayer.prepare(mediaSource,false,false);
-        mExoPlayer.seekTo(seekTo);
-        mExoPlayer.addListener(this);
-        mExoPlayer.setPlayWhenReady(SHOULD_AUTO_PLAY);
-       // mExoPlayer.setPlayWhenReady(true);
+        try {
+            mExoPlayer.prepare(mediaSource,false,false);
+            mExoPlayer.seekTo(seekTo);
+            mExoPlayer.addListener(this);
+            mExoPlayer.setPlayWhenReady(SHOULD_AUTO_PLAY);
+        } catch (Exception e) {
+            Log.e("CustomPlayerViewModel", "Error preparing player: " + e.getMessage(), e);
+            if (mActivity != null) {
+                android.widget.Toast.makeText(mActivity, "Error preparing video player. Please try again.", android.widget.Toast.LENGTH_LONG).show();
+            }
+            // Reset loading state
+            isLoadingNow = false;
+            notifyPropertyChanged(BR.loaidingNow);
+            setLoadingComplete(false);
+        }
 
     }
 
@@ -520,7 +543,31 @@ public class CustomPlayerViewModel extends BaseObservable implements ExoPlayer.E
 
     @Override
     public void onPlayerError(ExoPlaybackException error) {
-
+        Log.e("CustomPlayerViewModel", "Player error: " + error.getMessage(), error);
+        
+        // Handle different types of errors
+        if (error.type == ExoPlaybackException.TYPE_SOURCE) {
+            Log.e("CustomPlayerViewModel", "Source error: " + error.getSourceException().getMessage());
+            // Show user-friendly error message
+            if (mActivity != null) {
+                android.widget.Toast.makeText(mActivity, "Video source error. Please try again.", android.widget.Toast.LENGTH_LONG).show();
+            }
+        } else if (error.type == ExoPlaybackException.TYPE_RENDERER) {
+            Log.e("CustomPlayerViewModel", "Renderer error: " + error.getRendererException().getMessage());
+            if (mActivity != null) {
+                android.widget.Toast.makeText(mActivity, "Video playback error. Please try again.", android.widget.Toast.LENGTH_LONG).show();
+            }
+        } else if (error.type == ExoPlaybackException.TYPE_UNEXPECTED) {
+            Log.e("CustomPlayerViewModel", "Unexpected error: " + error.getUnexpectedException().getMessage());
+            if (mActivity != null) {
+                android.widget.Toast.makeText(mActivity, "Unexpected error occurred. Please try again.", android.widget.Toast.LENGTH_LONG).show();
+            }
+        }
+        
+        // Reset player state
+        isLoadingNow = false;
+        notifyPropertyChanged(BR.loaidingNow);
+        setLoadingComplete(false);
     }
 
     @Override
