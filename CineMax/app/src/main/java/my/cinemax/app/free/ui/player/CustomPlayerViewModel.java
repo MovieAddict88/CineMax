@@ -195,6 +195,15 @@ public class CustomPlayerViewModel extends BaseObservable implements ExoPlayer.E
                      .createMediaSource(videoUri);
             // mediaSource1 = new HlsMediaSource(videoUri, dataSourceFactory,  new DefaultDashChunkSource.Factory(dataSourceFactory), null,null);
             sourceSize++;
+        }else if (videoType.equals("embed")){
+            // For embed URLs, try to extract the actual video URL or handle as fallback
+            // For now, we'll try to play it as a regular video source
+            // If it fails, the error handler will show a fallback message
+            ExtractorsFactory extractorsFactory = new DefaultExtractorsFactory();
+            mediaSource1 =  new ProgressiveMediaSource.Factory(dataSourceFactory)
+                    .setExtractorsFactory(extractorsFactory)
+                    .createMediaSource(videoUri);
+            sourceSize++;
         }else{
             ExtractorsFactory extractorsFactory = new DefaultExtractorsFactory();
             //  mediaSource1 = new ExtractorMediaSource(videoUri, dataSourceFactory, extractorsFactory, null, null);
@@ -545,12 +554,22 @@ public class CustomPlayerViewModel extends BaseObservable implements ExoPlayer.E
     public void onPlayerError(ExoPlaybackException error) {
         Log.e("CustomPlayerViewModel", "Player error: " + error.getMessage(), error);
         
+        // Check if this is an embed URL that failed to play
+        boolean isEmbedUrl = mUrl != null && (mUrl.contains("vidsrc.net") || mUrl.contains("embed") || 
+                                             mUrl.contains("iframe") || mUrl.contains("player"));
+        
         // Handle different types of errors
         if (error.type == ExoPlaybackException.TYPE_SOURCE) {
             Log.e("CustomPlayerViewModel", "Source error: " + error.getSourceException().getMessage());
-            // Show user-friendly error message
-            if (mActivity != null) {
-                android.widget.Toast.makeText(mActivity, "Video source error. Please try again.", android.widget.Toast.LENGTH_LONG).show();
+            
+            if (isEmbedUrl && mActivity != null) {
+                // For embed URLs, show option to open in WebView
+                showEmbedFallbackDialog();
+            } else {
+                // Show user-friendly error message
+                if (mActivity != null) {
+                    android.widget.Toast.makeText(mActivity, "Video source error. Please try again.", android.widget.Toast.LENGTH_LONG).show();
+                }
             }
         } else if (error.type == ExoPlaybackException.TYPE_RENDERER) {
             Log.e("CustomPlayerViewModel", "Renderer error: " + error.getRendererException().getMessage());
@@ -568,6 +587,26 @@ public class CustomPlayerViewModel extends BaseObservable implements ExoPlayer.E
         isLoadingNow = false;
         notifyPropertyChanged(BR.loaidingNow);
         setLoadingComplete(false);
+    }
+    
+    private void showEmbedFallbackDialog() {
+        if (mActivity == null) return;
+        
+        new androidx.appcompat.app.AlertDialog.Builder(mActivity)
+            .setTitle("Video Playback Issue")
+            .setMessage("This video requires a different player. Would you like to open it in a web browser?")
+            .setPositiveButton("Open in Browser", (dialog, which) -> {
+                // Open in EmbedActivity (WebView)
+                android.content.Intent intent = new android.content.Intent(mActivity, 
+                    my.cinemax.app.free.ui.activities.EmbedActivity.class);
+                intent.putExtra("url", mUrl);
+                mActivity.startActivity(intent);
+            })
+            .setNegativeButton("Cancel", (dialog, which) -> {
+                dialog.dismiss();
+            })
+            .setCancelable(true)
+            .show();
     }
 
     @Override
