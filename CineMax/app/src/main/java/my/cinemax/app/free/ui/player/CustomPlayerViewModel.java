@@ -196,13 +196,14 @@ public class CustomPlayerViewModel extends BaseObservable implements ExoPlayer.E
             // mediaSource1 = new HlsMediaSource(videoUri, dataSourceFactory,  new DefaultDashChunkSource.Factory(dataSourceFactory), null,null);
             sourceSize++;
         }else if (videoType.equals("embed")){
-            // For embed URLs, try to play as regular video first
-            // If it fails, the error handler will show WebView fallback
-            ExtractorsFactory extractorsFactory = new DefaultExtractorsFactory();
-            mediaSource1 =  new ProgressiveMediaSource.Factory(dataSourceFactory)
-                    .setExtractorsFactory(extractorsFactory)
-                    .createMediaSource(videoUri);
-            sourceSize++;
+            // For embed URLs, show fallback dialog immediately since ExoPlayer can't handle them
+            Log.d("CustomPlayerViewModel", "Embed URL detected, showing fallback options: " + mUrl);
+            if (mActivity != null) {
+                mActivity.runOnUiThread(() -> {
+                    showEmbedFallbackDialog();
+                });
+            }
+            return; // Don't continue with ExoPlayer preparation
         }else{
             ExtractorsFactory extractorsFactory = new DefaultExtractorsFactory();
             //  mediaSource1 = new ExtractorMediaSource(videoUri, dataSourceFactory, extractorsFactory, null, null);
@@ -588,124 +589,21 @@ public class CustomPlayerViewModel extends BaseObservable implements ExoPlayer.E
         setLoadingComplete(false);
     }
     
-    /**
-     * Extract direct video URL from embed URL and prepare player
-     */
-    private void extractAndPrepareVideo(String embedUrl, Subtitle subtitle, long seekTo, DataSource.Factory dataSourceFactory) {
-        // Show loading state
-        isLoadingNow = true;
-        notifyPropertyChanged(BR.loaidingNow);
-        
-        my.cinemax.app.free.utils.VidsrcExtractor.extractDirectUrl(embedUrl, new my.cinemax.app.free.utils.VidsrcExtractor.ExtractionListener() {
-            @Override
-            public void onSuccess(String directUrl, String extractedVideoType) {
-                if (mActivity != null) {
-                    mActivity.runOnUiThread(() -> {
-                        Log.d("CustomPlayerViewModel", "URL extraction successful: " + directUrl + " (Type: " + extractedVideoType + ")");
-                        // Update URL and type with extracted values
-                        mUrl = directUrl;
-                        videoType = extractedVideoType;
-                        
-                        // Now prepare player with extracted URL
-                        preparePlayerWithExtractedUrl(subtitle, seekTo, dataSourceFactory);
-                    });
-                }
-            }
-            
-            @Override
-            public void onError(String error) {
-                if (mActivity != null) {
-                    mActivity.runOnUiThread(() -> {
-                        Log.w("CustomPlayerViewModel", "URL extraction failed: " + error + ". Showing fallback options.");
-                        // Reset loading state
-                        isLoadingNow = false;
-                        notifyPropertyChanged(BR.loaidingNow);
-                        setLoadingComplete(false);
-                        
-                        // Show fallback dialog
-                        showEmbedFallbackDialog();
-                    });
-                }
-            }
-        });
-    }
+
     
-    /**
-     * Prepare player with the extracted direct URL
-     */
-    private void preparePlayerWithExtractedUrl(Subtitle subtitle, long seekTo, DataSource.Factory dataSourceFactory) {
-        try {
-            Uri videoUri = Uri.parse(mUrl);
-            MediaSource mediaSource1;
-            
-            // Create media source based on extracted video type
-            if (videoType.equals("m3u8")) {
-                mediaSource1 = new HlsMediaSource.Factory(dataSourceFactory)
-                        .createMediaSource(videoUri);
-            } else if (videoType.equals("dash")) {
-                mediaSource1 = new DashMediaSource.Factory(dataSourceFactory)
-                        .createMediaSource(videoUri);
-            } else {
-                // Default to progressive (MP4)
-                ExtractorsFactory extractorsFactory = new DefaultExtractorsFactory();
-                mediaSource1 = new ProgressiveMediaSource.Factory(dataSourceFactory)
-                        .setExtractorsFactory(extractorsFactory)
-                        .createMediaSource(videoUri);
-            }
-            
-            // Handle subtitles
-            SingleSampleMediaSource subtitleSource = null;
-            int sourceSize = 1;
-            if (subtitle != null) {
-                if (subtitle.getType().equals("srt")) {
-                    Format textFormat = Format.createTextSampleFormat(null, MimeTypes.APPLICATION_SUBRIP,
-                            null, Format.NO_VALUE, Format.NO_VALUE, "ar", null, Format.OFFSET_SAMPLE_RELATIVE);
-                    subtitleSource = new SingleSampleMediaSource.Factory(dataSourceFactory)
-                            .createMediaSource(Uri.parse(subtitle.getUrl()), textFormat, C.TIME_UNSET);
-                } else if (subtitle.getType().equals("vtt")) {
-                    subtitleSource = new SingleSampleMediaSource(Uri.parse(subtitle.getUrl()), dataSourceFactory, 
-                            Format.createTextSampleFormat(null, MimeTypes.TEXT_VTT, Format.NO_VALUE, "en", null), C.TIME_UNSET);
-                } else if (subtitle.getType().equals("ass")) {
-                    subtitleSource = new SingleSampleMediaSource(Uri.parse(subtitle.getUrl()), dataSourceFactory, 
-                            Format.createTextSampleFormat(null, MimeTypes.TEXT_SSA, Format.NO_VALUE, "en", null), C.TIME_UNSET);
-                }
-                if (subtitleSource != null) sourceSize++;
-            }
-            
-            // Create merged media source
-            MediaSource[] mediaSources = new MediaSource[sourceSize];
-            mediaSources[0] = mediaSource1;
-            if (subtitleSource != null) {
-                mediaSources[1] = subtitleSource;
-            }
-            
-            MediaSource mediaSource = new MergingMediaSource(mediaSources);
-            
-            // Prepare player
-            mExoPlayer.prepare(mediaSource, false, false);
-            mExoPlayer.seekTo(seekTo);
-            mExoPlayer.addListener(this);
-            mExoPlayer.setPlayWhenReady(SHOULD_AUTO_PLAY);
-            
-            Log.d("CustomPlayerViewModel", "Player prepared successfully with extracted URL");
-            
-        } catch (Exception e) {
-            Log.e("CustomPlayerViewModel", "Error preparing player with extracted URL", e);
-            // Reset loading state and show fallback
-            isLoadingNow = false;
-            notifyPropertyChanged(BR.loaidingNow);
-            setLoadingComplete(false);
-            showEmbedFallbackDialog();
-        }
-    }
+    private my.cinemax.app.free.Provider.EmbedWebServer embedWebServer;
     
     private void showEmbedFallbackDialog() {
         if (mActivity == null) return;
         
         new androidx.appcompat.app.AlertDialog.Builder(mActivity)
-            .setTitle("Video Playback Issue")
-            .setMessage("This video requires a different player. Would you like to open it in a web browser?")
-            .setPositiveButton("Open in Browser", (dialog, which) -> {
+            .setTitle("Video Playback Options")
+            .setMessage("This video requires special handling. Choose playback method:")
+            .setPositiveButton("HTML Player", (dialog, which) -> {
+                // Use NanoHTTPD HTML player
+                startNanoHTTPDPlayer();
+            })
+            .setNeutralButton("WebView", (dialog, which) -> {
                 // Open in EmbedActivity (WebView)
                 android.content.Intent intent = new android.content.Intent(mActivity, 
                     my.cinemax.app.free.ui.activities.EmbedActivity.class);
@@ -717,6 +615,49 @@ public class CustomPlayerViewModel extends BaseObservable implements ExoPlayer.E
             })
             .setCancelable(true)
             .show();
+    }
+    
+    private void startNanoHTTPDPlayer() {
+        try {
+            // Stop any existing server
+            if (embedWebServer != null) {
+                embedWebServer.stop();
+            }
+            
+            // Find available port
+            int port = findAvailablePort();
+            embedWebServer = new my.cinemax.app.free.Provider.EmbedWebServer(port, mUrl, videoTitle);
+            embedWebServer.start();
+            
+            Log.d("CustomPlayerViewModel", "Started NanoHTTPD server on port " + port);
+            
+            // Open in EmbedActivity with local server URL
+            String localUrl = embedWebServer.getServerUrl();
+            android.content.Intent intent = new android.content.Intent(mActivity, 
+                my.cinemax.app.free.ui.activities.EmbedActivity.class);
+            intent.putExtra("url", localUrl);
+            mActivity.startActivity(intent);
+            
+        } catch (Exception e) {
+            Log.e("CustomPlayerViewModel", "Error starting NanoHTTPD server", e);
+            if (mActivity != null) {
+                android.widget.Toast.makeText(mActivity, "Failed to start HTML player", android.widget.Toast.LENGTH_LONG).show();
+            }
+        }
+    }
+    
+    private int findAvailablePort() {
+        // Find available port starting from 8080
+        for (int port = 8080; port <= 8099; port++) {
+            try {
+                java.net.ServerSocket socket = new java.net.ServerSocket(port);
+                socket.close();
+                return port;
+            } catch (java.io.IOException e) {
+                // Port in use, try next
+            }
+        }
+        return 8080; // Default fallback
     }
 
     @Override
