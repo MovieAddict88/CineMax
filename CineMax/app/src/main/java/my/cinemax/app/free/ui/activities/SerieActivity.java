@@ -835,18 +835,50 @@ public class SerieActivity extends AppCompatActivity implements PlaylistDownload
     public void playSource(int position){
         addView();
 
-        if (playableList.get(position).getType().equals("youtube")){
+        // Get the source details
+        if (position < 0 || position >= playableList.size()) {
+            Log.e("SerieActivity", "Invalid position: " + position + " for playableList size: " + playableList.size());
+            Toast.makeText(this, "Invalid source selected", Toast.LENGTH_SHORT).show();
+            return;
+        }
+        
+        Source source = playableList.get(position);
+        if (source == null) {
+            Log.e("SerieActivity", "Source is null at position: " + position);
+            Toast.makeText(this, "Source not available", Toast.LENGTH_SHORT).show();
+            return;
+        }
+        
+        String url = source.getUrl();
+        String type = source.getType();
+        
+        if (url == null || url.isEmpty()) {
+            Log.e("SerieActivity", "URL is null or empty for source: " + source.getTitle());
+            Toast.makeText(this, "Video URL not available", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        // Add logging for debugging
+        Log.d("SerieActivity", "Playing source: " + source.getTitle() + " URL: " + url + " Type: " + type);
+
+        // Check for embed URLs first (vidsrc.net, embed links)
+        if (url != null && (url.contains("vidsrc.net") || url.contains("embed") || 
+            url.contains("iframe") || url.contains("player") || "embed".equals(type))) {
+            // For embed URLs, redirect to embed activity
+            Log.d("SerieActivity", "Redirecting to EmbedActivity for URL: " + url);
+            Intent embedIntent = new Intent(SerieActivity.this,EmbedActivity.class);
+            embedIntent.putExtra("url",url);
+            startActivity(embedIntent);
+            return;
+        }
+
+        if ("youtube".equals(type)){
             Intent intent = new Intent(SerieActivity.this,YoutubeActivity.class);
-            intent.putExtra("url",playableList.get(position).getUrl());
+            intent.putExtra("url",url);
             startActivity(intent);
             return;
         }
-        if (playableList.get(position).getType().equals("embed")){
-            Intent intent = new Intent(SerieActivity.this,EmbedActivity.class);
-            intent.putExtra("url",playableList.get(position).getUrl());
-            startActivity(intent);
-            return;
-        }
+
         if (mCastSession == null) {
             mCastSession = mSessionManager.getCurrentCastSession();
         }
@@ -855,21 +887,12 @@ public class SerieActivity extends AppCompatActivity implements PlaylistDownload
         } else {
             Intent intent = new Intent(SerieActivity.this,PlayerActivity.class);
             intent.putExtra("id",selectedEpisode.getId());
-            intent.putExtra("url",playableList.get(position).getUrl());
+            intent.putExtra("url",url);
             
             // Enhanced video type detection for streaming URLs
-            String videoType = playableList.get(position).getType();
-            String url = playableList.get(position).getUrl();
+            String videoType = type;
             if (url != null) {
-                // Check for embed URLs first (vidsrc.net, embed links)
-                if (url.contains("vidsrc.net") || url.contains("embed") || 
-                    url.contains("iframe") || url.contains("player")) {
-                    // For embed URLs, redirect to embed activity
-                    Intent embedIntent = new Intent(SerieActivity.this,EmbedActivity.class);
-                    embedIntent.putExtra("url",url);
-                    startActivity(embedIntent);
-                    return;
-                } else if (url.contains(".m3u8")) {
+                if (url.contains(".m3u8")) {
                     videoType = "m3u8";  // Player expects "m3u8" for HLS streams
                 } else if (url.contains(".mpd")) {
                     videoType = "dash";  // Player expects "dash" for MPD/DASH streams
