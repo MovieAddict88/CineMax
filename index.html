@@ -1836,23 +1836,48 @@
                 (jsonData.movies || []).forEach(movie => {
                     if (movie.genres && movie.genres.length > 0) {
                         movie.genres.forEach(genre => {
-                            if (genre.title && genre.title.trim() !== '') {
-                                const key = genre.title.toLowerCase();
+                            const genreName = genre.name || genre.title; // Support both name and title
+                            if (genreName && genreName.trim() !== '') {
+                                const key = genreName.toLowerCase();
                                 if (!genreMap.has(key)) {
                                     genreMap.set(key, {
                                         id: genreMap.size + 1,
-                                        title: genre.title,
+                                        title: genreName,  // Root-level genres use "title"
                                         posters: []
                                     });
                                 }
                                 
-                                // Add movie poster to genre
+                                // Add complete movie data to genre
                                 const genreData = genreMap.get(key);
                                 if (movie.image && !genreData.posters.find(p => p.id === movie.id)) {
                                     genreData.posters.push({
                                         id: movie.id,
                                         title: movie.title,
-                                        image: movie.image
+                                        type: movie.type || 'movie',
+                                        label: movie.label || 'Movie',
+                                        sublabel: movie.sublabel || movie.year || 'N/A',
+                                        imdb: movie.imdb || '0.0',
+                                        downloadas: movie.downloadas || movie.title?.toLowerCase().replace(/[^a-z0-9]/g, '-') || '',
+                                        comment: movie.comment !== undefined ? movie.comment : true,
+                                        playas: movie.playas || 'video',
+                                        description: movie.description || '',
+                                        classification: movie.classification || 'PG-13',
+                                        year: movie.year || 'N/A',
+                                        duration: movie.duration || '00:00',
+                                        rating: movie.rating || 0,
+                                        image: movie.image,
+                                        cover: movie.cover || movie.image || '',
+                                        genres: movie.genres || [],
+                                        actors: movie.actors || [],
+                                        views: movie.views || 0,
+                                        created_at: movie.created_at || new Date().toISOString().split('T')[0],
+                                        sources: movie.sources || [],
+                                        trailer: movie.trailer || null,
+                                        subtitles: movie.subtitles || [],
+                                        comments: movie.comments || [],
+                                        downloads: movie.downloads || 0,
+                                        shares: movie.shares || 0,
+                                        ...(movie.type === 'series' && { seasons: movie.seasons || [] })
                                     });
                                 }
                             }
@@ -3046,7 +3071,10 @@
                     duration: movieData.runtime ? `${Math.floor(movieData.runtime / 60)}:${(movieData.runtime % 60).toString().padStart(2, '0')}` : '00:00',
                     rating: movieData.vote_average || 0,
                     created_at: new Date().toISOString().split('T')[0],
-                    genres: movieData.genres || [],
+                    genres: (movieData.genres || []).map(g => ({
+                        id: g.id,
+                        name: g.name || g.title  // Ensure "name" field for movie genres
+                    })),
                     actors: actors,
                     subtitles: [],
                     comments: []
@@ -3107,7 +3135,10 @@
                     duration: '00:00',
                     rating: seriesData.vote_average || 0,
                     created_at: new Date().toISOString().split('T')[0],
-                    genres: seriesData.genres || [],
+                    genres: (seriesData.genres || []).map(g => ({
+                        id: g.id,
+                        name: g.name || g.title  // Ensure "name" field for series genres
+                    })),
                     actors: actors,
                     subtitles: [],
                     comments: [],
@@ -3135,8 +3166,11 @@
                     movieCoverInput.value = movieData.backdrop_path ? 
                         `https://image.tmdb.org/t/p/original${movieData.backdrop_path}` : '';
                     
-                    // Auto-add genres from TMDb
-                    currentMovieGenres = movieData.genres || [];
+                    // Auto-add genres from TMDb (convert to CineMax format)
+                    currentMovieGenres = (movieData.genres || []).map(genre => ({
+                        id: genre.id,
+                        name: genre.name || genre.title  // Ensure "name" field for movie genres
+                    }));
                     console.log('Auto-added genres:', currentMovieGenres);
                     
                     // Auto-add actors from TMDb credits
