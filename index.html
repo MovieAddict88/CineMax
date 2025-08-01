@@ -550,88 +550,86 @@
         
         /* Seasons & Episodes */
         .season-card {
-            background: #f8f9fa;
+            border: 1px solid #dce4ec;
             border-radius: 8px;
             padding: 15px;
             margin-bottom: 15px;
-            border-left: 4px solid var(--primary);
+            background: #f8f9fa;
         }
         
         .season-header {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 10px;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #dce4ec;
         }
         
-        .episode-list {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
-            gap: 10px;
+        .season-header h4 {
+            margin: 0;
+            color: var(--dark);
+            font-size: 1.1rem;
+        }
+        
+        .btn-danger-small {
+            background-color: var(--danger);
+            color: white;
+            border: none;
+            border-radius: 4px;
+            padding: 4px 8px;
+            cursor: pointer;
+            font-size: 0.8rem;
+            transition: background-color 0.3s ease;
+        }
+        
+        .btn-danger-small:hover {
+            background-color: #c0392b;
         }
         
         .episode-item {
-            background-color: white;
+            border: 1px solid #e9ecef;
             border-radius: 6px;
-            padding: 12px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+            padding: 10px;
+            margin-bottom: 10px;
+            background: white;
         }
         
         .episode-header {
             display: flex;
             justify-content: space-between;
+            align-items: center;
             margin-bottom: 8px;
         }
         
         .episode-title {
             font-weight: 600;
-        }
-        
-        .episode-meta {
-            color: var(--gray);
+            color: var(--dark);
             font-size: 0.9rem;
         }
         
-        .episode-sources {
-            margin-top: 8px;
+        .episode-details {
+            display: flex;
+            gap: 10px;
         }
         
-        .episode-sources input {
-            width: 100%;
-            padding: 8px 12px;
-            border: 1px solid #ddd;
+        .episode-details input {
+            flex: 1;
+            padding: 8px 10px;
+            border: 1px solid #dce4ec;
             border-radius: 4px;
+            font-size: 0.9rem;
         }
         
-        .no-results, .no-seasons {
+        .no-seasons, .no-episodes {
             text-align: center;
-            padding: 40px 20px;
+            padding: 20px;
             color: var(--gray);
+            font-style: italic;
         }
         
-        .no-results i {
-            font-size: 3rem;
-            margin-bottom: 15px;
-            opacity: 0.5;
-        }
-        
-        .no-results h3 {
+        .episodes-container {
             margin-bottom: 10px;
-            color: var(--dark);
-        }
-        
-        .add-episode-btn {
-            background-color: var(--primary);
-            color: white;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-            padding: 5px 10px;
-            font-size: 12px;
-        }
-        
-        .add-episode-btn:hover {
-            background-color: #2980b9;
         }
 
         /* Responsive */
@@ -2384,199 +2382,159 @@
             // OLD DUPLICATE FORM HANDLER REMOVED - Using the new one above
             
             function saveMovie(id) {
-                console.log('Saving movie with ID:', id);
-                console.log('Current movie sources:', currentMovieSources);
+                console.log('=== SAVING MOVIE ===');
                 
-                const entryData = {
+                const newId = id || generateNewId();
+                const movieData = {
+                    id: parseInt(newId),
                     type: 'movie',
                     title: movieTitleInput.value.trim(),
-                    year: movieYearInput.value.trim(),
-                    description: movieDescriptionInput.value.trim(),
-                    image: movieImageInput.value.trim(),
-                    cover: movieCoverInput.value.trim(),
-                    trailer: movieTrailerInput.value.trim() ? { 
+                    year: movieYearInput.value.trim() || new Date().getFullYear().toString(),
+                    description: movieDescriptionInput.value.trim() || '',
+                    image: movieImageInput.value.trim() || '',
+                    cover: movieCoverInput.value.trim() || movieImageInput.value.trim() || '',
+                    trailer: movieTrailerInput.value.trim() ? {
                         id: generateNewId(),
                         type: 'video',
                         title: `${movieTitleInput.value.trim()} Trailer`,
-                        url: movieTrailerInput.value.trim() 
+                        url: movieTrailerInput.value.trim()
                     } : null,
-                    sources: currentMovieSources.length > 0 ? currentMovieSources : [],
+                    sources: currentMovieSources || [],
                     label: 'Movie',
-                    sublabel: movieYearInput.value.trim() || 'N/A',
+                    sublabel: movieYearInput.value.trim() || new Date().getFullYear().toString(),
                     imdb: '0.0',
                     downloadas: movieTitleInput.value.trim().toLowerCase().replace(/[^a-z0-9]/g, '-'),
                     comment: true,
                     playas: 'video',
-                    classification: 'N/A',
+                    classification: 'PG-13',
                     duration: '00:00',
                     rating: 0,
+                    created_at: new Date().toISOString().split('T')[0],
+                    genres: currentMovieGenres || [],
+                    actors: currentMovieActors || [],
+                    subtitles: [],
+                    comments: [],
                     views: 0,
                     downloads: 0,
-                    shares: 0,
-                    created_at: new Date().toISOString().split('T')[0],
-                    genres: currentMovieGenres.length > 0 ? currentMovieGenres : [],
-                    actors: [],
-                    subtitles: [],
-                    comments: []
+                    shares: 0
                 };
                 
-                console.log('Movie data to save:', entryData);
+                console.log('Movie data to save:', movieData);
                 
                 if (id) {
+                    // Update existing movie
                     const index = jsonData.movies.findIndex(m => m.id == id);
-                    if (index > -1) {
-                        jsonData.movies[index] = { ...jsonData.movies[index], ...entryData };
+                    if (index !== -1) {
+                        jsonData.movies[index] = movieData;
                         console.log('Updated existing movie at index:', index);
+                    } else {
+                        jsonData.movies.push(movieData);
+                        console.log('Added new movie (ID not found)');
                     }
                 } else {
-                    const newId = generateNewId();
-                    jsonData.movies.push({ id: newId, ...entryData });
-                    console.log('Added new movie with ID:', newId);
+                    // Add new movie
+                    jsonData.movies.push(movieData);
+                    console.log('Added new movie');
                 }
                 
-                console.log('Total movies after save:', jsonData.movies.length);
+                // Reset form
+                resetMovieForm();
+                console.log('Movie saved successfully');
             }
             
             function saveSeries(id) {
-                // Collect season/episode data from the form
-                const seasons = [];
-                const seasonElements = document.querySelectorAll('.season-card');
+                console.log('=== SAVING SERIES ===');
                 
-                for (const seasonElement of seasonElements) {
-                    const seasonNumber = parseInt(seasonElement.dataset.season);
-                    const episodes = [];
-                    const episodeElements = seasonElement.querySelectorAll('.episode-item');
-                    
-                    for (const episodeElement of episodeElements) {
-                        const episodeNumber = parseInt(episodeElement.dataset.episode);
-                        const sourceUrl = episodeElement.querySelector('.episode-sources input').value.trim();
-                        
-                        if (sourceUrl) {
-                            const titleElement = episodeElement.querySelector('.episode-title');
-                            const episodeTitle = titleElement ? titleElement.textContent.replace(/^Episode \d+: /, '') : `Episode ${episodeNumber}`;
-                            
-                            episodes.push({
-                                id: generateNewId(),
-                                title: episodeTitle,
-                                episode_number: episodeNumber,
-                                image: '',
-                                duration: '45:00',
-                                views: 0,
-                                downloads: 0,
-                                sources: [{ 
-                                    id: generateNewId(),
-                                    type: 'video', 
-                                    title: `${episodeTitle} 1080p`,
-                                    quality: '1080p',
-                                    url: sourceUrl 
-                                }],
-                                subtitles: []
-                            });
-                        }
-                    }
-                    
-                    if (episodes.length > 0) {
-                        seasons.push({
-                            id: generateNewId(),
-                            title: `Season ${seasonNumber}`,
-                            episodes: episodes
-                        });
-                    }
-                }
-                
-                const entryData = {
+                const newId = id || generateNewId();
+                const seriesData = {
+                    id: parseInt(newId),
                     type: 'series',
                     title: seriesTitleInput.value.trim(),
-                    year: seriesYearInput.value.trim(),
-                    description: seriesDescriptionInput.value.trim(),
-                    image: seriesImageInput.value.trim(),
-                    cover: seriesCoverInput.value.trim(),
-                    trailer: seriesTrailerInput.value.trim() ? { 
+                    year: seriesYearInput.value.trim() || new Date().getFullYear().toString(),
+                    description: seriesDescriptionInput.value.trim() || '',
+                    image: seriesImageInput.value.trim() || '',
+                    cover: seriesCoverInput.value.trim() || seriesImageInput.value.trim() || '',
+                    trailer: seriesTrailerInput.value.trim() ? {
                         id: generateNewId(),
                         type: 'video',
                         title: `${seriesTitleInput.value.trim()} Trailer`,
-                        url: seriesTrailerInput.value.trim() 
+                        url: seriesTrailerInput.value.trim()
                     } : null,
+                    sources: [],
                     label: 'Series',
-                    sublabel: `${seasons.length} Season${seasons.length !== 1 ? 's' : ''}`,
+                    sublabel: `${(currentSeriesData.seasons || []).length} Seasons`,
                     imdb: '0.0',
                     downloadas: seriesTitleInput.value.trim().toLowerCase().replace(/[^a-z0-9]/g, '-'),
                     comment: true,
                     playas: 'video',
-                    classification: 'TV-PG',
-                    duration: '45:00',
+                    classification: 'PG-13',
+                    duration: '00:00',
                     rating: 0,
+                    created_at: new Date().toISOString().split('T')[0],
+                    genres: currentSeriesGenres || [],
+                    actors: currentSeriesActors || [],
+                    subtitles: [],
+                    comments: [],
                     views: 0,
                     downloads: 0,
                     shares: 0,
-                    created_at: new Date().toISOString().split('T')[0],
-                    genres: [],
-                    actors: [],
-                    subtitles: [],
-                    comments: [],
-                    sources: [],
-                    seasons: seasons
+                    seasons: currentSeriesData.seasons || []
                 };
                 
+                console.log('Series data to save:', seriesData);
+                console.log('Seasons data:', seriesData.seasons);
+                
                 if (id) {
+                    // Update existing series
                     const index = jsonData.movies.findIndex(m => m.id == id);
-                    if (index > -1) {
-                        jsonData.movies[index] = { ...jsonData.movies[index], ...entryData };
+                    if (index !== -1) {
+                        jsonData.movies[index] = seriesData;
+                        console.log('Updated existing series at index:', index);
+                    } else {
+                        jsonData.movies.push(seriesData);
+                        console.log('Added new series (ID not found)');
                     }
                 } else {
-                    const newId = generateNewId();
-                    jsonData.movies.push({ id: newId, ...entryData });
+                    // Add new series
+                    jsonData.movies.push(seriesData);
+                    console.log('Added new series');
                 }
+                
+                // Reset form
+                resetSeriesForm();
+                console.log('Series saved successfully');
             }
             
             function saveChannel(id) {
-                const sources = [];
-                if (channelStreamUrlInput.value.trim()) {
-                    sources.push({ 
-                        id: generateNewId(),
-                        type: 'live',
-                        title: 'Live Stream',
-                        quality: 'HD',
-                        size: 'Live',
-                        kind: 'play',
-                        premium: 'false',
-                        external: false,
-                        url: channelStreamUrlInput.value.trim() 
-                    });
-                }
-                if (channelBackupUrlInput.value.trim()) {
-                    sources.push({ 
-                        id: generateNewId(),
-                        type: 'live',
-                        title: 'Backup Stream',
-                        quality: 'HD',
-                        size: 'Live',
-                        kind: 'play',
-                        premium: 'false',
-                        external: false,
-                        url: channelBackupUrlInput.value.trim() 
-                    });
-                }
+                console.log('=== SAVING CHANNEL ===');
                 
-                const categoryTitle = channelCategoryInput.value.trim() || 'General';
-                
-                const entryData = {
+                const newId = id || generateNewId();
+                const channelData = {
+                    id: parseInt(newId),
                     title: channelTitleInput.value.trim(),
-                    label: categoryTitle,
+                    label: channelCategoryInput.value.trim() || 'Entertainment',
                     sublabel: 'Live TV',
-                    description: channelDescriptionInput.value.trim(),
+                    description: channelDescriptionInput.value.trim() || '',
                     website: 'https://example.com',
-                    classification: categoryTitle,
+                    classification: channelCategoryInput.value.trim() || 'Entertainment',
                     views: 0,
                     shares: 0,
                     rating: parseFloat(channelRatingInput.value) || 0,
                     comment: true,
-                    image: channelImageInput.value.trim(),
+                    image: channelImageInput.value.trim() || '',
                     playas: 'live',
-                    sources: sources,
+                    sources: [
+                        {
+                            id: generateNewId(),
+                            type: 'live',
+                            title: 'Main Stream',
+                            quality: 'HD',
+                            url: channelStreamUrlInput.value.trim()
+                        }
+                    ],
                     categories: [{
-                        id: generateNewId(),
-                        title: categoryTitle
+                        id: 1,
+                        title: channelCategoryInput.value.trim() || 'Entertainment'
                     }],
                     countries: [{
                         id: 1,
@@ -2585,70 +2543,61 @@
                     comments: []
                 };
                 
+                // Add backup source if provided
+                if (channelBackupUrlInput.value.trim()) {
+                    channelData.sources.push({
+                        id: generateNewId(),
+                        type: 'live',
+                        title: 'Backup Stream',
+                        quality: 'HD',
+                        url: channelBackupUrlInput.value.trim()
+                    });
+                }
+                
+                console.log('Channel data to save:', channelData);
+                
                 if (id) {
+                    // Update existing channel
                     const index = jsonData.channels.findIndex(c => c.id == id);
-                    if (index > -1) {
-                        jsonData.channels[index] = { ...jsonData.channels[index], ...entryData };
+                    if (index !== -1) {
+                        jsonData.channels[index] = channelData;
+                        console.log('Updated existing channel at index:', index);
+                    } else {
+                        jsonData.channels.push(channelData);
+                        console.log('Added new channel (ID not found)');
                     }
                 } else {
-                    const newId = generateNewId();
-                    jsonData.channels.push({ id: newId, ...entryData });
+                    // Add new channel
+                    jsonData.channels.push(channelData);
+                    console.log('Added new channel');
                 }
+                
+                // Reset form
+                resetChannelForm();
+                console.log('Channel saved successfully');
             }
             
             function generateNewId() {
-                const allIds = [
-                    ...(jsonData.movies || []).map(m => m.id),
-                    ...(jsonData.channels || []).map(c => c.id),
-                    // Also check for IDs in sources, episodes, etc.
-                    ...getAllNestedIds()
-                ];
-                return allIds.length > 0 ? Math.max(...allIds) + 1 : 1;
-            }
-            
-            function getAllNestedIds() {
-                const ids = [];
-                
-                // Collect IDs from movie sources
-                if (jsonData.movies) {
-                    jsonData.movies.forEach(movie => {
-                        if (movie.sources) {
-                            movie.sources.forEach(source => {
-                                if (source.id) ids.push(source.id);
-                            });
-                        }
-                        if (movie.seasons) {
-                            movie.seasons.forEach(season => {
-                                if (season.id) ids.push(season.id);
-                                if (season.episodes) {
-                                    season.episodes.forEach(episode => {
-                                        if (episode.id) ids.push(episode.id);
-                                        if (episode.sources) {
-                                            episode.sources.forEach(source => {
-                                                if (source.id) ids.push(source.id);
-                                            });
-                                        }
-                                    });
-                                }
-                            });
-                        }
-                    });
+                if (!generateNewId.counter) {
+                    // Find the highest existing ID
+                    let maxId = 0;
+                    if (jsonData.movies) {
+                        jsonData.movies.forEach(m => {
+                            if (m.id && m.id > maxId) maxId = m.id;
+                        });
+                    }
+                    if (jsonData.channels) {
+                        jsonData.channels.forEach(c => {
+                            if (c.id && c.id > maxId) maxId = c.id;
+                        });
+                    }
+                    generateNewId.counter = maxId + 1;
+                } else {
+                    generateNewId.counter++;
                 }
-                
-                // Collect IDs from channel sources
-                if (jsonData.channels) {
-                    jsonData.channels.forEach(channel => {
-                        if (channel.sources) {
-                            channel.sources.forEach(source => {
-                                if (source.id) ids.push(source.id);
-                            });
-                        }
-                    });
-                }
-                
-                return ids;
+                return generateNewId.counter;
             }
-            
+
             // --- Movie Source Management ---
             function renderMovieSources() {
                 movieSourceListDiv.innerHTML = '';
@@ -3669,6 +3618,154 @@
             } else {
                 console.log('⏸️ Auto-save disabled, skipping auto-load');
             }
+
+            // --- Series Season Management ---
+            function renderSeasons(seasons) {
+                console.log('Rendering seasons:', seasons);
+                seasonContainerDiv.innerHTML = '';
+                
+                if (!seasons || seasons.length === 0) {
+                    seasonContainerDiv.innerHTML = `
+                        <div class="no-seasons">
+                            <p>No seasons added yet.</p>
+                            <button type="button" onclick="addDefaultSeason()" class="btn-secondary">
+                                <i class="fas fa-plus"></i> Add Season
+                            </button>
+                        </div>
+                    `;
+                    return;
+                }
+                
+                seasons.forEach((season, seasonIndex) => {
+                    const seasonDiv = document.createElement('div');
+                    seasonDiv.className = 'season-card';
+                    seasonDiv.innerHTML = `
+                        <div class="season-header">
+                            <h4><i class="fas fa-tv"></i> ${season.title || `Season ${seasonIndex + 1}`}</h4>
+                            <button type="button" onclick="removeSeason(${seasonIndex})" class="btn-danger-small">
+                                <i class="fas fa-times"></i>
+                            </button>
+                        </div>
+                        <div class="episodes-container" id="episodes-${seasonIndex}">
+                            ${renderEpisodes(season.episodes || [], seasonIndex)}
+                        </div>
+                        <button type="button" onclick="addEpisode(${seasonIndex})" class="btn-secondary">
+                            <i class="fas fa-plus"></i> Add Episode
+                        </button>
+                    `;
+                    seasonContainerDiv.appendChild(seasonDiv);
+                });
+                
+                // Add "Add Season" button at the end
+                const addSeasonDiv = document.createElement('div');
+                addSeasonDiv.innerHTML = `
+                    <button type="button" onclick="addSeason()" class="btn-secondary" style="margin-top: 15px;">
+                        <i class="fas fa-plus"></i> Add Another Season
+                    </button>
+                `;
+                seasonContainerDiv.appendChild(addSeasonDiv);
+            }
+            
+            function renderEpisodes(episodes, seasonIndex) {
+                if (!episodes || episodes.length === 0) {
+                    return '<p class="no-episodes">No episodes added yet.</p>';
+                }
+                
+                return episodes.map((episode, episodeIndex) => `
+                    <div class="episode-item">
+                        <div class="episode-header">
+                            <span class="episode-title">Episode ${episode.episode_number || episodeIndex + 1}: ${episode.title || `Episode ${episodeIndex + 1}`}</span>
+                            <button type="button" onclick="removeEpisode(${seasonIndex}, ${episodeIndex})" class="btn-danger-small">
+                                <i class="fas fa-times"></i>
+                            </button>
+                        </div>
+                        <div class="episode-details">
+                            <input type="text" placeholder="Episode title" value="${episode.title || ''}" 
+                                   onchange="updateEpisodeTitle(${seasonIndex}, ${episodeIndex}, this.value)">
+                            <input type="text" placeholder="Video URL" value="${episode.sources && episode.sources[0] ? episode.sources[0].url : ''}" 
+                                   onchange="updateEpisodeSource(${seasonIndex}, ${episodeIndex}, this.value)">
+                        </div>
+                    </div>
+                `).join('');
+            }
+            
+            window.addDefaultSeason = function() {
+                addSeason();
+            };
+            
+            window.addSeason = function() {
+                if (!currentSeriesData.seasons) {
+                    currentSeriesData.seasons = [];
+                }
+                
+                const seasonNumber = currentSeriesData.seasons.length + 1;
+                const newSeason = {
+                    id: generateNewId(),
+                    title: `Season ${seasonNumber}`,
+                    episodes: []
+                };
+                
+                currentSeriesData.seasons.push(newSeason);
+                renderSeasons(currentSeriesData.seasons);
+            };
+            
+            window.removeSeason = function(seasonIndex) {
+                if (confirm('Are you sure you want to remove this season and all its episodes?')) {
+                    currentSeriesData.seasons.splice(seasonIndex, 1);
+                    renderSeasons(currentSeriesData.seasons);
+                }
+            };
+            
+            window.addEpisode = function(seasonIndex) {
+                if (!currentSeriesData.seasons[seasonIndex].episodes) {
+                    currentSeriesData.seasons[seasonIndex].episodes = [];
+                }
+                
+                const episodeNumber = currentSeriesData.seasons[seasonIndex].episodes.length + 1;
+                const newEpisode = {
+                    id: generateNewId(),
+                    title: `Episode ${episodeNumber}`,
+                    episode_number: episodeNumber,
+                    image: '',
+                    duration: '45:00',
+                    views: 0,
+                    downloads: 0,
+                    sources: [{
+                        id: generateNewId(),
+                        type: 'video',
+                        title: `Episode ${episodeNumber} 1080p`,
+                        quality: '1080p',
+                        url: ''
+                    }],
+                    subtitles: []
+                };
+                
+                currentSeriesData.seasons[seasonIndex].episodes.push(newEpisode);
+                renderSeasons(currentSeriesData.seasons);
+            };
+            
+            window.removeEpisode = function(seasonIndex, episodeIndex) {
+                if (confirm('Are you sure you want to remove this episode?')) {
+                    currentSeriesData.seasons[seasonIndex].episodes.splice(episodeIndex, 1);
+                    renderSeasons(currentSeriesData.seasons);
+                }
+            };
+            
+            window.updateEpisodeTitle = function(seasonIndex, episodeIndex, title) {
+                if (currentSeriesData.seasons[seasonIndex] && currentSeriesData.seasons[seasonIndex].episodes[episodeIndex]) {
+                    currentSeriesData.seasons[seasonIndex].episodes[episodeIndex].title = title;
+                }
+            };
+            
+            window.updateEpisodeSource = function(seasonIndex, episodeIndex, url) {
+                if (currentSeriesData.seasons[seasonIndex] && 
+                    currentSeriesData.seasons[seasonIndex].episodes[episodeIndex] && 
+                    currentSeriesData.seasons[seasonIndex].episodes[episodeIndex].sources[0]) {
+                    currentSeriesData.seasons[seasonIndex].episodes[episodeIndex].sources[0].url = url;
+                }
+            };
+
+            // --- Movie Source Management ---
         });
     </script>
 </body>
