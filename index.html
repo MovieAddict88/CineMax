@@ -786,11 +786,11 @@
                         <p><strong>Generated API Structure:</strong></p>
                         <ul>
                             <li><code>api_info</code> - API metadata and statistics</li>
-                            <li><code>home</code> - Homepage slides and featured content</li>
+                            <li><code>home</code> - Homepage data with slides, featuredMovies, channels, actors, and genres</li>
                             <li><code>movies</code> - Complete movie/series database</li>
-                            <li><code>channels</code> - Live TV channels</li>
-                            <li><code>actors</code> - Cast and crew information</li>
-                            <li><code>genres</code> - Content categories</li>
+                            <li><code>channels</code> - Live TV channels (also available in home section)</li>
+                            <li><code>actors</code> - Cast and crew information (also available in home section)</li>
+                            <li><code>genres</code> - Content categories (also available in home section)</li>
                         </ul>
                         
                         <p><strong>Usage in CineMax App:</strong></p>
@@ -3465,12 +3465,15 @@
                     api_info: updatedApiInfo,
                     home: {
                         slides: homeSlides,
-                        featured_movies: jsonData.home?.featured_movies || []
+                        featuredMovies: jsonData.home?.featured_movies || [],  // CamelCase for Java compatibility
+                        channels: processedChannels,  // Move channels to home section
+                        actors: jsonData.actors || [],  // Move actors to home section  
+                        genres: jsonData.genres || []   // Move genres to home section
                     },
                     movies: processedMovies,
-                    channels: processedChannels,
-                    actors: jsonData.actors || [],
-                    genres: jsonData.genres || []
+                    channels: processedChannels,  // Keep a copy at root for backward compatibility
+                    actors: jsonData.actors || [],  // Keep a copy at root for backward compatibility
+                    genres: jsonData.genres || []   // Keep a copy at root for backward compatibility
                 };
             }
             
@@ -3486,7 +3489,13 @@
                 if (!jsonData.api_info) errors.push('Missing api_info section');
                 if (!jsonData.movies) errors.push('Missing movies array');
                 if (!jsonData.channels) errors.push('Missing channels array');
-                if (!jsonData.home) warnings.push('Missing home section');
+                if (!jsonData.home) {
+                    errors.push('Missing home section');
+                } else {
+                    // Check home section structure
+                    if (!jsonData.home.slides) warnings.push('Missing home.slides array');
+                    if (!jsonData.home.featuredMovies && !jsonData.home.featured_movies) warnings.push('Missing home.featuredMovies array');
+                }
                 if (!jsonData.actors) warnings.push('Missing actors array');
                 if (!jsonData.genres) warnings.push('Missing genres array');
                 
