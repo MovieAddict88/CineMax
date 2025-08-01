@@ -424,42 +424,24 @@ public class SerieActivity extends AppCompatActivity implements PlaylistDownload
         }
     }
     private void getSeasons() {
+        // Read seasons directly from poster data instead of API call
+        if (poster != null && poster.getSeasons() != null && poster.getSeasons().size() > 0) {
+            seasonArrayList.clear();
+            final String[] countryCodes = new String[poster.getSeasons().size()];
 
-        Retrofit retrofit = apiClient.getClient();
-        apiRest service = retrofit.create(apiRest.class);
-
-        Call<List<Season>> call = service.getSeasonsBySerie(poster.getId());
-        call.enqueue(new Callback<List<Season>>() {
-            @Override
-            public void onResponse(Call<List<Season>> call, Response<List<Season>> response) {
-                if (response.isSuccessful()){
-                    if (response.body().size()>0) {
-                        seasonArrayList.clear();
-                        final String[] countryCodes = new String[response.body().size()];
-
-                        for (int i = 0; i < response.body().size(); i++) {
-                            countryCodes[i] = response.body().get(i).getTitle();
-                            seasonArrayList.add(response.body().get(i));
-                        }
-                        ArrayAdapter<String> filtresAdapter = new ArrayAdapter<String>(SerieActivity.this,
-                                R.layout.spinner_layout_season,R.id.textView,countryCodes);
-                        filtresAdapter.setDropDownViewResource(R.layout.simple_spinner_dropdown_season_item);
-                        spinner_activity_serie_season_list.setAdapter(filtresAdapter);
-
-                        linear_layout_activity_serie_seasons.setVisibility(View.VISIBLE);
-                    }else{
-                        linear_layout_activity_serie_seasons.setVisibility(View.GONE);
-                    }
-                }else{
-                    linear_layout_activity_serie_seasons.setVisibility(View.VISIBLE);
-                }
+            for (int i = 0; i < poster.getSeasons().size(); i++) {
+                countryCodes[i] = poster.getSeasons().get(i).getTitle();
+                seasonArrayList.add(poster.getSeasons().get(i));
             }
-            @Override
-            public void onFailure(Call<List<Season>> call, Throwable t) {
-                linear_layout_activity_serie_seasons.setVisibility(View.GONE);
+            ArrayAdapter<String> filtresAdapter = new ArrayAdapter<String>(SerieActivity.this,
+                    R.layout.spinner_layout_season, R.id.textView, countryCodes);
+            filtresAdapter.setDropDownViewResource(R.layout.simple_spinner_dropdown_season_item);
+            spinner_activity_serie_season_list.setAdapter(filtresAdapter);
 
-            }
-        });
+            linear_layout_activity_serie_seasons.setVisibility(View.VISIBLE);
+        } else {
+            linear_layout_activity_serie_seasons.setVisibility(View.GONE);
+        }
     }
     private void getPosterCastings() {
         Retrofit retrofit = apiClient.getClient();

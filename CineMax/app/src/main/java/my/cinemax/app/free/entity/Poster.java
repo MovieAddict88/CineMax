@@ -95,6 +95,9 @@ public class Poster implements Parcelable {
     @Expose
     private List<Source> sources = new ArrayList<>();
 
+    @SerializedName("seasons")
+    @Expose
+    private List<Season> seasons = new ArrayList<>();
 
     @SerializedName("trailer")
     @Expose
@@ -141,6 +144,7 @@ public class Poster implements Parcelable {
         }
         createdAt = in.readString();
         sources = in.createTypedArrayList(Source.CREATOR);
+        seasons = in.createTypedArrayList(Season.CREATOR);
         trailer = in.readParcelable(Source.class.getClassLoader());
         typeView = in.readInt();
     }
@@ -183,6 +187,7 @@ public class Poster implements Parcelable {
         }
         dest.writeString(createdAt);
         dest.writeTypedList(sources);
+        dest.writeTypedList(seasons);
         dest.writeParcelable(trailer, flags);
         dest.writeInt(typeView);
     }
@@ -313,6 +318,14 @@ public class Poster implements Parcelable {
     }
     public List<Source> getSources() {
         return sources;
+    }
+
+    public List<Season> getSeasons() {
+        return seasons;
+    }
+
+    public void setSeasons(List<Season> seasons) {
+        this.seasons = seasons;
     }
 
     public Source getTrailer() {
