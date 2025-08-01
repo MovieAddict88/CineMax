@@ -101,14 +101,33 @@ public class CustomPlayerViewModel extends BaseObservable implements ExoPlayer.E
 
     public void onStart(SimpleExoPlayerView simpleExoPlayerView, Bundle bundle) {
         mSimpleExoPlayerView = simpleExoPlayerView;
+        
+        // Add null checks for bundle
+        if (bundle == null) {
+            Log.e("CustomPlayerViewModel", "Bundle is null");
+            return;
+        }
+        
         mUrl = bundle.getString("videoUrl");
-        isLive = bundle.getBoolean("isLive");
+        isLive = bundle.getBoolean("isLive", false);
         videoType = bundle.getString("videoType");
         videoTitle = bundle.getString("videoTitle");
         videoSubTile = bundle.getString("videoSubTile");
         videoImage = bundle.getString("videoImage");
+        
+        // Validate URL
+        if (mUrl == null || mUrl.isEmpty()) {
+            Log.e("CustomPlayerViewModel", "Video URL is null or empty");
+            if (mActivity != null) {
+                android.widget.Toast.makeText(mActivity, "Video URL not available", android.widget.Toast.LENGTH_LONG).show();
+            }
+            return;
+        }
+        
         initPlayer();
-        mSimpleExoPlayerView.setPlayer(mExoPlayer);
+        if (mSimpleExoPlayerView != null) {
+            mSimpleExoPlayerView.setPlayer(mExoPlayer);
+        }
 
         preparePlayer(null,0);
         updateCastSessionAndSessionManager();
@@ -126,18 +145,25 @@ public class CustomPlayerViewModel extends BaseObservable implements ExoPlayer.E
         mSimpleExoPlayerView.setResizeMode(AspectRatioFrameLayout.RESIZE_MODE_FIT);
     }
     private void initPlayer() {
-        // 1. Create a default TrackSelector
-        Handler mainHandler = new Handler();
-        BandwidthMeter bandwidthMeter = new DefaultBandwidthMeter();
-        TrackSelection.Factory videoTrackSelectionFactory = new AdaptiveTrackSelection.Factory(bandwidthMeter);
-        TrackSelector trackSelector = new DefaultTrackSelector(videoTrackSelectionFactory);
+        try {
+            // 1. Create a default TrackSelector
+            Handler mainHandler = new Handler();
+            BandwidthMeter bandwidthMeter = new DefaultBandwidthMeter();
+            TrackSelection.Factory videoTrackSelectionFactory = new AdaptiveTrackSelection.Factory(bandwidthMeter);
+            TrackSelector trackSelector = new DefaultTrackSelector(videoTrackSelectionFactory);
 
-        // 2. Create a default LoadControl
-        LoadControl loadControl = new DefaultLoadControl();
+            // 2. Create a default LoadControl
+            LoadControl loadControl = new DefaultLoadControl();
 
-        // 3. Create the player
-        mExoPlayer = ExoPlayerFactory.newSimpleInstance(mActivity,
-                trackSelector, loadControl);
+            // 3. Create the player
+            mExoPlayer = ExoPlayerFactory.newSimpleInstance(mActivity,
+                    trackSelector, loadControl);
+        } catch (Exception e) {
+            Log.e("CustomPlayerViewModel", "Error initializing player: " + e.getMessage(), e);
+            if (mActivity != null) {
+                android.widget.Toast.makeText(mActivity, "Error initializing video player", android.widget.Toast.LENGTH_LONG).show();
+            }
+        }
     }
 
     public void preparePlayer(Subtitle subtitle,long seekTo) {
@@ -196,9 +222,9 @@ public class CustomPlayerViewModel extends BaseObservable implements ExoPlayer.E
             // mediaSource1 = new HlsMediaSource(videoUri, dataSourceFactory,  new DefaultDashChunkSource.Factory(dataSourceFactory), null,null);
             sourceSize++;
         }else if (videoType.equals("embed")){
-            // For embed URLs, try to extract the actual video URL or handle as fallback
-            // For now, we'll try to play it as a regular video source
-            // If it fails, the error handler will show a fallback message
+            // Embed URLs should have been extracted to direct URLs before reaching here
+            // If an embed URL still reaches here, treat it as MP4 and let ExoPlayer try
+            Log.w("CustomPlayerViewModel", "Embed URL reached ExoPlayer - treating as MP4: " + mUrl);
             ExtractorsFactory extractorsFactory = new DefaultExtractorsFactory();
             mediaSource1 =  new ProgressiveMediaSource.Factory(dataSourceFactory)
                     .setExtractorsFactory(extractorsFactory)

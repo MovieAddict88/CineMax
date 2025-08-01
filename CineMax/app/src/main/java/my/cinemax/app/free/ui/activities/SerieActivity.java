@@ -861,12 +861,43 @@ public class SerieActivity extends AppCompatActivity implements PlaylistDownload
         // Add logging for debugging
         Log.d("SerieActivity", "Playing source: " + source.getTitle() + " URL: " + url + " Type: " + type);
 
-        // For embed URLs, try to play in video player first, with fallback to WebView
+        // For embed URLs, try to extract direct video URL first
         if (url != null && (url.contains("vidsrc.net") || url.contains("embed") || 
             url.contains("iframe") || url.contains("player") || "embed".equals(type))) {
-            Log.d("SerieActivity", "Attempting to play embed URL in video player: " + url);
-            // Set video type to embed so the player knows how to handle it
-            type = "embed";
+            Log.d("SerieActivity", "Attempting to extract video URL from embed: " + url);
+            
+            // Show loading indicator
+            android.app.ProgressDialog progressDialog = new android.app.ProgressDialog(this);
+            progressDialog.setMessage("Extracting video URL...");
+            progressDialog.setCancelable(true);
+            progressDialog.show();
+            
+            my.cinemax.app.free.Utils.VideoExtractor.extractVideoUrl(url, new my.cinemax.app.free.Utils.VideoExtractor.ExtractionListener() {
+                @Override
+                public void onSuccess(String directUrl, String quality) {
+                    runOnUiThread(() -> {
+                        progressDialog.dismiss();
+                        Log.d("SerieActivity", "Successfully extracted video URL: " + directUrl);
+                        
+                        // Play the extracted URL in ExoPlayer
+                        playExtractedVideo(directUrl, quality);
+                    });
+                }
+                
+                @Override
+                public void onFailure(String error) {
+                    runOnUiThread(() -> {
+                        progressDialog.dismiss();
+                        Log.w("SerieActivity", "Video extraction failed: " + error + ". Falling back to WebView.");
+                        
+                        // Fallback to EmbedActivity (WebView)
+                        Intent intent = new Intent(SerieActivity.this, EmbedActivity.class);
+                        intent.putExtra("url", url);
+                        startActivity(intent);
+                    });
+                }
+            });
+            return;
         }
 
         if ("youtube".equals(type)){
@@ -2505,5 +2536,39 @@ public class SerieActivity extends AppCompatActivity implements PlaylistDownload
         Intent i = new Intent(Intent.ACTION_VIEW);
         i.setData(Uri.parse(url));
         startActivity(i);
+    }
+    
+    private void playExtractedVideo(String directUrl, String quality) {
+        if (mCastSession == null) {
+            mCastSession = mSessionManager.getCurrentCastSession();
+        }
+        
+        if (mCastSession != null) {
+            // Cast the extracted video
+            loadSubtitles(selectedSourceIndex);
+        } else {
+            // Play in ExoPlayer
+            Intent intent = new Intent(SerieActivity.this, PlayerActivity.class);
+            intent.putExtra("id", selectedEpisode.getId());
+            intent.putExtra("url", directUrl);
+            
+            // Determine video type from URL
+            String videoType = "mp4"; // Default
+            if (directUrl.contains(".m3u8")) {
+                videoType = "m3u8";
+            } else if (directUrl.contains(".mpd")) {
+                videoType = "dash";
+            }
+            
+            intent.putExtra("type", videoType);
+            intent.putExtra("isLive", false);
+            intent.putExtra("title", selectedEpisode.getTitle());
+            intent.putExtra("subtitle", poster.getTitle());
+            intent.putExtra("image", selectedEpisode.getImage());
+            intent.putExtra("kind", "episode");
+            
+            Log.d("SerieActivity", "Playing extracted video - URL: " + directUrl + ", Type: " + videoType);
+            startActivity(intent);
+        }
     }
 }

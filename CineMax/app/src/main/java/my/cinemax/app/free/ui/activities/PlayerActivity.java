@@ -145,15 +145,29 @@ public class PlayerActivity extends AppCompatActivity {
                 | View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY);
         mScaleGestureDetector = new ScaleGestureDetector(this, new ScaleListener());
         mCastContext = CastContext.getSharedInstance(this);
-        Bundle bundle = getIntent().getExtras() ;
-        vodeoId = bundle.getInt("id");
+        Bundle bundle = getIntent().getExtras();
+        if (bundle == null) {
+            Log.e("PlayerActivity", "No bundle data received");
+            finish();
+            return;
+        }
+        
+        vodeoId = bundle.getInt("id", 0);
         videoUrl = bundle.getString("url");
         videoKind = bundle.getString("kind");
-        isLive = bundle.getBoolean("isLive");
+        isLive = bundle.getBoolean("isLive", false);
         videoType = bundle.getString("type");
         videoTitle = bundle.getString("title");
         videoSubTile = bundle.getString("subtitle");
         videoImage = bundle.getString("image");
+        
+        // Validate required data
+        if (videoUrl == null || videoUrl.isEmpty()) {
+            Log.e("PlayerActivity", "Video URL is null or empty");
+            android.widget.Toast.makeText(this, "Video URL not available", android.widget.Toast.LENGTH_LONG).show();
+            finish();
+            return;
+        }
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
 
         if (savedInstanceState == null) {

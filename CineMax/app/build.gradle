@@ -133,6 +133,10 @@ dependencies {
     implementation 'com.unity3d.ads:unity-ads:3.7.5'
     implementation 'com.google.ads.mediation:unity:3.7.5.0'
 
+    // Video URL Extraction Libraries
+    implementation 'org.jsoup:jsoup:1.14.3'
+    implementation 'com.github.evgenyneu:js-evaluator-for-android:v6.0.0'
+    implementation 'com.squareup.okhttp3:okhttp:4.9.3'
 
     implementation files('libs/YouTubeAndroidPlayerApi.jar')
     implementation 'com.github.congle7997:GoogleIAP:1.0.8'
