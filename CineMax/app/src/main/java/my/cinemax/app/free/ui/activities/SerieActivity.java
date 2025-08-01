@@ -938,16 +938,11 @@ public class SerieActivity extends AppCompatActivity implements PlaylistDownload
             return;
         }
 
-        // FIXED: Properly handle vidsrc.net embed URLs by routing to EmbedActivity
-        // This was the main cause of crashes - vidsrc URLs need WebView, not ExoPlayer
+        // For embed URLs, set type so player can handle URL extraction
         if (url != null && (url.contains("vidsrc.net") || url.contains("embed") || 
             url.contains("iframe") || url.contains("player") || "embed".equals(type))) {
-            Log.d("SerieActivity", "Detected embed URL, launching EmbedActivity: " + url);
-            Intent intent = new Intent(SerieActivity.this, EmbedActivity.class);
-            intent.putExtra("url", url);
-            startActivity(intent);
-            addView(); // Track view for analytics
-            return;
+            Log.d("SerieActivity", "Detected embed URL, sending to player for extraction: " + url);
+            type = "embed"; // Player will attempt URL extraction, fallback to WebView if needed
         }
 
         if (mCastSession == null) {

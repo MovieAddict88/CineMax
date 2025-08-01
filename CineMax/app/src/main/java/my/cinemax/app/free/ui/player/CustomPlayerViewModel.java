@@ -196,14 +196,20 @@ public class CustomPlayerViewModel extends BaseObservable implements ExoPlayer.E
             // mediaSource1 = new HlsMediaSource(videoUri, dataSourceFactory,  new DefaultDashChunkSource.Factory(dataSourceFactory), null,null);
             sourceSize++;
         }else if (videoType.equals("embed")){
-            // For embed URLs, try to extract the actual video URL or handle as fallback
-            // For now, we'll try to play it as a regular video source
-            // If it fails, the error handler will show a fallback message
-            ExtractorsFactory extractorsFactory = new DefaultExtractorsFactory();
-            mediaSource1 =  new ProgressiveMediaSource.Factory(dataSourceFactory)
-                    .setExtractorsFactory(extractorsFactory)
-                    .createMediaSource(videoUri);
-            sourceSize++;
+            // For embed URLs, check if we can extract direct URL first
+            if (my.cinemax.app.free.utils.VidsrcExtractor.isVidsrcUrl(mUrl)) {
+                Log.d("CustomPlayerViewModel", "Embed URL detected, attempting URL extraction: " + mUrl);
+                // Try to extract direct URL first, fallback to embed player if extraction fails
+                extractAndPrepareVideo(mUrl, subtitle, seekTo, dataSourceFactory);
+                return; // Exit here, extraction will continue asynchronously
+            } else {
+                // For non-vidsrc embed URLs, try to play as regular video
+                ExtractorsFactory extractorsFactory = new DefaultExtractorsFactory();
+                mediaSource1 =  new ProgressiveMediaSource.Factory(dataSourceFactory)
+                        .setExtractorsFactory(extractorsFactory)
+                        .createMediaSource(videoUri);
+                sourceSize++;
+            }
         }else{
             ExtractorsFactory extractorsFactory = new DefaultExtractorsFactory();
             //  mediaSource1 = new ExtractorMediaSource(videoUri, dataSourceFactory, extractorsFactory, null, null);
@@ -587,6 +593,117 @@ public class CustomPlayerViewModel extends BaseObservable implements ExoPlayer.E
         isLoadingNow = false;
         notifyPropertyChanged(BR.loaidingNow);
         setLoadingComplete(false);
+    }
+    
+    /**
+     * Extract direct video URL from embed URL and prepare player
+     */
+    private void extractAndPrepareVideo(String embedUrl, Subtitle subtitle, long seekTo, DataSource.Factory dataSourceFactory) {
+        // Show loading state
+        isLoadingNow = true;
+        notifyPropertyChanged(BR.loaidingNow);
+        
+        my.cinemax.app.free.utils.VidsrcExtractor.extractDirectUrl(embedUrl, new my.cinemax.app.free.utils.VidsrcExtractor.ExtractionListener() {
+            @Override
+            public void onSuccess(String directUrl, String extractedVideoType) {
+                if (mActivity != null) {
+                    mActivity.runOnUiThread(() -> {
+                        Log.d("CustomPlayerViewModel", "URL extraction successful: " + directUrl + " (Type: " + extractedVideoType + ")");
+                        // Update URL and type with extracted values
+                        mUrl = directUrl;
+                        videoType = extractedVideoType;
+                        
+                        // Now prepare player with extracted URL
+                        preparePlayerWithExtractedUrl(subtitle, seekTo, dataSourceFactory);
+                    });
+                }
+            }
+            
+            @Override
+            public void onError(String error) {
+                if (mActivity != null) {
+                    mActivity.runOnUiThread(() -> {
+                        Log.w("CustomPlayerViewModel", "URL extraction failed: " + error + ". Showing fallback options.");
+                        // Reset loading state
+                        isLoadingNow = false;
+                        notifyPropertyChanged(BR.loaidingNow);
+                        setLoadingComplete(false);
+                        
+                        // Show fallback dialog
+                        showEmbedFallbackDialog();
+                    });
+                }
+            }
+        });
+    }
+    
+    /**
+     * Prepare player with the extracted direct URL
+     */
+    private void preparePlayerWithExtractedUrl(Subtitle subtitle, long seekTo, DataSource.Factory dataSourceFactory) {
+        try {
+            Uri videoUri = Uri.parse(mUrl);
+            MediaSource mediaSource1;
+            
+            // Create media source based on extracted video type
+            if (videoType.equals("m3u8")) {
+                mediaSource1 = new HlsMediaSource.Factory(dataSourceFactory)
+                        .createMediaSource(videoUri);
+            } else if (videoType.equals("dash")) {
+                mediaSource1 = new DashMediaSource.Factory(dataSourceFactory)
+                        .createMediaSource(videoUri);
+            } else {
+                // Default to progressive (MP4)
+                ExtractorsFactory extractorsFactory = new DefaultExtractorsFactory();
+                mediaSource1 = new ProgressiveMediaSource.Factory(dataSourceFactory)
+                        .setExtractorsFactory(extractorsFactory)
+                        .createMediaSource(videoUri);
+            }
+            
+            // Handle subtitles
+            SingleSampleMediaSource subtitleSource = null;
+            int sourceSize = 1;
+            if (subtitle != null) {
+                if (subtitle.getType().equals("srt")) {
+                    Format textFormat = Format.createTextSampleFormat(null, MimeTypes.APPLICATION_SUBRIP,
+                            null, Format.NO_VALUE, Format.NO_VALUE, "ar", null, Format.OFFSET_SAMPLE_RELATIVE);
+                    subtitleSource = new SingleSampleMediaSource.Factory(dataSourceFactory)
+                            .createMediaSource(Uri.parse(subtitle.getUrl()), textFormat, C.TIME_UNSET);
+                } else if (subtitle.getType().equals("vtt")) {
+                    subtitleSource = new SingleSampleMediaSource(Uri.parse(subtitle.getUrl()), dataSourceFactory, 
+                            Format.createTextSampleFormat(null, MimeTypes.TEXT_VTT, Format.NO_VALUE, "en", null), C.TIME_UNSET);
+                } else if (subtitle.getType().equals("ass")) {
+                    subtitleSource = new SingleSampleMediaSource(Uri.parse(subtitle.getUrl()), dataSourceFactory, 
+                            Format.createTextSampleFormat(null, MimeTypes.TEXT_SSA, Format.NO_VALUE, "en", null), C.TIME_UNSET);
+                }
+                if (subtitleSource != null) sourceSize++;
+            }
+            
+            // Create merged media source
+            MediaSource[] mediaSources = new MediaSource[sourceSize];
+            mediaSources[0] = mediaSource1;
+            if (subtitleSource != null) {
+                mediaSources[1] = subtitleSource;
+            }
+            
+            MediaSource mediaSource = new MergingMediaSource(mediaSources);
+            
+            // Prepare player
+            mExoPlayer.prepare(mediaSource, false, false);
+            mExoPlayer.seekTo(seekTo);
+            mExoPlayer.addListener(this);
+            mExoPlayer.setPlayWhenReady(SHOULD_AUTO_PLAY);
+            
+            Log.d("CustomPlayerViewModel", "Player prepared successfully with extracted URL");
+            
+        } catch (Exception e) {
+            Log.e("CustomPlayerViewModel", "Error preparing player with extracted URL", e);
+            // Reset loading state and show fallback
+            isLoadingNow = false;
+            notifyPropertyChanged(BR.loaidingNow);
+            setLoadingComplete(false);
+            showEmbedFallbackDialog();
+        }
     }
     
     private void showEmbedFallbackDialog() {
