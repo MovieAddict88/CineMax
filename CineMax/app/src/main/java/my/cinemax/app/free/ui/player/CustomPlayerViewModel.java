@@ -196,20 +196,13 @@ public class CustomPlayerViewModel extends BaseObservable implements ExoPlayer.E
             // mediaSource1 = new HlsMediaSource(videoUri, dataSourceFactory,  new DefaultDashChunkSource.Factory(dataSourceFactory), null,null);
             sourceSize++;
         }else if (videoType.equals("embed")){
-            // For embed URLs, check if we can extract direct URL first
-            if (my.cinemax.app.free.utils.VidsrcExtractor.isVidsrcUrl(mUrl)) {
-                Log.d("CustomPlayerViewModel", "Embed URL detected, attempting URL extraction: " + mUrl);
-                // Try to extract direct URL first, fallback to embed player if extraction fails
-                extractAndPrepareVideo(mUrl, subtitle, seekTo, dataSourceFactory);
-                return; // Exit here, extraction will continue asynchronously
-            } else {
-                // For non-vidsrc embed URLs, try to play as regular video
-                ExtractorsFactory extractorsFactory = new DefaultExtractorsFactory();
-                mediaSource1 =  new ProgressiveMediaSource.Factory(dataSourceFactory)
-                        .setExtractorsFactory(extractorsFactory)
-                        .createMediaSource(videoUri);
-                sourceSize++;
-            }
+            // For embed URLs, try to play as regular video first
+            // If it fails, the error handler will show WebView fallback
+            ExtractorsFactory extractorsFactory = new DefaultExtractorsFactory();
+            mediaSource1 =  new ProgressiveMediaSource.Factory(dataSourceFactory)
+                    .setExtractorsFactory(extractorsFactory)
+                    .createMediaSource(videoUri);
+            sourceSize++;
         }else{
             ExtractorsFactory extractorsFactory = new DefaultExtractorsFactory();
             //  mediaSource1 = new ExtractorMediaSource(videoUri, dataSourceFactory, extractorsFactory, null, null);
@@ -706,19 +699,13 @@ public class CustomPlayerViewModel extends BaseObservable implements ExoPlayer.E
         }
     }
     
-    private my.cinemax.app.free.Provider.EmbedWebServer embedWebServer;
-    
     private void showEmbedFallbackDialog() {
         if (mActivity == null) return;
         
         new androidx.appcompat.app.AlertDialog.Builder(mActivity)
-            .setTitle("Video Playback Method")
-            .setMessage("Choose how to play this video:")
-            .setPositiveButton("HTML Player", (dialog, which) -> {
-                // Use NanoHTTPD HTML fallback player
-                startHtmlFallbackPlayer();
-            })
-            .setNeutralButton("WebView", (dialog, which) -> {
+            .setTitle("Video Playback Issue")
+            .setMessage("This video requires a different player. Would you like to open it in a web browser?")
+            .setPositiveButton("Open in Browser", (dialog, which) -> {
                 // Open in EmbedActivity (WebView)
                 android.content.Intent intent = new android.content.Intent(mActivity, 
                     my.cinemax.app.free.ui.activities.EmbedActivity.class);
@@ -730,123 +717,6 @@ public class CustomPlayerViewModel extends BaseObservable implements ExoPlayer.E
             })
             .setCancelable(true)
             .show();
-    }
-    
-    /**
-     * Start HTML fallback player using NanoHTTPD web server
-     */
-    private void startHtmlFallbackPlayer() {
-        try {
-            // Stop any existing server
-            if (embedWebServer != null) {
-                embedWebServer.stop();
-            }
-            
-            // Start new web server on available port
-            int port = findAvailablePort();
-            embedWebServer = new my.cinemax.app.free.Provider.EmbedWebServer(port, mUrl, videoTitle);
-            embedWebServer.start();
-            
-            Log.d("CustomPlayerViewModel", "Started HTML fallback server on port " + port);
-            
-            // Load the local HTML player in the current player WebView
-            String localUrl = embedWebServer.getServerUrl();
-            loadHtmlPlayerInWebView(localUrl);
-            
-        } catch (Exception e) {
-            Log.e("CustomPlayerViewModel", "Error starting HTML fallback server", e);
-            if (mActivity != null) {
-                android.widget.Toast.makeText(mActivity, "Failed to start HTML player", android.widget.Toast.LENGTH_LONG).show();
-            }
-        }
-    }
-    
-    /**
-     * Load HTML player in a WebView within the current player
-     */
-    private void loadHtmlPlayerInWebView(String localUrl) {
-        if (mActivity != null) {
-            mActivity.runOnUiThread(() -> {
-                // Create WebView programmatically and add to player view
-                android.webkit.WebView webView = new android.webkit.WebView(mActivity);
-                android.webkit.WebSettings webSettings = webView.getSettings();
-                webSettings.setJavaScriptEnabled(true);
-                webSettings.setDomStorageEnabled(true);
-                webSettings.setLoadWithOverviewMode(true);
-                webSettings.setUseWideViewPort(true);
-                webSettings.setMediaPlaybackRequiresUserGesture(false);
-                
-                // Set WebView client
-                webView.setWebViewClient(new android.webkit.WebViewClient() {
-                    @Override
-                    public void onPageFinished(android.webkit.WebView view, String url) {
-                        super.onPageFinished(view, url);
-                        Log.d("CustomPlayerViewModel", "HTML player page loaded: " + url);
-                        // Hide ExoPlayer view and show WebView
-                        if (mSimpleExoPlayerView != null) {
-                            mSimpleExoPlayerView.setVisibility(android.view.View.GONE);
-                        }
-                    }
-                    
-                    @Override
-                    public void onReceivedError(android.webkit.WebView view, int errorCode, String description, String failingUrl) {
-                        super.onReceivedError(view, errorCode, description, failingUrl);
-                        Log.e("CustomPlayerViewModel", "WebView error: " + description);
-                    }
-                });
-                
-                // Set Chrome client for fullscreen support
-                webView.setWebChromeClient(new android.webkit.WebChromeClient() {
-                    @Override
-                    public void onShowCustomView(android.view.View view, CustomViewCallback callback) {
-                        super.onShowCustomView(view, callback);
-                        // Handle fullscreen
-                    }
-                });
-                
-                // Add WebView to player layout
-                if (mSimpleExoPlayerView != null && mSimpleExoPlayerView.getParent() instanceof android.view.ViewGroup) {
-                    android.view.ViewGroup parent = (android.view.ViewGroup) mSimpleExoPlayerView.getParent();
-                    android.view.ViewGroup.LayoutParams params = new android.view.ViewGroup.LayoutParams(
-                        android.view.ViewGroup.LayoutParams.MATCH_PARENT,
-                        android.view.ViewGroup.LayoutParams.MATCH_PARENT);
-                    parent.addView(webView, params);
-                }
-                
-                // Load the HTML player
-                webView.loadUrl(localUrl);
-                
-                Log.d("CustomPlayerViewModel", "Loading HTML player at: " + localUrl);
-            });
-        }
-    }
-    
-    /**
-     * Find an available port for the web server
-     */
-    private int findAvailablePort() {
-        // Start from port 8080 and find available port
-        for (int port = 8080; port <= 8099; port++) {
-            try {
-                java.net.ServerSocket socket = new java.net.ServerSocket(port);
-                socket.close();
-                return port;
-            } catch (java.io.IOException e) {
-                // Port in use, try next
-            }
-        }
-        return 8080; // Default fallback
-    }
-    
-    /**
-     * Clean up web server when player is destroyed
-     */
-    public void cleanup() {
-        if (embedWebServer != null) {
-            embedWebServer.stop();
-            embedWebServer = null;
-            Log.d("CustomPlayerViewModel", "Stopped HTML fallback server");
-        }
     }
 
     @Override

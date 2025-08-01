@@ -878,12 +878,12 @@ public class SerieActivity extends AppCompatActivity implements PlaylistDownload
                     } else if (playas.equals("3")) {
                         showDialog(true);
                         operationAfterAds = 200;
-                        }else{
-                            showSourcesPlayDialog();
-                        }
+                    } else {
+                        showSourcesPlayDialog();
                     }
                 }
             }
+        }
         });
         linear_layout_serie_activity_rate.setOnClickListener(new View.OnClickListener() {
             @Override
