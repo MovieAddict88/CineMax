@@ -60,7 +60,7 @@ public class VideoExtractor {
                 }
             } catch (Exception e) {
                 Log.e(TAG, "Error extracting video URL: " + e.getMessage(), e);
-                return new VideoResult(null, "Extraction failed: " + e.getMessage());
+                return new VideoResult(null, "Extraction failed: " + e.getMessage(), true);
             }
         }
         
@@ -84,7 +84,7 @@ public class VideoExtractor {
             this.quality = quality;
         }
         
-        VideoResult(String url, String error) {
+        VideoResult(String url, String error, boolean isError) {
             this.url = url;
             this.error = error;
         }
@@ -107,7 +107,7 @@ public class VideoExtractor {
         
         try (Response response = client.newCall(request).execute()) {
             if (!response.isSuccessful()) {
-                return new VideoResult(null, "HTTP error: " + response.code());
+                return new VideoResult(null, "HTTP error: " + response.code(), true);
             }
             
             String html = response.body().string();
@@ -153,7 +153,7 @@ public class VideoExtractor {
             }
         }
         
-        return new VideoResult(null, "No video URL found in Vidsrc");
+        return new VideoResult(null, "No video URL found in Vidsrc", true);
     }
     
     private static VideoResult extractFromStreamtape(String embedUrl) throws IOException {
@@ -171,7 +171,7 @@ public class VideoExtractor {
         
         try (Response response = client.newCall(request).execute()) {
             if (!response.isSuccessful()) {
-                return new VideoResult(null, "HTTP error: " + response.code());
+                return new VideoResult(null, "HTTP error: " + response.code(), true);
             }
             
             String html = response.body().string();
@@ -200,7 +200,7 @@ public class VideoExtractor {
             }
         }
         
-        return new VideoResult(null, "No video URL found in Streamtape");
+        return new VideoResult(null, "No video URL found in Streamtape", true);
     }
     
     private static VideoResult extractFromMixdrop(String embedUrl) throws IOException {
@@ -218,7 +218,7 @@ public class VideoExtractor {
         
         try (Response response = client.newCall(request).execute()) {
             if (!response.isSuccessful()) {
-                return new VideoResult(null, "HTTP error: " + response.code());
+                return new VideoResult(null, "HTTP error: " + response.code(), true);
             }
             
             String html = response.body().string();
@@ -240,7 +240,7 @@ public class VideoExtractor {
             }
         }
         
-        return new VideoResult(null, "No video URL found in Mixdrop");
+        return new VideoResult(null, "No video URL found in Mixdrop", true);
     }
     
     private static VideoResult extractFromUpvid(String embedUrl) throws IOException {
@@ -269,7 +269,7 @@ public class VideoExtractor {
         
         try (Response response = client.newCall(request).execute()) {
             if (!response.isSuccessful()) {
-                return new VideoResult(null, "HTTP error: " + response.code());
+                return new VideoResult(null, "HTTP error: " + response.code(), true);
             }
             
             String html = response.body().string();
@@ -330,6 +330,6 @@ public class VideoExtractor {
             }
         }
         
-        return new VideoResult(null, "No video URL found in generic extraction");
+        return new VideoResult(null, "No video URL found in generic extraction", true);
     }
 }

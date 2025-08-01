@@ -72,7 +72,7 @@ public class EmbedActivity extends AppCompatActivity {
         mWebChromeClient = new myWebChromeClient();
         webView.setWebChromeClient(mWebChromeClient);
         webView.getSettings().setJavaScriptEnabled(true);
-        webView.getSettings().setAppCacheEnabled(true);
+        // webView.getSettings().setAppCacheEnabled(true); // Deprecated in API 33
         webView.getSettings().setBuiltInZoomControls(false);
         webView.getSettings().setSaveFormData(true);
         

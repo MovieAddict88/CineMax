@@ -2545,7 +2545,7 @@ public class SerieActivity extends AppCompatActivity implements PlaylistDownload
         
         if (mCastSession != null) {
             // Cast the extracted video
-            loadSubtitles(selectedSourceIndex);
+            loadSubtitles(0); // Use default position for cast
         } else {
             // Play in ExoPlayer
             Intent intent = new Intent(SerieActivity.this, PlayerActivity.class);
