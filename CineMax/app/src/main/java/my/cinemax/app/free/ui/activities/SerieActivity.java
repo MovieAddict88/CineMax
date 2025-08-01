@@ -274,6 +274,45 @@ public class SerieActivity extends AppCompatActivity implements PlaylistDownload
         setContentView(R.layout.activity_serie);
         mCastContext = CastContext.getSharedInstance(this);
 
+        // Initialize poster from Intent data
+        try {
+            poster = getIntent().getParcelableExtra("poster");
+            if (poster == null) {
+                Log.e("SerieActivity", "Poster object is null - finishing activity");
+                finish();
+                return;
+            }
+            Log.d("SerieActivity", "Successfully loaded poster: " + poster.getTitle());
+            
+            // Initialize seasons list if null to prevent crashes
+            if (poster.getSeasons() == null) {
+                Log.d("SerieActivity", "Seasons list is null, initializing empty list");
+                poster.setSeasons(new ArrayList<>());
+            }
+            
+        } catch (Exception e) {
+            Log.e("SerieActivity", "Error loading poster from intent: " + e.getMessage());
+            e.printStackTrace();
+            
+            // Try to get basic data without Parcelable if there's a serialization issue
+            try {
+                String title = getIntent().getStringExtra("title");
+                if (title != null) {
+                    Log.d("SerieActivity", "Trying fallback method for title: " + title);
+                    // Create a basic poster object as fallback
+                    poster = new Poster();
+                    poster.setTitle(title);
+                    poster.setSeasons(new ArrayList<>());
+                } else {
+                    finish();
+                    return;
+                }
+            } catch (Exception e2) {
+                Log.e("SerieActivity", "Fallback method also failed: " + e2.getMessage());
+                finish();
+                return;
+            }
+        }
 
         initView();
         initAction();
@@ -425,38 +464,73 @@ public class SerieActivity extends AppCompatActivity implements PlaylistDownload
     }
     private void getSeasons() {
         // Always show the seasons layout for TV series
-        linear_layout_activity_serie_seasons.setVisibility(View.VISIBLE);
+        if (linear_layout_activity_serie_seasons != null) {
+            linear_layout_activity_serie_seasons.setVisibility(View.VISIBLE);
+        }
+        
+        // Add comprehensive null checks to prevent crashes
+        if (poster == null) {
+            Log.e("SerieActivity", "ERROR: Poster is null! Cannot load seasons.");
+            if (spinner_activity_serie_season_list != null) {
+                String[] errorState = {"Error: No series data"};
+                ArrayAdapter<String> errorAdapter = new ArrayAdapter<String>(SerieActivity.this,
+                        R.layout.spinner_layout_season, R.id.textView, errorState);
+                errorAdapter.setDropDownViewResource(R.layout.simple_spinner_dropdown_season_item);
+                spinner_activity_serie_season_list.setAdapter(errorAdapter);
+                spinner_activity_serie_season_list.setVisibility(View.VISIBLE);
+            }
+            return;
+        }
+        
+        // Check if spinner is properly initialized
+        if (spinner_activity_serie_season_list == null) {
+            Log.e("SerieActivity", "ERROR: Season spinner is null! UI not properly initialized.");
+            return;
+        }
         
         // Read seasons directly from poster data instead of API call
-        if (poster != null && poster.getSeasons() != null && poster.getSeasons().size() > 0) {
+        if (poster.getSeasons() != null && poster.getSeasons().size() > 0) {
+            Log.d("SerieActivity", "Found " + poster.getSeasons().size() + " seasons for: " + poster.getTitle());
+            
             seasonArrayList.clear();
             final String[] countryCodes = new String[poster.getSeasons().size()];
 
             for (int i = 0; i < poster.getSeasons().size(); i++) {
-                countryCodes[i] = poster.getSeasons().get(i).getTitle();
+                String seasonTitle = poster.getSeasons().get(i).getTitle();
+                countryCodes[i] = seasonTitle != null ? seasonTitle : ("Season " + (i + 1));
                 seasonArrayList.add(poster.getSeasons().get(i));
             }
-            ArrayAdapter<String> filtresAdapter = new ArrayAdapter<String>(SerieActivity.this,
-                    R.layout.spinner_layout_season, R.id.textView, countryCodes);
-            filtresAdapter.setDropDownViewResource(R.layout.simple_spinner_dropdown_season_item);
-            spinner_activity_serie_season_list.setAdapter(filtresAdapter);
             
-            // Make sure spinner is visible when we have seasons
-            if (spinner_activity_serie_season_list != null) {
+            try {
+                ArrayAdapter<String> filtresAdapter = new ArrayAdapter<String>(SerieActivity.this,
+                        R.layout.spinner_layout_season, R.id.textView, countryCodes);
+                filtresAdapter.setDropDownViewResource(R.layout.simple_spinner_dropdown_season_item);
+                spinner_activity_serie_season_list.setAdapter(filtresAdapter);
                 spinner_activity_serie_season_list.setVisibility(View.VISIBLE);
+                
+                Log.d("SerieActivity", "Successfully loaded seasons spinner");
+            } catch (Exception e) {
+                Log.e("SerieActivity", "Error setting up seasons adapter: " + e.getMessage());
+                e.printStackTrace();
             }
         } else {
             // No seasons available - show empty state
+            Log.d("SerieActivity", "No seasons found for series: " + poster.getTitle());
+            
             seasonArrayList.clear();
             String[] emptyState = {"No seasons available"};
-            ArrayAdapter<String> emptyAdapter = new ArrayAdapter<String>(SerieActivity.this,
-                    R.layout.spinner_layout_season, R.id.textView, emptyState);
-            emptyAdapter.setDropDownViewResource(R.layout.simple_spinner_dropdown_season_item);
-            spinner_activity_serie_season_list.setAdapter(emptyAdapter);
             
-            // Make sure spinner is visible to show the "No seasons available" message
-            if (spinner_activity_serie_season_list != null) {
+            try {
+                ArrayAdapter<String> emptyAdapter = new ArrayAdapter<String>(SerieActivity.this,
+                        R.layout.spinner_layout_season, R.id.textView, emptyState);
+                emptyAdapter.setDropDownViewResource(R.layout.simple_spinner_dropdown_season_item);
+                spinner_activity_serie_season_list.setAdapter(emptyAdapter);
                 spinner_activity_serie_season_list.setVisibility(View.VISIBLE);
+                
+                Log.d("SerieActivity", "Set empty seasons state");
+            } catch (Exception e) {
+                Log.e("SerieActivity", "Error setting up empty seasons adapter: " + e.getMessage());
+                e.printStackTrace();
             }
         }
     }
@@ -485,16 +559,7 @@ public class SerieActivity extends AppCompatActivity implements PlaylistDownload
     }
 
     private void getSerie() {
-        poster = getIntent().getParcelableExtra("poster");
         from = getIntent().getStringExtra("from");
-        
-        // Check if poster is null - this prevents crashes
-        if (poster == null) {
-            Log.e("SerieActivity", "Poster object is null - finishing activity");
-            Toast.makeText(this, "Content not available", Toast.LENGTH_SHORT).show();
-            finish();
-            return;
-        }
     }
     private void setSerie() {
         Picasso.with(this).load((poster.getCover()!=null ? poster.getCover() : poster.getImage())).into(image_view_activity_serie_cover);
