@@ -361,9 +361,23 @@ public class MovieActivity extends AppCompatActivity {
         if (poster != null && poster.getSources() != null) {
             for (int i = 0; i < poster.getSources().size(); i++) {
                 Source source = poster.getSources().get(i);
-                if (source != null && source.getKind() != null && 
-                    (source.getKind().equals("both") || source.getKind().equals("play"))) {
-                    playSources.add(source);
+                if (source != null && source.getUrl() != null && !source.getUrl().isEmpty()) {
+                    // Check if source is playable
+                    boolean isPlayable = false;
+                    
+                    // If kind is specified, check it
+                    if (source.getKind() != null) {
+                        isPlayable = source.getKind().equals("both") || source.getKind().equals("play");
+                    } else {
+                        // If no kind is specified, assume it's playable if it has a valid URL
+                        // This handles sources without the kind field
+                        isPlayable = true;
+                    }
+                    
+                    if (isPlayable) {
+                        playSources.add(source);
+                        Log.d("MovieActivity", "Added playable source: " + source.getTitle() + " - " + source.getUrl());
+                    }
                 }
             }
         }
@@ -372,10 +386,25 @@ public class MovieActivity extends AppCompatActivity {
         if (poster != null && poster.getSources() != null) {
             for (int i = 0; i < poster.getSources().size(); i++) {
                 Source source = poster.getSources().get(i);
-                if (source != null && source.getKind() != null && source.getType() != null &&
-                    (source.getKind().equals("both") || source.getKind().equals("download"))) {
-                    if (!source.getType().equals("youtube") && !source.getType().equals("embed")) {
+                if (source != null && source.getUrl() != null && !source.getUrl().isEmpty()) {
+                    // Check if source is downloadable
+                    boolean isDownloadable = false;
+                    
+                    // If kind is specified, check it
+                    if (source.getKind() != null) {
+                        isDownloadable = source.getKind().equals("both") || source.getKind().equals("download");
+                    } else {
+                        // If no kind is specified, check if it's not an embed/youtube type
+                        // This handles sources without the kind field
+                        isDownloadable = source.getType() != null && 
+                                       !source.getType().equals("youtube") && 
+                                       !source.getType().equals("embed");
+                    }
+                    
+                    if (isDownloadable && source.getType() != null &&
+                        !source.getType().equals("youtube") && !source.getType().equals("embed")) {
                         downloadableList.add(source);
+                        Log.d("MovieActivity", "Added downloadable source: " + source.getTitle() + " - " + source.getUrl());
                     }
                 }
             }

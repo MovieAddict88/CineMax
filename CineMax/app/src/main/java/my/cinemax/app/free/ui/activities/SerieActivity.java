@@ -418,23 +418,44 @@ public class SerieActivity extends AppCompatActivity implements PlaylistDownload
         if (episode != null && episode.getSources() != null) {
             for (int i = 0; i < episode.getSources().size(); i++) {
                 Source source = episode.getSources().get(i);
-                if (source != null && source.getKind() != null && source.getType() != null &&
-                    (source.getKind().equals("both") || source.getKind().equals("download"))) {
-                    if (!source.getType().equals("youtube") && !source.getType().equals("embed")) {
+                if (source != null && source.getUrl() != null && !source.getUrl().isEmpty()) {
+                    // Check if source is downloadable
+                    boolean isDownloadable = false;
+                    
+                    // If kind is specified, check it
+                    if (source.getKind() != null) {
+                        isDownloadable = source.getKind().equals("both") || source.getKind().equals("download");
+                    } else {
+                        // If no kind is specified, check if it's not an embed/youtube type
+                        // This handles sources without the kind field
+                        isDownloadable = source.getType() != null && 
+                                       !source.getType().equals("youtube") && 
+                                       !source.getType().equals("embed");
+                    }
+                    
+                    if (isDownloadable && source.getType() != null &&
+                        !source.getType().equals("youtube") && !source.getType().equals("embed")) {
                         downloadableList.add(source);
+                        Log.d("SerieActivity", "Added downloadable source: " + source.getTitle() + " - " + source.getUrl());
                     }
                 }
             }
         }
+        
         if (checkSUBSCRIBED()){
             showSourcesDownloadDialog();
         }else{
-            if (selectedEpisode.getDownloadas().equals("2")){
-                showDialog(false);
-            }else if(selectedEpisode.getDownloadas().equals("3") ){
-                showDialog(true);
-                operationAfterAds = 100;
-            }else{
+            if (selectedEpisode.getDownloadas() != null) {
+                if (selectedEpisode.getDownloadas().equals("2")){
+                    showDialog(false);
+                }else if(selectedEpisode.getDownloadas().equals("3") ){
+                    showDialog(true);
+                    operationAfterAds = 100;
+                }else{
+                    showSourcesDownloadDialog();
+                }
+            } else {
+                // Default to showing download dialog if downloadas is not set
                 showSourcesDownloadDialog();
             }
         }
@@ -453,11 +474,23 @@ public class SerieActivity extends AppCompatActivity implements PlaylistDownload
             for (int i = 0; i < episode.getSources().size(); i++) {
                 Source source = episode.getSources().get(i);
                 if (source != null && source.getUrl() != null && !source.getUrl().isEmpty()) {
-                    // Check if source is playable (both or play kind)
-                    if (source.getKind() != null && 
-                        (source.getKind().equals("both") || source.getKind().equals("play"))) {
+                    // Check if source is playable
+                    boolean isPlayable = false;
+                    
+                    // If kind is specified, check it
+                    if (source.getKind() != null) {
+                        isPlayable = source.getKind().equals("both") || source.getKind().equals("play");
+                    } else {
+                        // If no kind is specified, assume it's playable if it has a valid URL
+                        // This handles sources without the kind field (like vidsrc.net embeds)
+                        isPlayable = true;
+                    }
+                    
+                    if (isPlayable) {
                         playableList.add(source);
                         Log.d("SerieActivity", "Added playable source: " + source.getTitle() + " - " + source.getUrl());
+                    } else {
+                        Log.d("SerieActivity", "Skipping non-playable source: " + source.getTitle());
                     }
                 } else {
                     Log.w("SerieActivity", "Skipping invalid source at index " + i);
