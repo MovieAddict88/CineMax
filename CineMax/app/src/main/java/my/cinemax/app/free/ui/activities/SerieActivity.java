@@ -274,11 +274,12 @@ public class SerieActivity extends AppCompatActivity implements PlaylistDownload
         setContentView(R.layout.activity_serie);
         mCastContext = CastContext.getSharedInstance(this);
 
-        // Initialize poster from Intent data
+        // Initialize poster from Intent data with comprehensive error handling
         try {
             poster = getIntent().getParcelableExtra("poster");
             if (poster == null) {
                 Log.e("SerieActivity", "Poster object is null - finishing activity");
+                Toasty.error(this, "Error: Unable to load series data", Toast.LENGTH_SHORT).show();
                 finish();
                 return;
             }
@@ -304,11 +305,13 @@ public class SerieActivity extends AppCompatActivity implements PlaylistDownload
                     poster.setTitle(title);
                     poster.setSeasons(new ArrayList<>());
                 } else {
+                    Toasty.error(this, "Error: Unable to load series data", Toast.LENGTH_SHORT).show();
                     finish();
                     return;
                 }
             } catch (Exception e2) {
                 Log.e("SerieActivity", "Fallback method also failed: " + e2.getMessage());
+                Toasty.error(this, "Error: Unable to load series data", Toast.LENGTH_SHORT).show();
                 finish();
                 return;
             }
@@ -496,9 +499,16 @@ public class SerieActivity extends AppCompatActivity implements PlaylistDownload
             final String[] countryCodes = new String[poster.getSeasons().size()];
 
             for (int i = 0; i < poster.getSeasons().size(); i++) {
-                String seasonTitle = poster.getSeasons().get(i).getTitle();
-                countryCodes[i] = seasonTitle != null ? seasonTitle : ("Season " + (i + 1));
-                seasonArrayList.add(poster.getSeasons().get(i));
+                Season season = poster.getSeasons().get(i);
+                if (season != null) {
+                    String seasonTitle = season.getTitle();
+                    countryCodes[i] = seasonTitle != null ? seasonTitle : ("Season " + (i + 1));
+                    seasonArrayList.add(season);
+                } else {
+                    // Handle null season
+                    countryCodes[i] = "Season " + (i + 1);
+                    Log.w("SerieActivity", "Null season found at index " + i);
+                }
             }
             
             try {
@@ -512,26 +522,33 @@ public class SerieActivity extends AppCompatActivity implements PlaylistDownload
             } catch (Exception e) {
                 Log.e("SerieActivity", "Error setting up seasons adapter: " + e.getMessage());
                 e.printStackTrace();
+                // Show error state
+                showEmptySeasonsState("Error loading seasons");
             }
         } else {
-            // No seasons available - show empty state
+            // No seasons available - show empty state with helpful message
             Log.d("SerieActivity", "No seasons found for series: " + poster.getTitle());
-            
-            seasonArrayList.clear();
-            String[] emptyState = {"No seasons available"};
-            
-            try {
-                ArrayAdapter<String> emptyAdapter = new ArrayAdapter<String>(SerieActivity.this,
-                        R.layout.spinner_layout_season, R.id.textView, emptyState);
-                emptyAdapter.setDropDownViewResource(R.layout.simple_spinner_dropdown_season_item);
+            showEmptySeasonsState("No episodes available yet");
+        }
+    }
+    
+    private void showEmptySeasonsState(String message) {
+        seasonArrayList.clear();
+        String[] emptyState = {message};
+        
+        try {
+            ArrayAdapter<String> emptyAdapter = new ArrayAdapter<String>(SerieActivity.this,
+                    R.layout.spinner_layout_season, R.id.textView, emptyState);
+            emptyAdapter.setDropDownViewResource(R.layout.simple_spinner_dropdown_season_item);
+            if (spinner_activity_serie_season_list != null) {
                 spinner_activity_serie_season_list.setAdapter(emptyAdapter);
                 spinner_activity_serie_season_list.setVisibility(View.VISIBLE);
-                
-                Log.d("SerieActivity", "Set empty seasons state");
-            } catch (Exception e) {
-                Log.e("SerieActivity", "Error setting up empty seasons adapter: " + e.getMessage());
-                e.printStackTrace();
             }
+            
+            Log.d("SerieActivity", "Set empty seasons state: " + message);
+        } catch (Exception e) {
+            Log.e("SerieActivity", "Error setting up empty seasons adapter: " + e.getMessage());
+            e.printStackTrace();
         }
     }
     private void getPosterCastings() {
@@ -562,75 +579,113 @@ public class SerieActivity extends AppCompatActivity implements PlaylistDownload
         from = getIntent().getStringExtra("from");
     }
     private void setSerie() {
-        Picasso.with(this).load((poster.getCover()!=null ? poster.getCover() : poster.getImage())).into(image_view_activity_serie_cover);
-        final com.squareup.picasso.Target target = new com.squareup.picasso.Target() {
-            @Override
-            public void onBitmapLoaded(Bitmap bitmap, Picasso.LoadedFrom from) {
-                BlurImage.with(getApplicationContext()).load(bitmap).intensity(25).Async(true).into(image_view_activity_serie_background);
+        // Add null checks to prevent crashes
+        if (poster == null) {
+            Log.e("SerieActivity", "Poster is null in setSerie()");
+            return;
+        }
+        
+        try {
+            // Load cover image with fallback to main image
+            String imageUrl = (poster.getCover() != null && !poster.getCover().isEmpty()) ? 
+                poster.getCover() : poster.getImage();
+            if (imageUrl != null && !imageUrl.isEmpty()) {
+                Picasso.with(this).load(imageUrl).into(image_view_activity_serie_cover);
+                
+                final com.squareup.picasso.Target target = new com.squareup.picasso.Target() {
+                    @Override
+                    public void onBitmapLoaded(Bitmap bitmap, Picasso.LoadedFrom from) {
+                        BlurImage.with(getApplicationContext()).load(bitmap).intensity(25).Async(true).into(image_view_activity_serie_background);
+                    }
+                    @Override
+                    public void onBitmapFailed(Drawable errorDrawable) { }
+                    @Override
+                    public void onPrepareLoad(Drawable placeHolderDrawable) { }
+                };
+                Picasso.with(getApplicationContext()).load(poster.getImage()).into(target);
+                image_view_activity_serie_background.setTag(target);
             }
-            @Override
-            public void onBitmapFailed(Drawable errorDrawable) { }
-            @Override
-            public void onPrepareLoad(Drawable placeHolderDrawable) { }
-        };
-        Picasso.with(getApplicationContext()).load(poster.getImage()).into(target);
-        image_view_activity_serie_background.setTag(target);
 
-        ViewCompat.setTransitionName(image_view_activity_serie_cover, "imageMain");
+            ViewCompat.setTransitionName(image_view_activity_serie_cover, "imageMain");
 
-        text_view_activity_serie_title.setText(poster.getTitle());
-        text_view_activity_serie_sub_title.setText(poster.getTitle());
-        text_view_activity_serie_description.setText(poster.getDescription());
-        if (poster.getYear()!=null){
-            if(!poster.getYear().isEmpty()){
+            // Set title with null check
+            if (poster.getTitle() != null) {
+                text_view_activity_serie_title.setText(poster.getTitle());
+                text_view_activity_serie_sub_title.setText(poster.getTitle());
+            }
+
+            // Set description with null check
+            if (poster.getDescription() != null) {
+                text_view_activity_serie_description.setText(poster.getDescription());
+            }
+
+            // Set year with null check
+            if (poster.getYear() != null && !poster.getYear().isEmpty()) {
                 text_view_activity_serie_year.setVisibility(View.VISIBLE);
                 text_view_activity_serie_year.setText(poster.getYear());
+            } else {
+                text_view_activity_serie_year.setVisibility(View.GONE);
             }
-        }
 
-        if (poster.getClassification()!=null){
-            if(!poster.getClassification().isEmpty()){
+            // Set classification with null check
+            if (poster.getClassification() != null && !poster.getClassification().isEmpty()) {
                 text_view_activity_serie_classification.setVisibility(View.VISIBLE);
                 text_view_activity_serie_classification.setText(poster.getClassification());
+            } else {
+                text_view_activity_serie_classification.setVisibility(View.GONE);
             }
-        }
 
-        if (poster.getDuration()!=null){
-            if(!poster.getDuration().isEmpty()){
+            // Set duration with null check
+            if (poster.getDuration() != null && !poster.getDuration().isEmpty()) {
                 text_view_activity_serie_duration.setVisibility(View.VISIBLE);
                 text_view_activity_serie_duration.setText(poster.getDuration());
+            } else {
+                text_view_activity_serie_duration.setVisibility(View.GONE);
             }
-        }
-        if (poster.getDuration()!=null){
-            if(!poster.getDuration().isEmpty()){
-                text_view_activity_serie_duration.setVisibility(View.VISIBLE);
-                text_view_activity_serie_duration.setText(poster.getDuration());
-            }
-        }
 
-        if (poster.getImdb()!=null){
-            if(!poster.getImdb().isEmpty()){
+            // Set IMDB rating with null check
+            if (poster.getImdb() != null && !poster.getImdb().isEmpty()) {
                 linear_layout_activity_serie_imdb_rating.setVisibility(View.VISIBLE);
                 text_view_activity_serie_imdb_rating.setText(poster.getImdb());
+            } else {
+                linear_layout_activity_serie_imdb_rating.setVisibility(View.GONE);
             }
-        }
 
-        rating_bar_activity_serie_rating.setRating(poster.getRating());
-        linear_layout_activity_serie_rating.setVisibility(poster.getRating()==0 ? View.GONE:View.VISIBLE);
+            // Set rating with null check
+            if (poster.getRating() != null) {
+                rating_bar_activity_serie_rating.setRating(poster.getRating());
+                linear_layout_activity_serie_rating.setVisibility(poster.getRating() == 0 ? View.GONE : View.VISIBLE);
+            } else {
+                linear_layout_activity_serie_rating.setVisibility(View.GONE);
+            }
 
-        this.linearLayoutManagerGenre=  new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false);
-        this.genreAdapter =new GenreAdapter(poster.getGenres(),this);
-        recycle_view_activity_serie_genres.setHasFixedSize(true);
-        recycle_view_activity_serie_genres.setAdapter(genreAdapter);
-        recycle_view_activity_serie_genres.setLayoutManager(linearLayoutManagerGenre);
+            // Set genres with null check
+            if (poster.getGenres() != null && !poster.getGenres().isEmpty()) {
+                this.linearLayoutManagerGenre = new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false);
+                this.genreAdapter = new GenreAdapter(poster.getGenres(), this);
+                recycle_view_activity_serie_genres.setHasFixedSize(true);
+                recycle_view_activity_serie_genres.setAdapter(genreAdapter);
+                recycle_view_activity_serie_genres.setLayoutManager(linearLayoutManagerGenre);
+            }
 
-        if (poster.getTrailer()!=null){
-            linear_layout_serie_activity_trailer.setVisibility(View.VISIBLE);
-        }
-        if (poster.getComment()){
-            floating_action_button_activity_serie_comment.setVisibility(View.VISIBLE);
-        }else{
-            floating_action_button_activity_serie_comment.setVisibility(View.GONE);
+            // Set trailer visibility with null check
+            if (poster.getTrailer() != null) {
+                linear_layout_serie_activity_trailer.setVisibility(View.VISIBLE);
+            } else {
+                linear_layout_serie_activity_trailer.setVisibility(View.GONE);
+            }
+
+            // Set comment button visibility with null check
+            if (poster.getComment() != null && poster.getComment()) {
+                floating_action_button_activity_serie_comment.setVisibility(View.VISIBLE);
+            } else {
+                floating_action_button_activity_serie_comment.setVisibility(View.GONE);
+            }
+            
+        } catch (Exception e) {
+            Log.e("SerieActivity", "Error in setSerie(): " + e.getMessage());
+            e.printStackTrace();
+            Toasty.error(this, "Error loading series details", Toast.LENGTH_SHORT).show();
         }
     }
 
