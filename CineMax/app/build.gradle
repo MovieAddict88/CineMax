@@ -67,7 +67,6 @@ android {
 dependencies {
     coreLibraryDesugaring 'com.android.tools:desugar_jdk_libs:1.1.5'
 
-
     implementation fileTree(include: ['*.jar'], dir: 'libs')
     implementation 'androidx.constraintlayout:constraintlayout:2.1.0'
 
@@ -141,5 +140,28 @@ dependencies {
     implementation files('libs/YouTubeAndroidPlayerApi.jar')
     implementation 'com.github.congle7997:GoogleIAP:1.0.8'
 
+    // Force consistent lifecycle versions to resolve conflicts
+    implementation('androidx.lifecycle:lifecycle-viewmodel:2.5.1') {
+        force = true
+    }
+    implementation('androidx.lifecycle:lifecycle-viewmodel-ktx:2.5.1') {
+        force = true
+    }
+    implementation('androidx.lifecycle:lifecycle-livedata:2.5.1') {
+        force = true
+    }
+    implementation('androidx.lifecycle:lifecycle-runtime:2.5.1') {
+        force = true
+    }
+
+    // Exclude conflicting lifecycle versions from transitive dependencies
+    configurations.all {
+        resolutionStrategy {
+            force 'androidx.lifecycle:lifecycle-viewmodel:2.5.1'
+            force 'androidx.lifecycle:lifecycle-viewmodel-ktx:2.5.1'
+            force 'androidx.lifecycle:lifecycle-livedata:2.5.1'
+            force 'androidx.lifecycle:lifecycle-runtime:2.5.1'
+        }
+    }
 }
 apply plugin: 'com.google.gms.google-services'
