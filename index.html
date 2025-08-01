@@ -680,6 +680,18 @@
                 </div>
             </div>
             
+            <div class="auto-gen-toggle" style="margin-top: 10px;">
+                <input type="checkbox" id="autoSaveToggle" checked>
+                <label for="autoSaveToggle">Auto-save data locally</label>
+                <span class="help-text">Keeps your work safe even after page refresh - data is saved in your browser</span>
+                <button id="clearStorageButton" class="btn btn-secondary" style="margin-left: 20px; background-color: var(--danger);">
+                    <i class="fas fa-trash"></i> Clear Saved Data
+                </button>
+                <div id="autoSaveStatus" style="margin-left: 20px; font-size: 0.9rem; color: var(--success); display: none;">
+                    <i class="fas fa-save"></i> Auto-save active <span id="lastSaveTime"></span>
+                </div>
+            </div>
+            
             <div class="load-section">
                 <div class="load-file">
                     <label for="fileInput">Load JSON file:</label>
@@ -1148,6 +1160,9 @@
             let currentSeriesGenres = [];
             let currentSeriesActors = [];
             let autoGenerationEnabled = true; // Global control for auto-generation
+            
+            const STORAGE_KEY = 'cinemax_api_data';
+            const AUTO_SAVE_ENABLED_KEY = 'cinemax_auto_save_enabled';
 
             // SIMPLE CLICK TEST
             console.log('🧪 Setting up simple click tests...');
@@ -1257,6 +1272,8 @@
                             // Update UI and auto-generate related content
                             autoGenerateRelatedContent();
                             renderEntries();
+                            // Auto-save after adding/editing entry
+                            saveToLocalStorage();
                             closeModal();
                             
                         } catch (error) {
@@ -1461,6 +1478,108 @@
                 });
             }
             
+            // --- Auto-Save Control ---
+            const autoSaveToggle = document.getElementById('autoSaveToggle');
+            const clearStorageButton = document.getElementById('clearStorageButton');
+            let autoSaveEnabled = true;
+            
+            // Load auto-save preference
+            const savedAutoSavePreference = localStorage.getItem(AUTO_SAVE_ENABLED_KEY);
+            if (savedAutoSavePreference !== null) {
+                autoSaveEnabled = JSON.parse(savedAutoSavePreference);
+                if (autoSaveToggle) {
+                    autoSaveToggle.checked = autoSaveEnabled;
+                }
+            }
+            
+            if (autoSaveToggle) {
+                autoSaveToggle.addEventListener('change', (e) => {
+                    autoSaveEnabled = e.target.checked;
+                    localStorage.setItem(AUTO_SAVE_ENABLED_KEY, JSON.stringify(autoSaveEnabled));
+                    console.log(`Auto-save ${autoSaveEnabled ? 'enabled' : 'disabled'}`);
+                    showNotification(`Auto-save ${autoSaveEnabled ? 'enabled' : 'disabled'}`, true);
+                    
+                    // Update status indicator
+                    const statusElement = document.getElementById('autoSaveStatus');
+                    if (statusElement) {
+                        statusElement.style.display = autoSaveEnabled ? 'inline-block' : 'none';
+                    }
+                    
+                    // If enabled, save current data immediately
+                    if (autoSaveEnabled && jsonData) {
+                        saveToLocalStorage();
+                    }
+                });
+                
+                // Initialize status indicator
+                const statusElement = document.getElementById('autoSaveStatus');
+                if (statusElement && autoSaveEnabled) {
+                    statusElement.style.display = 'inline-block';
+                }
+            }
+            
+            if (clearStorageButton) {
+                clearStorageButton.addEventListener('click', () => {
+                    if (confirm('Are you sure you want to clear all saved data? This action cannot be undone.')) {
+                        localStorage.removeItem(STORAGE_KEY);
+                        showNotification('Saved data cleared successfully!', true);
+                        console.log('🗑️ Local storage cleared');
+                    }
+                });
+            }
+            
+            // --- Auto-Save Functions ---
+            function saveToLocalStorage() {
+                if (!autoSaveEnabled || !jsonData) return;
+                
+                try {
+                    const now = new Date();
+                    const dataToSave = {
+                        timestamp: now.toISOString(),
+                        data: jsonData
+                    };
+                    localStorage.setItem(STORAGE_KEY, JSON.stringify(dataToSave));
+                    console.log('💾 Data auto-saved to localStorage');
+                    
+                    // Update the last save time display
+                    const lastSaveElement = document.getElementById('lastSaveTime');
+                    if (lastSaveElement) {
+                        lastSaveElement.textContent = `(Last saved: ${now.toLocaleTimeString()})`;
+                    }
+                } catch (error) {
+                    console.warn('Failed to save to localStorage:', error);
+                    if (error.name === 'QuotaExceededError') {
+                        showNotification('Auto-save failed: Storage quota exceeded. Consider clearing old data.', false);
+                    }
+                }
+            }
+            
+            function loadFromLocalStorage() {
+                try {
+                    const savedData = localStorage.getItem(STORAGE_KEY);
+                    if (savedData) {
+                        const parsed = JSON.parse(savedData);
+                        if (parsed.data) {
+                            jsonData = parsed.data;
+                            
+                            // Initialize the UI
+                            editorDiv.style.display = 'block';
+                            saveSectionDiv.style.display = 'block';
+                            renderEntries();
+                            
+                            const saveTime = new Date(parsed.timestamp).toLocaleString();
+                            showNotification(`Data restored from auto-save (${saveTime})`, true);
+                            console.log('✅ Data loaded from localStorage');
+                            return true;
+                        }
+                    }
+                } catch (error) {
+                    console.warn('Failed to load from localStorage:', error);
+                    localStorage.removeItem(STORAGE_KEY); // Clean up corrupted data
+                }
+                return false;
+            }
+
             // --- CineMax API Structure Functions ---
             function createNewCineMaxAPI() {
                 console.log('🚀 Creating new CineMax API structure...');
@@ -1483,6 +1602,9 @@
                     actors: [],
                     genres: []
                 };
+                
+                // Auto-save the new structure
+                saveToLocalStorage();
                 
                 // Initialize the UI
                 editorDiv.style.display = 'block';
@@ -1975,6 +2097,9 @@
                     saveSectionDiv.style.display = 'block';
                     renderEntries();
                     
+                    // Auto-save the loaded data
+                    saveToLocalStorage();
+                    
                     const totalItems = (jsonData.movies?.length || 0) + (jsonData.channels?.length || 0);
                     showNotification(`Data loaded successfully! Found ${totalItems} items.`, true);
                     console.log('Data loading completed successfully');
@@ -2224,6 +2349,8 @@
                 if (index > -1) {
                     showNotification(`${type.charAt(0).toUpperCase() + type.slice(1)} deleted successfully!`, true);
                     renderEntries();
+                    // Auto-save after deletion
+                    saveToLocalStorage();
                 } else {
                     showNotification(`Failed to delete ${type}. Please try again.`, false);
                 }
@@ -2834,6 +2961,9 @@
                     
                     // Update UI
                     renderEntries();
+                    
+                    // Auto-save the imported data
+                    saveToLocalStorage();
                     
                     progressBar.style.width = '100%';
                     statusText.textContent = `✅ Bulk import completed! Added ${addedItems} new items out of ${totalItems} processed.`;
@@ -3483,6 +3613,19 @@
                     closeModal();
                 }
             });
+            
+            // --- Auto-Load on Page Start ---
+            console.log('🔄 Checking for auto-saved data...');
+            if (autoSaveEnabled) {
+                const hasRestored = loadFromLocalStorage();
+                if (hasRestored) {
+                    console.log('✅ Auto-saved data restored successfully');
+                } else {
+                    console.log('ℹ️ No auto-saved data found');
+                }
+            } else {
+                console.log('⏸️ Auto-save disabled, skipping auto-load');
+            }
         });
     </script>
 </body>
