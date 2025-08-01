@@ -424,6 +424,9 @@ public class SerieActivity extends AppCompatActivity implements PlaylistDownload
         }
     }
     private void getSeasons() {
+        // Always show the seasons layout for TV series
+        linear_layout_activity_serie_seasons.setVisibility(View.VISIBLE);
+        
         // Read seasons directly from poster data instead of API call
         if (poster != null && poster.getSeasons() != null && poster.getSeasons().size() > 0) {
             seasonArrayList.clear();
@@ -437,10 +440,24 @@ public class SerieActivity extends AppCompatActivity implements PlaylistDownload
                     R.layout.spinner_layout_season, R.id.textView, countryCodes);
             filtresAdapter.setDropDownViewResource(R.layout.simple_spinner_dropdown_season_item);
             spinner_activity_serie_season_list.setAdapter(filtresAdapter);
-
-            linear_layout_activity_serie_seasons.setVisibility(View.VISIBLE);
+            
+            // Make sure spinner is visible when we have seasons
+            if (spinner_activity_serie_season_list != null) {
+                spinner_activity_serie_season_list.setVisibility(View.VISIBLE);
+            }
         } else {
-            linear_layout_activity_serie_seasons.setVisibility(View.GONE);
+            // No seasons available - show empty state
+            seasonArrayList.clear();
+            String[] emptyState = {"No seasons available"};
+            ArrayAdapter<String> emptyAdapter = new ArrayAdapter<String>(SerieActivity.this,
+                    R.layout.spinner_layout_season, R.id.textView, emptyState);
+            emptyAdapter.setDropDownViewResource(R.layout.simple_spinner_dropdown_season_item);
+            spinner_activity_serie_season_list.setAdapter(emptyAdapter);
+            
+            // Make sure spinner is visible to show the "No seasons available" message
+            if (spinner_activity_serie_season_list != null) {
+                spinner_activity_serie_season_list.setVisibility(View.VISIBLE);
+            }
         }
     }
     private void getPosterCastings() {
