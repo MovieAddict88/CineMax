@@ -1075,9 +1075,220 @@
             setupSimpleTest();
         }
         
-        // IMMEDIATE TEST - This should show up first
-        console.log('🔥 JAVASCRIPT IS LOADING! 🔥');
-        alert('JavaScript is working! Check console for details.');
+        // DIRECT FIX - Add immediate event listener when page loads
+        window.addEventListener('load', function() {
+            console.log('🔧 DIRECT FIX: Page loaded, setting up button...');
+            
+            const btn = document.getElementById('testDataButton');
+            if (btn) {
+                console.log('✅ DIRECT FIX: Button found');
+                
+                // Clear any existing listeners
+                btn.onclick = null;
+                
+                // Add direct click handler
+                btn.onclick = function() {
+                    console.log('🚀 DIRECT FIX: Button clicked!');
+                    
+                    // Show immediate feedback
+                    const editor = document.getElementById('editor');
+                    const entryList = document.getElementById('entryList');
+                    
+                    if (editor) {
+                        editor.style.display = 'block';
+                        console.log('✅ DIRECT FIX: Editor shown');
+                    }
+                    
+                    if (entryList) {
+                        entryList.innerHTML = `
+                            <div style="padding: 20px; background: #d4edda; border: 1px solid #c3e6cb; border-radius: 5px; margin: 10px 0;">
+                                <h3 style="color: #155724; margin: 0 0 10px 0;">✅ Direct Fix Working!</h3>
+                                <p style="color: #155724; margin: 0;">The button click was detected. Now loading test data...</p>
+                            </div>
+                        `;
+                        console.log('✅ DIRECT FIX: Content added to entryList');
+                        
+                        // Now try to load actual test data
+                        setTimeout(() => {
+                            try {
+                                // Simple test data
+                                const testMovies = [
+                                    {
+                                        id: 1,
+                                        title: "Test Movie",
+                                        type: "movie",
+                                        year: "2023",
+                                        image: "https://via.placeholder.com/300x450/3498db/ffffff?text=Test+Movie",
+                                        description: "This is a test movie",
+                                        rating: 8.5
+                                    }
+                                ];
+                                
+                                const testChannels = [
+                                    {
+                                        id: 2,
+                                        title: "Test Channel",
+                                        type: "channel",
+                                        image: "https://via.placeholder.com/200x100/e74c3c/ffffff?text=Test+Channel",
+                                        description: "This is a test channel"
+                                    }
+                                ];
+                                
+                                // Create entry items
+                                let html = '<h3 style="color: #2c3e50; margin: 20px 0 10px 0;">📋 Loaded Content:</h3>';
+                                
+                                testMovies.forEach(movie => {
+                                    html += `
+                                        <div style="border: 1px solid #ddd; padding: 15px; margin: 10px 0; border-radius: 5px; background: #f8f9fa;">
+                                            <h4 style="color: #2c3e50; margin: 0 0 5px 0;">🎬 ${movie.title}</h4>
+                                            <p style="color: #6c757d; margin: 0;">Type: ${movie.type} | Year: ${movie.year} | Rating: ${movie.rating}</p>
+                                        </div>
+                                    `;
+                                });
+                                
+                                testChannels.forEach(channel => {
+                                    html += `
+                                        <div style="border: 1px solid #ddd; padding: 15px; margin: 10px 0; border-radius: 5px; background: #f8f9fa;">
+                                            <h4 style="color: #2c3e50; margin: 0 0 5px 0;">📺 ${channel.title}</h4>
+                                            <p style="color: #6c757d; margin: 0;">Type: ${channel.type} | Description: ${channel.description}</p>
+                                        </div>
+                                    `;
+                                });
+                                
+                                entryList.innerHTML = html;
+                                console.log('✅ DIRECT FIX: Test data displayed successfully');
+                                
+                                // Show save section
+                                const saveSection = document.getElementById('save-section');
+                                if (saveSection) {
+                                    saveSection.style.display = 'block';
+                                    console.log('✅ DIRECT FIX: Save section shown');
+                                }
+                                
+                            } catch (error) {
+                                console.error('❌ DIRECT FIX: Error loading test data:', error);
+                                entryList.innerHTML += `<div style="padding: 15px; background: #f8d7da; border: 1px solid #f5c6cb; border-radius: 5px; margin: 10px 0; color: #721c24;">Error: ${error.message}</div>`;
+                            }
+                        }, 1000);
+                        
+                    } else {
+                        console.log('❌ DIRECT FIX: entryList not found');
+                    }
+                };
+                
+                console.log('✅ DIRECT FIX: Click handler attached');
+            } else {
+                console.log('❌ DIRECT FIX: Button not found');
+            }
+        });
+        
+        // DIRECT FIX for text import
+        window.addEventListener('load', function() {
+            console.log('🔧 DIRECT FIX: Setting up text import...');
+            
+            const loadBtn = document.getElementById('loadTextButton');
+            const textArea = document.getElementById('jsonTextInput');
+            
+            if (loadBtn && textArea) {
+                console.log('✅ DIRECT FIX: Text import elements found');
+                
+                loadBtn.onclick = function() {
+                    console.log('🚀 DIRECT FIX: Load text button clicked!');
+                    
+                    const text = textArea.value.trim();
+                    if (!text) {
+                        alert('Please paste some JSON data first!');
+                        return;
+                    }
+                    
+                    try {
+                        const data = JSON.parse(text);
+                        console.log('✅ DIRECT FIX: JSON parsed successfully');
+                        
+                        const editor = document.getElementById('editor');
+                        const entryList = document.getElementById('entryList');
+                        
+                        if (editor) {
+                            editor.style.display = 'block';
+                        }
+                        
+                        if (entryList) {
+                            let html = '<h3 style="color: #2c3e50; margin: 20px 0 10px 0;">📋 Imported Data:</h3>';
+                            
+                            // Display movies
+                            if (data.movies && data.movies.length > 0) {
+                                html += `<h4 style="color: #2c3e50; margin: 15px 0 5px 0;">🎬 Movies (${data.movies.length}):</h4>`;
+                                data.movies.forEach(movie => {
+                                    html += `
+                                        <div style="border: 1px solid #ddd; padding: 15px; margin: 10px 0; border-radius: 5px; background: #f8f9fa;">
+                                            <h5 style="color: #2c3e50; margin: 0 0 5px 0;">${movie.title || 'Untitled'}</h5>
+                                            <p style="color: #6c757d; margin: 0; font-size: 14px;">
+                                                ID: ${movie.id || 'N/A'} | 
+                                                Year: ${movie.year || 'N/A'} | 
+                                                Type: ${movie.type || 'movie'}
+                                            </p>
+                                        </div>
+                                    `;
+                                });
+                            }
+                            
+                            // Display channels
+                            if (data.channels && data.channels.length > 0) {
+                                html += `<h4 style="color: #2c3e50; margin: 15px 0 5px 0;">📺 Channels (${data.channels.length}):</h4>`;
+                                data.channels.forEach(channel => {
+                                    html += `
+                                        <div style="border: 1px solid #ddd; padding: 15px; margin: 10px 0; border-radius: 5px; background: #f8f9fa;">
+                                            <h5 style="color: #2c3e50; margin: 0 0 5px 0;">${channel.title || 'Untitled'}</h5>
+                                            <p style="color: #6c757d; margin: 0; font-size: 14px;">
+                                                ID: ${channel.id || 'N/A'} | 
+                                                Type: Live TV
+                                            </p>
+                                        </div>
+                                    `;
+                                });
+                            }
+                            
+                            // Display other data
+                            const otherArrays = ['actors', 'genres', 'categories', 'countries'];
+                            otherArrays.forEach(key => {
+                                if (data[key] && data[key].length > 0) {
+                                    html += `<h4 style="color: #2c3e50; margin: 15px 0 5px 0;">📋 ${key.charAt(0).toUpperCase() + key.slice(1)} (${data[key].length}):</h4>`;
+                                    html += `<p style="color: #6c757d; margin: 0 0 10px 0;">${data[key].length} items found</p>`;
+                                }
+                            });
+                            
+                            if (html === '<h3 style="color: #2c3e50; margin: 20px 0 10px 0;">📋 Imported Data:</h3>') {
+                                html += '<p style="color: #dc3545; margin: 10px 0;">No movies, channels, or other content found in the imported data.</p>';
+                            }
+                            
+                            entryList.innerHTML = html;
+                            
+                            // Show save section
+                            const saveSection = document.getElementById('save-section');
+                            if (saveSection) {
+                                saveSection.style.display = 'block';
+                            }
+                            
+                            // Clear text area
+                            textArea.value = '';
+                            
+                            alert(`Data imported successfully! Found ${(data.movies?.length || 0)} movies and ${(data.channels?.length || 0)} channels.`);
+                            
+                        } else {
+                            console.log('❌ DIRECT FIX: entryList not found');
+                        }
+                        
+                    } catch (error) {
+                        console.error('❌ DIRECT FIX: JSON parse error:', error);
+                        alert(`Error parsing JSON: ${error.message}\n\nPlease check that your JSON is properly formatted.`);
+                    }
+                };
+                
+                console.log('✅ DIRECT FIX: Text import handler attached');
+            } else {
+                console.log('❌ DIRECT FIX: Text import elements not found');
+            }
+        });
 
         document.addEventListener('DOMContentLoaded', () => {
             console.log('🚀 DOM Content Loaded - Initializing app...');
