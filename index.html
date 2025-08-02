@@ -671,17 +671,18 @@
         }
 
         async function generateSingleContent() {
-            const tmdbId = document.getElementById('tmdbId').value.trim();
-            const contentType = document.getElementById('contentType').value;
-            const videoSourceType = document.getElementById('videoSourceType').value;
-            const sourceType = document.querySelector('.source-type-btn.active').dataset.type;
-
-            if (!tmdbId) {
-                showNotification('Please enter a TMDB ID', 'error');
-                return;
-            }
-
             try {
+                const tmdbId = document.getElementById('tmdbId')?.value?.trim();
+                const contentType = document.getElementById('contentType')?.value || 'movie';
+                const videoSourceType = document.getElementById('videoSourceType')?.value || 'embed';
+                const sourceTypeBtn = document.querySelector('.source-type-btn.active');
+                const sourceType = sourceTypeBtn ? sourceTypeBtn.dataset.type : 'both';
+
+                if (!tmdbId) {
+                    showNotification('Please enter a TMDB ID', 'error');
+                    return;
+                }
+
                 showNotification('Fetching content from TMDB...', 'warning');
                 
                 let contentData;
@@ -715,20 +716,37 @@
                 showNotification(`✅ ${contentType} "${contentData.title || contentData.name}" generated successfully!`, 'success');
                 
             } catch (error) {
+                console.error('Error generating single content:', error);
                 showNotification(`Error: ${error.message}`, 'error');
             }
         }
 
         async function fetchTMDBMovie(tmdbId) {
-            const response = await fetch(`${TMDB_BASE_URL}/movie/${tmdbId}?api_key=${TMDB_API_KEY}&append_to_response=credits,videos`);
-            if (!response.ok) throw new Error('Failed to fetch movie data');
-            return await response.json();
+            try {
+                const response = await fetch(`${TMDB_BASE_URL}/movie/${tmdbId}?api_key=${TMDB_API_KEY}&append_to_response=credits,videos`);
+                if (!response.ok) {
+                    const errorData = await response.json().catch(() => ({}));
+                    throw new Error(`Failed to fetch movie data: ${response.status} ${response.statusText} - ${errorData.status_message || 'Unknown error'}`);
+                }
+                return await response.json();
+            } catch (error) {
+                console.error(`Error fetching movie ${tmdbId}:`, error);
+                throw error;
+            }
         }
 
         async function fetchTMDBSeries(tmdbId) {
-            const response = await fetch(`${TMDB_BASE_URL}/tv/${tmdbId}?api_key=${TMDB_API_KEY}&append_to_response=credits,videos`);
-            if (!response.ok) throw new Error('Failed to fetch series data');
-            return await response.json();
+            try {
+                const response = await fetch(`${TMDB_BASE_URL}/tv/${tmdbId}?api_key=${TMDB_API_KEY}&append_to_response=credits,videos`);
+                if (!response.ok) {
+                    const errorData = await response.json().catch(() => ({}));
+                    throw new Error(`Failed to fetch series data: ${response.status} ${response.statusText} - ${errorData.status_message || 'Unknown error'}`);
+                }
+                return await response.json();
+            } catch (error) {
+                console.error(`Error fetching series ${tmdbId}:`, error);
+                throw error;
+            }
         }
 
         function generateVideoSources(tmdbId, contentType, videoSourceType, sourceType) {
@@ -908,55 +926,88 @@
                 // Calculate total items
                 for (let page = 1; page <= pages; page++) {
                     if (type === 'movie' || type === 'both') {
-                        const moviesResponse = await fetch(`${TMDB_BASE_URL}/discover/movie?api_key=${TMDB_API_KEY}&year=${year}&page=${page}&vote_average.gte=${minRating}`);
-                        const moviesData = await moviesResponse.json();
-                        totalItems += moviesData.results.length;
+                        try {
+                            const moviesResponse = await fetch(`${TMDB_BASE_URL}/discover/movie?api_key=${TMDB_API_KEY}&year=${year}&page=${page}&vote_average.gte=${minRating}`);
+                            if (moviesResponse.ok) {
+                                const moviesData = await moviesResponse.json();
+                                totalItems += moviesData.results ? moviesData.results.length : 0;
+                            }
+                        } catch (error) {
+                            console.error(`Error fetching movies page ${page}:`, error);
+                        }
                     }
                     
                     if (type === 'series' || type === 'both') {
-                        const seriesResponse = await fetch(`${TMDB_BASE_URL}/discover/tv?api_key=${TMDB_API_KEY}&first_air_date_year=${year}&page=${page}&vote_average.gte=${minRating}`);
-                        const seriesData = await seriesResponse.json();
-                        totalItems += seriesData.results.length;
+                        try {
+                            const seriesResponse = await fetch(`${TMDB_BASE_URL}/discover/tv?api_key=${TMDB_API_KEY}&first_air_date_year=${year}&page=${page}&vote_average.gte=${minRating}`);
+                            if (seriesResponse.ok) {
+                                const seriesData = await seriesResponse.json();
+                                totalItems += seriesData.results ? seriesData.results.length : 0;
+                            }
+                        } catch (error) {
+                            console.error(`Error fetching series page ${page}:`, error);
+                        }
                     }
+                }
+
+                if (totalItems === 0) {
+                    showNotification('No content found for the specified criteria', 'warning');
+                    return;
                 }
 
                 // Process items
                 for (let page = 1; page <= pages; page++) {
                     if (type === 'movie' || type === 'both') {
-                        const moviesResponse = await fetch(`${TMDB_BASE_URL}/discover/movie?api_key=${TMDB_API_KEY}&year=${year}&page=${page}&vote_average.gte=${minRating}`);
-                        const moviesData = await moviesResponse.json();
-                        
-                        for (const movie of moviesData.results) {
-                            try {
-                                const fullMovieData = await fetchTMDBMovie(movie.id);
-                                const sources = generateVideoSources(movie.id, 'movie', 'embed', 'both');
-                                const cineMaxMovie = createCineMaxContent(fullMovieData, 'movie', sources);
-                                apiData.movies.push(cineMaxMovie);
+                        try {
+                            const moviesResponse = await fetch(`${TMDB_BASE_URL}/discover/movie?api_key=${TMDB_API_KEY}&year=${year}&page=${page}&vote_average.gte=${minRating}`);
+                            if (moviesResponse.ok) {
+                                const moviesData = await moviesResponse.json();
                                 
-                                processedItems++;
-                                updateBulkProgress(processedItems, totalItems);
-                            } catch (error) {
-                                console.error(`Error processing movie ${movie.id}:`, error);
+                                if (moviesData.results) {
+                                    for (const movie of moviesData.results) {
+                                        try {
+                                            const fullMovieData = await fetchTMDBMovie(movie.id);
+                                            const sources = generateVideoSources(movie.id, 'movie', 'embed', 'both');
+                                            const cineMaxMovie = createCineMaxContent(fullMovieData, 'movie', sources);
+                                            apiData.movies.push(cineMaxMovie);
+                                            
+                                            processedItems++;
+                                            updateBulkProgress(processedItems, totalItems);
+                                        } catch (error) {
+                                            console.error(`Error processing movie ${movie.id}:`, error);
+                                        }
+                                    }
+                                }
                             }
+                        } catch (error) {
+                            console.error(`Error processing movies page ${page}:`, error);
                         }
                     }
                     
                     if (type === 'series' || type === 'both') {
-                        const seriesResponse = await fetch(`${TMDB_BASE_URL}/discover/tv?api_key=${TMDB_API_KEY}&first_air_date_year=${year}&page=${page}&vote_average.gte=${minRating}`);
-                        const seriesData = await seriesResponse.json();
-                        
-                        for (const series of seriesData.results) {
-                            try {
-                                const fullSeriesData = await fetchTMDBSeries(series.id);
-                                const sources = generateVideoSources(series.id, 'series', 'embed', 'both');
-                                const cineMaxSeries = createCineMaxContent(fullSeriesData, 'series', sources);
-                                apiData.series.push(cineMaxSeries);
+                        try {
+                            const seriesResponse = await fetch(`${TMDB_BASE_URL}/discover/tv?api_key=${TMDB_API_KEY}&first_air_date_year=${year}&page=${page}&vote_average.gte=${minRating}`);
+                            if (seriesResponse.ok) {
+                                const seriesData = await seriesResponse.json();
                                 
-                                processedItems++;
-                                updateBulkProgress(processedItems, totalItems);
-                            } catch (error) {
-                                console.error(`Error processing series ${series.id}:`, error);
+                                if (seriesData.results) {
+                                    for (const series of seriesData.results) {
+                                        try {
+                                            const fullSeriesData = await fetchTMDBSeries(series.id);
+                                            const sources = generateVideoSources(series.id, 'series', 'embed', 'both');
+                                            const cineMaxSeries = createCineMaxContent(fullSeriesData, 'series', sources);
+                                            apiData.series.push(cineMaxSeries);
+                                            
+                                            processedItems++;
+                                            updateBulkProgress(processedItems, totalItems);
+                                        } catch (error) {
+                                            console.error(`Error processing series ${series.id}:`, error);
+                                        }
+                                    }
+                                }
                             }
+                        } catch (error) {
+                            console.error(`Error processing series page ${page}:`, error);
                         }
                     }
                 }
@@ -978,72 +1029,78 @@
         }
 
         function addManualContent() {
-            const title = document.getElementById('manualTitle').value.trim();
-            const year = document.getElementById('manualYear').value;
-            const description = document.getElementById('manualDescription').value.trim();
-            const image = document.getElementById('manualImage').value.trim();
-            const cover = document.getElementById('manualCover').value.trim();
-            const videoUrl = document.getElementById('manualVideoUrl').value.trim();
+            try {
+                const title = document.getElementById('manualTitle')?.value?.trim() || '';
+                const year = document.getElementById('manualYear')?.value || '';
+                const description = document.getElementById('manualDescription')?.value?.trim() || '';
+                const image = document.getElementById('manualImage')?.value?.trim() || '';
+                const cover = document.getElementById('manualCover')?.value?.trim() || '';
+                const videoUrl = document.getElementById('manualVideoUrl')?.value?.trim() || '';
 
-            if (!title || !year) {
-                showNotification('Please fill in title and year', 'error');
-                return;
-            }
+                if (!title || !year) {
+                    showNotification('Please fill in title and year', 'error');
+                    return;
+                }
 
-            const manualContent = {
-                id: generateId(),
-                type: 'movie',
-                title: title,
-                year: year,
-                description: description,
-                image: image,
-                cover: cover || image,
-                sources: [{
+                const manualContent = {
                     id: generateId(),
-                    type: 'video',
-                    title: 'Manual Source',
-                    quality: '1080p',
-                    size: '0MB',
-                    kind: 'both',
-                    premium: 'false',
-                    external: false,
-                    url: videoUrl
-                }],
-                label: 'Movie',
-                sublabel: year,
-                imdb: '0.0',
-                downloadas: title.toLowerCase().replace(/[^a-z0-9]/g, '-'),
-                comment: true,
-                playas: 'video',
-                classification: 'PG-13',
-                duration: '00:00',
-                rating: 0,
-                created_at: new Date().toISOString().split('T')[0],
-                genres: [],
-                actors: [],
-                subtitles: [],
-                comments: [],
-                views: 0,
-                downloads: 0,
-                shares: 0
-            };
+                    type: 'movie',
+                    title: title,
+                    year: year,
+                    description: description,
+                    image: image,
+                    cover: cover || image,
+                    sources: [{
+                        id: generateId(),
+                        type: 'video',
+                        title: 'Manual Source',
+                        quality: '1080p',
+                        size: '0MB',
+                        kind: 'both',
+                        premium: 'false',
+                        external: false,
+                        url: videoUrl
+                    }],
+                    label: 'Movie',
+                    sublabel: year,
+                    imdb: '0.0',
+                    downloadas: title.toLowerCase().replace(/[^a-z0-9]/g, '-'),
+                    comment: true,
+                    playas: 'video',
+                    classification: 'PG-13',
+                    duration: '00:00',
+                    rating: 0,
+                    created_at: new Date().toISOString().split('T')[0],
+                    genres: [],
+                    actors: [],
+                    subtitles: [],
+                    comments: [],
+                    views: 0,
+                    downloads: 0,
+                    shares: 0
+                };
 
-            apiData.movies.push(manualContent);
-            updateHomeSlides(manualContent);
-            
-            saveToLocalStorage();
-            updateStats();
-            renderResults();
-            
-            // Clear form
-            document.getElementById('manualTitle').value = '';
-            document.getElementById('manualYear').value = '';
-            document.getElementById('manualDescription').value = '';
-            document.getElementById('manualImage').value = '';
-            document.getElementById('manualCover').value = '';
-            document.getElementById('manualVideoUrl').value = '';
-            
-            showNotification(`✅ Manual content "${title}" added successfully!`, 'success');
+                apiData.movies.push(manualContent);
+                updateHomeSlides(manualContent);
+                
+                saveToLocalStorage();
+                updateStats();
+                renderResults();
+                
+                // Clear form
+                const formElements = ['manualTitle', 'manualYear', 'manualDescription', 'manualImage', 'manualCover', 'manualVideoUrl'];
+                formElements.forEach(elementId => {
+                    const element = document.getElementById(elementId);
+                    if (element) {
+                        element.value = '';
+                    }
+                });
+                
+                showNotification(`✅ Manual content "${title}" added successfully!`, 'success');
+            } catch (error) {
+                console.error('Error adding manual content:', error);
+                showNotification(`Error adding manual content: ${error.message}`, 'error');
+            }
         }
 
         function updateHomeSlides(content) {
