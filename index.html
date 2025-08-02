@@ -2438,9 +2438,15 @@
             }
             
             function saveSeries(id) {
-                // Collect season/episode data from the form
-                const seasons = [];
-                const seasonElements = document.querySelectorAll('.season-card');
+                // Use currentSeriesData if available (from TMDB fetch), otherwise collect from form
+                let seasons = [];
+                
+                if (currentSeriesData && currentSeriesData.seasons && currentSeriesData.seasons.length > 0) {
+                    // Use the enhanced TMDB data with proper fields
+                    seasons = currentSeriesData.seasons;
+                } else {
+                    // Fallback: collect from DOM
+                    const seasonElements = document.querySelectorAll('.season-card');
                 
                 for (const seasonElement of seasonElements) {
                     const seasonNumber = parseInt(seasonElement.dataset.season);
@@ -2465,9 +2471,13 @@
                                 downloads: 0,
                                 sources: [{ 
                                     id: generateNewId(),
-                                    type: 'video', 
+                                    type: detectSourceType(sourceUrl), 
                                     title: `${episodeTitle} 1080p`,
                                     quality: '1080p',
+                                    size: '0MB',
+                                    kind: detectSourceKind(sourceUrl),
+                                    premium: 'false',
+                                    external: false,
                                     url: sourceUrl 
                                 }],
                                 subtitles: []
@@ -2483,6 +2493,7 @@
                         });
                     }
                 }
+                } // End of else block for DOM collection
                 
                 const entryData = {
                     type: 'series',
@@ -2499,19 +2510,19 @@
                     } : null,
                     label: 'Series',
                     sublabel: `${seasons.length} Season${seasons.length !== 1 ? 's' : ''}`,
-                    imdb: '0.0',
+                    imdb: (currentSeriesData && currentSeriesData.vote_average) ? currentSeriesData.vote_average.toString() : '0.0',
                     downloadas: seriesTitleInput.value.trim().toLowerCase().replace(/[^a-z0-9]/g, '-'),
                     comment: true,
                     playas: 'video',
                     classification: 'TV-PG',
                     duration: '45:00',
-                    rating: 0,
+                    rating: (currentSeriesData && currentSeriesData.vote_average) ? currentSeriesData.vote_average : 0,
                     views: 0,
                     downloads: 0,
                     shares: 0,
                     created_at: new Date().toISOString().split('T')[0],
-                    genres: [],
-                    actors: [],
+                    genres: currentSeriesGenres || [],
+                    actors: currentSeriesActors || [],
                     subtitles: [],
                     comments: [],
                     sources: [],
@@ -2721,7 +2732,17 @@
                                 duration: '45:00',
                                 views: 0,
                                 downloads: 0,
-                                sources: [],
+                                sources: [{
+                                    id: generateNewId(),
+                                    type: 'embed',
+                                    title: 'Episode 1 1080p',
+                                    quality: '1080p',
+                                    size: '0MB',
+                                    kind: 'play',
+                                    premium: 'false',
+                                    external: false,
+                                    url: ''
+                                }],
                                 subtitles: []
                             }]
                         };
@@ -2787,7 +2808,17 @@
                             duration: '45:00',
                             views: 0,
                             downloads: 0,
-                            sources: [],
+                            sources: [{
+                                id: generateNewId(),
+                                type: 'embed',
+                                title: `Episode ${newEpisodeNumber} 1080p`,
+                                quality: '1080p',
+                                size: '0MB',
+                                kind: 'play',
+                                premium: 'false',
+                                external: false,
+                                url: ''
+                            }],
                             subtitles: []
                         });
                         
