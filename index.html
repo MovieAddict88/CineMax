@@ -2415,7 +2415,7 @@
                     shares: 0,
                     created_at: new Date().toISOString().split('T')[0],
                     genres: currentMovieGenres.length > 0 ? currentMovieGenres : [],
-                    actors: [],
+                    actors: currentMovieActors.length > 0 ? currentMovieActors : [],
                     subtitles: [],
                     comments: []
                 };
@@ -2459,16 +2459,20 @@
                                 id: generateNewId(),
                                 title: episodeTitle,
                                 episode_number: episodeNumber,
-                                image: '',
+                                image: getDefaultEpisodeImage(), // Use default placeholder to prevent app crashes
                                 duration: '45:00',
                                 views: 0,
                                 downloads: 0,
-                                sources: [{ 
+                                sources: [{
                                     id: generateNewId(),
-                                    type: 'video', 
+                                    type: 'embed',
                                     title: `${episodeTitle} 1080p`,
                                     quality: '1080p',
-                                    url: sourceUrl 
+                                    size: '0MB',
+                                    kind: 'play',
+                                    premium: 'false',
+                                    external: false,
+                                    url: sourceUrl
                                 }],
                                 subtitles: []
                             });
@@ -2510,8 +2514,8 @@
                     downloads: 0,
                     shares: 0,
                     created_at: new Date().toISOString().split('T')[0],
-                    genres: [],
-                    actors: [],
+                    genres: currentSeriesGenres || [],
+                    actors: currentSeriesActors || [],
                     subtitles: [],
                     comments: [],
                     sources: [],
@@ -2672,17 +2676,13 @@
                 const name = movieSourceNameInput.value.trim() || 'Source';
                 const url = movieSourceUrlInput.value.trim();
                 if (url) {
-                    currentMovieSources.push({ 
-                        id: generateNewId(),
-                        type: 'video',
-                        title: name,
-                        quality: name.includes('1080') ? '1080p' : name.includes('720') ? '720p' : name.includes('480') ? '480p' : 'HD',
-                        size: '0MB',
-                        kind: 'both',
-                        premium: 'false',
-                        external: false,
-                        url: url 
-                    });
+                    const quality = name.includes('1080') ? '1080p' : name.includes('720') ? '720p' : name.includes('480') ? '480p' : 'HD';
+                    currentMovieSources.push(createCompleteSource(
+                        generateNewId(),
+                        name,
+                        quality,
+                        url
+                    ));
                     movieSourceNameInput.value = '';
                     movieSourceUrlInput.value = '';
                     renderMovieSources();
@@ -2796,6 +2796,116 @@
                 });
             }
             
+            // --- Source Type and Kind Detection ---
+            function determineSourceType(url) {
+                if (!url) return 'video';
+                
+                const lowerUrl = url.toLowerCase();
+                
+                // Check for YouTube
+                if (lowerUrl.includes('youtube.com') || lowerUrl.includes('youtu.be')) {
+                    return 'youtube';
+                }
+                
+                // Check for direct video files
+                const videoExtensions = ['.mp4', '.mkv', '.avi', '.mov', '.wmv', '.flv', '.webm', '.m4v'];
+                if (videoExtensions.some(ext => lowerUrl.includes(ext))) {
+                    return 'video';
+                }
+                
+                // Check for live streaming
+                if (lowerUrl.includes('/live/') || lowerUrl.includes('.m3u8') || lowerUrl.includes('.ts')) {
+                    return 'video';
+                }
+                
+                // Default to embed for other URLs
+                return 'embed';
+            }
+            
+            function determineSourceKind(sourceType, url) {
+                if (!url) return 'both';
+                
+                const lowerUrl = url.toLowerCase();
+                
+                // Direct video files and live streams can be both played and downloaded
+                if (sourceType === 'video') {
+                    const directVideoExtensions = ['.mp4', '.mkv', '.avi', '.mov', '.wmv', '.flv', '.webm', '.m4v'];
+                    if (directVideoExtensions.some(ext => lowerUrl.includes(ext))) {
+                        return 'both';
+                    }
+                    // Live streams are play only
+                    if (lowerUrl.includes('/live/') || lowerUrl.includes('.m3u8') || lowerUrl.includes('.ts')) {
+                        return 'play';
+                    }
+                    return 'both';
+                }
+                
+                // YouTube and embed sources are play only
+                if (sourceType === 'youtube' || sourceType === 'embed') {
+                    return 'play';
+                }
+                
+                return 'both';
+            }
+            
+            function createCompleteSource(id, title, quality, url, size = '0MB') {
+                const sourceType = determineSourceType(url);
+                const sourceKind = determineSourceKind(sourceType, url);
+                
+                return {
+                    id: id,
+                    type: sourceType,
+                    title: title,
+                    quality: quality,
+                    size: size,
+                    kind: sourceKind,
+                    premium: "false",
+                    external: false,
+                    url: url
+                };
+            }
+
+            // --- Episode Image Fetching ---
+            function getDefaultEpisodeImage() {
+                // Use a default placeholder image that apps can handle
+                return 'https://via.placeholder.com/300x169/2c3e50/ecf0f1?text=Episode';
+            }
+
+            async function fetchEpisodeImage(tmdbId, seasonNumber, episodeNumber, useDefaultFallback = false) {
+                try {
+                    const episodeUrl = `https://api.themoviedb.org/3/tv/${tmdbId}/season/${seasonNumber}/episode/${episodeNumber}?api_key=${tmdbApiKey}`;
+                    const response = await fetch(episodeUrl);
+                    
+                    if (response.ok) {
+                        const episodeData = await response.json();
+                        if (episodeData.still_path) {
+                            return `https://image.tmdb.org/t/p/w500${episodeData.still_path}`;
+                        }
+                    }
+                } catch (error) {
+                    console.warn(`Could not fetch episode image for S${seasonNumber}E${episodeNumber}:`, error);
+                }
+                
+                // Return default placeholder or empty string
+                return useDefaultFallback ? getDefaultEpisodeImage() : '';
+            }
+
+            async function fetchSeasonEpisodeImages(tmdbId, seasonNumber, episodeCount, useDefaultFallback = true) {
+                const images = {};
+                const promises = [];
+                
+                for (let i = 1; i <= episodeCount; i++) {
+                    promises.push(
+                        fetchEpisodeImage(tmdbId, seasonNumber, i, useDefaultFallback).then(image => {
+                            images[i] = image;
+                        })
+                    );
+                }
+                
+                await Promise.all(promises);
+                return images;
+            }
+
             // --- TMDb Integration ---
             async function fetchTMDbData(type, tmdbId) {
                 const baseUrl = 'https://api.themoviedb.org/3';
@@ -3050,17 +3160,12 @@
                         title: `${movieData.title} Trailer`,
                         url: `https://www.youtube.com/watch?v=${trailer.key}`
                     } : null,
-                    sources: [{
-                        id: generateNewId(),
-                        type: 'video',
-                        title: 'vidsrc.net 1080p',
-                        quality: '1080p',
-                        size: '0MB',
-                        kind: 'both',
-                        premium: 'false',
-                        external: false,
-                        url: `https://vidsrc.net/embed/movie/${movieData.id}`
-                    }],
+                    sources: [createCompleteSource(
+                        generateNewId(),
+                        'vidsrc.net 1080p',
+                        '1080p',
+                        `https://vidsrc.net/embed/movie/${movieData.id}`
+                    )],
                     label: 'Movie',
                     sublabel: movieData.release_date ? movieData.release_date.split('-')[0] : 'N/A',
                     imdb: movieData.vote_average ? movieData.vote_average.toString() : '0.0',
@@ -3214,17 +3319,12 @@
                     
                     // Auto-add vidsrc source
                     const vidsrcUrl = `https://vidsrc.net/embed/movie/${tmdbId}`;
-                    currentMovieSources = [{ 
-                        id: generateNewId(),
-                        type: 'video',
-                        title: 'vidsrc.net 1080p',
-                        quality: '1080p',
-                        size: '0MB',
-                        kind: 'both',
-                        premium: 'false',
-                        external: false,
-                        url: vidsrcUrl 
-                    }];
+                    currentMovieSources = [createCompleteSource(
+                        generateNewId(),
+                        'vidsrc.net 1080p',
+                        '1080p',
+                        vidsrcUrl 
+                    )];
                     renderMovieSources();
                     
                     // Auto-generate related content after TMDB fetch
@@ -3310,15 +3410,19 @@
                                     id: generateNewId(),
                                     title: `Episode ${episodeNumber}`,
                                     episode_number: episodeNumber,
-                                    image: '',
+                                    image: 'https://via.placeholder.com/300x169/2c3e50/ecf0f1?text=Episode',
                                     duration: '45:00',
                                     views: 0,
                                     downloads: 0,
                                     sources: [{
                                         id: generateNewId(),
-                                        type: 'video',
+                                        type: 'embed',
                                         title: `Episode ${episodeNumber} 1080p`,
                                         quality: '1080p',
+                                        size: '0MB',
+                                        kind: 'play',
+                                        premium: 'false',
+                                        external: false,
                                         url: vidsrcEpisodeUrl
                                     }],
                                     subtitles: []
