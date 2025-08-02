@@ -2396,7 +2396,7 @@
                     cover: movieCoverInput.value.trim(),
                     trailer: movieTrailerInput.value.trim() ? { 
                         id: generateNewId(),
-                        type: 'video',
+                        type: 'youtube',
                         title: `${movieTitleInput.value.trim()} Trailer`,
                         url: movieTrailerInput.value.trim() 
                     } : null,
@@ -2497,7 +2497,7 @@
                     cover: seriesCoverInput.value.trim(),
                     trailer: seriesTrailerInput.value.trim() ? { 
                         id: generateNewId(),
-                        type: 'video',
+                        type: 'youtube',
                         title: `${seriesTitleInput.value.trim()} Trailer`,
                         url: seriesTrailerInput.value.trim() 
                     } : null,
@@ -2677,7 +2677,12 @@
                 const url = movieSourceUrlInput.value.trim();
                 if (url) {
                     // Determine type based on URL
-                    const sourceType = url.includes('vidsrc.net') ? 'embed' : 'video';
+                    let sourceType = 'video';
+                    if (url.includes('vidsrc.net')) {
+                        sourceType = 'embed';
+                    } else if (url.includes('youtube.com') || url.includes('youtu.be')) {
+                        sourceType = 'youtube';
+                    }
                     currentMovieSources.push({ 
                         id: generateNewId(),
                         type: sourceType,
@@ -3052,7 +3057,7 @@
                     cover: movieData.backdrop_path ? `https://image.tmdb.org/t/p/original${movieData.backdrop_path}` : '',
                     trailer: trailer ? {
                         id: generateNewId(),
-                        type: 'video',
+                        type: 'youtube',
                         title: `${movieData.title} Trailer`,
                         url: `https://www.youtube.com/watch?v=${trailer.key}`
                     } : null,
@@ -3127,7 +3132,7 @@
                     cover: seriesData.backdrop_path ? `https://image.tmdb.org/t/p/original${seriesData.backdrop_path}` : '',
                     trailer: trailer ? {
                         id: generateNewId(),
-                        type: 'video',
+                        type: 'youtube',
                         title: `${seriesData.name} Trailer`,
                         url: `https://www.youtube.com/watch?v=${trailer.key}`
                     } : null,
