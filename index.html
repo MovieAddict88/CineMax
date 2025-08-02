@@ -507,10 +507,21 @@
             display: flex;
             gap: 10px;
             margin-top: 10px;
+            flex-wrap: wrap;
         }
         
         .source-input-group input {
+            flex: 2;
+            min-width: 180px;
+        }
+        
+        .source-input-group select {
             flex: 1;
+            min-width: 100px;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            background: white;
         }
         
         .source-input-group button {
@@ -881,6 +892,17 @@
                         <div class="source-input-group">
                             <input type="text" id="movieSourceNameInput" placeholder="Source Name (e.g., 1080p)">
                             <input type="text" id="movieSourceUrlInput" placeholder="Source URL">
+                            <select id="movieSourceTypeSelect">
+                                <option value="video">Video (Direct/Embed)</option>
+                                <option value="live">Live Stream</option>
+                                <option value="youtube">YouTube</option>
+                                <option value="embed">Embed Player</option>
+                            </select>
+                            <select id="movieSourceKindSelect">
+                                <option value="both">Play & Download</option>
+                                <option value="play">Play Only</option>
+                                <option value="download">Download Only</option>
+                            </select>
                             <button type="button" id="addMovieSourceButton">
                                 <i class="fas fa-plus"></i> Add
                             </button>
@@ -1129,6 +1151,8 @@
             const movieSourceListDiv = document.getElementById('movieSourceList');
             const movieSourceNameInput = document.getElementById('movieSourceNameInput');
             const movieSourceUrlInput = document.getElementById('movieSourceUrlInput');
+            const movieSourceTypeSelect = document.getElementById('movieSourceTypeSelect');
+            const movieSourceKindSelect = document.getElementById('movieSourceKindSelect');
             const addMovieSourceButton = document.getElementById('addMovieSourceButton');
             
             // Series elements
@@ -2671,14 +2695,29 @@
             addMovieSourceButton.addEventListener('click', () => {
                 const name = movieSourceNameInput.value.trim() || 'Source';
                 const url = movieSourceUrlInput.value.trim();
+                const type = movieSourceTypeSelect.value;
+                const kind = movieSourceKindSelect.value;
+                
                 if (url) {
+                    // Smart type detection for URLs
+                    let finalType = type;
+                    if (type === 'video') {
+                        if (url.includes('youtube.com') || url.includes('youtu.be')) {
+                            finalType = 'youtube';
+                        } else if (url.includes('/embed/') || url.includes('vidsrc.net')) {
+                            finalType = 'video'; // Keep as video for embed detection in app
+                        } else if (url.includes('.m3u8')) {
+                            finalType = 'live';
+                        }
+                    }
+                    
                     currentMovieSources.push({ 
                         id: generateNewId(),
-                        type: 'video',
+                        type: finalType,
                         title: name,
                         quality: name.includes('1080') ? '1080p' : name.includes('720') ? '720p' : name.includes('480') ? '480p' : 'HD',
-                        size: '0MB',
-                        kind: 'both',
+                        size: type === 'live' ? 'Live' : '0MB',
+                        kind: kind,
                         premium: 'false',
                         external: false,
                         url: url 

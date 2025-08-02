@@ -623,13 +623,19 @@ public class MovieActivity extends AppCompatActivity {
     public void playSource(int position){
         addView();
 
+        // Handle YouTube sources
         if (playSources.get(position).getType().equals("youtube")){
             Intent intent = new Intent(MovieActivity.this,YoutubeActivity.class);
             intent.putExtra("url",playSources.get(position).getUrl());
             startActivity(intent);
             return;
         }
-        if (playSources.get(position).getType().equals("embed")){
+        
+        // Handle embed sources (including vidsrc.net and other embed players)
+        if (playSources.get(position).getType().equals("embed") || 
+            (playSources.get(position).getUrl() != null && 
+             (playSources.get(position).getUrl().contains("vidsrc.net/embed") ||
+              playSources.get(position).getUrl().contains("/embed/")))) {
             Intent intent = new Intent(MovieActivity.this,EmbedActivity.class);
             intent.putExtra("url",playSources.get(position).getUrl());
             startActivity(intent);
@@ -648,11 +654,25 @@ public class MovieActivity extends AppCompatActivity {
             // Fix video type for streaming URLs
             String videoType = playSources.get(position).getType();
             String url = playSources.get(position).getUrl();
+            
+            // Handle live TV sources
+            if ("live".equals(videoType)) {
+                intent.putExtra("isLive", true);
+                videoType = "m3u8"; // Most live streams are HLS
+            }
+            
+            // Smart URL detection for streaming protocols
             if (url != null) {
                 if (url.contains(".m3u8")) {
                     videoType = "m3u8";  // Player expects "m3u8" for HLS streams
                 } else if (url.contains(".mpd")) {
                     videoType = "dash";  // Player expects "dash" for MPD/DASH streams
+                } else if (url.contains("youtube.com") || url.contains("youtu.be")) {
+                    // Fallback for YouTube URLs not marked as youtube type
+                    Intent youtubeIntent = new Intent(MovieActivity.this, YoutubeActivity.class);
+                    youtubeIntent.putExtra("url", url);
+                    startActivity(youtubeIntent);
+                    return;
                 }
             }
             intent.putExtra("type", videoType);
