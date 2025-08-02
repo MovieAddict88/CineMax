@@ -1631,11 +1631,13 @@
                     if (!jsonData.home.featured_movies) jsonData.home.featured_movies = [];
                     if (!jsonData.actors) jsonData.actors = [];
                     if (!jsonData.genres) jsonData.genres = [];
+                    if (!jsonData.series) jsonData.series = [];
                     if (!jsonData.api_info) jsonData.api_info = {
                         version: "2.0",
                         description: "Enhanced Free Movie & TV Streaming JSON API with Full Actor Support",
                         last_updated: new Date().toISOString().split('T')[0],
                         total_movies: 0,
+                        total_series: 0,
                         total_channels: 0,
                         total_actors: 0
                     };
@@ -1667,6 +1669,7 @@
                 // Get top content for slides (movies, series, channels with images)
                 const allContent = [
                     ...(jsonData.movies || []).map(m => ({...m, contentType: 'movie', url: `movies/${m.id}`})),
+                    ...(jsonData.series || []).map(s => ({...s, contentType: 'series', url: `series/${s.id}`})),
                     ...(jsonData.channels || []).map(c => ({...c, contentType: 'channel', url: `channels/${c.id}`}))
                 ];
                 
@@ -1707,9 +1710,9 @@
                         type: item.contentType,
                         image: item.image,
                         url: item.url,
-                        poster: item.contentType === 'movie' ? { 
+                        poster: (item.contentType === 'movie' || item.contentType === 'series') ? { 
                             ...item,
-                            label: item.contentType === 'movie' ? 'Latest Movie' : 'Featured Content',
+                            label: item.contentType === 'movie' ? 'Latest Movie' : item.contentType === 'series' ? 'Latest Series' : 'Featured Content',
                             sublabel: item.year ? `Released ${item.year}` : 'New Release',
                             description: item.description || item.overview || 'Check out this amazing content!'
                         } : null,
@@ -1723,14 +1726,15 @@
             function autoGenerateFeaturedMovies() {
                 console.log('⭐ Generating featured movies...');
                 
-                // Get movies with rating >= 7 or recent movies (last 3 years)
+                // Get movies with rating >= 7 or recent movies (last 3 years) - ONLY MOVIES, NOT SERIES
                 const currentYear = new Date().getFullYear();
                 const featuredMovies = (jsonData.movies || [])
                     .filter(movie => {
                         const hasGoodRating = movie.rating >= 7;
                         const isRecent = movie.year >= (currentYear - 3);
                         const hasImage = movie.image;
-                        return (hasGoodRating || isRecent) && hasImage;
+                        const isActualMovie = movie.type !== 'series'; // Exclude series
+                        return (hasGoodRating || isRecent) && hasImage && isActualMovie;
                     })
                     .sort((a, b) => {
                         // First sort by rating (high to low)
@@ -1744,7 +1748,7 @@
                 // If no featured movies, use all available movies
                 if (featuredMovies.length === 0 && jsonData.movies.length > 0) {
                     const fallbackMovies = jsonData.movies
-                        .filter(movie => movie.image) // Only movies with images
+                        .filter(movie => movie.image && movie.type !== 'series') // Only movies with images, exclude series
                         .sort((a, b) => (b.rating || 0) - (a.rating || 0))
                         .slice(0, 8); // Top 8 as fallback
                     
@@ -1770,9 +1774,14 @@
                 const actorMap = new Map();
                 
                 // Collect actors from movies and series
-                (jsonData.movies || []).forEach(movie => {
-                    if (movie.actors && movie.actors.length > 0) {
-                        movie.actors.forEach(actor => {
+                const allContent = [
+                    ...(jsonData.movies || []).map(item => ({...item, contentType: 'movie'})),
+                    ...(jsonData.series || []).map(item => ({...item, contentType: 'series'}))
+                ];
+                
+                allContent.forEach(item => {
+                    if (item.actors && item.actors.length > 0) {
+                        item.actors.forEach(actor => {
                             if (actor.name && actor.name.trim() !== '') {
                                 const key = actor.name.toLowerCase();
                                 if (!actorMap.has(key)) {
@@ -1789,13 +1798,14 @@
                                     });
                                 }
                                 
-                                // Add movie to actor's filmography
+                                // Add movie/series to actor's filmography
                                 const actorData = actorMap.get(key);
                                 actorData.movies.push({
-                                    id: movie.id,
-                                    title: movie.title,
-                                    image: movie.image,
-                                    year: movie.year
+                                    id: item.id,
+                                    title: item.title,
+                                    image: item.image,
+                                    year: item.year,
+                                    type: item.contentType
                                 });
                             }
                         });
@@ -1833,9 +1843,14 @@
                 const genreMap = new Map();
                 
                 // Collect genres from movies and series
-                (jsonData.movies || []).forEach(movie => {
-                    if (movie.genres && movie.genres.length > 0) {
-                        movie.genres.forEach(genre => {
+                const allContent = [
+                    ...(jsonData.movies || []).map(item => ({...item, contentType: 'movie'})),
+                    ...(jsonData.series || []).map(item => ({...item, contentType: 'series'}))
+                ];
+                
+                allContent.forEach(item => {
+                    if (item.genres && item.genres.length > 0) {
+                        item.genres.forEach(genre => {
                             const genreName = genre.name || genre.title; // Support both name and title
                             if (genreName && genreName.trim() !== '') {
                                 const key = genreName.toLowerCase();
@@ -1847,37 +1862,37 @@
                                     });
                                 }
                                 
-                                // Add complete movie data to genre
+                                // Add complete item data to genre
                                 const genreData = genreMap.get(key);
-                                if (movie.image && !genreData.posters.find(p => p.id === movie.id)) {
+                                if (item.image && !genreData.posters.find(p => p.id === item.id)) {
                                     genreData.posters.push({
-                                        id: movie.id,
-                                        title: movie.title,
-                                        type: movie.type || 'movie',
-                                        label: movie.label || 'Movie',
-                                        sublabel: movie.sublabel || movie.year || 'N/A',
-                                        imdb: movie.imdb || '0.0',
-                                        downloadas: movie.downloadas || movie.title?.toLowerCase().replace(/[^a-z0-9]/g, '-') || '',
-                                        comment: movie.comment !== undefined ? movie.comment : true,
-                                        playas: movie.playas || 'video',
-                                        description: movie.description || '',
-                                        classification: movie.classification || 'PG-13',
-                                        year: movie.year || 'N/A',
-                                        duration: movie.duration || '00:00',
-                                        rating: movie.rating || 0,
-                                        image: movie.image,
-                                        cover: movie.cover || movie.image || '',
-                                        genres: movie.genres || [],
-                                        actors: movie.actors || [],
-                                        views: movie.views || 0,
-                                        created_at: movie.created_at || new Date().toISOString().split('T')[0],
-                                        sources: movie.sources || [],
-                                        trailer: movie.trailer || null,
-                                        subtitles: movie.subtitles || [],
-                                        comments: movie.comments || [],
-                                        downloads: movie.downloads || 0,
-                                        shares: movie.shares || 0,
-                                        ...(movie.type === 'series' && { seasons: movie.seasons || [] })
+                                        id: item.id,
+                                        title: item.title,
+                                        type: item.type || item.contentType,
+                                        label: item.label || (item.contentType === 'series' ? 'Series' : 'Movie'),
+                                        sublabel: item.sublabel || item.year || 'N/A',
+                                        imdb: item.imdb || '0.0',
+                                        downloadas: item.downloadas || item.title?.toLowerCase().replace(/[^a-z0-9]/g, '-') || '',
+                                        comment: item.comment !== undefined ? item.comment : true,
+                                        playas: item.playas || 'video',
+                                        description: item.description || '',
+                                        classification: item.classification || 'PG-13',
+                                        year: item.year || 'N/A',
+                                        duration: item.duration || '00:00',
+                                        rating: item.rating || 0,
+                                        image: item.image,
+                                        cover: item.cover || item.image || '',
+                                        genres: item.genres || [],
+                                        actors: item.actors || [],
+                                        views: item.views || 0,
+                                        created_at: item.created_at || new Date().toISOString().split('T')[0],
+                                        sources: item.sources || [],
+                                        trailer: item.trailer || null,
+                                        subtitles: item.subtitles || [],
+                                        comments: item.comments || [],
+                                        downloads: item.downloads || 0,
+                                        shares: item.shares || 0,
+                                        ...(item.type === 'series' && { seasons: item.seasons || [] })
                                     });
                                 }
                             }
@@ -1905,6 +1920,7 @@
                 console.log('📊 Updating API info...');
                 
                 jsonData.api_info.total_movies = (jsonData.movies || []).length;
+                jsonData.api_info.total_series = (jsonData.series || []).length;
                 jsonData.api_info.total_channels = (jsonData.channels || []).length;
                 jsonData.api_info.total_actors = (jsonData.actors || []).length;
                 jsonData.api_info.last_updated = new Date().toISOString().split('T')[0];
@@ -2147,9 +2163,11 @@
                 if (!jsonData.home.featured_movies) jsonData.home.featured_movies = [];
                 if (!jsonData.actors) jsonData.actors = [];
                 if (!jsonData.genres) jsonData.genres = [];
+                if (!jsonData.series) jsonData.series = [];
                 
                 // CLEAN EMPTY/INVALID ENTRIES to prevent crashes
                 jsonData.movies = (jsonData.movies || []).filter(m => m.title && m.title.trim() !== '');
+                jsonData.series = (jsonData.series || []).filter(s => s.title && s.title.trim() !== '');
                 jsonData.channels = (jsonData.channels || []).filter(c => c.title && c.title.trim() !== '');
                 jsonData.home.slides = (jsonData.home.slides || []).filter(s => s.title && s.title.trim() !== '');
                 jsonData.home.featured_movies = (jsonData.home.featured_movies || []).filter(f => f.title && f.title.trim() !== '');
@@ -2159,7 +2177,8 @@
                 console.log('🧹 Cleaned empty entries from JSON data');
                 
                 const allEntries = [
-                    ...(jsonData.movies || []).map(e => ({ ...e, entryType: e.type || (e.seasons ? 'series' : 'movie') })),
+                    ...(jsonData.movies || []).map(e => ({ ...e, entryType: 'movie' })),
+                    ...(jsonData.series || []).map(e => ({ ...e, entryType: 'series' })),
                     ...(jsonData.channels || []).map(e => ({ ...e, entryType: 'channel' })),
                     ...(jsonData.home.slides || []).map(e => ({ ...e, entryType: 'slide' })),
                     ...(jsonData.home.featured_movies || []).map(e => ({ ...e, entryType: 'featured' })),
@@ -2304,8 +2323,18 @@
                 let entry;
                 if (type === 'channel') {
                     entry = jsonData.channels.find(c => c.id == id);
-                } else {
+                } else if (type === 'series') {
+                    entry = jsonData.series.find(s => s.id == id);
+                } else if (type === 'movie') {
                     entry = jsonData.movies.find(m => m.id == id);
+                } else {
+                    // Handle other types (slide, featured, actor, genre) - these might be in different arrays
+                    entry = jsonData.movies.find(m => m.id == id) || 
+                           jsonData.series.find(s => s.id == id) ||
+                           (jsonData.home.slides || []).find(s => s.id == id) ||
+                           (jsonData.home.featured_movies || []).find(f => f.id == id) ||
+                           (jsonData.actors || []).find(a => a.id == id) ||
+                           (jsonData.genres || []).find(g => g.id == id);
                 }
                 if (!entry) return;
                 
@@ -2366,9 +2395,24 @@
                 if (type === 'channel') {
                     index = jsonData.channels.findIndex(c => c.id == id);
                     if (index > -1) jsonData.channels.splice(index, 1);
-                } else {
+                } else if (type === 'series') {
+                    index = jsonData.series.findIndex(s => s.id == id);
+                    if (index > -1) jsonData.series.splice(index, 1);
+                } else if (type === 'movie') {
                     index = jsonData.movies.findIndex(m => m.id == id);
                     if (index > -1) jsonData.movies.splice(index, 1);
+                } else if (type === 'slide') {
+                    index = (jsonData.home.slides || []).findIndex(s => s.id == id);
+                    if (index > -1) jsonData.home.slides.splice(index, 1);
+                } else if (type === 'featured') {
+                    index = (jsonData.home.featured_movies || []).findIndex(f => f.id == id);
+                    if (index > -1) jsonData.home.featured_movies.splice(index, 1);
+                } else if (type === 'actor') {
+                    index = (jsonData.actors || []).findIndex(a => a.id == id);
+                    if (index > -1) jsonData.actors.splice(index, 1);
+                } else if (type === 'genre') {
+                    index = (jsonData.genres || []).findIndex(g => g.id == id);
+                    if (index > -1) jsonData.genres.splice(index, 1);
                 }
                 
                 if (index > -1) {
@@ -2518,14 +2562,26 @@
                     seasons: seasons
                 };
                 
+                // Initialize series array if it doesn't exist
+                if (!jsonData.series) jsonData.series = [];
+                
                 if (id) {
-                    const index = jsonData.movies.findIndex(m => m.id == id);
-                    if (index > -1) {
-                        jsonData.movies[index] = { ...jsonData.movies[index], ...entryData };
+                    // Check if editing existing series
+                    const seriesIndex = jsonData.series.findIndex(s => s.id == id);
+                    if (seriesIndex > -1) {
+                        jsonData.series[seriesIndex] = { ...jsonData.series[seriesIndex], ...entryData };
+                    } else {
+                        // Check if it was incorrectly stored in movies array
+                        const movieIndex = jsonData.movies.findIndex(m => m.id == id);
+                        if (movieIndex > -1) {
+                            // Move from movies to series
+                            jsonData.movies.splice(movieIndex, 1);
+                            jsonData.series.push({ id, ...entryData });
+                        }
                     }
                 } else {
                     const newId = generateNewId();
-                    jsonData.movies.push({ id: newId, ...entryData });
+                    jsonData.series.push({ id: newId, ...entryData });
                 }
             }
             
@@ -2946,15 +3002,31 @@
                             }
                             
                             if (movieData) {
-                                // Check if already exists
-                                const existingMovie = jsonData.movies.find(m => 
-                                    m.title.toLowerCase() === movieData.title.toLowerCase() && 
-                                    m.year === movieData.year
-                                );
-                                
-                                if (!existingMovie) {
-                                    jsonData.movies.push(movieData);
-                                    addedItems++;
+                                if (isTV) {
+                                    // Handle TV series separately
+                                    if (!jsonData.series) jsonData.series = [];
+                                    
+                                    // Check if series already exists
+                                    const existingSeries = jsonData.series.find(s => 
+                                        s.title.toLowerCase() === movieData.title.toLowerCase() && 
+                                        s.year === movieData.year
+                                    );
+                                    
+                                    if (!existingSeries) {
+                                        jsonData.series.push(movieData);
+                                        addedItems++;
+                                    }
+                                } else {
+                                    // Handle movies
+                                    const existingMovie = jsonData.movies.find(m => 
+                                        m.title.toLowerCase() === movieData.title.toLowerCase() && 
+                                        m.year === movieData.year
+                                    );
+                                    
+                                    if (!existingMovie) {
+                                        jsonData.movies.push(movieData);
+                                        addedItems++;
+                                    }
                                 }
                             }
                             
@@ -2976,6 +3048,7 @@
                     // Update API info
                     if (jsonData.api_info) {
                         jsonData.api_info.total_movies = jsonData.movies.length;
+                        jsonData.api_info.total_series = (jsonData.series || []).length;
                         jsonData.api_info.last_updated = new Date().toISOString().split('T')[0];
                     }
                     
