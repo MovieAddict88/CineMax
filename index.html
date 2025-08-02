@@ -2437,6 +2437,35 @@
                 console.log('Total movies after save:', jsonData.movies.length);
             }
             
+            // Helper function to detect source type and kind based on URL
+            function detectSourceTypeAndKind(url) {
+                if (!url) return { type: 'video', kind: 'both' };
+                
+                const urlLower = url.toLowerCase();
+                
+                // Detect type
+                let type = 'video';
+                if (urlLower.includes('youtube.com') || urlLower.includes('youtu.be')) {
+                    type = 'youtube';
+                } else if (urlLower.includes('embed') || urlLower.includes('iframe')) {
+                    type = 'embed';
+                } else if (urlLower.includes('live') || urlLower.includes('stream')) {
+                    type = 'video';
+                }
+                
+                // Detect kind
+                let kind = 'both';
+                if (type === 'youtube' || type === 'embed') {
+                    kind = 'play';
+                } else if (urlLower.match(/\.(mp4|mkv|avi|mov|wmv|flv|webm)$/)) {
+                    kind = 'both';
+                } else if (urlLower.includes('live') || urlLower.includes('stream')) {
+                    kind = 'play';
+                }
+                
+                return { type, kind };
+            }
+
             function saveSeries(id) {
                 // Collect season/episode data from the form
                 const seasons = [];
@@ -2455,6 +2484,9 @@
                             const titleElement = episodeElement.querySelector('.episode-title');
                             const episodeTitle = titleElement ? titleElement.textContent.replace(/^Episode \d+: /, '') : `Episode ${episodeNumber}`;
                             
+                            // Detect source type and kind automatically
+                            const { type, kind } = detectSourceTypeAndKind(sourceUrl);
+                            
                             episodes.push({
                                 id: generateNewId(),
                                 title: episodeTitle,
@@ -2465,9 +2497,13 @@
                                 downloads: 0,
                                 sources: [{ 
                                     id: generateNewId(),
-                                    type: 'video', 
+                                    type: type,
                                     title: `${episodeTitle} 1080p`,
                                     quality: '1080p',
+                                    size: '0MB',
+                                    kind: kind,
+                                    premium: 'false',
+                                    external: false,
                                     url: sourceUrl 
                                 }],
                                 subtitles: []
@@ -2532,26 +2568,28 @@
             function saveChannel(id) {
                 const sources = [];
                 if (channelStreamUrlInput.value.trim()) {
+                    const { type, kind } = detectSourceTypeAndKind(channelStreamUrlInput.value.trim());
                     sources.push({ 
                         id: generateNewId(),
-                        type: 'live',
+                        type: type,
                         title: 'Live Stream',
                         quality: 'HD',
-                        size: 'Live',
-                        kind: 'play',
+                        size: '0MB',
+                        kind: kind,
                         premium: 'false',
                         external: false,
                         url: channelStreamUrlInput.value.trim() 
                     });
                 }
                 if (channelBackupUrlInput.value.trim()) {
+                    const { type, kind } = detectSourceTypeAndKind(channelBackupUrlInput.value.trim());
                     sources.push({ 
                         id: generateNewId(),
-                        type: 'live',
+                        type: type,
                         title: 'Backup Stream',
                         quality: 'HD',
-                        size: 'Live',
-                        kind: 'play',
+                        size: '0MB',
+                        kind: kind,
                         premium: 'false',
                         external: false,
                         url: channelBackupUrlInput.value.trim() 
@@ -3111,6 +3149,46 @@
                     });
                 }
                 
+                // Create default season with episodes if available
+                const seasons = [];
+                if (seriesData.number_of_seasons > 0) {
+                    const season = {
+                        id: generateNewId(),
+                        title: 'Season 1',
+                        episodes: []
+                    };
+                    
+                    // Create episodes based on number of episodes in first season
+                    const episodesInSeason = seriesData.number_of_episodes || 1;
+                    for (let i = 1; i <= Math.min(episodesInSeason, 10); i++) { // Limit to 10 episodes for demo
+                        const episodeUrl = `https://vidsrc.net/embed/tv/${seriesData.id}/1/${i}`;
+                        const { type, kind } = detectSourceTypeAndKind(episodeUrl);
+                        
+                        season.episodes.push({
+                            id: generateNewId(),
+                            title: `Episode ${i}`,
+                            episode_number: i,
+                            image: '',
+                            duration: '45:00',
+                            views: 0,
+                            downloads: 0,
+                            sources: [{
+                                id: generateNewId(),
+                                type: type,
+                                title: `Episode ${i} 1080p`,
+                                quality: '1080p',
+                                size: '0MB',
+                                kind: kind,
+                                premium: 'false',
+                                external: false,
+                                url: episodeUrl
+                            }],
+                            subtitles: []
+                        });
+                    }
+                    seasons.push(season);
+                }
+                
                 return {
                     id: newId,
                     type: 'series',
@@ -3143,7 +3221,7 @@
                     subtitles: [],
                     comments: [],
                     sources: [],
-                    seasons: [] // This would need to be populated separately if needed
+                    seasons: seasons
                 };
             }
             
@@ -3392,52 +3470,114 @@
                 };
                 
                 // Ensure all movies have complete CineMax structure
-                const processedMovies = (jsonData.movies || []).map(movie => ({
-                    id: movie.id,
-                    type: movie.type || 'movie',
-                    title: movie.title,
-                    year: movie.year,
-                    description: movie.description || '',
-                    image: movie.image || '',
-                    cover: movie.cover || movie.image || '',
-                    trailer: movie.trailer,
-                    sources: movie.sources || [],
-                    label: movie.label || (movie.type === 'series' ? 'Series' : 'Movie'),
-                    sublabel: movie.sublabel || movie.year || 'N/A',
-                    imdb: movie.imdb || '0.0',
-                    downloadas: movie.downloadas || movie.title?.toLowerCase().replace(/[^a-z0-9]/g, '-') || '',
-                    comment: movie.comment !== undefined ? movie.comment : true,
-                    playas: movie.playas || 'video',
-                    classification: movie.classification || 'PG-13',
-                    duration: movie.duration || '00:00',
-                    rating: movie.rating || 0,
-                    created_at: movie.created_at || new Date().toISOString().split('T')[0],
-                    genres: movie.genres || [],
-                    actors: movie.actors || [],
-                    subtitles: movie.subtitles || [],
-                    comments: movie.comments || [],
-                    views: movie.views || 0,
-                    downloads: movie.downloads || 0,
-                    shares: movie.shares || 0,
-                    ...(movie.type === 'series' && { seasons: movie.seasons || [] })
-                }));
+                const processedMovies = (jsonData.movies || []).map(movie => {
+                    // Process sources to ensure they have all required fields
+                    const processedSources = (movie.sources || []).map(source => {
+                        const { type, kind } = detectSourceTypeAndKind(source.url);
+                        return {
+                            id: source.id,
+                            type: source.type || type,
+                            title: source.title || 'Unknown',
+                            quality: source.quality || '1080p',
+                            size: source.size || '0MB',
+                            kind: source.kind || kind,
+                            premium: source.premium || 'false',
+                            external: source.external !== undefined ? source.external : false,
+                            url: source.url
+                        };
+                    });
+                    
+                    // Process series seasons and episodes
+                    let processedSeasons = movie.seasons || [];
+                    if (movie.type === 'series' && processedSeasons.length > 0) {
+                        processedSeasons = processedSeasons.map(season => ({
+                            ...season,
+                            episodes: (season.episodes || []).map(episode => ({
+                                ...episode,
+                                sources: (episode.sources || []).map(source => {
+                                    const { type, kind } = detectSourceTypeAndKind(source.url);
+                                    return {
+                                        id: source.id,
+                                        type: source.type || type,
+                                        title: source.title || 'Unknown',
+                                        quality: source.quality || '1080p',
+                                        size: source.size || '0MB',
+                                        kind: source.kind || kind,
+                                        premium: source.premium || 'false',
+                                        external: source.external !== undefined ? source.external : false,
+                                        url: source.url
+                                    };
+                                })
+                            }))
+                        }));
+                    }
+                    
+                    return {
+                        id: movie.id,
+                        type: movie.type || 'movie',
+                        title: movie.title,
+                        year: movie.year,
+                        description: movie.description || '',
+                        image: movie.image || '',
+                        cover: movie.cover || movie.image || '',
+                        trailer: movie.trailer,
+                        sources: processedSources,
+                        label: movie.label || (movie.type === 'series' ? 'Series' : 'Movie'),
+                        sublabel: movie.sublabel || movie.year || 'N/A',
+                        imdb: movie.imdb || '0.0',
+                        downloadas: movie.downloadas || movie.title?.toLowerCase().replace(/[^a-z0-9]/g, '-') || '',
+                        comment: movie.comment !== undefined ? movie.comment : true,
+                        playas: movie.playas || 'video',
+                        classification: movie.classification || 'PG-13',
+                        duration: movie.duration || '00:00',
+                        rating: movie.rating || 0,
+                        created_at: movie.created_at || new Date().toISOString().split('T')[0],
+                        genres: movie.genres || [],
+                        actors: movie.actors || [],
+                        subtitles: movie.subtitles || [],
+                        comments: movie.comments || [],
+                        views: movie.views || 0,
+                        downloads: movie.downloads || 0,
+                        shares: movie.shares || 0,
+                        ...(movie.type === 'series' && { seasons: processedSeasons })
+                    };
+                });
                 
                 // Ensure all channels have complete CineMax structure
-                const processedChannels = (jsonData.channels || []).map(channel => ({
-                    id: channel.id,
-                    title: channel.title,
-                    label: channel.label || channel.category || 'Entertainment',
-                    sublabel: channel.sublabel || 'Live TV',
-                    description: channel.description || '',
-                    website: channel.website || 'https://example.com',
-                    classification: channel.classification || channel.category || 'Entertainment',
-                    views: channel.views || 0,
-                    shares: channel.shares || 0,
-                    rating: channel.rating || 0,
-                    comment: channel.comment !== undefined ? channel.comment : true,
-                    image: channel.image || '',
-                    playas: channel.playas || 'live',
-                    sources: channel.sources || [],
+                const processedChannels = (jsonData.channels || []).map(channel => {
+                    // Process channel sources to ensure they have all required fields
+                    const processedSources = (channel.sources || []).map(source => {
+                        const { type, kind } = detectSourceTypeAndKind(source.url);
+                        return {
+                            id: source.id,
+                            type: source.type || type,
+                            title: source.title || 'Live Stream',
+                            quality: source.quality || 'HD',
+                            size: source.size || '0MB',
+                            kind: source.kind || kind,
+                            premium: source.premium || 'false',
+                            external: source.external !== undefined ? source.external : false,
+                            url: source.url
+                        };
+                    });
+                    
+                    return {
+                        id: channel.id,
+                        title: channel.title,
+                        label: channel.label || channel.category || 'Entertainment',
+                        sublabel: channel.sublabel || 'Live TV',
+                        description: channel.description || '',
+                        website: channel.website || 'https://example.com',
+                        classification: channel.classification || channel.category || 'Entertainment',
+                        views: channel.views || 0,
+                        shares: channel.shares || 0,
+                        rating: channel.rating || 0,
+                        comment: channel.comment !== undefined ? channel.comment : true,
+                        image: channel.image || '',
+                        playas: channel.playas || 'live',
+                                                sources: processedSources
+                    };
+                });
                     categories: channel.categories || [{
                         id: 1,
                         title: channel.label || channel.category || 'Entertainment'
