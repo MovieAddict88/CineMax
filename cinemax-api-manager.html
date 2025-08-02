@@ -1,0 +1,1196 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CineMax API Manager</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+        }
+
+        .header p {
+            font-size: 1.1rem;
+            opacity: 0.9;
+        }
+
+        .content {
+            padding: 30px;
+        }
+
+        .section {
+            margin-bottom: 40px;
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
+        }
+
+        .section h2 {
+            color: #333;
+            margin-bottom: 20px;
+            font-size: 1.5rem;
+            border-bottom: 3px solid #667eea;
+            padding-bottom: 10px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #555;
+        }
+
+        .form-group input, .form-group select, .form-group textarea {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e1e5e9;
+            border-radius: 8px;
+            font-size: 14px;
+            transition: border-color 0.3s ease;
+        }
+
+        .form-group input:focus, .form-group select:focus, .form-group textarea:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 600;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+            margin-right: 10px;
+            margin-bottom: 10px;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-secondary {
+            background: linear-gradient(135deg, #6c757d 0%, #495057 100%);
+        }
+
+        .btn-success {
+            background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+        }
+
+        .btn-warning {
+            background: linear-gradient(135deg, #ffc107 0%, #fd7e14 100%);
+        }
+
+        .btn-danger {
+            background: linear-gradient(135deg, #dc3545 0%, #e83e8c 100%);
+        }
+
+        .results {
+            margin-top: 30px;
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 20px;
+            border-left: 4px solid #667eea;
+        }
+
+        .results h3 {
+            color: #333;
+            margin-bottom: 15px;
+        }
+
+        .json-output {
+            background: #2d3748;
+            color: #e2e8f0;
+            padding: 20px;
+            border-radius: 8px;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            overflow-x: auto;
+            white-space: pre-wrap;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+
+        .status {
+            padding: 10px;
+            border-radius: 5px;
+            margin: 10px 0;
+            font-weight: 600;
+        }
+
+        .status.success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .status.error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        .status.info {
+            background: #d1ecf1;
+            color: #0c5460;
+            border: 1px solid #bee5eb;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+
+        .card {
+            background: white;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            border: 1px solid #e1e5e9;
+        }
+
+        .card h3 {
+            color: #333;
+            margin-bottom: 15px;
+            font-size: 1.2rem;
+        }
+
+        .movie-item {
+            background: white;
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 10px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            border-left: 4px solid #667eea;
+        }
+
+        .movie-item h4 {
+            color: #333;
+            margin-bottom: 8px;
+        }
+
+        .movie-item p {
+            color: #666;
+            font-size: 14px;
+            margin-bottom: 5px;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 20px;
+            color: #667eea;
+        }
+
+        .spinner {
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #667eea;
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 10px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .tabs {
+            display: flex;
+            margin-bottom: 20px;
+            border-bottom: 2px solid #e1e5e9;
+        }
+
+        .tab {
+            padding: 12px 20px;
+            cursor: pointer;
+            border: none;
+            background: none;
+            font-size: 16px;
+            font-weight: 600;
+            color: #666;
+            transition: all 0.3s ease;
+        }
+
+        .tab.active {
+            color: #667eea;
+            border-bottom: 3px solid #667eea;
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+
+        .stat-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+        }
+
+        .stat-card h3 {
+            font-size: 2rem;
+            margin-bottom: 5px;
+        }
+
+        .stat-card p {
+            opacity: 0.9;
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🎬 CineMax API Manager</h1>
+            <p>Generate content for movies, TV series, and live TV using TMDB API and vidsrc.net</p>
+        </div>
+
+        <div class="content">
+            <div class="stats">
+                <div class="stat-card">
+                    <h3 id="totalMovies">0</h3>
+                    <p>Total Movies</p>
+                </div>
+                <div class="stat-card">
+                    <h3 id="totalTVShows">0</h3>
+                    <p>Total TV Shows</p>
+                </div>
+                <div class="stat-card">
+                    <h3 id="totalLiveTV">0</h3>
+                    <p>Live TV Channels</p>
+                </div>
+                <div class="stat-card">
+                    <h3 id="totalActors">0</h3>
+                    <p>Total Actors</p>
+                </div>
+            </div>
+
+            <div class="tabs">
+                <button class="tab active" onclick="showTab('movies')">Movies & TV Series</button>
+                <button class="tab" onclick="showTab('live-tv')">Live TV</button>
+                <button class="tab" onclick="showTab('manual')">Manual Entry</button>
+                <button class="tab" onclick="showTab('export')">Export JSON</button>
+            </div>
+
+            <!-- Movies & TV Series Tab -->
+            <div id="movies" class="tab-content active">
+                <div class="section">
+                    <h2>🎬 Auto-Generate Movies & TV Series</h2>
+                    <div class="form-group">
+                        <label for="tmdbApiKey">TMDB API Key:</label>
+                        <input type="text" id="tmdbApiKey" value="ec926176bf467b3f7735e3154238c161" placeholder="Enter your TMDB API key">
+                    </div>
+                    
+                    <div class="grid">
+                        <div class="card">
+                            <h3>Popular Movies</h3>
+                            <div class="form-group">
+                                <label for="movieCount">Number of Movies:</label>
+                                <input type="number" id="movieCount" value="20" min="1" max="100">
+                            </div>
+                            <button class="btn btn-success" onclick="generatePopularMovies()">Generate Popular Movies</button>
+                        </div>
+
+                        <div class="card">
+                            <h3>Popular TV Shows</h3>
+                            <div class="form-group">
+                                <label for="tvCount">Number of TV Shows:</label>
+                                <input type="number" id="tvCount" value="20" min="1" max="100">
+                            </div>
+                            <button class="btn btn-success" onclick="generatePopularTVShows()">Generate Popular TV Shows</button>
+                        </div>
+
+                        <div class="card">
+                            <h3>Search by Title</h3>
+                            <div class="form-group">
+                                <label for="searchTitle">Movie/TV Show Title:</label>
+                                <input type="text" id="searchTitle" placeholder="Enter movie or TV show title">
+                            </div>
+                            <button class="btn btn-warning" onclick="searchByTitle()">Search & Generate</button>
+                        </div>
+
+                        <div class="card">
+                            <h3>Generate by Genre</h3>
+                            <div class="form-group">
+                                <label for="genreSelect">Genre:</label>
+                                <select id="genreSelect">
+                                    <option value="28">Action</option>
+                                    <option value="12">Adventure</option>
+                                    <option value="16">Animation</option>
+                                    <option value="35">Comedy</option>
+                                    <option value="80">Crime</option>
+                                    <option value="99">Documentary</option>
+                                    <option value="18">Drama</option>
+                                    <option value="10751">Family</option>
+                                    <option value="14">Fantasy</option>
+                                    <option value="36">History</option>
+                                    <option value="27">Horror</option>
+                                    <option value="10402">Music</option>
+                                    <option value="9648">Mystery</option>
+                                    <option value="10749">Romance</option>
+                                    <option value="878">Science Fiction</option>
+                                    <option value="10770">TV Movie</option>
+                                    <option value="53">Thriller</option>
+                                    <option value="10752">War</option>
+                                    <option value="37">Western</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="genreCount">Number of Items:</label>
+                                <input type="number" id="genreCount" value="10" min="1" max="50">
+                            </div>
+                            <button class="btn btn-warning" onclick="generateByGenre()">Generate by Genre</button>
+                        </div>
+                    </div>
+
+                    <div id="movieResults" class="results" style="display: none;">
+                        <h3>Generated Content</h3>
+                        <div id="movieList"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Live TV Tab -->
+            <div id="live-tv" class="tab-content">
+                <div class="section">
+                    <h2>📺 Live TV Channels</h2>
+                    <div class="form-group">
+                        <label for="channelName">Channel Name:</label>
+                        <input type="text" id="channelName" placeholder="Enter channel name">
+                    </div>
+                    <div class="form-group">
+                        <label for="channelUrl">Stream URL:</label>
+                        <input type="text" id="channelUrl" placeholder="Enter stream URL">
+                    </div>
+                    <div class="form-group">
+                        <label for="channelImage">Channel Image URL:</label>
+                        <input type="text" id="channelImage" placeholder="Enter image URL">
+                    </div>
+                    <div class="form-group">
+                        <label for="channelDescription">Description:</label>
+                        <textarea id="channelDescription" rows="3" placeholder="Enter channel description"></textarea>
+                    </div>
+                    <button class="btn btn-success" onclick="addLiveTVChannel()">Add Live TV Channel</button>
+
+                    <div id="liveTVResults" class="results" style="display: none;">
+                        <h3>Live TV Channels</h3>
+                        <div id="liveTVList"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Manual Entry Tab -->
+            <div id="manual" class="tab-content">
+                <div class="section">
+                    <h2>✏️ Manual Content Entry</h2>
+                    <div class="grid">
+                        <div class="card">
+                            <h3>Movie/TV Show Details</h3>
+                            <div class="form-group">
+                                <label for="manualTitle">Title:</label>
+                                <input type="text" id="manualTitle" placeholder="Enter title">
+                            </div>
+                            <div class="form-group">
+                                <label for="manualType">Type:</label>
+                                <select id="manualType">
+                                    <option value="movie">Movie</option>
+                                    <option value="tv">TV Series</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="manualYear">Year:</label>
+                                <input type="number" id="manualYear" placeholder="Enter year">
+                            </div>
+                            <div class="form-group">
+                                <label for="manualDescription">Description:</label>
+                                <textarea id="manualDescription" rows="3" placeholder="Enter description"></textarea>
+                            </div>
+                            <div class="form-group">
+                                <label for="manualImage">Poster Image URL:</label>
+                                <input type="text" id="manualImage" placeholder="Enter image URL">
+                            </div>
+                            <div class="form-group">
+                                <label for="manualCover">Cover Image URL:</label>
+                                <input type="text" id="manualCover" placeholder="Enter cover URL">
+                            </div>
+                            <div class="form-group">
+                                <label for="manualVideoUrl">Video URL:</label>
+                                <input type="text" id="manualVideoUrl" placeholder="Enter video URL">
+                            </div>
+                            <div class="form-group">
+                                <label for="manualVideoType">Video Type:</label>
+                                <select id="manualVideoType">
+                                    <option value="play">Play (Embedded)</option>
+                                    <option value="both">Both (Downloadable/Playable)</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="manualVideoKind">Video Kind:</label>
+                                <select id="manualVideoKind">
+                                    <option value="embed">Embed</option>
+                                    <option value="youtube">YouTube</option>
+                                    <option value="video">Direct Video</option>
+                                </select>
+                            </div>
+                            <button class="btn btn-success" onclick="addManualContent()">Add Manual Content</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Export Tab -->
+            <div id="export" class="tab-content">
+                <div class="section">
+                    <h2>📤 Export JSON</h2>
+                    <div class="form-group">
+                        <label for="apiVersion">API Version:</label>
+                        <input type="text" id="apiVersion" value="2.0" placeholder="API version">
+                    </div>
+                    <div class="form-group">
+                        <label for="apiDescription">API Description:</label>
+                        <input type="text" id="apiDescription" value="Enhanced Free Movie & TV Streaming JSON API with Full Actor Support" placeholder="API description">
+                    </div>
+                    <button class="btn btn-success" onclick="generateJSON()">Generate Complete JSON</button>
+                    <button class="btn btn-secondary" onclick="downloadJSON()">Download JSON File</button>
+
+                    <div id="jsonResults" class="results" style="display: none;">
+                        <h3>Generated JSON</h3>
+                        <div class="json-output" id="jsonOutput"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Global variables
+        let generatedMovies = [];
+        let generatedTVShows = [];
+        let liveTVChannels = [];
+        let manualContent = [];
+        let actors = [];
+        let genres = [];
+
+        // TMDB API configuration
+        const TMDB_BASE_URL = 'https://api.themoviedb.org/3';
+        const TMDB_IMAGE_BASE_URL = 'https://image.tmdb.org/t/p/w500';
+        const TMDB_IMAGE_BASE_URL_ORIGINAL = 'https://image.tmdb.org/t/p/original';
+        const VIDSRC_BASE_URL = 'https://vidsrc.net/embed';
+
+        // Initialize the application
+        document.addEventListener('DOMContentLoaded', function() {
+            updateStats();
+        });
+
+        // Tab functionality
+        function showTab(tabName) {
+            // Hide all tab contents
+            const tabContents = document.querySelectorAll('.tab-content');
+            tabContents.forEach(content => content.classList.remove('active'));
+
+            // Remove active class from all tabs
+            const tabs = document.querySelectorAll('.tab');
+            tabs.forEach(tab => tab.classList.remove('active'));
+
+            // Show selected tab content
+            document.getElementById(tabName).classList.add('active');
+
+            // Add active class to clicked tab
+            event.target.classList.add('active');
+        }
+
+        // Update statistics
+        function updateStats() {
+            document.getElementById('totalMovies').textContent = generatedMovies.length;
+            document.getElementById('totalTVShows').textContent = generatedTVShows.length;
+            document.getElementById('totalLiveTV').textContent = liveTVChannels.length;
+            document.getElementById('totalActors').textContent = actors.length;
+        }
+
+        // Show status message
+        function showStatus(message, type = 'info') {
+            const statusDiv = document.createElement('div');
+            statusDiv.className = `status ${type}`;
+            statusDiv.textContent = message;
+            document.querySelector('.content').insertBefore(statusDiv, document.querySelector('.content').firstChild);
+            
+            setTimeout(() => {
+                statusDiv.remove();
+            }, 5000);
+        }
+
+        // Generate popular movies
+        async function generatePopularMovies() {
+            const apiKey = document.getElementById('tmdbApiKey').value;
+            const count = parseInt(document.getElementById('movieCount').value);
+            
+            if (!apiKey) {
+                showStatus('Please enter a valid TMDB API key', 'error');
+                return;
+            }
+
+            showStatus('Generating popular movies...', 'info');
+            
+            try {
+                const response = await fetch(`${TMDB_BASE_URL}/movie/popular?api_key=${apiKey}&language=en-US&page=1`);
+                const data = await response.json();
+                
+                if (data.results) {
+                    const movies = data.results.slice(0, count);
+                    for (const movie of movies) {
+                        await generateMovieContent(movie, 'movie');
+                    }
+                    
+                    showStatus(`Successfully generated ${movies.length} popular movies!`, 'success');
+                    updateStats();
+                    displayMovieResults();
+                }
+            } catch (error) {
+                showStatus('Error generating movies: ' + error.message, 'error');
+            }
+        }
+
+        // Generate popular TV shows
+        async function generatePopularTVShows() {
+            const apiKey = document.getElementById('tmdbApiKey').value;
+            const count = parseInt(document.getElementById('tvCount').value);
+            
+            if (!apiKey) {
+                showStatus('Please enter a valid TMDB API key', 'error');
+                return;
+            }
+
+            showStatus('Generating popular TV shows...', 'info');
+            
+            try {
+                const response = await fetch(`${TMDB_BASE_URL}/tv/popular?api_key=${apiKey}&language=en-US&page=1`);
+                const data = await response.json();
+                
+                if (data.results) {
+                    const tvShows = data.results.slice(0, count);
+                    for (const tvShow of tvShows) {
+                        await generateTVShowContent(tvShow);
+                    }
+                    
+                    showStatus(`Successfully generated ${tvShows.length} popular TV shows!`, 'success');
+                    updateStats();
+                    displayMovieResults();
+                }
+            } catch (error) {
+                showStatus('Error generating TV shows: ' + error.message, 'error');
+            }
+        }
+
+        // Search by title
+        async function searchByTitle() {
+            const apiKey = document.getElementById('tmdbApiKey').value;
+            const title = document.getElementById('searchTitle').value;
+            
+            if (!apiKey || !title) {
+                showStatus('Please enter both API key and title', 'error');
+                return;
+            }
+
+            showStatus('Searching for content...', 'info');
+            
+            try {
+                // Search movies
+                const movieResponse = await fetch(`${TMDB_BASE_URL}/search/movie?api_key=${apiKey}&query=${encodeURIComponent(title)}&language=en-US&page=1`);
+                const movieData = await movieResponse.json();
+                
+                // Search TV shows
+                const tvResponse = await fetch(`${TMDB_BASE_URL}/search/tv?api_key=${apiKey}&query=${encodeURIComponent(title)}&language=en-US&page=1`);
+                const tvData = await tvResponse.json();
+                
+                let found = false;
+                
+                if (movieData.results && movieData.results.length > 0) {
+                    await generateMovieContent(movieData.results[0], 'movie');
+                    found = true;
+                }
+                
+                if (tvData.results && tvData.results.length > 0) {
+                    await generateTVShowContent(tvData.results[0]);
+                    found = true;
+                }
+                
+                if (found) {
+                    showStatus('Content found and generated successfully!', 'success');
+                    updateStats();
+                    displayMovieResults();
+                } else {
+                    showStatus('No content found for the given title', 'error');
+                }
+            } catch (error) {
+                showStatus('Error searching: ' + error.message, 'error');
+            }
+        }
+
+        // Generate by genre
+        async function generateByGenre() {
+            const apiKey = document.getElementById('tmdbApiKey').value;
+            const genreId = document.getElementById('genreSelect').value;
+            const count = parseInt(document.getElementById('genreCount').value);
+            
+            if (!apiKey) {
+                showStatus('Please enter a valid TMDB API key', 'error');
+                return;
+            }
+
+            showStatus('Generating content by genre...', 'info');
+            
+            try {
+                const response = await fetch(`${TMDB_BASE_URL}/discover/movie?api_key=${apiKey}&with_genres=${genreId}&language=en-US&page=1&sort_by=popularity.desc`);
+                const data = await response.json();
+                
+                if (data.results) {
+                    const movies = data.results.slice(0, count);
+                    for (const movie of movies) {
+                        await generateMovieContent(movie, 'movie');
+                    }
+                    
+                    showStatus(`Successfully generated ${movies.length} movies for the selected genre!`, 'success');
+                    updateStats();
+                    displayMovieResults();
+                }
+            } catch (error) {
+                showStatus('Error generating content by genre: ' + error.message, 'error');
+            }
+        }
+
+        // Generate movie content
+        async function generateMovieContent(movie, type = 'movie') {
+            const apiKey = document.getElementById('tmdbApiKey').value;
+            
+            try {
+                // Get detailed movie info
+                const detailResponse = await fetch(`${TMDB_BASE_URL}/movie/${movie.id}?api_key=${apiKey}&language=en-US&append_to_response=credits,videos`);
+                const detailData = await detailResponse.json();
+                
+                // Get genres
+                const genres = detailData.genres || [];
+                
+                // Get actors
+                const actors = detailData.credits?.cast?.slice(0, 10) || [];
+                
+                // Generate vidsrc URL
+                const vidsrcUrl = `${VIDSRC_BASE_URL}/movie/${movie.id}`;
+                
+                // Create movie object
+                const movieObj = {
+                    id: movie.id,
+                    type: type,
+                    title: movie.title,
+                    year: movie.release_date?.split('-')[0] || 'Unknown',
+                    description: movie.overview || 'No description available',
+                    image: movie.poster_path ? `${TMDB_IMAGE_BASE_URL}${movie.poster_path}` : '',
+                    cover: movie.backdrop_path ? `${TMDB_IMAGE_BASE_URL_ORIGINAL}${movie.backdrop_path}` : '',
+                    rating: movie.vote_average || 0,
+                    duration: detailData.runtime ? `${Math.floor(detailData.runtime / 60)}:${(detailData.runtime % 60).toString().padStart(2, '0')}` : '00:00',
+                    classification: detailData.adult ? 'R' : 'PG-13',
+                    label: 'Latest Movie',
+                    sublabel: `Released ${movie.release_date?.split('-')[0] || 'Unknown'}`,
+                    imdb: movie.vote_average?.toString() || '0.0',
+                    downloadas: movie.title.toLowerCase().replace(/[^a-z0-9]/g, '-'),
+                    comment: true,
+                    playas: 'video',
+                    created_at: new Date().toISOString().split('T')[0],
+                    views: Math.floor(Math.random() * 1000),
+                    genres: genres.map(genre => ({
+                        id: genre.id,
+                        name: genre.name
+                    })),
+                    actors: actors.map(actor => ({
+                        name: actor.name,
+                        type: 'actor',
+                        role: actor.character || 'Unknown',
+                        image: actor.profile_path ? `${TMDB_IMAGE_BASE_URL}${actor.profile_path}` : ''
+                    })),
+                    sources: [{
+                        id: movie.id,
+                        type: 'video',
+                        title: `vidsrc.net 1080p`,
+                        quality: '1080p',
+                        size: '0MB',
+                        kind: 'both',
+                        premium: 'false',
+                        external: false,
+                        url: vidsrcUrl
+                    }],
+                    trailer: null,
+                    subtitles: [],
+                    comments: []
+                };
+                
+                generatedMovies.push(movieObj);
+                
+                // Add actors to global list
+                actors.forEach(actor => {
+                    if (!actors.find(a => a.name === actor.name)) {
+                        actors.push({
+                            name: actor.name,
+                            type: 'actor',
+                            role: actor.character || 'Unknown',
+                            image: actor.profile_path ? `${TMDB_IMAGE_BASE_URL}${actor.profile_path}` : ''
+                        });
+                    }
+                });
+                
+                // Add genres to global list
+                genres.forEach(genre => {
+                    if (!genres.find(g => g.id === genre.id)) {
+                        genres.push({
+                            id: genre.id,
+                            name: genre.name
+                        });
+                    }
+                });
+                
+            } catch (error) {
+                console.error('Error generating movie content:', error);
+            }
+        }
+
+        // Generate TV show content
+        async function generateTVShowContent(tvShow) {
+            const apiKey = document.getElementById('tmdbApiKey').value;
+            
+            try {
+                // Get detailed TV show info
+                const detailResponse = await fetch(`${TMDB_BASE_URL}/tv/${tvShow.id}?api_key=${apiKey}&language=en-US&append_to_response=credits,videos`);
+                const detailData = await detailResponse.json();
+                
+                // Get genres
+                const genres = detailData.genres || [];
+                
+                // Get actors
+                const actors = detailData.credits?.cast?.slice(0, 10) || [];
+                
+                // Generate vidsrc URL
+                const vidsrcUrl = `${VIDSRC_BASE_URL}/tv/${tvShow.id}`;
+                
+                // Create TV show object
+                const tvShowObj = {
+                    id: tvShow.id,
+                    type: 'tv',
+                    title: tvShow.name,
+                    year: tvShow.first_air_date?.split('-')[0] || 'Unknown',
+                    description: tvShow.overview || 'No description available',
+                    image: tvShow.poster_path ? `${TMDB_IMAGE_BASE_URL}${tvShow.poster_path}` : '',
+                    cover: tvShow.backdrop_path ? `${TMDB_IMAGE_BASE_URL_ORIGINAL}${tvShow.backdrop_path}` : '',
+                    rating: tvShow.vote_average || 0,
+                    duration: detailData.episode_run_time?.[0] ? `${detailData.episode_run_time[0]} min` : '00:00',
+                    classification: detailData.adult ? 'R' : 'PG-13',
+                    label: 'Latest TV Show',
+                    sublabel: `First Aired ${tvShow.first_air_date?.split('-')[0] || 'Unknown'}`,
+                    imdb: tvShow.vote_average?.toString() || '0.0',
+                    downloadas: tvShow.name.toLowerCase().replace(/[^a-z0-9]/g, '-'),
+                    comment: true,
+                    playas: 'video',
+                    created_at: new Date().toISOString().split('T')[0],
+                    views: Math.floor(Math.random() * 1000),
+                    genres: genres.map(genre => ({
+                        id: genre.id,
+                        name: genre.name
+                    })),
+                    actors: actors.map(actor => ({
+                        name: actor.name,
+                        type: 'actor',
+                        role: actor.character || 'Unknown',
+                        image: actor.profile_path ? `${TMDB_IMAGE_BASE_URL}${actor.profile_path}` : ''
+                    })),
+                    sources: [{
+                        id: tvShow.id,
+                        type: 'video',
+                        title: `vidsrc.net 1080p`,
+                        quality: '1080p',
+                        size: '0MB',
+                        kind: 'both',
+                        premium: 'false',
+                        external: false,
+                        url: vidsrcUrl
+                    }],
+                    trailer: null,
+                    subtitles: [],
+                    comments: []
+                };
+                
+                generatedTVShows.push(tvShowObj);
+                
+                // Add actors to global list
+                actors.forEach(actor => {
+                    if (!actors.find(a => a.name === actor.name)) {
+                        actors.push({
+                            name: actor.name,
+                            type: 'actor',
+                            role: actor.character || 'Unknown',
+                            image: actor.profile_path ? `${TMDB_IMAGE_BASE_URL}${actor.profile_path}` : ''
+                        });
+                    }
+                });
+                
+                // Add genres to global list
+                genres.forEach(genre => {
+                    if (!genres.find(g => g.id === genre.id)) {
+                        genres.push({
+                            id: genre.id,
+                            name: genre.name
+                        });
+                    }
+                });
+                
+            } catch (error) {
+                console.error('Error generating TV show content:', error);
+            }
+        }
+
+        // Add live TV channel
+        function addLiveTVChannel() {
+            const name = document.getElementById('channelName').value;
+            const url = document.getElementById('channelUrl').value;
+            const image = document.getElementById('channelImage').value;
+            const description = document.getElementById('channelDescription').value;
+            
+            if (!name || !url) {
+                showStatus('Please enter channel name and URL', 'error');
+                return;
+            }
+            
+            const channel = {
+                id: Date.now(),
+                name: name,
+                url: url,
+                image: image || '',
+                description: description || '',
+                type: 'play',
+                kind: 'embed',
+                quality: 'HD',
+                premium: 'false',
+                external: false
+            };
+            
+            liveTVChannels.push(channel);
+            showStatus('Live TV channel added successfully!', 'success');
+            updateStats();
+            displayLiveTVResults();
+            
+            // Clear form
+            document.getElementById('channelName').value = '';
+            document.getElementById('channelUrl').value = '';
+            document.getElementById('channelImage').value = '';
+            document.getElementById('channelDescription').value = '';
+        }
+
+        // Add manual content
+        function addManualContent() {
+            const title = document.getElementById('manualTitle').value;
+            const type = document.getElementById('manualType').value;
+            const year = document.getElementById('manualYear').value;
+            const description = document.getElementById('manualDescription').value;
+            const image = document.getElementById('manualImage').value;
+            const cover = document.getElementById('manualCover').value;
+            const videoUrl = document.getElementById('manualVideoUrl').value;
+            const videoType = document.getElementById('manualVideoType').value;
+            const videoKind = document.getElementById('manualVideoKind').value;
+            
+            if (!title || !videoUrl) {
+                showStatus('Please enter title and video URL', 'error');
+                return;
+            }
+            
+            const content = {
+                id: Date.now(),
+                type: type,
+                title: title,
+                year: year || 'Unknown',
+                description: description || 'No description available',
+                image: image || '',
+                cover: cover || '',
+                rating: 0,
+                duration: '00:00',
+                classification: 'PG-13',
+                label: type === 'movie' ? 'Latest Movie' : 'Latest TV Show',
+                sublabel: `Released ${year || 'Unknown'}`,
+                imdb: '0.0',
+                downloadas: title.toLowerCase().replace(/[^a-z0-9]/g, '-'),
+                comment: true,
+                playas: 'video',
+                created_at: new Date().toISOString().split('T')[0],
+                views: 0,
+                genres: [],
+                actors: [],
+                sources: [{
+                    id: Date.now(),
+                    type: 'video',
+                    title: `${videoKind} 1080p`,
+                    quality: '1080p',
+                    size: '0MB',
+                    kind: videoKind,
+                    premium: 'false',
+                    external: false,
+                    url: videoUrl
+                }],
+                trailer: null,
+                subtitles: [],
+                comments: []
+            };
+            
+            if (type === 'movie') {
+                generatedMovies.push(content);
+            } else {
+                generatedTVShows.push(content);
+            }
+            
+            showStatus('Manual content added successfully!', 'success');
+            updateStats();
+            displayMovieResults();
+            
+            // Clear form
+            document.getElementById('manualTitle').value = '';
+            document.getElementById('manualYear').value = '';
+            document.getElementById('manualDescription').value = '';
+            document.getElementById('manualImage').value = '';
+            document.getElementById('manualCover').value = '';
+            document.getElementById('manualVideoUrl').value = '';
+        }
+
+        // Display movie results
+        function displayMovieResults() {
+            const resultsDiv = document.getElementById('movieResults');
+            const listDiv = document.getElementById('movieList');
+            
+            const allContent = [...generatedMovies, ...generatedTVShows];
+            
+            if (allContent.length > 0) {
+                listDiv.innerHTML = '';
+                
+                allContent.forEach(item => {
+                    const itemDiv = document.createElement('div');
+                    itemDiv.className = 'movie-item';
+                    itemDiv.innerHTML = `
+                        <h4>${item.title} (${item.year})</h4>
+                        <p><strong>Type:</strong> ${item.type}</p>
+                        <p><strong>Rating:</strong> ${item.rating}/10</p>
+                        <p><strong>Duration:</strong> ${item.duration}</p>
+                        <p><strong>Genres:</strong> ${item.genres.map(g => g.name).join(', ')}</p>
+                        <p><strong>Actors:</strong> ${item.actors.slice(0, 3).map(a => a.name).join(', ')}</p>
+                    `;
+                    listDiv.appendChild(itemDiv);
+                });
+                
+                resultsDiv.style.display = 'block';
+            }
+        }
+
+        // Display live TV results
+        function displayLiveTVResults() {
+            const resultsDiv = document.getElementById('liveTVResults');
+            const listDiv = document.getElementById('liveTVList');
+            
+            if (liveTVChannels.length > 0) {
+                listDiv.innerHTML = '';
+                
+                liveTVChannels.forEach(channel => {
+                    const itemDiv = document.createElement('div');
+                    itemDiv.className = 'movie-item';
+                    itemDiv.innerHTML = `
+                        <h4>${channel.name}</h4>
+                        <p><strong>URL:</strong> ${channel.url}</p>
+                        <p><strong>Type:</strong> ${channel.type}</p>
+                        <p><strong>Kind:</strong> ${channel.kind}</p>
+                        <p><strong>Description:</strong> ${channel.description}</p>
+                    `;
+                    listDiv.appendChild(itemDiv);
+                });
+                
+                resultsDiv.style.display = 'block';
+            }
+        }
+
+        // Generate complete JSON
+        function generateJSON() {
+            const version = document.getElementById('apiVersion').value;
+            const description = document.getElementById('apiDescription').value;
+            
+            const allMovies = [...generatedMovies, ...generatedTVShows];
+            
+            const jsonData = {
+                api_info: {
+                    version: version,
+                    description: description,
+                    last_updated: new Date().toISOString().split('T')[0],
+                    total_movies: allMovies.length,
+                    total_channels: liveTVChannels.length,
+                    total_actors: actors.length
+                },
+                home: {
+                    slides: allMovies.slice(0, 5).map((movie, index) => ({
+                        id: index + 1,
+                        title: movie.title,
+                        type: movie.type,
+                        image: movie.image,
+                        url: `${movie.type}/${movie.id}`,
+                        poster: movie
+                    })),
+                    featured_movies: allMovies.slice(0, 10),
+                    channels: liveTVChannels,
+                    actors: actors.slice(0, 20),
+                    genres: genres
+                },
+                movies: allMovies,
+                channels: liveTVChannels,
+                actors: actors,
+                genres: genres,
+                categories: [],
+                countries: [],
+                subscription_plans: [],
+                video_sources: {
+                    big_buck_bunny: {
+                        title: "Big Buck Bunny",
+                        description: "A giant rabbit with a heart bigger than himself.",
+                        urls: {
+                            "1080p": "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4",
+                            "720p": "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4",
+                            "480p": "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4"
+                        },
+                        duration: "10:00",
+                        size: "100MB",
+                        license: "Creative Commons"
+                    },
+                    elephants_dream: {
+                        title: "Elephants Dream",
+                        description: "The world's first open movie.",
+                        urls: {
+                            "1080p": "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ElephantsDream.mp4",
+                            "720p": "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ElephantsDream.mp4",
+                            "480p": "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ElephantsDream.mp4"
+                        },
+                        duration: "11:00",
+                        size: "150MB",
+                        license: "Creative Commons"
+                    },
+                    live_streams: {
+                        test_hls: {
+                            title: "Test HLS Stream",
+                            description: "A test HLS stream for development",
+                            url: "https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8",
+                            quality: "HD",
+                            type: "play"
+                        }
+                    }
+                },
+                ads_config: {
+                    admob: {
+                        banner_id: "",
+                        interstitial_id: "",
+                        rewarded_id: "",
+                        native_id: "",
+                        app_id: ""
+                    },
+                    facebook: {
+                        banner_id: "",
+                        interstitial_id: "",
+                        rewarded_id: "",
+                        native_id: ""
+                    },
+                    settings: {
+                        banner_enabled: false,
+                        interstitial_enabled: false,
+                        rewarded_enabled: false,
+                        native_enabled: false,
+                        interstitial_clicks: 3,
+                        native_lines: 4,
+                        banner_type: "admob",
+                        interstitial_type: "admob",
+                        native_type: "admob"
+                    }
+                }
+            };
+            
+            document.getElementById('jsonOutput').textContent = JSON.stringify(jsonData, null, 2);
+            document.getElementById('jsonResults').style.display = 'block';
+            
+            showStatus('JSON generated successfully!', 'success');
+        }
+
+        // Download JSON file
+        function downloadJSON() {
+            const jsonOutput = document.getElementById('jsonOutput').textContent;
+            
+            if (!jsonOutput) {
+                showStatus('Please generate JSON first', 'error');
+                return;
+            }
+            
+            const blob = new Blob([jsonOutput], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'cinemax-api.json';
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+            
+            showStatus('JSON file downloaded successfully!', 'success');
+        }
+    </script>
+</body>
+</html>
