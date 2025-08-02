@@ -2459,7 +2459,7 @@
                                 id: generateNewId(),
                                 title: episodeTitle,
                                 episode_number: episodeNumber,
-                                image: '',
+                                image: getDefaultEpisodeImage(), // Use default placeholder to prevent app crashes
                                 duration: '45:00',
                                 views: 0,
                                 downloads: 0,
@@ -2858,6 +2858,47 @@
                     external: false,
                     url: url
                 };
+            }
+
+            // --- Episode Image Fetching ---
+            function getDefaultEpisodeImage() {
+                // Use a default placeholder image that apps can handle
+                return 'https://via.placeholder.com/300x169/2c3e50/ecf0f1?text=Episode';
+            }
+
+            async function fetchEpisodeImage(tmdbId, seasonNumber, episodeNumber, useDefaultFallback = false) {
+                try {
+                    const episodeUrl = `https://api.themoviedb.org/3/tv/${tmdbId}/season/${seasonNumber}/episode/${episodeNumber}?api_key=${tmdbApiKey}`;
+                    const response = await fetch(episodeUrl);
+                    
+                    if (response.ok) {
+                        const episodeData = await response.json();
+                        if (episodeData.still_path) {
+                            return `https://image.tmdb.org/t/p/w500${episodeData.still_path}`;
+                        }
+                    }
+                } catch (error) {
+                    console.warn(`Could not fetch episode image for S${seasonNumber}E${episodeNumber}:`, error);
+                }
+                
+                // Return default placeholder or empty string
+                return useDefaultFallback ? getDefaultEpisodeImage() : '';
+            }
+
+            async function fetchSeasonEpisodeImages(tmdbId, seasonNumber, episodeCount, useDefaultFallback = true) {
+                const images = {};
+                const promises = [];
+                
+                for (let i = 1; i <= episodeCount; i++) {
+                    promises.push(
+                        fetchEpisodeImage(tmdbId, seasonNumber, i, useDefaultFallback).then(image => {
+                            images[i] = image;
+                        })
+                    );
+                }
+                
+                await Promise.all(promises);
+                return images;
             }
 
             // --- TMDb Integration ---
@@ -3351,10 +3392,15 @@
                         console.warn('Could not fetch series credits:', error);
                     }
                     
-                    // Prepare seasons data with auto vidsrc URLs
-                    currentSeriesData = {
-                        ...seriesData,
-                        seasons: seriesData.seasons.filter(s => s.season_number > 0).map(season => ({
+                    // Prepare seasons data with auto vidsrc URLs and episode images
+                    showNotification('Fetching episode images from TMDB...', true);
+                    
+                    const seasonsWithImages = [];
+                    for (const season of seriesData.seasons.filter(s => s.season_number > 0)) {
+                        // Fetch episode images for this season
+                        const episodeImages = await fetchSeasonEpisodeImages(tmdbId, season.season_number, season.episode_count || 1);
+                        
+                        const seasonData = {
                             id: generateNewId(),
                             title: `Season ${season.season_number}`,
                             episodes: Array.from({length: season.episode_count || 1}, (_, i) => {
@@ -3364,7 +3410,7 @@
                                     id: generateNewId(),
                                     title: `Episode ${episodeNumber}`,
                                     episode_number: episodeNumber,
-                                    image: '',
+                                    image: episodeImages[episodeNumber] || getDefaultEpisodeImage(),
                                     duration: '45:00',
                                     views: 0,
                                     downloads: 0,
@@ -3377,7 +3423,13 @@
                                     subtitles: []
                                 };
                             })
-                        }))
+                        };
+                        seasonsWithImages.push(seasonData);
+                    }
+                    
+                    currentSeriesData = {
+                        ...seriesData,
+                        seasons: seasonsWithImages
                     };
                     
                     // Render seasons
