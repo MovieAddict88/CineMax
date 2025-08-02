@@ -500,6 +500,8 @@
                     type: defaultType,
                     title: `${defaultType === "live" ? "Main Stream" : "HD Quality"}`,
                     quality: defaultType === "live" ? "HD" : "1080p",
+                    premium: "1", // Always FREE for CineMax
+                    external: false,
                     url: defaultType === "live" 
                         ? `https://vidsrc.net/embed/tv/${id || 1}/1/1`
                         : `https://vidsrc.net/embed/movie/${id || 1}`
@@ -513,7 +515,7 @@
                 quality: source.quality || "1080p",
                 size: source.size || "",
                 kind: source.kind || "",
-                premium: source.premium || "",
+                premium: "1", // Force ALL sources to be FREE for CineMax (1=free, 2=premium, 3=ads)
                 external: source.external || false,
                 url: source.url || ""
             }));

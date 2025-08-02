@@ -4051,10 +4051,19 @@
                                     type: "video",
                                     title: `${movie.title || 'Movie'} 1080p`,
                                     quality: "1080p",
+                                    premium: "1", // Always FREE for CineMax
+                                    external: false,
                                     url: `https://vidsrc.net/embed/movie/${movie.id || index + 1}`
                                 }
                             ];
                         }
+                    }
+                    
+                    // Ensure ALL existing sources are marked as FREE for CineMax
+                    if (movie.sources && Array.isArray(movie.sources)) {
+                        movie.sources.forEach(source => {
+                            source.premium = "1"; // Force all sources to be FREE (1=free, 2=premium, 3=ads)
+                        });
                     }
                     
                     // Fix missing trailer structure
@@ -4104,9 +4113,18 @@
                                                 type: "video",
                                                 title: `${episode.title || 'Episode'} 1080p`,
                                                 quality: "1080p",
+                                                premium: "1", // Always FREE for CineMax
+                                                external: false,
                                                 url: `https://vidsrc.net/embed/tv/${movie.id || index + 1}/${season.id || 1}/${episode.episode_number || episodeIndex + 1}`
                                             }
                                         ];
+                                    }
+                                    
+                                    // Ensure ALL episode sources are marked as FREE for CineMax
+                                    if (episode.sources && Array.isArray(episode.sources)) {
+                                        episode.sources.forEach(source => {
+                                            source.premium = "1"; // Force all episode sources to be FREE
+                                        });
                                     }
                                     
                                     // Fix missing episode fields
