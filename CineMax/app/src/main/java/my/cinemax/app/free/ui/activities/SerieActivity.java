@@ -413,74 +413,101 @@ public class SerieActivity extends AppCompatActivity implements PlaylistDownload
         if (checkSUBSCRIBED()){
             showSourcesPlayDialog();
         }else{
-            if (selectedEpisode.getPlayas().equals("2")){
-                showDialog(false);
-            }else if(selectedEpisode.getPlayas().equals("3") ){
-                showDialog(true);
-                operationAfterAds = 200;
-            }else{
+            if (selectedEpisode != null && selectedEpisode.getPlayas() != null) {
+                if (selectedEpisode.getPlayas().equals("2")){
+                    showDialog(false);
+                }else if(selectedEpisode.getPlayas().equals("3") ){
+                    showDialog(true);
+                    operationAfterAds = 200;
+                }else{
+                    showSourcesPlayDialog();
+                }
+            } else {
                 showSourcesPlayDialog();
             }
         }
     }
     private void getSeasons() {
-
-        Retrofit retrofit = apiClient.getClient();
-        apiRest service = retrofit.create(apiRest.class);
-
-        Call<List<Season>> call = service.getSeasonsBySerie(poster.getId());
-        call.enqueue(new Callback<List<Season>>() {
+        // Use JSON API instead of old REST API
+        apiClient.getJsonApiData(new retrofit2.Callback<my.cinemax.app.free.entity.JsonApiResponse>() {
             @Override
-            public void onResponse(Call<List<Season>> call, Response<List<Season>> response) {
-                if (response.isSuccessful()){
-                    if (response.body().size()>0) {
-                        seasonArrayList.clear();
-                        final String[] countryCodes = new String[response.body().size()];
-
-                        for (int i = 0; i < response.body().size(); i++) {
-                            countryCodes[i] = response.body().get(i).getTitle();
-                            seasonArrayList.add(response.body().get(i));
+            public void onResponse(Call<my.cinemax.app.free.entity.JsonApiResponse> call, retrofit2.Response<my.cinemax.app.free.entity.JsonApiResponse> response) {
+                if (response.isSuccessful() && response.body() != null) {
+                    my.cinemax.app.free.entity.JsonApiResponse apiResponse = response.body();
+                    
+                    if (apiResponse.getMovies() != null) {
+                        // Find the specific series by ID
+                        Poster targetSeries = null;
+                        for (Poster movie : apiResponse.getMovies()) {
+                            if (movie.getId() != null && movie.getId().equals(poster.getId())) {
+                                targetSeries = movie;
+                                break;
+                            }
                         }
-                        ArrayAdapter<String> filtresAdapter = new ArrayAdapter<String>(SerieActivity.this,
-                                R.layout.spinner_layout_season,R.id.textView,countryCodes);
-                        filtresAdapter.setDropDownViewResource(R.layout.simple_spinner_dropdown_season_item);
-                        spinner_activity_serie_season_list.setAdapter(filtresAdapter);
+                        
+                        if (targetSeries != null && targetSeries.getSeasons() != null && targetSeries.getSeasons().size() > 0) {
+                            seasonArrayList.clear();
+                            final String[] countryCodes = new String[targetSeries.getSeasons().size()];
 
-                        linear_layout_activity_serie_seasons.setVisibility(View.VISIBLE);
-                    }else{
+                            for (int i = 0; i < targetSeries.getSeasons().size(); i++) {
+                                countryCodes[i] = targetSeries.getSeasons().get(i).getTitle();
+                                seasonArrayList.add(targetSeries.getSeasons().get(i));
+                            }
+                            ArrayAdapter<String> filtresAdapter = new ArrayAdapter<String>(SerieActivity.this,
+                                    R.layout.spinner_layout_season,R.id.textView,countryCodes);
+                            filtresAdapter.setDropDownViewResource(R.layout.simple_spinner_dropdown_season_item);
+                            spinner_activity_serie_season_list.setAdapter(filtresAdapter);
+
+                            linear_layout_activity_serie_seasons.setVisibility(View.VISIBLE);
+                        } else {
+                            linear_layout_activity_serie_seasons.setVisibility(View.GONE);
+                        }
+                    } else {
                         linear_layout_activity_serie_seasons.setVisibility(View.GONE);
                     }
-                }else{
-                    linear_layout_activity_serie_seasons.setVisibility(View.VISIBLE);
+                } else {
+                    linear_layout_activity_serie_seasons.setVisibility(View.GONE);
                 }
             }
+            
             @Override
-            public void onFailure(Call<List<Season>> call, Throwable t) {
+            public void onFailure(Call<my.cinemax.app.free.entity.JsonApiResponse> call, Throwable t) {
                 linear_layout_activity_serie_seasons.setVisibility(View.GONE);
-
             }
         });
     }
     private void getPosterCastings() {
-        Retrofit retrofit = apiClient.getClient();
-        apiRest service = retrofit.create(apiRest.class);
-        Call<List<Actor>> call = service.getRolesByPoster(poster.getId());
-        call.enqueue(new Callback<List<Actor>>() {
+        // Use JSON API instead of old REST API
+        apiClient.getJsonApiData(new retrofit2.Callback<my.cinemax.app.free.entity.JsonApiResponse>() {
             @Override
-            public void onResponse(Call<List<Actor>> call, Response<List<Actor>> response) {
-                if (response.isSuccessful()){
-                    if (response.body().size()>0) {
-                        linearLayoutManagerCast = new LinearLayoutManager(getApplicationContext(), LinearLayoutManager.HORIZONTAL, false);
-                        actorAdapter = new ActorAdapter(response.body(), SerieActivity.this);
-                        recycle_view_activity_activity_serie_cast.setHasFixedSize(true);
-                        recycle_view_activity_activity_serie_cast.setAdapter(actorAdapter);
-                        recycle_view_activity_activity_serie_cast.setLayoutManager(linearLayoutManagerCast);
-                        linear_layout_activity_serie_cast.setVisibility(View.VISIBLE);
+            public void onResponse(Call<my.cinemax.app.free.entity.JsonApiResponse> call, retrofit2.Response<my.cinemax.app.free.entity.JsonApiResponse> response) {
+                if (response.isSuccessful() && response.body() != null) {
+                    my.cinemax.app.free.entity.JsonApiResponse apiResponse = response.body();
+                    
+                    if (apiResponse.getMovies() != null) {
+                        // Find the specific series by ID
+                        Poster targetSeries = null;
+                        for (Poster movie : apiResponse.getMovies()) {
+                            if (movie.getId() != null && movie.getId().equals(poster.getId())) {
+                                targetSeries = movie;
+                                break;
+                            }
+                        }
+                        
+                        if (targetSeries != null && targetSeries.getActors() != null && targetSeries.getActors().size() > 0) {
+                            linearLayoutManagerCast = new LinearLayoutManager(getApplicationContext(), LinearLayoutManager.HORIZONTAL, false);
+                            actorAdapter = new ActorAdapter(targetSeries.getActors(), SerieActivity.this);
+                            recycle_view_activity_activity_serie_cast.setHasFixedSize(true);
+                            recycle_view_activity_activity_serie_cast.setAdapter(actorAdapter);
+                            recycle_view_activity_activity_serie_cast.setLayoutManager(linearLayoutManagerCast);
+                            linear_layout_activity_serie_cast.setVisibility(View.VISIBLE);
+                        }
                     }
                 }
             }
+            
             @Override
-            public void onFailure(Call<List<Actor>> call, Throwable t) {
+            public void onFailure(Call<my.cinemax.app.free.entity.JsonApiResponse> call, Throwable t) {
             }
         });
     }
@@ -654,15 +681,35 @@ public class SerieActivity extends AppCompatActivity implements PlaylistDownload
     public void playSource(int position){
         addView();
 
-        if (playableList.get(position).getType().equals("youtube")){
+        // Validate position and playableList
+        if (position < 0 || position >= playableList.size()) {
+            Toasty.error(getApplicationContext(), "Invalid source selected", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        Source source = playableList.get(position);
+        if (source == null) {
+            Toasty.error(getApplicationContext(), "Source is null", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        String sourceType = source.getType();
+        String sourceUrl = source.getUrl();
+
+        if (sourceType == null || sourceUrl == null) {
+            Toasty.error(getApplicationContext(), "Invalid source data", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        if (sourceType.equals("youtube")){
             Intent intent = new Intent(SerieActivity.this,YoutubeActivity.class);
-            intent.putExtra("url",playableList.get(position).getUrl());
+            intent.putExtra("url", sourceUrl);
             startActivity(intent);
             return;
         }
-        if (playableList.get(position).getType().equals("embed")){
+        if (sourceType.equals("embed")){
             Intent intent = new Intent(SerieActivity.this,EmbedActivity.class);
-            intent.putExtra("url",playableList.get(position).getUrl());
+            intent.putExtra("url", sourceUrl);
             startActivity(intent);
             return;
         }
@@ -673,24 +720,45 @@ public class SerieActivity extends AppCompatActivity implements PlaylistDownload
             loadSubtitles(position);
         } else {
             Intent intent = new Intent(SerieActivity.this,PlayerActivity.class);
-            intent.putExtra("id",selectedEpisode.getId());
-            intent.putExtra("url",playableList.get(position).getUrl());
+            
+            // Validate selectedEpisode
+            if (selectedEpisode == null || selectedEpisode.getId() == null) {
+                Toasty.error(getApplicationContext(), "Episode data is invalid", Toast.LENGTH_SHORT).show();
+                return;
+            }
+            
+            intent.putExtra("id", selectedEpisode.getId());
+            intent.putExtra("url", sourceUrl);
             
             // Fix video type for streaming URLs
-            String videoType = playableList.get(position).getType();
-            String url = playableList.get(position).getUrl();
-            if (url != null) {
-                if (url.contains(".m3u8")) {
+            String videoType = sourceType;
+            if (sourceUrl != null) {
+                if (sourceUrl.contains(".m3u8")) {
                     videoType = "m3u8";  // Player expects "m3u8" for HLS streams
-                } else if (url.contains(".mpd")) {
+                } else if (sourceUrl.contains(".mpd")) {
                     videoType = "dash";  // Player expects "dash" for MPD/DASH streams
                 }
             }
             intent.putExtra("type", videoType);
             intent.putExtra("kind","episode");
-            intent.putExtra("image",poster.getImage());
-            intent.putExtra("title",poster.getTitle());
-            intent.putExtra("subtitle",seasonArrayList.get(spinner_activity_serie_season_list.getSelectedItemPosition()).getTitle()+" : "+selectedEpisode.getTitle());
+            
+            // Validate poster data
+            if (poster != null) {
+                intent.putExtra("image", poster.getImage());
+                intent.putExtra("title", poster.getTitle());
+            }
+            
+            // Validate season and episode data
+            if (seasonArrayList != null && seasonArrayList.size() > 0 && 
+                spinner_activity_serie_season_list != null && 
+                spinner_activity_serie_season_list.getSelectedItemPosition() >= 0 &&
+                spinner_activity_serie_season_list.getSelectedItemPosition() < seasonArrayList.size()) {
+                String subtitle = seasonArrayList.get(spinner_activity_serie_season_list.getSelectedItemPosition()).getTitle() + " : " + selectedEpisode.getTitle();
+                intent.putExtra("subtitle", subtitle);
+            } else {
+                intent.putExtra("subtitle", selectedEpisode.getTitle());
+            }
+            
             startActivity(intent);
         }
 

@@ -28,6 +28,8 @@ import my.cinemax.app.free.event.CastSessionStartedEvent;
 import my.cinemax.app.free.ui.player.CustomPlayerFragment;
 
 import org.greenrobot.eventbus.EventBus;
+import es.dmoral.toasty.Toasty;
+import android.widget.Toast;
 
 
 /**
@@ -145,15 +147,31 @@ public class PlayerActivity extends AppCompatActivity {
                 | View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY);
         mScaleGestureDetector = new ScaleGestureDetector(this, new ScaleListener());
         mCastContext = CastContext.getSharedInstance(this);
-        Bundle bundle = getIntent().getExtras() ;
-        vodeoId = bundle.getInt("id");
+        Bundle bundle = getIntent().getExtras();
+        
+        // Validate bundle and extract data safely
+        if (bundle == null) {
+            Toasty.error(this, "Invalid video data", Toast.LENGTH_SHORT).show();
+            finish();
+            return;
+        }
+        
+        vodeoId = bundle.getInt("id", -1);
         videoUrl = bundle.getString("url");
         videoKind = bundle.getString("kind");
-        isLive = bundle.getBoolean("isLive");
+        isLive = bundle.getBoolean("isLive", false);
         videoType = bundle.getString("type");
         videoTitle = bundle.getString("title");
         videoSubTile = bundle.getString("subtitle");
         videoImage = bundle.getString("image");
+        
+        // Validate required data
+        if (videoUrl == null || videoUrl.isEmpty()) {
+            Toasty.error(this, "Video URL is missing", Toast.LENGTH_SHORT).show();
+            finish();
+            return;
+        }
+        
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
 
         if (savedInstanceState == null) {
