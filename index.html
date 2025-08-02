@@ -1723,14 +1723,15 @@
             function autoGenerateFeaturedMovies() {
                 console.log('⭐ Generating featured movies...');
                 
-                // Get movies with rating >= 7 or recent movies (last 3 years)
+                // Get movies with rating >= 7 or recent movies (last 3 years) - EXCLUDE SERIES
                 const currentYear = new Date().getFullYear();
                 const featuredMovies = (jsonData.movies || [])
                     .filter(movie => {
                         const hasGoodRating = movie.rating >= 7;
                         const isRecent = movie.year >= (currentYear - 3);
                         const hasImage = movie.image;
-                        return (hasGoodRating || isRecent) && hasImage;
+                        const isNotSeries = movie.type !== 'series' && !movie.seasons; // Exclude series
+                        return (hasGoodRating || isRecent) && hasImage && isNotSeries;
                     })
                     .sort((a, b) => {
                         // First sort by rating (high to low)
