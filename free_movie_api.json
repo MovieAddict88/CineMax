@@ -3,37 +3,44 @@
     "version": "2.0",
     "description": "Enhanced Free Movie & TV Streaming JSON API with Full Actor Support",
     "last_updated": "2025-08-02",
-    "total_movies": 1,
+    "total_movies": 2,
     "total_channels": 0,
-    "total_actors": 3
+    "total_actors": 6
   },
   "home": {
     "slides": [
       {
         "id": 1,
-        "title": "The Sandman",
+        "title": "The Last Round",
         "type": "movie",
-        "image": "https://image.tmdb.org/t/p/w500/vfJ1nBnqiiRWZWv3ZvtFWO5zccg.jpg",
-        "url": "movies/49",
+        "image": "https://image.tmdb.org/t/p/w500/vleNhtwRG9FUEoZQ9e7Q0s8xxBG.jpg",
+        "url": "movies/2",
         "poster": {
-          "id": 49,
-          "type": "series",
-          "title": "The Sandman",
-          "year": "2022",
-          "description": "After years of imprisonment, Morpheus — the King of Dreams — embarks on a journey across worlds to find what was stolen from him and restore his power.",
-          "image": "https://image.tmdb.org/t/p/w500/vfJ1nBnqiiRWZWv3ZvtFWO5zccg.jpg",
-          "cover": "https://image.tmdb.org/t/p/original/uxrP5yB9h6Dh6SbojI018pMYIIH.jpg",
-          "trailer": {
-            "id": 50,
-            "type": "video",
-            "title": "The Sandman Trailer",
-            "url": "https://www.youtube.com/watch?v=ZJXamnPUm0I"
-          },
-          "sources": [],
+          "id": 2,
+          "type": "movie",
+          "title": "The Last Round",
+          "year": "1976",
+          "description": "Stelvio Massi's crime thriller centers on a drifter who sets out to help blue-collar workers rise up against the two powerful families who are exploiting them. After settling in an industrial town and witnessing the cruelty of the factory owners, ex-mercenary Marco (Carlos Monzón) assumes the role of union agitator. When a violent confrontation erupts, the labor leader is driven to bring down the corrupt clans.",
+          "image": "https://image.tmdb.org/t/p/w500/vleNhtwRG9FUEoZQ9e7Q0s8xxBG.jpg",
+          "cover": "https://image.tmdb.org/t/p/original/2FUCnpfIW6tTdKXjPXgo7DV2MNq.jpg",
+          "trailer": null,
+          "sources": [
+            {
+              "id": 1,
+              "type": "video",
+              "title": "vidsrc.net 1080p",
+              "quality": "1080p",
+              "size": "0MB",
+              "kind": "both",
+              "premium": "false",
+              "external": false,
+              "url": "https://vidsrc.net/embed/movie/90802"
+            }
+          ],
           "label": "Latest Movie",
-          "sublabel": "Released 2022",
+          "sublabel": "Released 1976",
           "imdb": "0.0",
-          "downloadas": "the-sandman",
+          "downloadas": "the-last-round",
           "comment": true,
           "playas": "video",
           "classification": "PG-13",
@@ -42,36 +49,50 @@
           "created_at": "2025-08-02",
           "genres": [
             {
-              "id": 10765,
-              "name": "Sci-Fi & Fantasy"
+              "id": 28,
+              "name": "Action"
             },
             {
-              "id": 18,
-              "name": "Drama"
-            },
-            {
-              "id": 10759,
-              "name": "Action & Adventure"
+              "id": 53,
+              "name": "Thriller"
             }
           ],
           "actors": [
             {
-              "name": "Tom Sturridge",
+              "name": "Luc Merenda",
               "type": "actor",
-              "role": "Morpheus / Dream",
-              "image": "https://image.tmdb.org/t/p/w200/2EIUT2junjmFYRm70E4pAAUKnMc.jpg"
+              "role": "Rico Manzetti",
+              "image": "https://image.tmdb.org/t/p/w200/9i9moFaHJlDzlUjhUH67f091ZWt.jpg"
             },
             {
-              "name": "Vivienne Acheampong",
+              "name": "Carlos Monzón",
               "type": "actor",
-              "role": "Lucienne",
-              "image": "https://image.tmdb.org/t/p/w200/1VqJnnimdMwuje0ttU2SsKSuy3S.jpg"
+              "role": "Marco Russo",
+              "image": "https://image.tmdb.org/t/p/w200/bcrhWzGqvE7I5ZMQvuewnIyuNlV.jpg"
             },
             {
-              "name": "Patton Oswalt",
+              "name": "Mariangela Giordano",
               "type": "actor",
-              "role": "Matthew the Raven (voice)",
-              "image": "https://image.tmdb.org/t/p/w200/skGzommLR2zE6uk1YQRFK71dOJ8.jpg"
+              "role": "Lisa's mother",
+              "image": "https://image.tmdb.org/t/p/w200/t8ANeJZt22ZkyvVSIehv1HeuUBo.jpg"
+            },
+            {
+              "name": "Gianni Dei",
+              "type": "actor",
+              "role": "Beny Manzetti",
+              "image": "https://image.tmdb.org/t/p/w200/h1B2hHOJp1gWCfd3zXD9gSvPymb.jpg"
+            },
+            {
+              "name": "Luisa Maneri",
+              "type": "actor",
+              "role": "Lisa",
+              "image": ""
+            },
+            {
+              "name": "Stelvio Massi",
+              "type": "director",
+              "role": "Director",
+              "image": "https://image.tmdb.org/t/p/w200/ezpFYlK2RVvq8VP19GyQCBaE7h7.jpg"
             }
           ],
           "subtitles": [],
@@ -79,483 +100,39 @@
           "views": 0,
           "downloads": 0,
           "shares": 0,
-          "seasons": [
-            {
-              "id": 23,
-              "title": "Season 1",
-              "episodes": [
-                {
-                  "id": 1,
-                  "title": "Sleep of the Just",
-                  "episode_number": 1,
-                  "image": "https://image.tmdb.org/t/p/w500/xzmpOdpN1wpdKK2kaJmBidMpUL9.jpg",
-                  "duration": "54:00",
-                  "views": 0,
-                  "downloads": 0,
-                  "sources": [
-                    {
-                      "id": 2,
-                      "type": "video",
-                      "title": "Episode 1 1080p",
-                      "quality": "1080p",
-                      "url": "https://vidsrc.net/embed/tv/90802/1/1"
-                    }
-                  ],
-                  "subtitles": []
-                },
-                {
-                  "id": 3,
-                  "title": "Imperfect Hosts",
-                  "episode_number": 2,
-                  "image": "https://image.tmdb.org/t/p/w500/i1uLLs0Z9AzXTkYrRoWZQTfFCEp.jpg",
-                  "duration": "38:00",
-                  "views": 0,
-                  "downloads": 0,
-                  "sources": [
-                    {
-                      "id": 4,
-                      "type": "video",
-                      "title": "Episode 2 1080p",
-                      "quality": "1080p",
-                      "url": "https://vidsrc.net/embed/tv/90802/1/2"
-                    }
-                  ],
-                  "subtitles": []
-                },
-                {
-                  "id": 5,
-                  "title": "Dream a Little Dream of Me",
-                  "episode_number": 3,
-                  "image": "https://image.tmdb.org/t/p/w500/c2NipAl5AJn1mZ2n1u6XUQ2gcz4.jpg",
-                  "duration": "46:00",
-                  "views": 0,
-                  "downloads": 0,
-                  "sources": [
-                    {
-                      "id": 6,
-                      "type": "video",
-                      "title": "Episode 3 1080p",
-                      "quality": "1080p",
-                      "url": "https://vidsrc.net/embed/tv/90802/1/3"
-                    }
-                  ],
-                  "subtitles": []
-                },
-                {
-                  "id": 7,
-                  "title": "A Hope in Hell",
-                  "episode_number": 4,
-                  "image": "https://image.tmdb.org/t/p/w500/2wBRe3shmk6lwJvwIQuN8PfB2tV.jpg",
-                  "duration": "45:00",
-                  "views": 0,
-                  "downloads": 0,
-                  "sources": [
-                    {
-                      "id": 8,
-                      "type": "video",
-                      "title": "Episode 4 1080p",
-                      "quality": "1080p",
-                      "url": "https://vidsrc.net/embed/tv/90802/1/4"
-                    }
-                  ],
-                  "subtitles": []
-                },
-                {
-                  "id": 9,
-                  "title": "24/7",
-                  "episode_number": 5,
-                  "image": "https://image.tmdb.org/t/p/w500/1srp7lHS239WfXw0gSBllYw8mCx.jpg",
-                  "duration": "54:00",
-                  "views": 0,
-                  "downloads": 0,
-                  "sources": [
-                    {
-                      "id": 10,
-                      "type": "video",
-                      "title": "Episode 5 1080p",
-                      "quality": "1080p",
-                      "url": "https://vidsrc.net/embed/tv/90802/1/5"
-                    }
-                  ],
-                  "subtitles": []
-                },
-                {
-                  "id": 11,
-                  "title": "The Sound of Her Wings",
-                  "episode_number": 6,
-                  "image": "https://image.tmdb.org/t/p/w500/aKekIXd1a6HfgT46kuKco0apV0n.jpg",
-                  "duration": "53:00",
-                  "views": 0,
-                  "downloads": 0,
-                  "sources": [
-                    {
-                      "id": 12,
-                      "type": "video",
-                      "title": "Episode 6 1080p",
-                      "quality": "1080p",
-                      "url": "https://vidsrc.net/embed/tv/90802/1/6"
-                    }
-                  ],
-                  "subtitles": []
-                },
-                {
-                  "id": 13,
-                  "title": "The Doll's House",
-                  "episode_number": 7,
-                  "image": "https://image.tmdb.org/t/p/w500/ckMg5eK20e65czJCfPGJgtyg63H.jpg",
-                  "duration": "49:00",
-                  "views": 0,
-                  "downloads": 0,
-                  "sources": [
-                    {
-                      "id": 14,
-                      "type": "video",
-                      "title": "Episode 7 1080p",
-                      "quality": "1080p",
-                      "url": "https://vidsrc.net/embed/tv/90802/1/7"
-                    }
-                  ],
-                  "subtitles": []
-                },
-                {
-                  "id": 15,
-                  "title": "Playing House",
-                  "episode_number": 8,
-                  "image": "https://image.tmdb.org/t/p/w500/xGE5htx5TTbTrRFasgxJpZm8dSA.jpg",
-                  "duration": "50:00",
-                  "views": 0,
-                  "downloads": 0,
-                  "sources": [
-                    {
-                      "id": 16,
-                      "type": "video",
-                      "title": "Episode 8 1080p",
-                      "quality": "1080p",
-                      "url": "https://vidsrc.net/embed/tv/90802/1/8"
-                    }
-                  ],
-                  "subtitles": []
-                },
-                {
-                  "id": 17,
-                  "title": "Collectors",
-                  "episode_number": 9,
-                  "image": "https://image.tmdb.org/t/p/w500/m95ZlPULJoinfXNwMmdbckIXvTz.jpg",
-                  "duration": "49:00",
-                  "views": 0,
-                  "downloads": 0,
-                  "sources": [
-                    {
-                      "id": 18,
-                      "type": "video",
-                      "title": "Episode 9 1080p",
-                      "quality": "1080p",
-                      "url": "https://vidsrc.net/embed/tv/90802/1/9"
-                    }
-                  ],
-                  "subtitles": []
-                },
-                {
-                  "id": 19,
-                  "title": "Lost Hearts",
-                  "episode_number": 10,
-                  "image": "https://image.tmdb.org/t/p/w500/b4UgJQr2Ov2Mg8HZQP4K90xjNBh.jpg",
-                  "duration": "46:00",
-                  "views": 0,
-                  "downloads": 0,
-                  "sources": [
-                    {
-                      "id": 20,
-                      "type": "video",
-                      "title": "Episode 10 1080p",
-                      "quality": "1080p",
-                      "url": "https://vidsrc.net/embed/tv/90802/1/10"
-                    }
-                  ],
-                  "subtitles": []
-                },
-                {
-                  "id": 21,
-                  "title": "Dream of a Thousand Cats/Calliope",
-                  "episode_number": 11,
-                  "image": "https://image.tmdb.org/t/p/w500/vWzr1iaBqOW1G8PiESdcxSrNWku.jpg",
-                  "duration": "64:00",
-                  "views": 0,
-                  "downloads": 0,
-                  "sources": [
-                    {
-                      "id": 22,
-                      "type": "video",
-                      "title": "Episode 11 1080p",
-                      "quality": "1080p",
-                      "url": "https://vidsrc.net/embed/tv/90802/1/11"
-                    }
-                  ],
-                  "subtitles": []
-                }
-              ]
-            },
-            {
-              "id": 48,
-              "title": "Season 2",
-              "episodes": [
-                {
-                  "id": 24,
-                  "title": "Season of Mists",
-                  "episode_number": 1,
-                  "image": "https://image.tmdb.org/t/p/w500/gdRVJGhE2hHFNd5q0mQZizRWO9w.jpg",
-                  "duration": "46:00",
-                  "views": 0,
-                  "downloads": 0,
-                  "sources": [
-                    {
-                      "id": 25,
-                      "type": "video",
-                      "title": "Episode 1 1080p",
-                      "quality": "1080p",
-                      "url": "https://vidsrc.net/embed/tv/90802/2/1"
-                    }
-                  ],
-                  "subtitles": []
-                },
-                {
-                  "id": 26,
-                  "title": "The Ruler of Hell",
-                  "episode_number": 2,
-                  "image": "https://image.tmdb.org/t/p/w500/n9NIf3PHHc0ApXAp5G8kFcdXesM.jpg",
-                  "duration": "51:00",
-                  "views": 0,
-                  "downloads": 0,
-                  "sources": [
-                    {
-                      "id": 27,
-                      "type": "video",
-                      "title": "Episode 2 1080p",
-                      "quality": "1080p",
-                      "url": "https://vidsrc.net/embed/tv/90802/2/2"
-                    }
-                  ],
-                  "subtitles": []
-                },
-                {
-                  "id": 28,
-                  "title": "More Devils Than Vast Hell Can Hold",
-                  "episode_number": 3,
-                  "image": "https://image.tmdb.org/t/p/w500/2ALbQ7b8ICWfcuVIcOKxCCWHbK9.jpg",
-                  "duration": "51:00",
-                  "views": 0,
-                  "downloads": 0,
-                  "sources": [
-                    {
-                      "id": 29,
-                      "type": "video",
-                      "title": "Episode 3 1080p",
-                      "quality": "1080p",
-                      "url": "https://vidsrc.net/embed/tv/90802/2/3"
-                    }
-                  ],
-                  "subtitles": []
-                },
-                {
-                  "id": 30,
-                  "title": "Brief Lives",
-                  "episode_number": 4,
-                  "image": "https://image.tmdb.org/t/p/w500/4OZcba8f9qcMMEiTf4svtLxhRav.jpg",
-                  "duration": "45:00",
-                  "views": 0,
-                  "downloads": 0,
-                  "sources": [
-                    {
-                      "id": 31,
-                      "type": "video",
-                      "title": "Episode 4 1080p",
-                      "quality": "1080p",
-                      "url": "https://vidsrc.net/embed/tv/90802/2/4"
-                    }
-                  ],
-                  "subtitles": []
-                },
-                {
-                  "id": 32,
-                  "title": "The Song of Orpheus",
-                  "episode_number": 5,
-                  "image": "https://image.tmdb.org/t/p/w500/cu6tPZ4RyHTEErEwfK0Wh7cJFiP.jpg",
-                  "duration": "65:00",
-                  "views": 0,
-                  "downloads": 0,
-                  "sources": [
-                    {
-                      "id": 33,
-                      "type": "video",
-                      "title": "Episode 5 1080p",
-                      "quality": "1080p",
-                      "url": "https://vidsrc.net/embed/tv/90802/2/5"
-                    }
-                  ],
-                  "subtitles": []
-                },
-                {
-                  "id": 34,
-                  "title": "Family Blood",
-                  "episode_number": 6,
-                  "image": "https://image.tmdb.org/t/p/w500/474h1MDAS0ylszh7vhYsrOIJX8K.jpg",
-                  "duration": "59:00",
-                  "views": 0,
-                  "downloads": 0,
-                  "sources": [
-                    {
-                      "id": 35,
-                      "type": "video",
-                      "title": "Episode 6 1080p",
-                      "quality": "1080p",
-                      "url": "https://vidsrc.net/embed/tv/90802/2/6"
-                    }
-                  ],
-                  "subtitles": []
-                },
-                {
-                  "id": 36,
-                  "title": "Time and Night",
-                  "episode_number": 7,
-                  "image": "https://image.tmdb.org/t/p/w500/3raXaPXCxhKCUcN0vDpkX7M8S1x.jpg",
-                  "duration": "50:00",
-                  "views": 0,
-                  "downloads": 0,
-                  "sources": [
-                    {
-                      "id": 37,
-                      "type": "video",
-                      "title": "Episode 7 1080p",
-                      "quality": "1080p",
-                      "url": "https://vidsrc.net/embed/tv/90802/2/7"
-                    }
-                  ],
-                  "subtitles": []
-                },
-                {
-                  "id": 38,
-                  "title": "Fuel for the Fire",
-                  "episode_number": 8,
-                  "image": "https://image.tmdb.org/t/p/w500/oU6g3xvPXPkQiQEkkgm9jMymwVS.jpg",
-                  "duration": "48:00",
-                  "views": 0,
-                  "downloads": 0,
-                  "sources": [
-                    {
-                      "id": 39,
-                      "type": "video",
-                      "title": "Episode 8 1080p",
-                      "quality": "1080p",
-                      "url": "https://vidsrc.net/embed/tv/90802/2/8"
-                    }
-                  ],
-                  "subtitles": []
-                },
-                {
-                  "id": 40,
-                  "title": "The Kindly Ones",
-                  "episode_number": 9,
-                  "image": "https://image.tmdb.org/t/p/w500/o6gKGocuv98ZNmBGAdiNW5YdXgt.jpg",
-                  "duration": "54:00",
-                  "views": 0,
-                  "downloads": 0,
-                  "sources": [
-                    {
-                      "id": 41,
-                      "type": "video",
-                      "title": "Episode 9 1080p",
-                      "quality": "1080p",
-                      "url": "https://vidsrc.net/embed/tv/90802/2/9"
-                    }
-                  ],
-                  "subtitles": []
-                },
-                {
-                  "id": 42,
-                  "title": "Long Live the King",
-                  "episode_number": 10,
-                  "image": "https://image.tmdb.org/t/p/w500/k2xGycTbss6rZi3jMFjzg4CJyOa.jpg",
-                  "duration": "45:00",
-                  "views": 0,
-                  "downloads": 0,
-                  "sources": [
-                    {
-                      "id": 43,
-                      "type": "video",
-                      "title": "Episode 10 1080p",
-                      "quality": "1080p",
-                      "url": "https://vidsrc.net/embed/tv/90802/2/10"
-                    }
-                  ],
-                  "subtitles": []
-                },
-                {
-                  "id": 44,
-                  "title": "A Tale of Graceful Ends",
-                  "episode_number": 11,
-                  "image": "https://image.tmdb.org/t/p/w500/iMbt6UaHo09sSAlCkiL7ANmKal6.jpg",
-                  "duration": "70:00",
-                  "views": 0,
-                  "downloads": 0,
-                  "sources": [
-                    {
-                      "id": 45,
-                      "type": "video",
-                      "title": "Episode 11 1080p",
-                      "quality": "1080p",
-                      "url": "https://vidsrc.net/embed/tv/90802/2/11"
-                    }
-                  ],
-                  "subtitles": []
-                },
-                {
-                  "id": 46,
-                  "title": "A Special Episode - Death: The High Cost of Living",
-                  "episode_number": 12,
-                  "image": "https://image.tmdb.org/t/p/w500/lGXkdwfOzpy17OLOnkyJBE8avWT.jpg",
-                  "duration": "58:00",
-                  "views": 0,
-                  "downloads": 0,
-                  "sources": [
-                    {
-                      "id": 47,
-                      "type": "video",
-                      "title": "Episode 12 1080p",
-                      "quality": "1080p",
-                      "url": "https://vidsrc.net/embed/tv/90802/2/12"
-                    }
-                  ],
-                  "subtitles": []
-                }
-              ]
-            }
-          ],
           "contentType": "movie",
-          "url": "movies/49"
+          "url": "movies/2"
         },
         "channel": null
       }
     ],
     "featuredMovies": [
       {
-        "id": 49,
-        "type": "series",
-        "title": "The Sandman",
-        "year": "2022",
-        "description": "After years of imprisonment, Morpheus — the King of Dreams — embarks on a journey across worlds to find what was stolen from him and restore his power.",
-        "image": "https://image.tmdb.org/t/p/w500/vfJ1nBnqiiRWZWv3ZvtFWO5zccg.jpg",
-        "cover": "https://image.tmdb.org/t/p/original/uxrP5yB9h6Dh6SbojI018pMYIIH.jpg",
-        "trailer": {
-          "id": 50,
-          "type": "video",
-          "title": "The Sandman Trailer",
-          "url": "https://www.youtube.com/watch?v=ZJXamnPUm0I"
-        },
-        "sources": [],
-        "label": "Series",
-        "sublabel": "2 Seasons",
+        "id": 2,
+        "type": "movie",
+        "title": "The Last Round",
+        "year": "1976",
+        "description": "Stelvio Massi's crime thriller centers on a drifter who sets out to help blue-collar workers rise up against the two powerful families who are exploiting them. After settling in an industrial town and witnessing the cruelty of the factory owners, ex-mercenary Marco (Carlos Monzón) assumes the role of union agitator. When a violent confrontation erupts, the labor leader is driven to bring down the corrupt clans.",
+        "image": "https://image.tmdb.org/t/p/w500/vleNhtwRG9FUEoZQ9e7Q0s8xxBG.jpg",
+        "cover": "https://image.tmdb.org/t/p/original/2FUCnpfIW6tTdKXjPXgo7DV2MNq.jpg",
+        "trailer": null,
+        "sources": [
+          {
+            "id": 1,
+            "type": "video",
+            "title": "vidsrc.net 1080p",
+            "quality": "1080p",
+            "size": "0MB",
+            "kind": "both",
+            "premium": "false",
+            "external": false,
+            "url": "https://vidsrc.net/embed/movie/90802"
+          }
+        ],
+        "label": "Movie",
+        "sublabel": "1976",
         "imdb": "0.0",
-        "downloadas": "the-sandman",
+        "downloadas": "the-last-round",
         "comment": true,
         "playas": "video",
         "classification": "PG-13",
@@ -564,549 +141,166 @@
         "created_at": "2025-08-02",
         "genres": [
           {
-            "id": 10765,
-            "name": "Sci-Fi & Fantasy"
+            "id": 28,
+            "name": "Action"
           },
           {
-            "id": 18,
-            "name": "Drama"
-          },
-          {
-            "id": 10759,
-            "name": "Action & Adventure"
+            "id": 53,
+            "name": "Thriller"
           }
         ],
         "actors": [
           {
-            "name": "Tom Sturridge",
+            "name": "Luc Merenda",
             "type": "actor",
-            "role": "Morpheus / Dream",
-            "image": "https://image.tmdb.org/t/p/w200/2EIUT2junjmFYRm70E4pAAUKnMc.jpg"
+            "role": "Rico Manzetti",
+            "image": "https://image.tmdb.org/t/p/w200/9i9moFaHJlDzlUjhUH67f091ZWt.jpg"
           },
           {
-            "name": "Vivienne Acheampong",
+            "name": "Carlos Monzón",
             "type": "actor",
-            "role": "Lucienne",
-            "image": "https://image.tmdb.org/t/p/w200/1VqJnnimdMwuje0ttU2SsKSuy3S.jpg"
+            "role": "Marco Russo",
+            "image": "https://image.tmdb.org/t/p/w200/bcrhWzGqvE7I5ZMQvuewnIyuNlV.jpg"
           },
           {
-            "name": "Patton Oswalt",
+            "name": "Mariangela Giordano",
             "type": "actor",
-            "role": "Matthew the Raven (voice)",
-            "image": "https://image.tmdb.org/t/p/w200/skGzommLR2zE6uk1YQRFK71dOJ8.jpg"
+            "role": "Lisa's mother",
+            "image": "https://image.tmdb.org/t/p/w200/t8ANeJZt22ZkyvVSIehv1HeuUBo.jpg"
+          },
+          {
+            "name": "Gianni Dei",
+            "type": "actor",
+            "role": "Beny Manzetti",
+            "image": "https://image.tmdb.org/t/p/w200/h1B2hHOJp1gWCfd3zXD9gSvPymb.jpg"
+          },
+          {
+            "name": "Luisa Maneri",
+            "type": "actor",
+            "role": "Lisa",
+            "image": ""
+          },
+          {
+            "name": "Stelvio Massi",
+            "type": "director",
+            "role": "Director",
+            "image": "https://image.tmdb.org/t/p/w200/ezpFYlK2RVvq8VP19GyQCBaE7h7.jpg"
           }
         ],
         "subtitles": [],
         "comments": [],
-        "views": 5826,
+        "views": 8163,
         "downloads": 0,
-        "shares": 0,
-        "seasons": [
-          {
-            "id": 23,
-            "title": "Season 1",
-            "episodes": [
-              {
-                "id": 1,
-                "title": "Sleep of the Just",
-                "episode_number": 1,
-                "image": "https://image.tmdb.org/t/p/w500/xzmpOdpN1wpdKK2kaJmBidMpUL9.jpg",
-                "duration": "54:00",
-                "views": 0,
-                "downloads": 0,
-                "sources": [
-                  {
-                    "id": 2,
-                    "type": "video",
-                    "title": "Episode 1 1080p",
-                    "quality": "1080p",
-                    "url": "https://vidsrc.net/embed/tv/90802/1/1"
-                  }
-                ],
-                "subtitles": []
-              },
-              {
-                "id": 3,
-                "title": "Imperfect Hosts",
-                "episode_number": 2,
-                "image": "https://image.tmdb.org/t/p/w500/i1uLLs0Z9AzXTkYrRoWZQTfFCEp.jpg",
-                "duration": "38:00",
-                "views": 0,
-                "downloads": 0,
-                "sources": [
-                  {
-                    "id": 4,
-                    "type": "video",
-                    "title": "Episode 2 1080p",
-                    "quality": "1080p",
-                    "url": "https://vidsrc.net/embed/tv/90802/1/2"
-                  }
-                ],
-                "subtitles": []
-              },
-              {
-                "id": 5,
-                "title": "Dream a Little Dream of Me",
-                "episode_number": 3,
-                "image": "https://image.tmdb.org/t/p/w500/c2NipAl5AJn1mZ2n1u6XUQ2gcz4.jpg",
-                "duration": "46:00",
-                "views": 0,
-                "downloads": 0,
-                "sources": [
-                  {
-                    "id": 6,
-                    "type": "video",
-                    "title": "Episode 3 1080p",
-                    "quality": "1080p",
-                    "url": "https://vidsrc.net/embed/tv/90802/1/3"
-                  }
-                ],
-                "subtitles": []
-              },
-              {
-                "id": 7,
-                "title": "A Hope in Hell",
-                "episode_number": 4,
-                "image": "https://image.tmdb.org/t/p/w500/2wBRe3shmk6lwJvwIQuN8PfB2tV.jpg",
-                "duration": "45:00",
-                "views": 0,
-                "downloads": 0,
-                "sources": [
-                  {
-                    "id": 8,
-                    "type": "video",
-                    "title": "Episode 4 1080p",
-                    "quality": "1080p",
-                    "url": "https://vidsrc.net/embed/tv/90802/1/4"
-                  }
-                ],
-                "subtitles": []
-              },
-              {
-                "id": 9,
-                "title": "24/7",
-                "episode_number": 5,
-                "image": "https://image.tmdb.org/t/p/w500/1srp7lHS239WfXw0gSBllYw8mCx.jpg",
-                "duration": "54:00",
-                "views": 0,
-                "downloads": 0,
-                "sources": [
-                  {
-                    "id": 10,
-                    "type": "video",
-                    "title": "Episode 5 1080p",
-                    "quality": "1080p",
-                    "url": "https://vidsrc.net/embed/tv/90802/1/5"
-                  }
-                ],
-                "subtitles": []
-              },
-              {
-                "id": 11,
-                "title": "The Sound of Her Wings",
-                "episode_number": 6,
-                "image": "https://image.tmdb.org/t/p/w500/aKekIXd1a6HfgT46kuKco0apV0n.jpg",
-                "duration": "53:00",
-                "views": 0,
-                "downloads": 0,
-                "sources": [
-                  {
-                    "id": 12,
-                    "type": "video",
-                    "title": "Episode 6 1080p",
-                    "quality": "1080p",
-                    "url": "https://vidsrc.net/embed/tv/90802/1/6"
-                  }
-                ],
-                "subtitles": []
-              },
-              {
-                "id": 13,
-                "title": "The Doll's House",
-                "episode_number": 7,
-                "image": "https://image.tmdb.org/t/p/w500/ckMg5eK20e65czJCfPGJgtyg63H.jpg",
-                "duration": "49:00",
-                "views": 0,
-                "downloads": 0,
-                "sources": [
-                  {
-                    "id": 14,
-                    "type": "video",
-                    "title": "Episode 7 1080p",
-                    "quality": "1080p",
-                    "url": "https://vidsrc.net/embed/tv/90802/1/7"
-                  }
-                ],
-                "subtitles": []
-              },
-              {
-                "id": 15,
-                "title": "Playing House",
-                "episode_number": 8,
-                "image": "https://image.tmdb.org/t/p/w500/xGE5htx5TTbTrRFasgxJpZm8dSA.jpg",
-                "duration": "50:00",
-                "views": 0,
-                "downloads": 0,
-                "sources": [
-                  {
-                    "id": 16,
-                    "type": "video",
-                    "title": "Episode 8 1080p",
-                    "quality": "1080p",
-                    "url": "https://vidsrc.net/embed/tv/90802/1/8"
-                  }
-                ],
-                "subtitles": []
-              },
-              {
-                "id": 17,
-                "title": "Collectors",
-                "episode_number": 9,
-                "image": "https://image.tmdb.org/t/p/w500/m95ZlPULJoinfXNwMmdbckIXvTz.jpg",
-                "duration": "49:00",
-                "views": 0,
-                "downloads": 0,
-                "sources": [
-                  {
-                    "id": 18,
-                    "type": "video",
-                    "title": "Episode 9 1080p",
-                    "quality": "1080p",
-                    "url": "https://vidsrc.net/embed/tv/90802/1/9"
-                  }
-                ],
-                "subtitles": []
-              },
-              {
-                "id": 19,
-                "title": "Lost Hearts",
-                "episode_number": 10,
-                "image": "https://image.tmdb.org/t/p/w500/b4UgJQr2Ov2Mg8HZQP4K90xjNBh.jpg",
-                "duration": "46:00",
-                "views": 0,
-                "downloads": 0,
-                "sources": [
-                  {
-                    "id": 20,
-                    "type": "video",
-                    "title": "Episode 10 1080p",
-                    "quality": "1080p",
-                    "url": "https://vidsrc.net/embed/tv/90802/1/10"
-                  }
-                ],
-                "subtitles": []
-              },
-              {
-                "id": 21,
-                "title": "Dream of a Thousand Cats/Calliope",
-                "episode_number": 11,
-                "image": "https://image.tmdb.org/t/p/w500/vWzr1iaBqOW1G8PiESdcxSrNWku.jpg",
-                "duration": "64:00",
-                "views": 0,
-                "downloads": 0,
-                "sources": [
-                  {
-                    "id": 22,
-                    "type": "video",
-                    "title": "Episode 11 1080p",
-                    "quality": "1080p",
-                    "url": "https://vidsrc.net/embed/tv/90802/1/11"
-                  }
-                ],
-                "subtitles": []
-              }
-            ]
-          },
-          {
-            "id": 48,
-            "title": "Season 2",
-            "episodes": [
-              {
-                "id": 24,
-                "title": "Season of Mists",
-                "episode_number": 1,
-                "image": "https://image.tmdb.org/t/p/w500/gdRVJGhE2hHFNd5q0mQZizRWO9w.jpg",
-                "duration": "46:00",
-                "views": 0,
-                "downloads": 0,
-                "sources": [
-                  {
-                    "id": 25,
-                    "type": "video",
-                    "title": "Episode 1 1080p",
-                    "quality": "1080p",
-                    "url": "https://vidsrc.net/embed/tv/90802/2/1"
-                  }
-                ],
-                "subtitles": []
-              },
-              {
-                "id": 26,
-                "title": "The Ruler of Hell",
-                "episode_number": 2,
-                "image": "https://image.tmdb.org/t/p/w500/n9NIf3PHHc0ApXAp5G8kFcdXesM.jpg",
-                "duration": "51:00",
-                "views": 0,
-                "downloads": 0,
-                "sources": [
-                  {
-                    "id": 27,
-                    "type": "video",
-                    "title": "Episode 2 1080p",
-                    "quality": "1080p",
-                    "url": "https://vidsrc.net/embed/tv/90802/2/2"
-                  }
-                ],
-                "subtitles": []
-              },
-              {
-                "id": 28,
-                "title": "More Devils Than Vast Hell Can Hold",
-                "episode_number": 3,
-                "image": "https://image.tmdb.org/t/p/w500/2ALbQ7b8ICWfcuVIcOKxCCWHbK9.jpg",
-                "duration": "51:00",
-                "views": 0,
-                "downloads": 0,
-                "sources": [
-                  {
-                    "id": 29,
-                    "type": "video",
-                    "title": "Episode 3 1080p",
-                    "quality": "1080p",
-                    "url": "https://vidsrc.net/embed/tv/90802/2/3"
-                  }
-                ],
-                "subtitles": []
-              },
-              {
-                "id": 30,
-                "title": "Brief Lives",
-                "episode_number": 4,
-                "image": "https://image.tmdb.org/t/p/w500/4OZcba8f9qcMMEiTf4svtLxhRav.jpg",
-                "duration": "45:00",
-                "views": 0,
-                "downloads": 0,
-                "sources": [
-                  {
-                    "id": 31,
-                    "type": "video",
-                    "title": "Episode 4 1080p",
-                    "quality": "1080p",
-                    "url": "https://vidsrc.net/embed/tv/90802/2/4"
-                  }
-                ],
-                "subtitles": []
-              },
-              {
-                "id": 32,
-                "title": "The Song of Orpheus",
-                "episode_number": 5,
-                "image": "https://image.tmdb.org/t/p/w500/cu6tPZ4RyHTEErEwfK0Wh7cJFiP.jpg",
-                "duration": "65:00",
-                "views": 0,
-                "downloads": 0,
-                "sources": [
-                  {
-                    "id": 33,
-                    "type": "video",
-                    "title": "Episode 5 1080p",
-                    "quality": "1080p",
-                    "url": "https://vidsrc.net/embed/tv/90802/2/5"
-                  }
-                ],
-                "subtitles": []
-              },
-              {
-                "id": 34,
-                "title": "Family Blood",
-                "episode_number": 6,
-                "image": "https://image.tmdb.org/t/p/w500/474h1MDAS0ylszh7vhYsrOIJX8K.jpg",
-                "duration": "59:00",
-                "views": 0,
-                "downloads": 0,
-                "sources": [
-                  {
-                    "id": 35,
-                    "type": "video",
-                    "title": "Episode 6 1080p",
-                    "quality": "1080p",
-                    "url": "https://vidsrc.net/embed/tv/90802/2/6"
-                  }
-                ],
-                "subtitles": []
-              },
-              {
-                "id": 36,
-                "title": "Time and Night",
-                "episode_number": 7,
-                "image": "https://image.tmdb.org/t/p/w500/3raXaPXCxhKCUcN0vDpkX7M8S1x.jpg",
-                "duration": "50:00",
-                "views": 0,
-                "downloads": 0,
-                "sources": [
-                  {
-                    "id": 37,
-                    "type": "video",
-                    "title": "Episode 7 1080p",
-                    "quality": "1080p",
-                    "url": "https://vidsrc.net/embed/tv/90802/2/7"
-                  }
-                ],
-                "subtitles": []
-              },
-              {
-                "id": 38,
-                "title": "Fuel for the Fire",
-                "episode_number": 8,
-                "image": "https://image.tmdb.org/t/p/w500/oU6g3xvPXPkQiQEkkgm9jMymwVS.jpg",
-                "duration": "48:00",
-                "views": 0,
-                "downloads": 0,
-                "sources": [
-                  {
-                    "id": 39,
-                    "type": "video",
-                    "title": "Episode 8 1080p",
-                    "quality": "1080p",
-                    "url": "https://vidsrc.net/embed/tv/90802/2/8"
-                  }
-                ],
-                "subtitles": []
-              },
-              {
-                "id": 40,
-                "title": "The Kindly Ones",
-                "episode_number": 9,
-                "image": "https://image.tmdb.org/t/p/w500/o6gKGocuv98ZNmBGAdiNW5YdXgt.jpg",
-                "duration": "54:00",
-                "views": 0,
-                "downloads": 0,
-                "sources": [
-                  {
-                    "id": 41,
-                    "type": "video",
-                    "title": "Episode 9 1080p",
-                    "quality": "1080p",
-                    "url": "https://vidsrc.net/embed/tv/90802/2/9"
-                  }
-                ],
-                "subtitles": []
-              },
-              {
-                "id": 42,
-                "title": "Long Live the King",
-                "episode_number": 10,
-                "image": "https://image.tmdb.org/t/p/w500/k2xGycTbss6rZi3jMFjzg4CJyOa.jpg",
-                "duration": "45:00",
-                "views": 0,
-                "downloads": 0,
-                "sources": [
-                  {
-                    "id": 43,
-                    "type": "video",
-                    "title": "Episode 10 1080p",
-                    "quality": "1080p",
-                    "url": "https://vidsrc.net/embed/tv/90802/2/10"
-                  }
-                ],
-                "subtitles": []
-              },
-              {
-                "id": 44,
-                "title": "A Tale of Graceful Ends",
-                "episode_number": 11,
-                "image": "https://image.tmdb.org/t/p/w500/iMbt6UaHo09sSAlCkiL7ANmKal6.jpg",
-                "duration": "70:00",
-                "views": 0,
-                "downloads": 0,
-                "sources": [
-                  {
-                    "id": 45,
-                    "type": "video",
-                    "title": "Episode 11 1080p",
-                    "quality": "1080p",
-                    "url": "https://vidsrc.net/embed/tv/90802/2/11"
-                  }
-                ],
-                "subtitles": []
-              },
-              {
-                "id": 46,
-                "title": "A Special Episode - Death: The High Cost of Living",
-                "episode_number": 12,
-                "image": "https://image.tmdb.org/t/p/w500/lGXkdwfOzpy17OLOnkyJBE8avWT.jpg",
-                "duration": "58:00",
-                "views": 0,
-                "downloads": 0,
-                "sources": [
-                  {
-                    "id": 47,
-                    "type": "video",
-                    "title": "Episode 12 1080p",
-                    "quality": "1080p",
-                    "url": "https://vidsrc.net/embed/tv/90802/2/12"
-                  }
-                ],
-                "subtitles": []
-              }
-            ]
-          }
-        ]
+        "shares": 0
       }
     ],
     "channels": [],
     "actors": [
       {
         "id": 1,
-        "name": "Tom Sturridge",
+        "name": "Luc Merenda",
         "type": "actor",
-        "role": "Morpheus / Dream",
-        "image": "https://image.tmdb.org/t/p/w200/2EIUT2junjmFYRm70E4pAAUKnMc.jpg",
+        "role": "Rico Manzetti",
+        "image": "https://image.tmdb.org/t/p/w200/9i9moFaHJlDzlUjhUH67f091ZWt.jpg",
         "born": "",
         "height": "",
         "bio": "",
         "movies": [
           {
-            "id": 49,
-            "title": "The Sandman",
-            "image": "https://image.tmdb.org/t/p/w500/vfJ1nBnqiiRWZWv3ZvtFWO5zccg.jpg",
-            "year": "2022"
+            "id": 2,
+            "title": "The Last Round",
+            "image": "https://image.tmdb.org/t/p/w500/vleNhtwRG9FUEoZQ9e7Q0s8xxBG.jpg",
+            "year": "1976"
           }
         ]
       },
       {
         "id": 2,
-        "name": "Vivienne Acheampong",
+        "name": "Carlos Monzón",
         "type": "actor",
-        "role": "Lucienne",
-        "image": "https://image.tmdb.org/t/p/w200/1VqJnnimdMwuje0ttU2SsKSuy3S.jpg",
+        "role": "Marco Russo",
+        "image": "https://image.tmdb.org/t/p/w200/bcrhWzGqvE7I5ZMQvuewnIyuNlV.jpg",
         "born": "",
         "height": "",
         "bio": "",
         "movies": [
           {
-            "id": 49,
-            "title": "The Sandman",
-            "image": "https://image.tmdb.org/t/p/w500/vfJ1nBnqiiRWZWv3ZvtFWO5zccg.jpg",
-            "year": "2022"
+            "id": 2,
+            "title": "The Last Round",
+            "image": "https://image.tmdb.org/t/p/w500/vleNhtwRG9FUEoZQ9e7Q0s8xxBG.jpg",
+            "year": "1976"
           }
         ]
       },
       {
         "id": 3,
-        "name": "Patton Oswalt",
+        "name": "Mariangela Giordano",
         "type": "actor",
-        "role": "Matthew the Raven (voice)",
-        "image": "https://image.tmdb.org/t/p/w200/skGzommLR2zE6uk1YQRFK71dOJ8.jpg",
+        "role": "Lisa's mother",
+        "image": "https://image.tmdb.org/t/p/w200/t8ANeJZt22ZkyvVSIehv1HeuUBo.jpg",
         "born": "",
         "height": "",
         "bio": "",
         "movies": [
           {
-            "id": 49,
-            "title": "The Sandman",
-            "image": "https://image.tmdb.org/t/p/w500/vfJ1nBnqiiRWZWv3ZvtFWO5zccg.jpg",
-            "year": "2022"
+            "id": 2,
+            "title": "The Last Round",
+            "image": "https://image.tmdb.org/t/p/w500/vleNhtwRG9FUEoZQ9e7Q0s8xxBG.jpg",
+            "year": "1976"
+          }
+        ]
+      },
+      {
+        "id": 4,
+        "name": "Gianni Dei",
+        "type": "actor",
+        "role": "Beny Manzetti",
+        "image": "https://image.tmdb.org/t/p/w200/h1B2hHOJp1gWCfd3zXD9gSvPymb.jpg",
+        "born": "",
+        "height": "",
+        "bio": "",
+        "movies": [
+          {
+            "id": 2,
+            "title": "The Last Round",
+            "image": "https://image.tmdb.org/t/p/w500/vleNhtwRG9FUEoZQ9e7Q0s8xxBG.jpg",
+            "year": "1976"
+          }
+        ]
+      },
+      {
+        "id": 5,
+        "name": "Luisa Maneri",
+        "type": "actor",
+        "role": "Lisa",
+        "image": "",
+        "born": "",
+        "height": "",
+        "bio": "",
+        "movies": [
+          {
+            "id": 2,
+            "title": "The Last Round",
+            "image": "https://image.tmdb.org/t/p/w500/vleNhtwRG9FUEoZQ9e7Q0s8xxBG.jpg",
+            "year": "1976"
+          }
+        ]
+      },
+      {
+        "id": 6,
+        "name": "Stelvio Massi",
+        "type": "director",
+        "role": "Director",
+        "image": "https://image.tmdb.org/t/p/w200/ezpFYlK2RVvq8VP19GyQCBaE7h7.jpg",
+        "born": "",
+        "height": "",
+        "bio": "",
+        "movies": [
+          {
+            "id": 2,
+            "title": "The Last Round",
+            "image": "https://image.tmdb.org/t/p/w500/vleNhtwRG9FUEoZQ9e7Q0s8xxBG.jpg",
+            "year": "1976"
           }
         ]
       }
@@ -1114,1567 +308,185 @@
     "genres": [
       {
         "id": 1,
-        "title": "Sci-Fi & Fantasy",
+        "title": "Action",
         "posters": [
           {
-            "id": 49,
-            "title": "The Sandman",
-            "type": "series",
-            "label": "Series",
-            "sublabel": "2 Seasons",
+            "id": 2,
+            "title": "The Last Round",
+            "type": "movie",
+            "label": "Movie",
+            "sublabel": "1976",
             "imdb": "0.0",
-            "downloadas": "the-sandman",
+            "downloadas": "the-last-round",
             "comment": true,
             "playas": "video",
-            "description": "After years of imprisonment, Morpheus — the King of Dreams — embarks on a journey across worlds to find what was stolen from him and restore his power.",
+            "description": "Stelvio Massi's crime thriller centers on a drifter who sets out to help blue-collar workers rise up against the two powerful families who are exploiting them. After settling in an industrial town and witnessing the cruelty of the factory owners, ex-mercenary Marco (Carlos Monzón) assumes the role of union agitator. When a violent confrontation erupts, the labor leader is driven to bring down the corrupt clans.",
             "classification": "PG-13",
-            "year": "2022",
+            "year": "1976",
             "duration": "00:00",
             "rating": 0,
-            "image": "https://image.tmdb.org/t/p/w500/vfJ1nBnqiiRWZWv3ZvtFWO5zccg.jpg",
-            "cover": "https://image.tmdb.org/t/p/original/uxrP5yB9h6Dh6SbojI018pMYIIH.jpg",
+            "image": "https://image.tmdb.org/t/p/w500/vleNhtwRG9FUEoZQ9e7Q0s8xxBG.jpg",
+            "cover": "https://image.tmdb.org/t/p/original/2FUCnpfIW6tTdKXjPXgo7DV2MNq.jpg",
             "genres": [
               {
-                "id": 10765,
-                "name": "Sci-Fi & Fantasy"
+                "id": 28,
+                "name": "Action"
               },
               {
-                "id": 18,
-                "name": "Drama"
-              },
-              {
-                "id": 10759,
-                "name": "Action & Adventure"
+                "id": 53,
+                "name": "Thriller"
               }
             ],
             "actors": [
               {
-                "name": "Tom Sturridge",
+                "name": "Luc Merenda",
                 "type": "actor",
-                "role": "Morpheus / Dream",
-                "image": "https://image.tmdb.org/t/p/w200/2EIUT2junjmFYRm70E4pAAUKnMc.jpg"
+                "role": "Rico Manzetti",
+                "image": "https://image.tmdb.org/t/p/w200/9i9moFaHJlDzlUjhUH67f091ZWt.jpg"
               },
               {
-                "name": "Vivienne Acheampong",
+                "name": "Carlos Monzón",
                 "type": "actor",
-                "role": "Lucienne",
-                "image": "https://image.tmdb.org/t/p/w200/1VqJnnimdMwuje0ttU2SsKSuy3S.jpg"
+                "role": "Marco Russo",
+                "image": "https://image.tmdb.org/t/p/w200/bcrhWzGqvE7I5ZMQvuewnIyuNlV.jpg"
               },
               {
-                "name": "Patton Oswalt",
+                "name": "Mariangela Giordano",
                 "type": "actor",
-                "role": "Matthew the Raven (voice)",
-                "image": "https://image.tmdb.org/t/p/w200/skGzommLR2zE6uk1YQRFK71dOJ8.jpg"
+                "role": "Lisa's mother",
+                "image": "https://image.tmdb.org/t/p/w200/t8ANeJZt22ZkyvVSIehv1HeuUBo.jpg"
+              },
+              {
+                "name": "Gianni Dei",
+                "type": "actor",
+                "role": "Beny Manzetti",
+                "image": "https://image.tmdb.org/t/p/w200/h1B2hHOJp1gWCfd3zXD9gSvPymb.jpg"
+              },
+              {
+                "name": "Luisa Maneri",
+                "type": "actor",
+                "role": "Lisa",
+                "image": ""
+              },
+              {
+                "name": "Stelvio Massi",
+                "type": "director",
+                "role": "Director",
+                "image": "https://image.tmdb.org/t/p/w200/ezpFYlK2RVvq8VP19GyQCBaE7h7.jpg"
               }
             ],
             "views": 0,
             "created_at": "2025-08-02",
-            "sources": [],
-            "trailer": {
-              "id": 50,
-              "type": "video",
-              "title": "The Sandman Trailer",
-              "url": "https://www.youtube.com/watch?v=ZJXamnPUm0I"
-            },
+            "sources": [
+              {
+                "id": 1,
+                "type": "video",
+                "title": "vidsrc.net 1080p",
+                "quality": "1080p",
+                "size": "0MB",
+                "kind": "both",
+                "premium": "false",
+                "external": false,
+                "url": "https://vidsrc.net/embed/movie/90802"
+              }
+            ],
+            "trailer": null,
             "subtitles": [],
             "comments": [],
             "downloads": 0,
-            "shares": 0,
-            "seasons": [
-              {
-                "id": 23,
-                "title": "Season 1",
-                "episodes": [
-                  {
-                    "id": 1,
-                    "title": "Sleep of the Just",
-                    "episode_number": 1,
-                    "image": "https://image.tmdb.org/t/p/w500/xzmpOdpN1wpdKK2kaJmBidMpUL9.jpg",
-                    "duration": "54:00",
-                    "views": 0,
-                    "downloads": 0,
-                    "sources": [
-                      {
-                        "id": 2,
-                        "type": "video",
-                        "title": "Episode 1 1080p",
-                        "quality": "1080p",
-                        "url": "https://vidsrc.net/embed/tv/90802/1/1"
-                      }
-                    ],
-                    "subtitles": []
-                  },
-                  {
-                    "id": 3,
-                    "title": "Imperfect Hosts",
-                    "episode_number": 2,
-                    "image": "https://image.tmdb.org/t/p/w500/i1uLLs0Z9AzXTkYrRoWZQTfFCEp.jpg",
-                    "duration": "38:00",
-                    "views": 0,
-                    "downloads": 0,
-                    "sources": [
-                      {
-                        "id": 4,
-                        "type": "video",
-                        "title": "Episode 2 1080p",
-                        "quality": "1080p",
-                        "url": "https://vidsrc.net/embed/tv/90802/1/2"
-                      }
-                    ],
-                    "subtitles": []
-                  },
-                  {
-                    "id": 5,
-                    "title": "Dream a Little Dream of Me",
-                    "episode_number": 3,
-                    "image": "https://image.tmdb.org/t/p/w500/c2NipAl5AJn1mZ2n1u6XUQ2gcz4.jpg",
-                    "duration": "46:00",
-                    "views": 0,
-                    "downloads": 0,
-                    "sources": [
-                      {
-                        "id": 6,
-                        "type": "video",
-                        "title": "Episode 3 1080p",
-                        "quality": "1080p",
-                        "url": "https://vidsrc.net/embed/tv/90802/1/3"
-                      }
-                    ],
-                    "subtitles": []
-                  },
-                  {
-                    "id": 7,
-                    "title": "A Hope in Hell",
-                    "episode_number": 4,
-                    "image": "https://image.tmdb.org/t/p/w500/2wBRe3shmk6lwJvwIQuN8PfB2tV.jpg",
-                    "duration": "45:00",
-                    "views": 0,
-                    "downloads": 0,
-                    "sources": [
-                      {
-                        "id": 8,
-                        "type": "video",
-                        "title": "Episode 4 1080p",
-                        "quality": "1080p",
-                        "url": "https://vidsrc.net/embed/tv/90802/1/4"
-                      }
-                    ],
-                    "subtitles": []
-                  },
-                  {
-                    "id": 9,
-                    "title": "24/7",
-                    "episode_number": 5,
-                    "image": "https://image.tmdb.org/t/p/w500/1srp7lHS239WfXw0gSBllYw8mCx.jpg",
-                    "duration": "54:00",
-                    "views": 0,
-                    "downloads": 0,
-                    "sources": [
-                      {
-                        "id": 10,
-                        "type": "video",
-                        "title": "Episode 5 1080p",
-                        "quality": "1080p",
-                        "url": "https://vidsrc.net/embed/tv/90802/1/5"
-                      }
-                    ],
-                    "subtitles": []
-                  },
-                  {
-                    "id": 11,
-                    "title": "The Sound of Her Wings",
-                    "episode_number": 6,
-                    "image": "https://image.tmdb.org/t/p/w500/aKekIXd1a6HfgT46kuKco0apV0n.jpg",
-                    "duration": "53:00",
-                    "views": 0,
-                    "downloads": 0,
-                    "sources": [
-                      {
-                        "id": 12,
-                        "type": "video",
-                        "title": "Episode 6 1080p",
-                        "quality": "1080p",
-                        "url": "https://vidsrc.net/embed/tv/90802/1/6"
-                      }
-                    ],
-                    "subtitles": []
-                  },
-                  {
-                    "id": 13,
-                    "title": "The Doll's House",
-                    "episode_number": 7,
-                    "image": "https://image.tmdb.org/t/p/w500/ckMg5eK20e65czJCfPGJgtyg63H.jpg",
-                    "duration": "49:00",
-                    "views": 0,
-                    "downloads": 0,
-                    "sources": [
-                      {
-                        "id": 14,
-                        "type": "video",
-                        "title": "Episode 7 1080p",
-                        "quality": "1080p",
-                        "url": "https://vidsrc.net/embed/tv/90802/1/7"
-                      }
-                    ],
-                    "subtitles": []
-                  },
-                  {
-                    "id": 15,
-                    "title": "Playing House",
-                    "episode_number": 8,
-                    "image": "https://image.tmdb.org/t/p/w500/xGE5htx5TTbTrRFasgxJpZm8dSA.jpg",
-                    "duration": "50:00",
-                    "views": 0,
-                    "downloads": 0,
-                    "sources": [
-                      {
-                        "id": 16,
-                        "type": "video",
-                        "title": "Episode 8 1080p",
-                        "quality": "1080p",
-                        "url": "https://vidsrc.net/embed/tv/90802/1/8"
-                      }
-                    ],
-                    "subtitles": []
-                  },
-                  {
-                    "id": 17,
-                    "title": "Collectors",
-                    "episode_number": 9,
-                    "image": "https://image.tmdb.org/t/p/w500/m95ZlPULJoinfXNwMmdbckIXvTz.jpg",
-                    "duration": "49:00",
-                    "views": 0,
-                    "downloads": 0,
-                    "sources": [
-                      {
-                        "id": 18,
-                        "type": "video",
-                        "title": "Episode 9 1080p",
-                        "quality": "1080p",
-                        "url": "https://vidsrc.net/embed/tv/90802/1/9"
-                      }
-                    ],
-                    "subtitles": []
-                  },
-                  {
-                    "id": 19,
-                    "title": "Lost Hearts",
-                    "episode_number": 10,
-                    "image": "https://image.tmdb.org/t/p/w500/b4UgJQr2Ov2Mg8HZQP4K90xjNBh.jpg",
-                    "duration": "46:00",
-                    "views": 0,
-                    "downloads": 0,
-                    "sources": [
-                      {
-                        "id": 20,
-                        "type": "video",
-                        "title": "Episode 10 1080p",
-                        "quality": "1080p",
-                        "url": "https://vidsrc.net/embed/tv/90802/1/10"
-                      }
-                    ],
-                    "subtitles": []
-                  },
-                  {
-                    "id": 21,
-                    "title": "Dream of a Thousand Cats/Calliope",
-                    "episode_number": 11,
-                    "image": "https://image.tmdb.org/t/p/w500/vWzr1iaBqOW1G8PiESdcxSrNWku.jpg",
-                    "duration": "64:00",
-                    "views": 0,
-                    "downloads": 0,
-                    "sources": [
-                      {
-                        "id": 22,
-                        "type": "video",
-                        "title": "Episode 11 1080p",
-                        "quality": "1080p",
-                        "url": "https://vidsrc.net/embed/tv/90802/1/11"
-                      }
-                    ],
-                    "subtitles": []
-                  }
-                ]
-              },
-              {
-                "id": 48,
-                "title": "Season 2",
-                "episodes": [
-                  {
-                    "id": 24,
-                    "title": "Season of Mists",
-                    "episode_number": 1,
-                    "image": "https://image.tmdb.org/t/p/w500/gdRVJGhE2hHFNd5q0mQZizRWO9w.jpg",
-                    "duration": "46:00",
-                    "views": 0,
-                    "downloads": 0,
-                    "sources": [
-                      {
-                        "id": 25,
-                        "type": "video",
-                        "title": "Episode 1 1080p",
-                        "quality": "1080p",
-                        "url": "https://vidsrc.net/embed/tv/90802/2/1"
-                      }
-                    ],
-                    "subtitles": []
-                  },
-                  {
-                    "id": 26,
-                    "title": "The Ruler of Hell",
-                    "episode_number": 2,
-                    "image": "https://image.tmdb.org/t/p/w500/n9NIf3PHHc0ApXAp5G8kFcdXesM.jpg",
-                    "duration": "51:00",
-                    "views": 0,
-                    "downloads": 0,
-                    "sources": [
-                      {
-                        "id": 27,
-                        "type": "video",
-                        "title": "Episode 2 1080p",
-                        "quality": "1080p",
-                        "url": "https://vidsrc.net/embed/tv/90802/2/2"
-                      }
-                    ],
-                    "subtitles": []
-                  },
-                  {
-                    "id": 28,
-                    "title": "More Devils Than Vast Hell Can Hold",
-                    "episode_number": 3,
-                    "image": "https://image.tmdb.org/t/p/w500/2ALbQ7b8ICWfcuVIcOKxCCWHbK9.jpg",
-                    "duration": "51:00",
-                    "views": 0,
-                    "downloads": 0,
-                    "sources": [
-                      {
-                        "id": 29,
-                        "type": "video",
-                        "title": "Episode 3 1080p",
-                        "quality": "1080p",
-                        "url": "https://vidsrc.net/embed/tv/90802/2/3"
-                      }
-                    ],
-                    "subtitles": []
-                  },
-                  {
-                    "id": 30,
-                    "title": "Brief Lives",
-                    "episode_number": 4,
-                    "image": "https://image.tmdb.org/t/p/w500/4OZcba8f9qcMMEiTf4svtLxhRav.jpg",
-                    "duration": "45:00",
-                    "views": 0,
-                    "downloads": 0,
-                    "sources": [
-                      {
-                        "id": 31,
-                        "type": "video",
-                        "title": "Episode 4 1080p",
-                        "quality": "1080p",
-                        "url": "https://vidsrc.net/embed/tv/90802/2/4"
-                      }
-                    ],
-                    "subtitles": []
-                  },
-                  {
-                    "id": 32,
-                    "title": "The Song of Orpheus",
-                    "episode_number": 5,
-                    "image": "https://image.tmdb.org/t/p/w500/cu6tPZ4RyHTEErEwfK0Wh7cJFiP.jpg",
-                    "duration": "65:00",
-                    "views": 0,
-                    "downloads": 0,
-                    "sources": [
-                      {
-                        "id": 33,
-                        "type": "video",
-                        "title": "Episode 5 1080p",
-                        "quality": "1080p",
-                        "url": "https://vidsrc.net/embed/tv/90802/2/5"
-                      }
-                    ],
-                    "subtitles": []
-                  },
-                  {
-                    "id": 34,
-                    "title": "Family Blood",
-                    "episode_number": 6,
-                    "image": "https://image.tmdb.org/t/p/w500/474h1MDAS0ylszh7vhYsrOIJX8K.jpg",
-                    "duration": "59:00",
-                    "views": 0,
-                    "downloads": 0,
-                    "sources": [
-                      {
-                        "id": 35,
-                        "type": "video",
-                        "title": "Episode 6 1080p",
-                        "quality": "1080p",
-                        "url": "https://vidsrc.net/embed/tv/90802/2/6"
-                      }
-                    ],
-                    "subtitles": []
-                  },
-                  {
-                    "id": 36,
-                    "title": "Time and Night",
-                    "episode_number": 7,
-                    "image": "https://image.tmdb.org/t/p/w500/3raXaPXCxhKCUcN0vDpkX7M8S1x.jpg",
-                    "duration": "50:00",
-                    "views": 0,
-                    "downloads": 0,
-                    "sources": [
-                      {
-                        "id": 37,
-                        "type": "video",
-                        "title": "Episode 7 1080p",
-                        "quality": "1080p",
-                        "url": "https://vidsrc.net/embed/tv/90802/2/7"
-                      }
-                    ],
-                    "subtitles": []
-                  },
-                  {
-                    "id": 38,
-                    "title": "Fuel for the Fire",
-                    "episode_number": 8,
-                    "image": "https://image.tmdb.org/t/p/w500/oU6g3xvPXPkQiQEkkgm9jMymwVS.jpg",
-                    "duration": "48:00",
-                    "views": 0,
-                    "downloads": 0,
-                    "sources": [
-                      {
-                        "id": 39,
-                        "type": "video",
-                        "title": "Episode 8 1080p",
-                        "quality": "1080p",
-                        "url": "https://vidsrc.net/embed/tv/90802/2/8"
-                      }
-                    ],
-                    "subtitles": []
-                  },
-                  {
-                    "id": 40,
-                    "title": "The Kindly Ones",
-                    "episode_number": 9,
-                    "image": "https://image.tmdb.org/t/p/w500/o6gKGocuv98ZNmBGAdiNW5YdXgt.jpg",
-                    "duration": "54:00",
-                    "views": 0,
-                    "downloads": 0,
-                    "sources": [
-                      {
-                        "id": 41,
-                        "type": "video",
-                        "title": "Episode 9 1080p",
-                        "quality": "1080p",
-                        "url": "https://vidsrc.net/embed/tv/90802/2/9"
-                      }
-                    ],
-                    "subtitles": []
-                  },
-                  {
-                    "id": 42,
-                    "title": "Long Live the King",
-                    "episode_number": 10,
-                    "image": "https://image.tmdb.org/t/p/w500/k2xGycTbss6rZi3jMFjzg4CJyOa.jpg",
-                    "duration": "45:00",
-                    "views": 0,
-                    "downloads": 0,
-                    "sources": [
-                      {
-                        "id": 43,
-                        "type": "video",
-                        "title": "Episode 10 1080p",
-                        "quality": "1080p",
-                        "url": "https://vidsrc.net/embed/tv/90802/2/10"
-                      }
-                    ],
-                    "subtitles": []
-                  },
-                  {
-                    "id": 44,
-                    "title": "A Tale of Graceful Ends",
-                    "episode_number": 11,
-                    "image": "https://image.tmdb.org/t/p/w500/iMbt6UaHo09sSAlCkiL7ANmKal6.jpg",
-                    "duration": "70:00",
-                    "views": 0,
-                    "downloads": 0,
-                    "sources": [
-                      {
-                        "id": 45,
-                        "type": "video",
-                        "title": "Episode 11 1080p",
-                        "quality": "1080p",
-                        "url": "https://vidsrc.net/embed/tv/90802/2/11"
-                      }
-                    ],
-                    "subtitles": []
-                  },
-                  {
-                    "id": 46,
-                    "title": "A Special Episode - Death: The High Cost of Living",
-                    "episode_number": 12,
-                    "image": "https://image.tmdb.org/t/p/w500/lGXkdwfOzpy17OLOnkyJBE8avWT.jpg",
-                    "duration": "58:00",
-                    "views": 0,
-                    "downloads": 0,
-                    "sources": [
-                      {
-                        "id": 47,
-                        "type": "video",
-                        "title": "Episode 12 1080p",
-                        "quality": "1080p",
-                        "url": "https://vidsrc.net/embed/tv/90802/2/12"
-                      }
-                    ],
-                    "subtitles": []
-                  }
-                ]
-              }
-            ]
+            "shares": 0
           }
         ]
       },
       {
         "id": 2,
-        "title": "Drama",
+        "title": "Thriller",
         "posters": [
           {
-            "id": 49,
-            "title": "The Sandman",
-            "type": "series",
-            "label": "Series",
-            "sublabel": "2 Seasons",
+            "id": 2,
+            "title": "The Last Round",
+            "type": "movie",
+            "label": "Movie",
+            "sublabel": "1976",
             "imdb": "0.0",
-            "downloadas": "the-sandman",
+            "downloadas": "the-last-round",
             "comment": true,
             "playas": "video",
-            "description": "After years of imprisonment, Morpheus — the King of Dreams — embarks on a journey across worlds to find what was stolen from him and restore his power.",
+            "description": "Stelvio Massi's crime thriller centers on a drifter who sets out to help blue-collar workers rise up against the two powerful families who are exploiting them. After settling in an industrial town and witnessing the cruelty of the factory owners, ex-mercenary Marco (Carlos Monzón) assumes the role of union agitator. When a violent confrontation erupts, the labor leader is driven to bring down the corrupt clans.",
             "classification": "PG-13",
-            "year": "2022",
+            "year": "1976",
             "duration": "00:00",
             "rating": 0,
-            "image": "https://image.tmdb.org/t/p/w500/vfJ1nBnqiiRWZWv3ZvtFWO5zccg.jpg",
-            "cover": "https://image.tmdb.org/t/p/original/uxrP5yB9h6Dh6SbojI018pMYIIH.jpg",
+            "image": "https://image.tmdb.org/t/p/w500/vleNhtwRG9FUEoZQ9e7Q0s8xxBG.jpg",
+            "cover": "https://image.tmdb.org/t/p/original/2FUCnpfIW6tTdKXjPXgo7DV2MNq.jpg",
             "genres": [
               {
-                "id": 10765,
-                "name": "Sci-Fi & Fantasy"
+                "id": 28,
+                "name": "Action"
               },
               {
-                "id": 18,
-                "name": "Drama"
-              },
-              {
-                "id": 10759,
-                "name": "Action & Adventure"
+                "id": 53,
+                "name": "Thriller"
               }
             ],
             "actors": [
               {
-                "name": "Tom Sturridge",
+                "name": "Luc Merenda",
                 "type": "actor",
-                "role": "Morpheus / Dream",
-                "image": "https://image.tmdb.org/t/p/w200/2EIUT2junjmFYRm70E4pAAUKnMc.jpg"
+                "role": "Rico Manzetti",
+                "image": "https://image.tmdb.org/t/p/w200/9i9moFaHJlDzlUjhUH67f091ZWt.jpg"
               },
               {
-                "name": "Vivienne Acheampong",
+                "name": "Carlos Monzón",
                 "type": "actor",
-                "role": "Lucienne",
-                "image": "https://image.tmdb.org/t/p/w200/1VqJnnimdMwuje0ttU2SsKSuy3S.jpg"
+                "role": "Marco Russo",
+                "image": "https://image.tmdb.org/t/p/w200/bcrhWzGqvE7I5ZMQvuewnIyuNlV.jpg"
               },
               {
-                "name": "Patton Oswalt",
+                "name": "Mariangela Giordano",
                 "type": "actor",
-                "role": "Matthew the Raven (voice)",
-                "image": "https://image.tmdb.org/t/p/w200/skGzommLR2zE6uk1YQRFK71dOJ8.jpg"
+                "role": "Lisa's mother",
+                "image": "https://image.tmdb.org/t/p/w200/t8ANeJZt22ZkyvVSIehv1HeuUBo.jpg"
+              },
+              {
+                "name": "Gianni Dei",
+                "type": "actor",
+                "role": "Beny Manzetti",
+                "image": "https://image.tmdb.org/t/p/w200/h1B2hHOJp1gWCfd3zXD9gSvPymb.jpg"
+              },
+              {
+                "name": "Luisa Maneri",
+                "type": "actor",
+                "role": "Lisa",
+                "image": ""
+              },
+              {
+                "name": "Stelvio Massi",
+                "type": "director",
+                "role": "Director",
+                "image": "https://image.tmdb.org/t/p/w200/ezpFYlK2RVvq8VP19GyQCBaE7h7.jpg"
               }
             ],
             "views": 0,
             "created_at": "2025-08-02",
-            "sources": [],
-            "trailer": {
-              "id": 50,
-              "type": "video",
-              "title": "The Sandman Trailer",
-              "url": "https://www.youtube.com/watch?v=ZJXamnPUm0I"
-            },
+            "sources": [
+              {
+                "id": 1,
+                "type": "video",
+                "title": "vidsrc.net 1080p",
+                "quality": "1080p",
+                "size": "0MB",
+                "kind": "both",
+                "premium": "false",
+                "external": false,
+                "url": "https://vidsrc.net/embed/movie/90802"
+              }
+            ],
+            "trailer": null,
             "subtitles": [],
             "comments": [],
             "downloads": 0,
-            "shares": 0,
-            "seasons": [
-              {
-                "id": 23,
-                "title": "Season 1",
-                "episodes": [
-                  {
-                    "id": 1,
-                    "title": "Sleep of the Just",
-                    "episode_number": 1,
-                    "image": "https://image.tmdb.org/t/p/w500/xzmpOdpN1wpdKK2kaJmBidMpUL9.jpg",
-                    "duration": "54:00",
-                    "views": 0,
-                    "downloads": 0,
-                    "sources": [
-                      {
-                        "id": 2,
-                        "type": "video",
-                        "title": "Episode 1 1080p",
-                        "quality": "1080p",
-                        "url": "https://vidsrc.net/embed/tv/90802/1/1"
-                      }
-                    ],
-                    "subtitles": []
-                  },
-                  {
-                    "id": 3,
-                    "title": "Imperfect Hosts",
-                    "episode_number": 2,
-                    "image": "https://image.tmdb.org/t/p/w500/i1uLLs0Z9AzXTkYrRoWZQTfFCEp.jpg",
-                    "duration": "38:00",
-                    "views": 0,
-                    "downloads": 0,
-                    "sources": [
-                      {
-                        "id": 4,
-                        "type": "video",
-                        "title": "Episode 2 1080p",
-                        "quality": "1080p",
-                        "url": "https://vidsrc.net/embed/tv/90802/1/2"
-                      }
-                    ],
-                    "subtitles": []
-                  },
-                  {
-                    "id": 5,
-                    "title": "Dream a Little Dream of Me",
-                    "episode_number": 3,
-                    "image": "https://image.tmdb.org/t/p/w500/c2NipAl5AJn1mZ2n1u6XUQ2gcz4.jpg",
-                    "duration": "46:00",
-                    "views": 0,
-                    "downloads": 0,
-                    "sources": [
-                      {
-                        "id": 6,
-                        "type": "video",
-                        "title": "Episode 3 1080p",
-                        "quality": "1080p",
-                        "url": "https://vidsrc.net/embed/tv/90802/1/3"
-                      }
-                    ],
-                    "subtitles": []
-                  },
-                  {
-                    "id": 7,
-                    "title": "A Hope in Hell",
-                    "episode_number": 4,
-                    "image": "https://image.tmdb.org/t/p/w500/2wBRe3shmk6lwJvwIQuN8PfB2tV.jpg",
-                    "duration": "45:00",
-                    "views": 0,
-                    "downloads": 0,
-                    "sources": [
-                      {
-                        "id": 8,
-                        "type": "video",
-                        "title": "Episode 4 1080p",
-                        "quality": "1080p",
-                        "url": "https://vidsrc.net/embed/tv/90802/1/4"
-                      }
-                    ],
-                    "subtitles": []
-                  },
-                  {
-                    "id": 9,
-                    "title": "24/7",
-                    "episode_number": 5,
-                    "image": "https://image.tmdb.org/t/p/w500/1srp7lHS239WfXw0gSBllYw8mCx.jpg",
-                    "duration": "54:00",
-                    "views": 0,
-                    "downloads": 0,
-                    "sources": [
-                      {
-                        "id": 10,
-                        "type": "video",
-                        "title": "Episode 5 1080p",
-                        "quality": "1080p",
-                        "url": "https://vidsrc.net/embed/tv/90802/1/5"
-                      }
-                    ],
-                    "subtitles": []
-                  },
-                  {
-                    "id": 11,
-                    "title": "The Sound of Her Wings",
-                    "episode_number": 6,
-                    "image": "https://image.tmdb.org/t/p/w500/aKekIXd1a6HfgT46kuKco0apV0n.jpg",
-                    "duration": "53:00",
-                    "views": 0,
-                    "downloads": 0,
-                    "sources": [
-                      {
-                        "id": 12,
-                        "type": "video",
-                        "title": "Episode 6 1080p",
-                        "quality": "1080p",
-                        "url": "https://vidsrc.net/embed/tv/90802/1/6"
-                      }
-                    ],
-                    "subtitles": []
-                  },
-                  {
-                    "id": 13,
-                    "title": "The Doll's House",
-                    "episode_number": 7,
-                    "image": "https://image.tmdb.org/t/p/w500/ckMg5eK20e65czJCfPGJgtyg63H.jpg",
-                    "duration": "49:00",
-                    "views": 0,
-                    "downloads": 0,
-                    "sources": [
-                      {
-                        "id": 14,
-                        "type": "video",
-                        "title": "Episode 7 1080p",
-                        "quality": "1080p",
-                        "url": "https://vidsrc.net/embed/tv/90802/1/7"
-                      }
-                    ],
-                    "subtitles": []
-                  },
-                  {
-                    "id": 15,
-                    "title": "Playing House",
-                    "episode_number": 8,
-                    "image": "https://image.tmdb.org/t/p/w500/xGE5htx5TTbTrRFasgxJpZm8dSA.jpg",
-                    "duration": "50:00",
-                    "views": 0,
-                    "downloads": 0,
-                    "sources": [
-                      {
-                        "id": 16,
-                        "type": "video",
-                        "title": "Episode 8 1080p",
-                        "quality": "1080p",
-                        "url": "https://vidsrc.net/embed/tv/90802/1/8"
-                      }
-                    ],
-                    "subtitles": []
-                  },
-                  {
-                    "id": 17,
-                    "title": "Collectors",
-                    "episode_number": 9,
-                    "image": "https://image.tmdb.org/t/p/w500/m95ZlPULJoinfXNwMmdbckIXvTz.jpg",
-                    "duration": "49:00",
-                    "views": 0,
-                    "downloads": 0,
-                    "sources": [
-                      {
-                        "id": 18,
-                        "type": "video",
-                        "title": "Episode 9 1080p",
-                        "quality": "1080p",
-                        "url": "https://vidsrc.net/embed/tv/90802/1/9"
-                      }
-                    ],
-                    "subtitles": []
-                  },
-                  {
-                    "id": 19,
-                    "title": "Lost Hearts",
-                    "episode_number": 10,
-                    "image": "https://image.tmdb.org/t/p/w500/b4UgJQr2Ov2Mg8HZQP4K90xjNBh.jpg",
-                    "duration": "46:00",
-                    "views": 0,
-                    "downloads": 0,
-                    "sources": [
-                      {
-                        "id": 20,
-                        "type": "video",
-                        "title": "Episode 10 1080p",
-                        "quality": "1080p",
-                        "url": "https://vidsrc.net/embed/tv/90802/1/10"
-                      }
-                    ],
-                    "subtitles": []
-                  },
-                  {
-                    "id": 21,
-                    "title": "Dream of a Thousand Cats/Calliope",
-                    "episode_number": 11,
-                    "image": "https://image.tmdb.org/t/p/w500/vWzr1iaBqOW1G8PiESdcxSrNWku.jpg",
-                    "duration": "64:00",
-                    "views": 0,
-                    "downloads": 0,
-                    "sources": [
-                      {
-                        "id": 22,
-                        "type": "video",
-                        "title": "Episode 11 1080p",
-                        "quality": "1080p",
-                        "url": "https://vidsrc.net/embed/tv/90802/1/11"
-                      }
-                    ],
-                    "subtitles": []
-                  }
-                ]
-              },
-              {
-                "id": 48,
-                "title": "Season 2",
-                "episodes": [
-                  {
-                    "id": 24,
-                    "title": "Season of Mists",
-                    "episode_number": 1,
-                    "image": "https://image.tmdb.org/t/p/w500/gdRVJGhE2hHFNd5q0mQZizRWO9w.jpg",
-                    "duration": "46:00",
-                    "views": 0,
-                    "downloads": 0,
-                    "sources": [
-                      {
-                        "id": 25,
-                        "type": "video",
-                        "title": "Episode 1 1080p",
-                        "quality": "1080p",
-                        "url": "https://vidsrc.net/embed/tv/90802/2/1"
-                      }
-                    ],
-                    "subtitles": []
-                  },
-                  {
-                    "id": 26,
-                    "title": "The Ruler of Hell",
-                    "episode_number": 2,
-                    "image": "https://image.tmdb.org/t/p/w500/n9NIf3PHHc0ApXAp5G8kFcdXesM.jpg",
-                    "duration": "51:00",
-                    "views": 0,
-                    "downloads": 0,
-                    "sources": [
-                      {
-                        "id": 27,
-                        "type": "video",
-                        "title": "Episode 2 1080p",
-                        "quality": "1080p",
-                        "url": "https://vidsrc.net/embed/tv/90802/2/2"
-                      }
-                    ],
-                    "subtitles": []
-                  },
-                  {
-                    "id": 28,
-                    "title": "More Devils Than Vast Hell Can Hold",
-                    "episode_number": 3,
-                    "image": "https://image.tmdb.org/t/p/w500/2ALbQ7b8ICWfcuVIcOKxCCWHbK9.jpg",
-                    "duration": "51:00",
-                    "views": 0,
-                    "downloads": 0,
-                    "sources": [
-                      {
-                        "id": 29,
-                        "type": "video",
-                        "title": "Episode 3 1080p",
-                        "quality": "1080p",
-                        "url": "https://vidsrc.net/embed/tv/90802/2/3"
-                      }
-                    ],
-                    "subtitles": []
-                  },
-                  {
-                    "id": 30,
-                    "title": "Brief Lives",
-                    "episode_number": 4,
-                    "image": "https://image.tmdb.org/t/p/w500/4OZcba8f9qcMMEiTf4svtLxhRav.jpg",
-                    "duration": "45:00",
-                    "views": 0,
-                    "downloads": 0,
-                    "sources": [
-                      {
-                        "id": 31,
-                        "type": "video",
-                        "title": "Episode 4 1080p",
-                        "quality": "1080p",
-                        "url": "https://vidsrc.net/embed/tv/90802/2/4"
-                      }
-                    ],
-                    "subtitles": []
-                  },
-                  {
-                    "id": 32,
-                    "title": "The Song of Orpheus",
-                    "episode_number": 5,
-                    "image": "https://image.tmdb.org/t/p/w500/cu6tPZ4RyHTEErEwfK0Wh7cJFiP.jpg",
-                    "duration": "65:00",
-                    "views": 0,
-                    "downloads": 0,
-                    "sources": [
-                      {
-                        "id": 33,
-                        "type": "video",
-                        "title": "Episode 5 1080p",
-                        "quality": "1080p",
-                        "url": "https://vidsrc.net/embed/tv/90802/2/5"
-                      }
-                    ],
-                    "subtitles": []
-                  },
-                  {
-                    "id": 34,
-                    "title": "Family Blood",
-                    "episode_number": 6,
-                    "image": "https://image.tmdb.org/t/p/w500/474h1MDAS0ylszh7vhYsrOIJX8K.jpg",
-                    "duration": "59:00",
-                    "views": 0,
-                    "downloads": 0,
-                    "sources": [
-                      {
-                        "id": 35,
-                        "type": "video",
-                        "title": "Episode 6 1080p",
-                        "quality": "1080p",
-                        "url": "https://vidsrc.net/embed/tv/90802/2/6"
-                      }
-                    ],
-                    "subtitles": []
-                  },
-                  {
-                    "id": 36,
-                    "title": "Time and Night",
-                    "episode_number": 7,
-                    "image": "https://image.tmdb.org/t/p/w500/3raXaPXCxhKCUcN0vDpkX7M8S1x.jpg",
-                    "duration": "50:00",
-                    "views": 0,
-                    "downloads": 0,
-                    "sources": [
-                      {
-                        "id": 37,
-                        "type": "video",
-                        "title": "Episode 7 1080p",
-                        "quality": "1080p",
-                        "url": "https://vidsrc.net/embed/tv/90802/2/7"
-                      }
-                    ],
-                    "subtitles": []
-                  },
-                  {
-                    "id": 38,
-                    "title": "Fuel for the Fire",
-                    "episode_number": 8,
-                    "image": "https://image.tmdb.org/t/p/w500/oU6g3xvPXPkQiQEkkgm9jMymwVS.jpg",
-                    "duration": "48:00",
-                    "views": 0,
-                    "downloads": 0,
-                    "sources": [
-                      {
-                        "id": 39,
-                        "type": "video",
-                        "title": "Episode 8 1080p",
-                        "quality": "1080p",
-                        "url": "https://vidsrc.net/embed/tv/90802/2/8"
-                      }
-                    ],
-                    "subtitles": []
-                  },
-                  {
-                    "id": 40,
-                    "title": "The Kindly Ones",
-                    "episode_number": 9,
-                    "image": "https://image.tmdb.org/t/p/w500/o6gKGocuv98ZNmBGAdiNW5YdXgt.jpg",
-                    "duration": "54:00",
-                    "views": 0,
-                    "downloads": 0,
-                    "sources": [
-                      {
-                        "id": 41,
-                        "type": "video",
-                        "title": "Episode 9 1080p",
-                        "quality": "1080p",
-                        "url": "https://vidsrc.net/embed/tv/90802/2/9"
-                      }
-                    ],
-                    "subtitles": []
-                  },
-                  {
-                    "id": 42,
-                    "title": "Long Live the King",
-                    "episode_number": 10,
-                    "image": "https://image.tmdb.org/t/p/w500/k2xGycTbss6rZi3jMFjzg4CJyOa.jpg",
-                    "duration": "45:00",
-                    "views": 0,
-                    "downloads": 0,
-                    "sources": [
-                      {
-                        "id": 43,
-                        "type": "video",
-                        "title": "Episode 10 1080p",
-                        "quality": "1080p",
-                        "url": "https://vidsrc.net/embed/tv/90802/2/10"
-                      }
-                    ],
-                    "subtitles": []
-                  },
-                  {
-                    "id": 44,
-                    "title": "A Tale of Graceful Ends",
-                    "episode_number": 11,
-                    "image": "https://image.tmdb.org/t/p/w500/iMbt6UaHo09sSAlCkiL7ANmKal6.jpg",
-                    "duration": "70:00",
-                    "views": 0,
-                    "downloads": 0,
-                    "sources": [
-                      {
-                        "id": 45,
-                        "type": "video",
-                        "title": "Episode 11 1080p",
-                        "quality": "1080p",
-                        "url": "https://vidsrc.net/embed/tv/90802/2/11"
-                      }
-                    ],
-                    "subtitles": []
-                  },
-                  {
-                    "id": 46,
-                    "title": "A Special Episode - Death: The High Cost of Living",
-                    "episode_number": 12,
-                    "image": "https://image.tmdb.org/t/p/w500/lGXkdwfOzpy17OLOnkyJBE8avWT.jpg",
-                    "duration": "58:00",
-                    "views": 0,
-                    "downloads": 0,
-                    "sources": [
-                      {
-                        "id": 47,
-                        "type": "video",
-                        "title": "Episode 12 1080p",
-                        "quality": "1080p",
-                        "url": "https://vidsrc.net/embed/tv/90802/2/12"
-                      }
-                    ],
-                    "subtitles": []
-                  }
-                ]
-              }
-            ]
-          }
-        ]
-      },
-      {
-        "id": 3,
-        "title": "Action & Adventure",
-        "posters": [
-          {
-            "id": 49,
-            "title": "The Sandman",
-            "type": "series",
-            "label": "Series",
-            "sublabel": "2 Seasons",
-            "imdb": "0.0",
-            "downloadas": "the-sandman",
-            "comment": true,
-            "playas": "video",
-            "description": "After years of imprisonment, Morpheus — the King of Dreams — embarks on a journey across worlds to find what was stolen from him and restore his power.",
-            "classification": "PG-13",
-            "year": "2022",
-            "duration": "00:00",
-            "rating": 0,
-            "image": "https://image.tmdb.org/t/p/w500/vfJ1nBnqiiRWZWv3ZvtFWO5zccg.jpg",
-            "cover": "https://image.tmdb.org/t/p/original/uxrP5yB9h6Dh6SbojI018pMYIIH.jpg",
-            "genres": [
-              {
-                "id": 10765,
-                "name": "Sci-Fi & Fantasy"
-              },
-              {
-                "id": 18,
-                "name": "Drama"
-              },
-              {
-                "id": 10759,
-                "name": "Action & Adventure"
-              }
-            ],
-            "actors": [
-              {
-                "name": "Tom Sturridge",
-                "type": "actor",
-                "role": "Morpheus / Dream",
-                "image": "https://image.tmdb.org/t/p/w200/2EIUT2junjmFYRm70E4pAAUKnMc.jpg"
-              },
-              {
-                "name": "Vivienne Acheampong",
-                "type": "actor",
-                "role": "Lucienne",
-                "image": "https://image.tmdb.org/t/p/w200/1VqJnnimdMwuje0ttU2SsKSuy3S.jpg"
-              },
-              {
-                "name": "Patton Oswalt",
-                "type": "actor",
-                "role": "Matthew the Raven (voice)",
-                "image": "https://image.tmdb.org/t/p/w200/skGzommLR2zE6uk1YQRFK71dOJ8.jpg"
-              }
-            ],
-            "views": 0,
-            "created_at": "2025-08-02",
-            "sources": [],
-            "trailer": {
-              "id": 50,
-              "type": "video",
-              "title": "The Sandman Trailer",
-              "url": "https://www.youtube.com/watch?v=ZJXamnPUm0I"
-            },
-            "subtitles": [],
-            "comments": [],
-            "downloads": 0,
-            "shares": 0,
-            "seasons": [
-              {
-                "id": 23,
-                "title": "Season 1",
-                "episodes": [
-                  {
-                    "id": 1,
-                    "title": "Sleep of the Just",
-                    "episode_number": 1,
-                    "image": "https://image.tmdb.org/t/p/w500/xzmpOdpN1wpdKK2kaJmBidMpUL9.jpg",
-                    "duration": "54:00",
-                    "views": 0,
-                    "downloads": 0,
-                    "sources": [
-                      {
-                        "id": 2,
-                        "type": "video",
-                        "title": "Episode 1 1080p",
-                        "quality": "1080p",
-                        "url": "https://vidsrc.net/embed/tv/90802/1/1"
-                      }
-                    ],
-                    "subtitles": []
-                  },
-                  {
-                    "id": 3,
-                    "title": "Imperfect Hosts",
-                    "episode_number": 2,
-                    "image": "https://image.tmdb.org/t/p/w500/i1uLLs0Z9AzXTkYrRoWZQTfFCEp.jpg",
-                    "duration": "38:00",
-                    "views": 0,
-                    "downloads": 0,
-                    "sources": [
-                      {
-                        "id": 4,
-                        "type": "video",
-                        "title": "Episode 2 1080p",
-                        "quality": "1080p",
-                        "url": "https://vidsrc.net/embed/tv/90802/1/2"
-                      }
-                    ],
-                    "subtitles": []
-                  },
-                  {
-                    "id": 5,
-                    "title": "Dream a Little Dream of Me",
-                    "episode_number": 3,
-                    "image": "https://image.tmdb.org/t/p/w500/c2NipAl5AJn1mZ2n1u6XUQ2gcz4.jpg",
-                    "duration": "46:00",
-                    "views": 0,
-                    "downloads": 0,
-                    "sources": [
-                      {
-                        "id": 6,
-                        "type": "video",
-                        "title": "Episode 3 1080p",
-                        "quality": "1080p",
-                        "url": "https://vidsrc.net/embed/tv/90802/1/3"
-                      }
-                    ],
-                    "subtitles": []
-                  },
-                  {
-                    "id": 7,
-                    "title": "A Hope in Hell",
-                    "episode_number": 4,
-                    "image": "https://image.tmdb.org/t/p/w500/2wBRe3shmk6lwJvwIQuN8PfB2tV.jpg",
-                    "duration": "45:00",
-                    "views": 0,
-                    "downloads": 0,
-                    "sources": [
-                      {
-                        "id": 8,
-                        "type": "video",
-                        "title": "Episode 4 1080p",
-                        "quality": "1080p",
-                        "url": "https://vidsrc.net/embed/tv/90802/1/4"
-                      }
-                    ],
-                    "subtitles": []
-                  },
-                  {
-                    "id": 9,
-                    "title": "24/7",
-                    "episode_number": 5,
-                    "image": "https://image.tmdb.org/t/p/w500/1srp7lHS239WfXw0gSBllYw8mCx.jpg",
-                    "duration": "54:00",
-                    "views": 0,
-                    "downloads": 0,
-                    "sources": [
-                      {
-                        "id": 10,
-                        "type": "video",
-                        "title": "Episode 5 1080p",
-                        "quality": "1080p",
-                        "url": "https://vidsrc.net/embed/tv/90802/1/5"
-                      }
-                    ],
-                    "subtitles": []
-                  },
-                  {
-                    "id": 11,
-                    "title": "The Sound of Her Wings",
-                    "episode_number": 6,
-                    "image": "https://image.tmdb.org/t/p/w500/aKekIXd1a6HfgT46kuKco0apV0n.jpg",
-                    "duration": "53:00",
-                    "views": 0,
-                    "downloads": 0,
-                    "sources": [
-                      {
-                        "id": 12,
-                        "type": "video",
-                        "title": "Episode 6 1080p",
-                        "quality": "1080p",
-                        "url": "https://vidsrc.net/embed/tv/90802/1/6"
-                      }
-                    ],
-                    "subtitles": []
-                  },
-                  {
-                    "id": 13,
-                    "title": "The Doll's House",
-                    "episode_number": 7,
-                    "image": "https://image.tmdb.org/t/p/w500/ckMg5eK20e65czJCfPGJgtyg63H.jpg",
-                    "duration": "49:00",
-                    "views": 0,
-                    "downloads": 0,
-                    "sources": [
-                      {
-                        "id": 14,
-                        "type": "video",
-                        "title": "Episode 7 1080p",
-                        "quality": "1080p",
-                        "url": "https://vidsrc.net/embed/tv/90802/1/7"
-                      }
-                    ],
-                    "subtitles": []
-                  },
-                  {
-                    "id": 15,
-                    "title": "Playing House",
-                    "episode_number": 8,
-                    "image": "https://image.tmdb.org/t/p/w500/xGE5htx5TTbTrRFasgxJpZm8dSA.jpg",
-                    "duration": "50:00",
-                    "views": 0,
-                    "downloads": 0,
-                    "sources": [
-                      {
-                        "id": 16,
-                        "type": "video",
-                        "title": "Episode 8 1080p",
-                        "quality": "1080p",
-                        "url": "https://vidsrc.net/embed/tv/90802/1/8"
-                      }
-                    ],
-                    "subtitles": []
-                  },
-                  {
-                    "id": 17,
-                    "title": "Collectors",
-                    "episode_number": 9,
-                    "image": "https://image.tmdb.org/t/p/w500/m95ZlPULJoinfXNwMmdbckIXvTz.jpg",
-                    "duration": "49:00",
-                    "views": 0,
-                    "downloads": 0,
-                    "sources": [
-                      {
-                        "id": 18,
-                        "type": "video",
-                        "title": "Episode 9 1080p",
-                        "quality": "1080p",
-                        "url": "https://vidsrc.net/embed/tv/90802/1/9"
-                      }
-                    ],
-                    "subtitles": []
-                  },
-                  {
-                    "id": 19,
-                    "title": "Lost Hearts",
-                    "episode_number": 10,
-                    "image": "https://image.tmdb.org/t/p/w500/b4UgJQr2Ov2Mg8HZQP4K90xjNBh.jpg",
-                    "duration": "46:00",
-                    "views": 0,
-                    "downloads": 0,
-                    "sources": [
-                      {
-                        "id": 20,
-                        "type": "video",
-                        "title": "Episode 10 1080p",
-                        "quality": "1080p",
-                        "url": "https://vidsrc.net/embed/tv/90802/1/10"
-                      }
-                    ],
-                    "subtitles": []
-                  },
-                  {
-                    "id": 21,
-                    "title": "Dream of a Thousand Cats/Calliope",
-                    "episode_number": 11,
-                    "image": "https://image.tmdb.org/t/p/w500/vWzr1iaBqOW1G8PiESdcxSrNWku.jpg",
-                    "duration": "64:00",
-                    "views": 0,
-                    "downloads": 0,
-                    "sources": [
-                      {
-                        "id": 22,
-                        "type": "video",
-                        "title": "Episode 11 1080p",
-                        "quality": "1080p",
-                        "url": "https://vidsrc.net/embed/tv/90802/1/11"
-                      }
-                    ],
-                    "subtitles": []
-                  }
-                ]
-              },
-              {
-                "id": 48,
-                "title": "Season 2",
-                "episodes": [
-                  {
-                    "id": 24,
-                    "title": "Season of Mists",
-                    "episode_number": 1,
-                    "image": "https://image.tmdb.org/t/p/w500/gdRVJGhE2hHFNd5q0mQZizRWO9w.jpg",
-                    "duration": "46:00",
-                    "views": 0,
-                    "downloads": 0,
-                    "sources": [
-                      {
-                        "id": 25,
-                        "type": "video",
-                        "title": "Episode 1 1080p",
-                        "quality": "1080p",
-                        "url": "https://vidsrc.net/embed/tv/90802/2/1"
-                      }
-                    ],
-                    "subtitles": []
-                  },
-                  {
-                    "id": 26,
-                    "title": "The Ruler of Hell",
-                    "episode_number": 2,
-                    "image": "https://image.tmdb.org/t/p/w500/n9NIf3PHHc0ApXAp5G8kFcdXesM.jpg",
-                    "duration": "51:00",
-                    "views": 0,
-                    "downloads": 0,
-                    "sources": [
-                      {
-                        "id": 27,
-                        "type": "video",
-                        "title": "Episode 2 1080p",
-                        "quality": "1080p",
-                        "url": "https://vidsrc.net/embed/tv/90802/2/2"
-                      }
-                    ],
-                    "subtitles": []
-                  },
-                  {
-                    "id": 28,
-                    "title": "More Devils Than Vast Hell Can Hold",
-                    "episode_number": 3,
-                    "image": "https://image.tmdb.org/t/p/w500/2ALbQ7b8ICWfcuVIcOKxCCWHbK9.jpg",
-                    "duration": "51:00",
-                    "views": 0,
-                    "downloads": 0,
-                    "sources": [
-                      {
-                        "id": 29,
-                        "type": "video",
-                        "title": "Episode 3 1080p",
-                        "quality": "1080p",
-                        "url": "https://vidsrc.net/embed/tv/90802/2/3"
-                      }
-                    ],
-                    "subtitles": []
-                  },
-                  {
-                    "id": 30,
-                    "title": "Brief Lives",
-                    "episode_number": 4,
-                    "image": "https://image.tmdb.org/t/p/w500/4OZcba8f9qcMMEiTf4svtLxhRav.jpg",
-                    "duration": "45:00",
-                    "views": 0,
-                    "downloads": 0,
-                    "sources": [
-                      {
-                        "id": 31,
-                        "type": "video",
-                        "title": "Episode 4 1080p",
-                        "quality": "1080p",
-                        "url": "https://vidsrc.net/embed/tv/90802/2/4"
-                      }
-                    ],
-                    "subtitles": []
-                  },
-                  {
-                    "id": 32,
-                    "title": "The Song of Orpheus",
-                    "episode_number": 5,
-                    "image": "https://image.tmdb.org/t/p/w500/cu6tPZ4RyHTEErEwfK0Wh7cJFiP.jpg",
-                    "duration": "65:00",
-                    "views": 0,
-                    "downloads": 0,
-                    "sources": [
-                      {
-                        "id": 33,
-                        "type": "video",
-                        "title": "Episode 5 1080p",
-                        "quality": "1080p",
-                        "url": "https://vidsrc.net/embed/tv/90802/2/5"
-                      }
-                    ],
-                    "subtitles": []
-                  },
-                  {
-                    "id": 34,
-                    "title": "Family Blood",
-                    "episode_number": 6,
-                    "image": "https://image.tmdb.org/t/p/w500/474h1MDAS0ylszh7vhYsrOIJX8K.jpg",
-                    "duration": "59:00",
-                    "views": 0,
-                    "downloads": 0,
-                    "sources": [
-                      {
-                        "id": 35,
-                        "type": "video",
-                        "title": "Episode 6 1080p",
-                        "quality": "1080p",
-                        "url": "https://vidsrc.net/embed/tv/90802/2/6"
-                      }
-                    ],
-                    "subtitles": []
-                  },
-                  {
-                    "id": 36,
-                    "title": "Time and Night",
-                    "episode_number": 7,
-                    "image": "https://image.tmdb.org/t/p/w500/3raXaPXCxhKCUcN0vDpkX7M8S1x.jpg",
-                    "duration": "50:00",
-                    "views": 0,
-                    "downloads": 0,
-                    "sources": [
-                      {
-                        "id": 37,
-                        "type": "video",
-                        "title": "Episode 7 1080p",
-                        "quality": "1080p",
-                        "url": "https://vidsrc.net/embed/tv/90802/2/7"
-                      }
-                    ],
-                    "subtitles": []
-                  },
-                  {
-                    "id": 38,
-                    "title": "Fuel for the Fire",
-                    "episode_number": 8,
-                    "image": "https://image.tmdb.org/t/p/w500/oU6g3xvPXPkQiQEkkgm9jMymwVS.jpg",
-                    "duration": "48:00",
-                    "views": 0,
-                    "downloads": 0,
-                    "sources": [
-                      {
-                        "id": 39,
-                        "type": "video",
-                        "title": "Episode 8 1080p",
-                        "quality": "1080p",
-                        "url": "https://vidsrc.net/embed/tv/90802/2/8"
-                      }
-                    ],
-                    "subtitles": []
-                  },
-                  {
-                    "id": 40,
-                    "title": "The Kindly Ones",
-                    "episode_number": 9,
-                    "image": "https://image.tmdb.org/t/p/w500/o6gKGocuv98ZNmBGAdiNW5YdXgt.jpg",
-                    "duration": "54:00",
-                    "views": 0,
-                    "downloads": 0,
-                    "sources": [
-                      {
-                        "id": 41,
-                        "type": "video",
-                        "title": "Episode 9 1080p",
-                        "quality": "1080p",
-                        "url": "https://vidsrc.net/embed/tv/90802/2/9"
-                      }
-                    ],
-                    "subtitles": []
-                  },
-                  {
-                    "id": 42,
-                    "title": "Long Live the King",
-                    "episode_number": 10,
-                    "image": "https://image.tmdb.org/t/p/w500/k2xGycTbss6rZi3jMFjzg4CJyOa.jpg",
-                    "duration": "45:00",
-                    "views": 0,
-                    "downloads": 0,
-                    "sources": [
-                      {
-                        "id": 43,
-                        "type": "video",
-                        "title": "Episode 10 1080p",
-                        "quality": "1080p",
-                        "url": "https://vidsrc.net/embed/tv/90802/2/10"
-                      }
-                    ],
-                    "subtitles": []
-                  },
-                  {
-                    "id": 44,
-                    "title": "A Tale of Graceful Ends",
-                    "episode_number": 11,
-                    "image": "https://image.tmdb.org/t/p/w500/iMbt6UaHo09sSAlCkiL7ANmKal6.jpg",
-                    "duration": "70:00",
-                    "views": 0,
-                    "downloads": 0,
-                    "sources": [
-                      {
-                        "id": 45,
-                        "type": "video",
-                        "title": "Episode 11 1080p",
-                        "quality": "1080p",
-                        "url": "https://vidsrc.net/embed/tv/90802/2/11"
-                      }
-                    ],
-                    "subtitles": []
-                  },
-                  {
-                    "id": 46,
-                    "title": "A Special Episode - Death: The High Cost of Living",
-                    "episode_number": 12,
-                    "image": "https://image.tmdb.org/t/p/w500/lGXkdwfOzpy17OLOnkyJBE8avWT.jpg",
-                    "duration": "58:00",
-                    "views": 0,
-                    "downloads": 0,
-                    "sources": [
-                      {
-                        "id": 47,
-                        "type": "video",
-                        "title": "Episode 12 1080p",
-                        "quality": "1080p",
-                        "url": "https://vidsrc.net/embed/tv/90802/2/12"
-                      }
-                    ],
-                    "subtitles": []
-                  }
-                ]
-              }
-            ]
+            "shares": 0
           }
         ]
       }
@@ -2682,7 +494,93 @@
   },
   "movies": [
     {
-      "id": 49,
+      "id": 2,
+      "type": "movie",
+      "title": "The Last Round",
+      "year": "1976",
+      "description": "Stelvio Massi's crime thriller centers on a drifter who sets out to help blue-collar workers rise up against the two powerful families who are exploiting them. After settling in an industrial town and witnessing the cruelty of the factory owners, ex-mercenary Marco (Carlos Monzón) assumes the role of union agitator. When a violent confrontation erupts, the labor leader is driven to bring down the corrupt clans.",
+      "image": "https://image.tmdb.org/t/p/w500/vleNhtwRG9FUEoZQ9e7Q0s8xxBG.jpg",
+      "cover": "https://image.tmdb.org/t/p/original/2FUCnpfIW6tTdKXjPXgo7DV2MNq.jpg",
+      "trailer": null,
+      "sources": [
+        {
+          "id": 1,
+          "type": "video",
+          "title": "vidsrc.net 1080p",
+          "quality": "1080p",
+          "size": "0MB",
+          "kind": "both",
+          "premium": "false",
+          "external": false,
+          "url": "https://vidsrc.net/embed/movie/90802"
+        }
+      ],
+      "label": "Movie",
+      "sublabel": "1976",
+      "imdb": "0.0",
+      "downloadas": "the-last-round",
+      "comment": true,
+      "playas": "video",
+      "classification": "PG-13",
+      "duration": "00:00",
+      "rating": 0,
+      "created_at": "2025-08-02",
+      "genres": [
+        {
+          "id": 28,
+          "name": "Action"
+        },
+        {
+          "id": 53,
+          "name": "Thriller"
+        }
+      ],
+      "actors": [
+        {
+          "name": "Luc Merenda",
+          "type": "actor",
+          "role": "Rico Manzetti",
+          "image": "https://image.tmdb.org/t/p/w200/9i9moFaHJlDzlUjhUH67f091ZWt.jpg"
+        },
+        {
+          "name": "Carlos Monzón",
+          "type": "actor",
+          "role": "Marco Russo",
+          "image": "https://image.tmdb.org/t/p/w200/bcrhWzGqvE7I5ZMQvuewnIyuNlV.jpg"
+        },
+        {
+          "name": "Mariangela Giordano",
+          "type": "actor",
+          "role": "Lisa's mother",
+          "image": "https://image.tmdb.org/t/p/w200/t8ANeJZt22ZkyvVSIehv1HeuUBo.jpg"
+        },
+        {
+          "name": "Gianni Dei",
+          "type": "actor",
+          "role": "Beny Manzetti",
+          "image": "https://image.tmdb.org/t/p/w200/h1B2hHOJp1gWCfd3zXD9gSvPymb.jpg"
+        },
+        {
+          "name": "Luisa Maneri",
+          "type": "actor",
+          "role": "Lisa",
+          "image": ""
+        },
+        {
+          "name": "Stelvio Massi",
+          "type": "director",
+          "role": "Director",
+          "image": "https://image.tmdb.org/t/p/w200/ezpFYlK2RVvq8VP19GyQCBaE7h7.jpg"
+        }
+      ],
+      "subtitles": [],
+      "comments": [],
+      "views": 0,
+      "downloads": 0,
+      "shares": 0
+    },
+    {
+      "id": 51,
       "type": "series",
       "title": "The Sandman",
       "year": "2022",
@@ -2690,7 +588,7 @@
       "image": "https://image.tmdb.org/t/p/w500/vfJ1nBnqiiRWZWv3ZvtFWO5zccg.jpg",
       "cover": "https://image.tmdb.org/t/p/original/uxrP5yB9h6Dh6SbojI018pMYIIH.jpg",
       "trailer": {
-        "id": 50,
+        "id": 52,
         "type": "video",
         "title": "The Sandman Trailer",
         "url": "https://www.youtube.com/watch?v=ZJXamnPUm0I"
@@ -2747,11 +645,11 @@
       "shares": 0,
       "seasons": [
         {
-          "id": 23,
+          "id": 25,
           "title": "Season 1",
           "episodes": [
             {
-              "id": 1,
+              "id": 3,
               "title": "Sleep of the Just",
               "episode_number": 1,
               "image": "https://image.tmdb.org/t/p/w500/xzmpOdpN1wpdKK2kaJmBidMpUL9.jpg",
@@ -2760,7 +658,7 @@
               "downloads": 0,
               "sources": [
                 {
-                  "id": 2,
+                  "id": 4,
                   "type": "video",
                   "title": "Episode 1 1080p",
                   "quality": "1080p",
@@ -2770,7 +668,7 @@
               "subtitles": []
             },
             {
-              "id": 3,
+              "id": 5,
               "title": "Imperfect Hosts",
               "episode_number": 2,
               "image": "https://image.tmdb.org/t/p/w500/i1uLLs0Z9AzXTkYrRoWZQTfFCEp.jpg",
@@ -2779,7 +677,7 @@
               "downloads": 0,
               "sources": [
                 {
-                  "id": 4,
+                  "id": 6,
                   "type": "video",
                   "title": "Episode 2 1080p",
                   "quality": "1080p",
@@ -2789,7 +687,7 @@
               "subtitles": []
             },
             {
-              "id": 5,
+              "id": 7,
               "title": "Dream a Little Dream of Me",
               "episode_number": 3,
               "image": "https://image.tmdb.org/t/p/w500/c2NipAl5AJn1mZ2n1u6XUQ2gcz4.jpg",
@@ -2798,7 +696,7 @@
               "downloads": 0,
               "sources": [
                 {
-                  "id": 6,
+                  "id": 8,
                   "type": "video",
                   "title": "Episode 3 1080p",
                   "quality": "1080p",
@@ -2808,7 +706,7 @@
               "subtitles": []
             },
             {
-              "id": 7,
+              "id": 9,
               "title": "A Hope in Hell",
               "episode_number": 4,
               "image": "https://image.tmdb.org/t/p/w500/2wBRe3shmk6lwJvwIQuN8PfB2tV.jpg",
@@ -2817,7 +715,7 @@
               "downloads": 0,
               "sources": [
                 {
-                  "id": 8,
+                  "id": 10,
                   "type": "video",
                   "title": "Episode 4 1080p",
                   "quality": "1080p",
@@ -2827,7 +725,7 @@
               "subtitles": []
             },
             {
-              "id": 9,
+              "id": 11,
               "title": "24/7",
               "episode_number": 5,
               "image": "https://image.tmdb.org/t/p/w500/1srp7lHS239WfXw0gSBllYw8mCx.jpg",
@@ -2836,7 +734,7 @@
               "downloads": 0,
               "sources": [
                 {
-                  "id": 10,
+                  "id": 12,
                   "type": "video",
                   "title": "Episode 5 1080p",
                   "quality": "1080p",
@@ -2846,7 +744,7 @@
               "subtitles": []
             },
             {
-              "id": 11,
+              "id": 13,
               "title": "The Sound of Her Wings",
               "episode_number": 6,
               "image": "https://image.tmdb.org/t/p/w500/aKekIXd1a6HfgT46kuKco0apV0n.jpg",
@@ -2855,7 +753,7 @@
               "downloads": 0,
               "sources": [
                 {
-                  "id": 12,
+                  "id": 14,
                   "type": "video",
                   "title": "Episode 6 1080p",
                   "quality": "1080p",
@@ -2865,7 +763,7 @@
               "subtitles": []
             },
             {
-              "id": 13,
+              "id": 15,
               "title": "The Doll's House",
               "episode_number": 7,
               "image": "https://image.tmdb.org/t/p/w500/ckMg5eK20e65czJCfPGJgtyg63H.jpg",
@@ -2874,7 +772,7 @@
               "downloads": 0,
               "sources": [
                 {
-                  "id": 14,
+                  "id": 16,
                   "type": "video",
                   "title": "Episode 7 1080p",
                   "quality": "1080p",
@@ -2884,7 +782,7 @@
               "subtitles": []
             },
             {
-              "id": 15,
+              "id": 17,
               "title": "Playing House",
               "episode_number": 8,
               "image": "https://image.tmdb.org/t/p/w500/xGE5htx5TTbTrRFasgxJpZm8dSA.jpg",
@@ -2893,7 +791,7 @@
               "downloads": 0,
               "sources": [
                 {
-                  "id": 16,
+                  "id": 18,
                   "type": "video",
                   "title": "Episode 8 1080p",
                   "quality": "1080p",
@@ -2903,7 +801,7 @@
               "subtitles": []
             },
             {
-              "id": 17,
+              "id": 19,
               "title": "Collectors",
               "episode_number": 9,
               "image": "https://image.tmdb.org/t/p/w500/m95ZlPULJoinfXNwMmdbckIXvTz.jpg",
@@ -2912,7 +810,7 @@
               "downloads": 0,
               "sources": [
                 {
-                  "id": 18,
+                  "id": 20,
                   "type": "video",
                   "title": "Episode 9 1080p",
                   "quality": "1080p",
@@ -2922,7 +820,7 @@
               "subtitles": []
             },
             {
-              "id": 19,
+              "id": 21,
               "title": "Lost Hearts",
               "episode_number": 10,
               "image": "https://image.tmdb.org/t/p/w500/b4UgJQr2Ov2Mg8HZQP4K90xjNBh.jpg",
@@ -2931,7 +829,7 @@
               "downloads": 0,
               "sources": [
                 {
-                  "id": 20,
+                  "id": 22,
                   "type": "video",
                   "title": "Episode 10 1080p",
                   "quality": "1080p",
@@ -2941,7 +839,7 @@
               "subtitles": []
             },
             {
-              "id": 21,
+              "id": 23,
               "title": "Dream of a Thousand Cats/Calliope",
               "episode_number": 11,
               "image": "https://image.tmdb.org/t/p/w500/vWzr1iaBqOW1G8PiESdcxSrNWku.jpg",
@@ -2950,7 +848,7 @@
               "downloads": 0,
               "sources": [
                 {
-                  "id": 22,
+                  "id": 24,
                   "type": "video",
                   "title": "Episode 11 1080p",
                   "quality": "1080p",
@@ -2962,11 +860,11 @@
           ]
         },
         {
-          "id": 48,
+          "id": 50,
           "title": "Season 2",
           "episodes": [
             {
-              "id": 24,
+              "id": 26,
               "title": "Season of Mists",
               "episode_number": 1,
               "image": "https://image.tmdb.org/t/p/w500/gdRVJGhE2hHFNd5q0mQZizRWO9w.jpg",
@@ -2975,7 +873,7 @@
               "downloads": 0,
               "sources": [
                 {
-                  "id": 25,
+                  "id": 27,
                   "type": "video",
                   "title": "Episode 1 1080p",
                   "quality": "1080p",
@@ -2985,7 +883,7 @@
               "subtitles": []
             },
             {
-              "id": 26,
+              "id": 28,
               "title": "The Ruler of Hell",
               "episode_number": 2,
               "image": "https://image.tmdb.org/t/p/w500/n9NIf3PHHc0ApXAp5G8kFcdXesM.jpg",
@@ -2994,7 +892,7 @@
               "downloads": 0,
               "sources": [
                 {
-                  "id": 27,
+                  "id": 29,
                   "type": "video",
                   "title": "Episode 2 1080p",
                   "quality": "1080p",
@@ -3004,7 +902,7 @@
               "subtitles": []
             },
             {
-              "id": 28,
+              "id": 30,
               "title": "More Devils Than Vast Hell Can Hold",
               "episode_number": 3,
               "image": "https://image.tmdb.org/t/p/w500/2ALbQ7b8ICWfcuVIcOKxCCWHbK9.jpg",
@@ -3013,7 +911,7 @@
               "downloads": 0,
               "sources": [
                 {
-                  "id": 29,
+                  "id": 31,
                   "type": "video",
                   "title": "Episode 3 1080p",
                   "quality": "1080p",
@@ -3023,7 +921,7 @@
               "subtitles": []
             },
             {
-              "id": 30,
+              "id": 32,
               "title": "Brief Lives",
               "episode_number": 4,
               "image": "https://image.tmdb.org/t/p/w500/4OZcba8f9qcMMEiTf4svtLxhRav.jpg",
@@ -3032,7 +930,7 @@
               "downloads": 0,
               "sources": [
                 {
-                  "id": 31,
+                  "id": 33,
                   "type": "video",
                   "title": "Episode 4 1080p",
                   "quality": "1080p",
@@ -3042,7 +940,7 @@
               "subtitles": []
             },
             {
-              "id": 32,
+              "id": 34,
               "title": "The Song of Orpheus",
               "episode_number": 5,
               "image": "https://image.tmdb.org/t/p/w500/cu6tPZ4RyHTEErEwfK0Wh7cJFiP.jpg",
@@ -3051,7 +949,7 @@
               "downloads": 0,
               "sources": [
                 {
-                  "id": 33,
+                  "id": 35,
                   "type": "video",
                   "title": "Episode 5 1080p",
                   "quality": "1080p",
@@ -3061,7 +959,7 @@
               "subtitles": []
             },
             {
-              "id": 34,
+              "id": 36,
               "title": "Family Blood",
               "episode_number": 6,
               "image": "https://image.tmdb.org/t/p/w500/474h1MDAS0ylszh7vhYsrOIJX8K.jpg",
@@ -3070,7 +968,7 @@
               "downloads": 0,
               "sources": [
                 {
-                  "id": 35,
+                  "id": 37,
                   "type": "video",
                   "title": "Episode 6 1080p",
                   "quality": "1080p",
@@ -3080,7 +978,7 @@
               "subtitles": []
             },
             {
-              "id": 36,
+              "id": 38,
               "title": "Time and Night",
               "episode_number": 7,
               "image": "https://image.tmdb.org/t/p/w500/3raXaPXCxhKCUcN0vDpkX7M8S1x.jpg",
@@ -3089,7 +987,7 @@
               "downloads": 0,
               "sources": [
                 {
-                  "id": 37,
+                  "id": 39,
                   "type": "video",
                   "title": "Episode 7 1080p",
                   "quality": "1080p",
@@ -3099,7 +997,7 @@
               "subtitles": []
             },
             {
-              "id": 38,
+              "id": 40,
               "title": "Fuel for the Fire",
               "episode_number": 8,
               "image": "https://image.tmdb.org/t/p/w500/oU6g3xvPXPkQiQEkkgm9jMymwVS.jpg",
@@ -3108,7 +1006,7 @@
               "downloads": 0,
               "sources": [
                 {
-                  "id": 39,
+                  "id": 41,
                   "type": "video",
                   "title": "Episode 8 1080p",
                   "quality": "1080p",
@@ -3118,7 +1016,7 @@
               "subtitles": []
             },
             {
-              "id": 40,
+              "id": 42,
               "title": "The Kindly Ones",
               "episode_number": 9,
               "image": "https://image.tmdb.org/t/p/w500/o6gKGocuv98ZNmBGAdiNW5YdXgt.jpg",
@@ -3127,7 +1025,7 @@
               "downloads": 0,
               "sources": [
                 {
-                  "id": 41,
+                  "id": 43,
                   "type": "video",
                   "title": "Episode 9 1080p",
                   "quality": "1080p",
@@ -3137,7 +1035,7 @@
               "subtitles": []
             },
             {
-              "id": 42,
+              "id": 44,
               "title": "Long Live the King",
               "episode_number": 10,
               "image": "https://image.tmdb.org/t/p/w500/k2xGycTbss6rZi3jMFjzg4CJyOa.jpg",
@@ -3146,7 +1044,7 @@
               "downloads": 0,
               "sources": [
                 {
-                  "id": 43,
+                  "id": 45,
                   "type": "video",
                   "title": "Episode 10 1080p",
                   "quality": "1080p",
@@ -3156,7 +1054,7 @@
               "subtitles": []
             },
             {
-              "id": 44,
+              "id": 46,
               "title": "A Tale of Graceful Ends",
               "episode_number": 11,
               "image": "https://image.tmdb.org/t/p/w500/iMbt6UaHo09sSAlCkiL7ANmKal6.jpg",
@@ -3165,7 +1063,7 @@
               "downloads": 0,
               "sources": [
                 {
-                  "id": 45,
+                  "id": 47,
                   "type": "video",
                   "title": "Episode 11 1080p",
                   "quality": "1080p",
@@ -3175,7 +1073,7 @@
               "subtitles": []
             },
             {
-              "id": 46,
+              "id": 48,
               "title": "A Special Episode - Death: The High Cost of Living",
               "episode_number": 12,
               "image": "https://image.tmdb.org/t/p/w500/lGXkdwfOzpy17OLOnkyJBE8avWT.jpg",
@@ -3184,7 +1082,7 @@
               "downloads": 0,
               "sources": [
                 {
-                  "id": 47,
+                  "id": 49,
                   "type": "video",
                   "title": "Episode 12 1080p",
                   "quality": "1080p",
@@ -3202,55 +1100,109 @@
   "actors": [
     {
       "id": 1,
-      "name": "Tom Sturridge",
+      "name": "Luc Merenda",
       "type": "actor",
-      "role": "Morpheus / Dream",
-      "image": "https://image.tmdb.org/t/p/w200/2EIUT2junjmFYRm70E4pAAUKnMc.jpg",
+      "role": "Rico Manzetti",
+      "image": "https://image.tmdb.org/t/p/w200/9i9moFaHJlDzlUjhUH67f091ZWt.jpg",
       "born": "",
       "height": "",
       "bio": "",
       "movies": [
         {
-          "id": 49,
-          "title": "The Sandman",
-          "image": "https://image.tmdb.org/t/p/w500/vfJ1nBnqiiRWZWv3ZvtFWO5zccg.jpg",
-          "year": "2022"
+          "id": 2,
+          "title": "The Last Round",
+          "image": "https://image.tmdb.org/t/p/w500/vleNhtwRG9FUEoZQ9e7Q0s8xxBG.jpg",
+          "year": "1976"
         }
       ]
     },
     {
       "id": 2,
-      "name": "Vivienne Acheampong",
+      "name": "Carlos Monzón",
       "type": "actor",
-      "role": "Lucienne",
-      "image": "https://image.tmdb.org/t/p/w200/1VqJnnimdMwuje0ttU2SsKSuy3S.jpg",
+      "role": "Marco Russo",
+      "image": "https://image.tmdb.org/t/p/w200/bcrhWzGqvE7I5ZMQvuewnIyuNlV.jpg",
       "born": "",
       "height": "",
       "bio": "",
       "movies": [
         {
-          "id": 49,
-          "title": "The Sandman",
-          "image": "https://image.tmdb.org/t/p/w500/vfJ1nBnqiiRWZWv3ZvtFWO5zccg.jpg",
-          "year": "2022"
+          "id": 2,
+          "title": "The Last Round",
+          "image": "https://image.tmdb.org/t/p/w500/vleNhtwRG9FUEoZQ9e7Q0s8xxBG.jpg",
+          "year": "1976"
         }
       ]
     },
     {
       "id": 3,
-      "name": "Patton Oswalt",
+      "name": "Mariangela Giordano",
       "type": "actor",
-      "role": "Matthew the Raven (voice)",
-      "image": "https://image.tmdb.org/t/p/w200/skGzommLR2zE6uk1YQRFK71dOJ8.jpg",
+      "role": "Lisa's mother",
+      "image": "https://image.tmdb.org/t/p/w200/t8ANeJZt22ZkyvVSIehv1HeuUBo.jpg",
       "born": "",
       "height": "",
       "bio": "",
       "movies": [
         {
-          "id": 49,
-          "title": "The Sandman",
-          "image": "https://image.tmdb.org/t/p/w500/vfJ1nBnqiiRWZWv3ZvtFWO5zccg.jpg",
-          "year": "2022"
+          "id": 2,
+          "title": "The Last Round",
+          "image": "https://image.tmdb.org/t/p/w500/vleNhtwRG9FUEoZQ9e7Q0s8xxBG.jpg",
+          "year": "1976"
+        }
+      ]
+    },
+    {
+      "id": 4,
+      "name": "Gianni Dei",
+      "type": "actor",
+      "role": "Beny Manzetti",
+      "image": "https://image.tmdb.org/t/p/w200/h1B2hHOJp1gWCfd3zXD9gSvPymb.jpg",
+      "born": "",
+      "height": "",
+      "bio": "",
+      "movies": [
+        {
+          "id": 2,
+          "title": "The Last Round",
+          "image": "https://image.tmdb.org/t/p/w500/vleNhtwRG9FUEoZQ9e7Q0s8xxBG.jpg",
+          "year": "1976"
+        }
+      ]
+    },
+    {
+      "id": 5,
+      "name": "Luisa Maneri",
+      "type": "actor",
+      "role": "Lisa",
+      "image": "",
+      "born": "",
+      "height": "",
+      "bio": "",
+      "movies": [
+        {
+          "id": 2,
+          "title": "The Last Round",
+          "image": "https://image.tmdb.org/t/p/w500/vleNhtwRG9FUEoZQ9e7Q0s8xxBG.jpg",
+          "year": "1976"
+        }
+      ]
+    },
+    {
+      "id": 6,
+      "name": "Stelvio Massi",
+      "type": "director",
+      "role": "Director",
+      "image": "https://image.tmdb.org/t/p/w200/ezpFYlK2RVvq8VP19GyQCBaE7h7.jpg",
+      "born": "",
+      "height": "",
+      "bio": "",
+      "movies": [
+        {
+          "id": 2,
+          "title": "The Last Round",
+          "image": "https://image.tmdb.org/t/p/w500/vleNhtwRG9FUEoZQ9e7Q0s8xxBG.jpg",
+          "year": "1976"
         }
       ]
     }
@@ -3258,1567 +1210,185 @@
   "genres": [
     {
       "id": 1,
-      "title": "Sci-Fi & Fantasy",
+      "title": "Action",
       "posters": [
         {
-          "id": 49,
-          "title": "The Sandman",
-          "type": "series",
-          "label": "Series",
-          "sublabel": "2 Seasons",
+          "id": 2,
+          "title": "The Last Round",
+          "type": "movie",
+          "label": "Movie",
+          "sublabel": "1976",
           "imdb": "0.0",
-          "downloadas": "the-sandman",
+          "downloadas": "the-last-round",
           "comment": true,
           "playas": "video",
-          "description": "After years of imprisonment, Morpheus — the King of Dreams — embarks on a journey across worlds to find what was stolen from him and restore his power.",
+          "description": "Stelvio Massi's crime thriller centers on a drifter who sets out to help blue-collar workers rise up against the two powerful families who are exploiting them. After settling in an industrial town and witnessing the cruelty of the factory owners, ex-mercenary Marco (Carlos Monzón) assumes the role of union agitator. When a violent confrontation erupts, the labor leader is driven to bring down the corrupt clans.",
           "classification": "PG-13",
-          "year": "2022",
+          "year": "1976",
           "duration": "00:00",
           "rating": 0,
-          "image": "https://image.tmdb.org/t/p/w500/vfJ1nBnqiiRWZWv3ZvtFWO5zccg.jpg",
-          "cover": "https://image.tmdb.org/t/p/original/uxrP5yB9h6Dh6SbojI018pMYIIH.jpg",
+          "image": "https://image.tmdb.org/t/p/w500/vleNhtwRG9FUEoZQ9e7Q0s8xxBG.jpg",
+          "cover": "https://image.tmdb.org/t/p/original/2FUCnpfIW6tTdKXjPXgo7DV2MNq.jpg",
           "genres": [
             {
-              "id": 10765,
-              "name": "Sci-Fi & Fantasy"
+              "id": 28,
+              "name": "Action"
             },
             {
-              "id": 18,
-              "name": "Drama"
-            },
-            {
-              "id": 10759,
-              "name": "Action & Adventure"
+              "id": 53,
+              "name": "Thriller"
             }
           ],
           "actors": [
             {
-              "name": "Tom Sturridge",
+              "name": "Luc Merenda",
               "type": "actor",
-              "role": "Morpheus / Dream",
-              "image": "https://image.tmdb.org/t/p/w200/2EIUT2junjmFYRm70E4pAAUKnMc.jpg"
+              "role": "Rico Manzetti",
+              "image": "https://image.tmdb.org/t/p/w200/9i9moFaHJlDzlUjhUH67f091ZWt.jpg"
             },
             {
-              "name": "Vivienne Acheampong",
+              "name": "Carlos Monzón",
               "type": "actor",
-              "role": "Lucienne",
-              "image": "https://image.tmdb.org/t/p/w200/1VqJnnimdMwuje0ttU2SsKSuy3S.jpg"
+              "role": "Marco Russo",
+              "image": "https://image.tmdb.org/t/p/w200/bcrhWzGqvE7I5ZMQvuewnIyuNlV.jpg"
             },
             {
-              "name": "Patton Oswalt",
+              "name": "Mariangela Giordano",
               "type": "actor",
-              "role": "Matthew the Raven (voice)",
-              "image": "https://image.tmdb.org/t/p/w200/skGzommLR2zE6uk1YQRFK71dOJ8.jpg"
+              "role": "Lisa's mother",
+              "image": "https://image.tmdb.org/t/p/w200/t8ANeJZt22ZkyvVSIehv1HeuUBo.jpg"
+            },
+            {
+              "name": "Gianni Dei",
+              "type": "actor",
+              "role": "Beny Manzetti",
+              "image": "https://image.tmdb.org/t/p/w200/h1B2hHOJp1gWCfd3zXD9gSvPymb.jpg"
+            },
+            {
+              "name": "Luisa Maneri",
+              "type": "actor",
+              "role": "Lisa",
+              "image": ""
+            },
+            {
+              "name": "Stelvio Massi",
+              "type": "director",
+              "role": "Director",
+              "image": "https://image.tmdb.org/t/p/w200/ezpFYlK2RVvq8VP19GyQCBaE7h7.jpg"
             }
           ],
           "views": 0,
           "created_at": "2025-08-02",
-          "sources": [],
-          "trailer": {
-            "id": 50,
-            "type": "video",
-            "title": "The Sandman Trailer",
-            "url": "https://www.youtube.com/watch?v=ZJXamnPUm0I"
-          },
+          "sources": [
+            {
+              "id": 1,
+              "type": "video",
+              "title": "vidsrc.net 1080p",
+              "quality": "1080p",
+              "size": "0MB",
+              "kind": "both",
+              "premium": "false",
+              "external": false,
+              "url": "https://vidsrc.net/embed/movie/90802"
+            }
+          ],
+          "trailer": null,
           "subtitles": [],
           "comments": [],
           "downloads": 0,
-          "shares": 0,
-          "seasons": [
-            {
-              "id": 23,
-              "title": "Season 1",
-              "episodes": [
-                {
-                  "id": 1,
-                  "title": "Sleep of the Just",
-                  "episode_number": 1,
-                  "image": "https://image.tmdb.org/t/p/w500/xzmpOdpN1wpdKK2kaJmBidMpUL9.jpg",
-                  "duration": "54:00",
-                  "views": 0,
-                  "downloads": 0,
-                  "sources": [
-                    {
-                      "id": 2,
-                      "type": "video",
-                      "title": "Episode 1 1080p",
-                      "quality": "1080p",
-                      "url": "https://vidsrc.net/embed/tv/90802/1/1"
-                    }
-                  ],
-                  "subtitles": []
-                },
-                {
-                  "id": 3,
-                  "title": "Imperfect Hosts",
-                  "episode_number": 2,
-                  "image": "https://image.tmdb.org/t/p/w500/i1uLLs0Z9AzXTkYrRoWZQTfFCEp.jpg",
-                  "duration": "38:00",
-                  "views": 0,
-                  "downloads": 0,
-                  "sources": [
-                    {
-                      "id": 4,
-                      "type": "video",
-                      "title": "Episode 2 1080p",
-                      "quality": "1080p",
-                      "url": "https://vidsrc.net/embed/tv/90802/1/2"
-                    }
-                  ],
-                  "subtitles": []
-                },
-                {
-                  "id": 5,
-                  "title": "Dream a Little Dream of Me",
-                  "episode_number": 3,
-                  "image": "https://image.tmdb.org/t/p/w500/c2NipAl5AJn1mZ2n1u6XUQ2gcz4.jpg",
-                  "duration": "46:00",
-                  "views": 0,
-                  "downloads": 0,
-                  "sources": [
-                    {
-                      "id": 6,
-                      "type": "video",
-                      "title": "Episode 3 1080p",
-                      "quality": "1080p",
-                      "url": "https://vidsrc.net/embed/tv/90802/1/3"
-                    }
-                  ],
-                  "subtitles": []
-                },
-                {
-                  "id": 7,
-                  "title": "A Hope in Hell",
-                  "episode_number": 4,
-                  "image": "https://image.tmdb.org/t/p/w500/2wBRe3shmk6lwJvwIQuN8PfB2tV.jpg",
-                  "duration": "45:00",
-                  "views": 0,
-                  "downloads": 0,
-                  "sources": [
-                    {
-                      "id": 8,
-                      "type": "video",
-                      "title": "Episode 4 1080p",
-                      "quality": "1080p",
-                      "url": "https://vidsrc.net/embed/tv/90802/1/4"
-                    }
-                  ],
-                  "subtitles": []
-                },
-                {
-                  "id": 9,
-                  "title": "24/7",
-                  "episode_number": 5,
-                  "image": "https://image.tmdb.org/t/p/w500/1srp7lHS239WfXw0gSBllYw8mCx.jpg",
-                  "duration": "54:00",
-                  "views": 0,
-                  "downloads": 0,
-                  "sources": [
-                    {
-                      "id": 10,
-                      "type": "video",
-                      "title": "Episode 5 1080p",
-                      "quality": "1080p",
-                      "url": "https://vidsrc.net/embed/tv/90802/1/5"
-                    }
-                  ],
-                  "subtitles": []
-                },
-                {
-                  "id": 11,
-                  "title": "The Sound of Her Wings",
-                  "episode_number": 6,
-                  "image": "https://image.tmdb.org/t/p/w500/aKekIXd1a6HfgT46kuKco0apV0n.jpg",
-                  "duration": "53:00",
-                  "views": 0,
-                  "downloads": 0,
-                  "sources": [
-                    {
-                      "id": 12,
-                      "type": "video",
-                      "title": "Episode 6 1080p",
-                      "quality": "1080p",
-                      "url": "https://vidsrc.net/embed/tv/90802/1/6"
-                    }
-                  ],
-                  "subtitles": []
-                },
-                {
-                  "id": 13,
-                  "title": "The Doll's House",
-                  "episode_number": 7,
-                  "image": "https://image.tmdb.org/t/p/w500/ckMg5eK20e65czJCfPGJgtyg63H.jpg",
-                  "duration": "49:00",
-                  "views": 0,
-                  "downloads": 0,
-                  "sources": [
-                    {
-                      "id": 14,
-                      "type": "video",
-                      "title": "Episode 7 1080p",
-                      "quality": "1080p",
-                      "url": "https://vidsrc.net/embed/tv/90802/1/7"
-                    }
-                  ],
-                  "subtitles": []
-                },
-                {
-                  "id": 15,
-                  "title": "Playing House",
-                  "episode_number": 8,
-                  "image": "https://image.tmdb.org/t/p/w500/xGE5htx5TTbTrRFasgxJpZm8dSA.jpg",
-                  "duration": "50:00",
-                  "views": 0,
-                  "downloads": 0,
-                  "sources": [
-                    {
-                      "id": 16,
-                      "type": "video",
-                      "title": "Episode 8 1080p",
-                      "quality": "1080p",
-                      "url": "https://vidsrc.net/embed/tv/90802/1/8"
-                    }
-                  ],
-                  "subtitles": []
-                },
-                {
-                  "id": 17,
-                  "title": "Collectors",
-                  "episode_number": 9,
-                  "image": "https://image.tmdb.org/t/p/w500/m95ZlPULJoinfXNwMmdbckIXvTz.jpg",
-                  "duration": "49:00",
-                  "views": 0,
-                  "downloads": 0,
-                  "sources": [
-                    {
-                      "id": 18,
-                      "type": "video",
-                      "title": "Episode 9 1080p",
-                      "quality": "1080p",
-                      "url": "https://vidsrc.net/embed/tv/90802/1/9"
-                    }
-                  ],
-                  "subtitles": []
-                },
-                {
-                  "id": 19,
-                  "title": "Lost Hearts",
-                  "episode_number": 10,
-                  "image": "https://image.tmdb.org/t/p/w500/b4UgJQr2Ov2Mg8HZQP4K90xjNBh.jpg",
-                  "duration": "46:00",
-                  "views": 0,
-                  "downloads": 0,
-                  "sources": [
-                    {
-                      "id": 20,
-                      "type": "video",
-                      "title": "Episode 10 1080p",
-                      "quality": "1080p",
-                      "url": "https://vidsrc.net/embed/tv/90802/1/10"
-                    }
-                  ],
-                  "subtitles": []
-                },
-                {
-                  "id": 21,
-                  "title": "Dream of a Thousand Cats/Calliope",
-                  "episode_number": 11,
-                  "image": "https://image.tmdb.org/t/p/w500/vWzr1iaBqOW1G8PiESdcxSrNWku.jpg",
-                  "duration": "64:00",
-                  "views": 0,
-                  "downloads": 0,
-                  "sources": [
-                    {
-                      "id": 22,
-                      "type": "video",
-                      "title": "Episode 11 1080p",
-                      "quality": "1080p",
-                      "url": "https://vidsrc.net/embed/tv/90802/1/11"
-                    }
-                  ],
-                  "subtitles": []
-                }
-              ]
-            },
-            {
-              "id": 48,
-              "title": "Season 2",
-              "episodes": [
-                {
-                  "id": 24,
-                  "title": "Season of Mists",
-                  "episode_number": 1,
-                  "image": "https://image.tmdb.org/t/p/w500/gdRVJGhE2hHFNd5q0mQZizRWO9w.jpg",
-                  "duration": "46:00",
-                  "views": 0,
-                  "downloads": 0,
-                  "sources": [
-                    {
-                      "id": 25,
-                      "type": "video",
-                      "title": "Episode 1 1080p",
-                      "quality": "1080p",
-                      "url": "https://vidsrc.net/embed/tv/90802/2/1"
-                    }
-                  ],
-                  "subtitles": []
-                },
-                {
-                  "id": 26,
-                  "title": "The Ruler of Hell",
-                  "episode_number": 2,
-                  "image": "https://image.tmdb.org/t/p/w500/n9NIf3PHHc0ApXAp5G8kFcdXesM.jpg",
-                  "duration": "51:00",
-                  "views": 0,
-                  "downloads": 0,
-                  "sources": [
-                    {
-                      "id": 27,
-                      "type": "video",
-                      "title": "Episode 2 1080p",
-                      "quality": "1080p",
-                      "url": "https://vidsrc.net/embed/tv/90802/2/2"
-                    }
-                  ],
-                  "subtitles": []
-                },
-                {
-                  "id": 28,
-                  "title": "More Devils Than Vast Hell Can Hold",
-                  "episode_number": 3,
-                  "image": "https://image.tmdb.org/t/p/w500/2ALbQ7b8ICWfcuVIcOKxCCWHbK9.jpg",
-                  "duration": "51:00",
-                  "views": 0,
-                  "downloads": 0,
-                  "sources": [
-                    {
-                      "id": 29,
-                      "type": "video",
-                      "title": "Episode 3 1080p",
-                      "quality": "1080p",
-                      "url": "https://vidsrc.net/embed/tv/90802/2/3"
-                    }
-                  ],
-                  "subtitles": []
-                },
-                {
-                  "id": 30,
-                  "title": "Brief Lives",
-                  "episode_number": 4,
-                  "image": "https://image.tmdb.org/t/p/w500/4OZcba8f9qcMMEiTf4svtLxhRav.jpg",
-                  "duration": "45:00",
-                  "views": 0,
-                  "downloads": 0,
-                  "sources": [
-                    {
-                      "id": 31,
-                      "type": "video",
-                      "title": "Episode 4 1080p",
-                      "quality": "1080p",
-                      "url": "https://vidsrc.net/embed/tv/90802/2/4"
-                    }
-                  ],
-                  "subtitles": []
-                },
-                {
-                  "id": 32,
-                  "title": "The Song of Orpheus",
-                  "episode_number": 5,
-                  "image": "https://image.tmdb.org/t/p/w500/cu6tPZ4RyHTEErEwfK0Wh7cJFiP.jpg",
-                  "duration": "65:00",
-                  "views": 0,
-                  "downloads": 0,
-                  "sources": [
-                    {
-                      "id": 33,
-                      "type": "video",
-                      "title": "Episode 5 1080p",
-                      "quality": "1080p",
-                      "url": "https://vidsrc.net/embed/tv/90802/2/5"
-                    }
-                  ],
-                  "subtitles": []
-                },
-                {
-                  "id": 34,
-                  "title": "Family Blood",
-                  "episode_number": 6,
-                  "image": "https://image.tmdb.org/t/p/w500/474h1MDAS0ylszh7vhYsrOIJX8K.jpg",
-                  "duration": "59:00",
-                  "views": 0,
-                  "downloads": 0,
-                  "sources": [
-                    {
-                      "id": 35,
-                      "type": "video",
-                      "title": "Episode 6 1080p",
-                      "quality": "1080p",
-                      "url": "https://vidsrc.net/embed/tv/90802/2/6"
-                    }
-                  ],
-                  "subtitles": []
-                },
-                {
-                  "id": 36,
-                  "title": "Time and Night",
-                  "episode_number": 7,
-                  "image": "https://image.tmdb.org/t/p/w500/3raXaPXCxhKCUcN0vDpkX7M8S1x.jpg",
-                  "duration": "50:00",
-                  "views": 0,
-                  "downloads": 0,
-                  "sources": [
-                    {
-                      "id": 37,
-                      "type": "video",
-                      "title": "Episode 7 1080p",
-                      "quality": "1080p",
-                      "url": "https://vidsrc.net/embed/tv/90802/2/7"
-                    }
-                  ],
-                  "subtitles": []
-                },
-                {
-                  "id": 38,
-                  "title": "Fuel for the Fire",
-                  "episode_number": 8,
-                  "image": "https://image.tmdb.org/t/p/w500/oU6g3xvPXPkQiQEkkgm9jMymwVS.jpg",
-                  "duration": "48:00",
-                  "views": 0,
-                  "downloads": 0,
-                  "sources": [
-                    {
-                      "id": 39,
-                      "type": "video",
-                      "title": "Episode 8 1080p",
-                      "quality": "1080p",
-                      "url": "https://vidsrc.net/embed/tv/90802/2/8"
-                    }
-                  ],
-                  "subtitles": []
-                },
-                {
-                  "id": 40,
-                  "title": "The Kindly Ones",
-                  "episode_number": 9,
-                  "image": "https://image.tmdb.org/t/p/w500/o6gKGocuv98ZNmBGAdiNW5YdXgt.jpg",
-                  "duration": "54:00",
-                  "views": 0,
-                  "downloads": 0,
-                  "sources": [
-                    {
-                      "id": 41,
-                      "type": "video",
-                      "title": "Episode 9 1080p",
-                      "quality": "1080p",
-                      "url": "https://vidsrc.net/embed/tv/90802/2/9"
-                    }
-                  ],
-                  "subtitles": []
-                },
-                {
-                  "id": 42,
-                  "title": "Long Live the King",
-                  "episode_number": 10,
-                  "image": "https://image.tmdb.org/t/p/w500/k2xGycTbss6rZi3jMFjzg4CJyOa.jpg",
-                  "duration": "45:00",
-                  "views": 0,
-                  "downloads": 0,
-                  "sources": [
-                    {
-                      "id": 43,
-                      "type": "video",
-                      "title": "Episode 10 1080p",
-                      "quality": "1080p",
-                      "url": "https://vidsrc.net/embed/tv/90802/2/10"
-                    }
-                  ],
-                  "subtitles": []
-                },
-                {
-                  "id": 44,
-                  "title": "A Tale of Graceful Ends",
-                  "episode_number": 11,
-                  "image": "https://image.tmdb.org/t/p/w500/iMbt6UaHo09sSAlCkiL7ANmKal6.jpg",
-                  "duration": "70:00",
-                  "views": 0,
-                  "downloads": 0,
-                  "sources": [
-                    {
-                      "id": 45,
-                      "type": "video",
-                      "title": "Episode 11 1080p",
-                      "quality": "1080p",
-                      "url": "https://vidsrc.net/embed/tv/90802/2/11"
-                    }
-                  ],
-                  "subtitles": []
-                },
-                {
-                  "id": 46,
-                  "title": "A Special Episode - Death: The High Cost of Living",
-                  "episode_number": 12,
-                  "image": "https://image.tmdb.org/t/p/w500/lGXkdwfOzpy17OLOnkyJBE8avWT.jpg",
-                  "duration": "58:00",
-                  "views": 0,
-                  "downloads": 0,
-                  "sources": [
-                    {
-                      "id": 47,
-                      "type": "video",
-                      "title": "Episode 12 1080p",
-                      "quality": "1080p",
-                      "url": "https://vidsrc.net/embed/tv/90802/2/12"
-                    }
-                  ],
-                  "subtitles": []
-                }
-              ]
-            }
-          ]
+          "shares": 0
         }
       ]
     },
     {
       "id": 2,
-      "title": "Drama",
+      "title": "Thriller",
       "posters": [
         {
-          "id": 49,
-          "title": "The Sandman",
-          "type": "series",
-          "label": "Series",
-          "sublabel": "2 Seasons",
+          "id": 2,
+          "title": "The Last Round",
+          "type": "movie",
+          "label": "Movie",
+          "sublabel": "1976",
           "imdb": "0.0",
-          "downloadas": "the-sandman",
+          "downloadas": "the-last-round",
           "comment": true,
           "playas": "video",
-          "description": "After years of imprisonment, Morpheus — the King of Dreams — embarks on a journey across worlds to find what was stolen from him and restore his power.",
+          "description": "Stelvio Massi's crime thriller centers on a drifter who sets out to help blue-collar workers rise up against the two powerful families who are exploiting them. After settling in an industrial town and witnessing the cruelty of the factory owners, ex-mercenary Marco (Carlos Monzón) assumes the role of union agitator. When a violent confrontation erupts, the labor leader is driven to bring down the corrupt clans.",
           "classification": "PG-13",
-          "year": "2022",
+          "year": "1976",
           "duration": "00:00",
           "rating": 0,
-          "image": "https://image.tmdb.org/t/p/w500/vfJ1nBnqiiRWZWv3ZvtFWO5zccg.jpg",
-          "cover": "https://image.tmdb.org/t/p/original/uxrP5yB9h6Dh6SbojI018pMYIIH.jpg",
+          "image": "https://image.tmdb.org/t/p/w500/vleNhtwRG9FUEoZQ9e7Q0s8xxBG.jpg",
+          "cover": "https://image.tmdb.org/t/p/original/2FUCnpfIW6tTdKXjPXgo7DV2MNq.jpg",
           "genres": [
             {
-              "id": 10765,
-              "name": "Sci-Fi & Fantasy"
+              "id": 28,
+              "name": "Action"
             },
             {
-              "id": 18,
-              "name": "Drama"
-            },
-            {
-              "id": 10759,
-              "name": "Action & Adventure"
+              "id": 53,
+              "name": "Thriller"
             }
           ],
           "actors": [
             {
-              "name": "Tom Sturridge",
+              "name": "Luc Merenda",
               "type": "actor",
-              "role": "Morpheus / Dream",
-              "image": "https://image.tmdb.org/t/p/w200/2EIUT2junjmFYRm70E4pAAUKnMc.jpg"
+              "role": "Rico Manzetti",
+              "image": "https://image.tmdb.org/t/p/w200/9i9moFaHJlDzlUjhUH67f091ZWt.jpg"
             },
             {
-              "name": "Vivienne Acheampong",
+              "name": "Carlos Monzón",
               "type": "actor",
-              "role": "Lucienne",
-              "image": "https://image.tmdb.org/t/p/w200/1VqJnnimdMwuje0ttU2SsKSuy3S.jpg"
+              "role": "Marco Russo",
+              "image": "https://image.tmdb.org/t/p/w200/bcrhWzGqvE7I5ZMQvuewnIyuNlV.jpg"
             },
             {
-              "name": "Patton Oswalt",
+              "name": "Mariangela Giordano",
               "type": "actor",
-              "role": "Matthew the Raven (voice)",
-              "image": "https://image.tmdb.org/t/p/w200/skGzommLR2zE6uk1YQRFK71dOJ8.jpg"
+              "role": "Lisa's mother",
+              "image": "https://image.tmdb.org/t/p/w200/t8ANeJZt22ZkyvVSIehv1HeuUBo.jpg"
+            },
+            {
+              "name": "Gianni Dei",
+              "type": "actor",
+              "role": "Beny Manzetti",
+              "image": "https://image.tmdb.org/t/p/w200/h1B2hHOJp1gWCfd3zXD9gSvPymb.jpg"
+            },
+            {
+              "name": "Luisa Maneri",
+              "type": "actor",
+              "role": "Lisa",
+              "image": ""
+            },
+            {
+              "name": "Stelvio Massi",
+              "type": "director",
+              "role": "Director",
+              "image": "https://image.tmdb.org/t/p/w200/ezpFYlK2RVvq8VP19GyQCBaE7h7.jpg"
             }
           ],
           "views": 0,
           "created_at": "2025-08-02",
-          "sources": [],
-          "trailer": {
-            "id": 50,
-            "type": "video",
-            "title": "The Sandman Trailer",
-            "url": "https://www.youtube.com/watch?v=ZJXamnPUm0I"
-          },
+          "sources": [
+            {
+              "id": 1,
+              "type": "video",
+              "title": "vidsrc.net 1080p",
+              "quality": "1080p",
+              "size": "0MB",
+              "kind": "both",
+              "premium": "false",
+              "external": false,
+              "url": "https://vidsrc.net/embed/movie/90802"
+            }
+          ],
+          "trailer": null,
           "subtitles": [],
           "comments": [],
           "downloads": 0,
-          "shares": 0,
-          "seasons": [
-            {
-              "id": 23,
-              "title": "Season 1",
-              "episodes": [
-                {
-                  "id": 1,
-                  "title": "Sleep of the Just",
-                  "episode_number": 1,
-                  "image": "https://image.tmdb.org/t/p/w500/xzmpOdpN1wpdKK2kaJmBidMpUL9.jpg",
-                  "duration": "54:00",
-                  "views": 0,
-                  "downloads": 0,
-                  "sources": [
-                    {
-                      "id": 2,
-                      "type": "video",
-                      "title": "Episode 1 1080p",
-                      "quality": "1080p",
-                      "url": "https://vidsrc.net/embed/tv/90802/1/1"
-                    }
-                  ],
-                  "subtitles": []
-                },
-                {
-                  "id": 3,
-                  "title": "Imperfect Hosts",
-                  "episode_number": 2,
-                  "image": "https://image.tmdb.org/t/p/w500/i1uLLs0Z9AzXTkYrRoWZQTfFCEp.jpg",
-                  "duration": "38:00",
-                  "views": 0,
-                  "downloads": 0,
-                  "sources": [
-                    {
-                      "id": 4,
-                      "type": "video",
-                      "title": "Episode 2 1080p",
-                      "quality": "1080p",
-                      "url": "https://vidsrc.net/embed/tv/90802/1/2"
-                    }
-                  ],
-                  "subtitles": []
-                },
-                {
-                  "id": 5,
-                  "title": "Dream a Little Dream of Me",
-                  "episode_number": 3,
-                  "image": "https://image.tmdb.org/t/p/w500/c2NipAl5AJn1mZ2n1u6XUQ2gcz4.jpg",
-                  "duration": "46:00",
-                  "views": 0,
-                  "downloads": 0,
-                  "sources": [
-                    {
-                      "id": 6,
-                      "type": "video",
-                      "title": "Episode 3 1080p",
-                      "quality": "1080p",
-                      "url": "https://vidsrc.net/embed/tv/90802/1/3"
-                    }
-                  ],
-                  "subtitles": []
-                },
-                {
-                  "id": 7,
-                  "title": "A Hope in Hell",
-                  "episode_number": 4,
-                  "image": "https://image.tmdb.org/t/p/w500/2wBRe3shmk6lwJvwIQuN8PfB2tV.jpg",
-                  "duration": "45:00",
-                  "views": 0,
-                  "downloads": 0,
-                  "sources": [
-                    {
-                      "id": 8,
-                      "type": "video",
-                      "title": "Episode 4 1080p",
-                      "quality": "1080p",
-                      "url": "https://vidsrc.net/embed/tv/90802/1/4"
-                    }
-                  ],
-                  "subtitles": []
-                },
-                {
-                  "id": 9,
-                  "title": "24/7",
-                  "episode_number": 5,
-                  "image": "https://image.tmdb.org/t/p/w500/1srp7lHS239WfXw0gSBllYw8mCx.jpg",
-                  "duration": "54:00",
-                  "views": 0,
-                  "downloads": 0,
-                  "sources": [
-                    {
-                      "id": 10,
-                      "type": "video",
-                      "title": "Episode 5 1080p",
-                      "quality": "1080p",
-                      "url": "https://vidsrc.net/embed/tv/90802/1/5"
-                    }
-                  ],
-                  "subtitles": []
-                },
-                {
-                  "id": 11,
-                  "title": "The Sound of Her Wings",
-                  "episode_number": 6,
-                  "image": "https://image.tmdb.org/t/p/w500/aKekIXd1a6HfgT46kuKco0apV0n.jpg",
-                  "duration": "53:00",
-                  "views": 0,
-                  "downloads": 0,
-                  "sources": [
-                    {
-                      "id": 12,
-                      "type": "video",
-                      "title": "Episode 6 1080p",
-                      "quality": "1080p",
-                      "url": "https://vidsrc.net/embed/tv/90802/1/6"
-                    }
-                  ],
-                  "subtitles": []
-                },
-                {
-                  "id": 13,
-                  "title": "The Doll's House",
-                  "episode_number": 7,
-                  "image": "https://image.tmdb.org/t/p/w500/ckMg5eK20e65czJCfPGJgtyg63H.jpg",
-                  "duration": "49:00",
-                  "views": 0,
-                  "downloads": 0,
-                  "sources": [
-                    {
-                      "id": 14,
-                      "type": "video",
-                      "title": "Episode 7 1080p",
-                      "quality": "1080p",
-                      "url": "https://vidsrc.net/embed/tv/90802/1/7"
-                    }
-                  ],
-                  "subtitles": []
-                },
-                {
-                  "id": 15,
-                  "title": "Playing House",
-                  "episode_number": 8,
-                  "image": "https://image.tmdb.org/t/p/w500/xGE5htx5TTbTrRFasgxJpZm8dSA.jpg",
-                  "duration": "50:00",
-                  "views": 0,
-                  "downloads": 0,
-                  "sources": [
-                    {
-                      "id": 16,
-                      "type": "video",
-                      "title": "Episode 8 1080p",
-                      "quality": "1080p",
-                      "url": "https://vidsrc.net/embed/tv/90802/1/8"
-                    }
-                  ],
-                  "subtitles": []
-                },
-                {
-                  "id": 17,
-                  "title": "Collectors",
-                  "episode_number": 9,
-                  "image": "https://image.tmdb.org/t/p/w500/m95ZlPULJoinfXNwMmdbckIXvTz.jpg",
-                  "duration": "49:00",
-                  "views": 0,
-                  "downloads": 0,
-                  "sources": [
-                    {
-                      "id": 18,
-                      "type": "video",
-                      "title": "Episode 9 1080p",
-                      "quality": "1080p",
-                      "url": "https://vidsrc.net/embed/tv/90802/1/9"
-                    }
-                  ],
-                  "subtitles": []
-                },
-                {
-                  "id": 19,
-                  "title": "Lost Hearts",
-                  "episode_number": 10,
-                  "image": "https://image.tmdb.org/t/p/w500/b4UgJQr2Ov2Mg8HZQP4K90xjNBh.jpg",
-                  "duration": "46:00",
-                  "views": 0,
-                  "downloads": 0,
-                  "sources": [
-                    {
-                      "id": 20,
-                      "type": "video",
-                      "title": "Episode 10 1080p",
-                      "quality": "1080p",
-                      "url": "https://vidsrc.net/embed/tv/90802/1/10"
-                    }
-                  ],
-                  "subtitles": []
-                },
-                {
-                  "id": 21,
-                  "title": "Dream of a Thousand Cats/Calliope",
-                  "episode_number": 11,
-                  "image": "https://image.tmdb.org/t/p/w500/vWzr1iaBqOW1G8PiESdcxSrNWku.jpg",
-                  "duration": "64:00",
-                  "views": 0,
-                  "downloads": 0,
-                  "sources": [
-                    {
-                      "id": 22,
-                      "type": "video",
-                      "title": "Episode 11 1080p",
-                      "quality": "1080p",
-                      "url": "https://vidsrc.net/embed/tv/90802/1/11"
-                    }
-                  ],
-                  "subtitles": []
-                }
-              ]
-            },
-            {
-              "id": 48,
-              "title": "Season 2",
-              "episodes": [
-                {
-                  "id": 24,
-                  "title": "Season of Mists",
-                  "episode_number": 1,
-                  "image": "https://image.tmdb.org/t/p/w500/gdRVJGhE2hHFNd5q0mQZizRWO9w.jpg",
-                  "duration": "46:00",
-                  "views": 0,
-                  "downloads": 0,
-                  "sources": [
-                    {
-                      "id": 25,
-                      "type": "video",
-                      "title": "Episode 1 1080p",
-                      "quality": "1080p",
-                      "url": "https://vidsrc.net/embed/tv/90802/2/1"
-                    }
-                  ],
-                  "subtitles": []
-                },
-                {
-                  "id": 26,
-                  "title": "The Ruler of Hell",
-                  "episode_number": 2,
-                  "image": "https://image.tmdb.org/t/p/w500/n9NIf3PHHc0ApXAp5G8kFcdXesM.jpg",
-                  "duration": "51:00",
-                  "views": 0,
-                  "downloads": 0,
-                  "sources": [
-                    {
-                      "id": 27,
-                      "type": "video",
-                      "title": "Episode 2 1080p",
-                      "quality": "1080p",
-                      "url": "https://vidsrc.net/embed/tv/90802/2/2"
-                    }
-                  ],
-                  "subtitles": []
-                },
-                {
-                  "id": 28,
-                  "title": "More Devils Than Vast Hell Can Hold",
-                  "episode_number": 3,
-                  "image": "https://image.tmdb.org/t/p/w500/2ALbQ7b8ICWfcuVIcOKxCCWHbK9.jpg",
-                  "duration": "51:00",
-                  "views": 0,
-                  "downloads": 0,
-                  "sources": [
-                    {
-                      "id": 29,
-                      "type": "video",
-                      "title": "Episode 3 1080p",
-                      "quality": "1080p",
-                      "url": "https://vidsrc.net/embed/tv/90802/2/3"
-                    }
-                  ],
-                  "subtitles": []
-                },
-                {
-                  "id": 30,
-                  "title": "Brief Lives",
-                  "episode_number": 4,
-                  "image": "https://image.tmdb.org/t/p/w500/4OZcba8f9qcMMEiTf4svtLxhRav.jpg",
-                  "duration": "45:00",
-                  "views": 0,
-                  "downloads": 0,
-                  "sources": [
-                    {
-                      "id": 31,
-                      "type": "video",
-                      "title": "Episode 4 1080p",
-                      "quality": "1080p",
-                      "url": "https://vidsrc.net/embed/tv/90802/2/4"
-                    }
-                  ],
-                  "subtitles": []
-                },
-                {
-                  "id": 32,
-                  "title": "The Song of Orpheus",
-                  "episode_number": 5,
-                  "image": "https://image.tmdb.org/t/p/w500/cu6tPZ4RyHTEErEwfK0Wh7cJFiP.jpg",
-                  "duration": "65:00",
-                  "views": 0,
-                  "downloads": 0,
-                  "sources": [
-                    {
-                      "id": 33,
-                      "type": "video",
-                      "title": "Episode 5 1080p",
-                      "quality": "1080p",
-                      "url": "https://vidsrc.net/embed/tv/90802/2/5"
-                    }
-                  ],
-                  "subtitles": []
-                },
-                {
-                  "id": 34,
-                  "title": "Family Blood",
-                  "episode_number": 6,
-                  "image": "https://image.tmdb.org/t/p/w500/474h1MDAS0ylszh7vhYsrOIJX8K.jpg",
-                  "duration": "59:00",
-                  "views": 0,
-                  "downloads": 0,
-                  "sources": [
-                    {
-                      "id": 35,
-                      "type": "video",
-                      "title": "Episode 6 1080p",
-                      "quality": "1080p",
-                      "url": "https://vidsrc.net/embed/tv/90802/2/6"
-                    }
-                  ],
-                  "subtitles": []
-                },
-                {
-                  "id": 36,
-                  "title": "Time and Night",
-                  "episode_number": 7,
-                  "image": "https://image.tmdb.org/t/p/w500/3raXaPXCxhKCUcN0vDpkX7M8S1x.jpg",
-                  "duration": "50:00",
-                  "views": 0,
-                  "downloads": 0,
-                  "sources": [
-                    {
-                      "id": 37,
-                      "type": "video",
-                      "title": "Episode 7 1080p",
-                      "quality": "1080p",
-                      "url": "https://vidsrc.net/embed/tv/90802/2/7"
-                    }
-                  ],
-                  "subtitles": []
-                },
-                {
-                  "id": 38,
-                  "title": "Fuel for the Fire",
-                  "episode_number": 8,
-                  "image": "https://image.tmdb.org/t/p/w500/oU6g3xvPXPkQiQEkkgm9jMymwVS.jpg",
-                  "duration": "48:00",
-                  "views": 0,
-                  "downloads": 0,
-                  "sources": [
-                    {
-                      "id": 39,
-                      "type": "video",
-                      "title": "Episode 8 1080p",
-                      "quality": "1080p",
-                      "url": "https://vidsrc.net/embed/tv/90802/2/8"
-                    }
-                  ],
-                  "subtitles": []
-                },
-                {
-                  "id": 40,
-                  "title": "The Kindly Ones",
-                  "episode_number": 9,
-                  "image": "https://image.tmdb.org/t/p/w500/o6gKGocuv98ZNmBGAdiNW5YdXgt.jpg",
-                  "duration": "54:00",
-                  "views": 0,
-                  "downloads": 0,
-                  "sources": [
-                    {
-                      "id": 41,
-                      "type": "video",
-                      "title": "Episode 9 1080p",
-                      "quality": "1080p",
-                      "url": "https://vidsrc.net/embed/tv/90802/2/9"
-                    }
-                  ],
-                  "subtitles": []
-                },
-                {
-                  "id": 42,
-                  "title": "Long Live the King",
-                  "episode_number": 10,
-                  "image": "https://image.tmdb.org/t/p/w500/k2xGycTbss6rZi3jMFjzg4CJyOa.jpg",
-                  "duration": "45:00",
-                  "views": 0,
-                  "downloads": 0,
-                  "sources": [
-                    {
-                      "id": 43,
-                      "type": "video",
-                      "title": "Episode 10 1080p",
-                      "quality": "1080p",
-                      "url": "https://vidsrc.net/embed/tv/90802/2/10"
-                    }
-                  ],
-                  "subtitles": []
-                },
-                {
-                  "id": 44,
-                  "title": "A Tale of Graceful Ends",
-                  "episode_number": 11,
-                  "image": "https://image.tmdb.org/t/p/w500/iMbt6UaHo09sSAlCkiL7ANmKal6.jpg",
-                  "duration": "70:00",
-                  "views": 0,
-                  "downloads": 0,
-                  "sources": [
-                    {
-                      "id": 45,
-                      "type": "video",
-                      "title": "Episode 11 1080p",
-                      "quality": "1080p",
-                      "url": "https://vidsrc.net/embed/tv/90802/2/11"
-                    }
-                  ],
-                  "subtitles": []
-                },
-                {
-                  "id": 46,
-                  "title": "A Special Episode - Death: The High Cost of Living",
-                  "episode_number": 12,
-                  "image": "https://image.tmdb.org/t/p/w500/lGXkdwfOzpy17OLOnkyJBE8avWT.jpg",
-                  "duration": "58:00",
-                  "views": 0,
-                  "downloads": 0,
-                  "sources": [
-                    {
-                      "id": 47,
-                      "type": "video",
-                      "title": "Episode 12 1080p",
-                      "quality": "1080p",
-                      "url": "https://vidsrc.net/embed/tv/90802/2/12"
-                    }
-                  ],
-                  "subtitles": []
-                }
-              ]
-            }
-          ]
-        }
-      ]
-    },
-    {
-      "id": 3,
-      "title": "Action & Adventure",
-      "posters": [
-        {
-          "id": 49,
-          "title": "The Sandman",
-          "type": "series",
-          "label": "Series",
-          "sublabel": "2 Seasons",
-          "imdb": "0.0",
-          "downloadas": "the-sandman",
-          "comment": true,
-          "playas": "video",
-          "description": "After years of imprisonment, Morpheus — the King of Dreams — embarks on a journey across worlds to find what was stolen from him and restore his power.",
-          "classification": "PG-13",
-          "year": "2022",
-          "duration": "00:00",
-          "rating": 0,
-          "image": "https://image.tmdb.org/t/p/w500/vfJ1nBnqiiRWZWv3ZvtFWO5zccg.jpg",
-          "cover": "https://image.tmdb.org/t/p/original/uxrP5yB9h6Dh6SbojI018pMYIIH.jpg",
-          "genres": [
-            {
-              "id": 10765,
-              "name": "Sci-Fi & Fantasy"
-            },
-            {
-              "id": 18,
-              "name": "Drama"
-            },
-            {
-              "id": 10759,
-              "name": "Action & Adventure"
-            }
-          ],
-          "actors": [
-            {
-              "name": "Tom Sturridge",
-              "type": "actor",
-              "role": "Morpheus / Dream",
-              "image": "https://image.tmdb.org/t/p/w200/2EIUT2junjmFYRm70E4pAAUKnMc.jpg"
-            },
-            {
-              "name": "Vivienne Acheampong",
-              "type": "actor",
-              "role": "Lucienne",
-              "image": "https://image.tmdb.org/t/p/w200/1VqJnnimdMwuje0ttU2SsKSuy3S.jpg"
-            },
-            {
-              "name": "Patton Oswalt",
-              "type": "actor",
-              "role": "Matthew the Raven (voice)",
-              "image": "https://image.tmdb.org/t/p/w200/skGzommLR2zE6uk1YQRFK71dOJ8.jpg"
-            }
-          ],
-          "views": 0,
-          "created_at": "2025-08-02",
-          "sources": [],
-          "trailer": {
-            "id": 50,
-            "type": "video",
-            "title": "The Sandman Trailer",
-            "url": "https://www.youtube.com/watch?v=ZJXamnPUm0I"
-          },
-          "subtitles": [],
-          "comments": [],
-          "downloads": 0,
-          "shares": 0,
-          "seasons": [
-            {
-              "id": 23,
-              "title": "Season 1",
-              "episodes": [
-                {
-                  "id": 1,
-                  "title": "Sleep of the Just",
-                  "episode_number": 1,
-                  "image": "https://image.tmdb.org/t/p/w500/xzmpOdpN1wpdKK2kaJmBidMpUL9.jpg",
-                  "duration": "54:00",
-                  "views": 0,
-                  "downloads": 0,
-                  "sources": [
-                    {
-                      "id": 2,
-                      "type": "video",
-                      "title": "Episode 1 1080p",
-                      "quality": "1080p",
-                      "url": "https://vidsrc.net/embed/tv/90802/1/1"
-                    }
-                  ],
-                  "subtitles": []
-                },
-                {
-                  "id": 3,
-                  "title": "Imperfect Hosts",
-                  "episode_number": 2,
-                  "image": "https://image.tmdb.org/t/p/w500/i1uLLs0Z9AzXTkYrRoWZQTfFCEp.jpg",
-                  "duration": "38:00",
-                  "views": 0,
-                  "downloads": 0,
-                  "sources": [
-                    {
-                      "id": 4,
-                      "type": "video",
-                      "title": "Episode 2 1080p",
-                      "quality": "1080p",
-                      "url": "https://vidsrc.net/embed/tv/90802/1/2"
-                    }
-                  ],
-                  "subtitles": []
-                },
-                {
-                  "id": 5,
-                  "title": "Dream a Little Dream of Me",
-                  "episode_number": 3,
-                  "image": "https://image.tmdb.org/t/p/w500/c2NipAl5AJn1mZ2n1u6XUQ2gcz4.jpg",
-                  "duration": "46:00",
-                  "views": 0,
-                  "downloads": 0,
-                  "sources": [
-                    {
-                      "id": 6,
-                      "type": "video",
-                      "title": "Episode 3 1080p",
-                      "quality": "1080p",
-                      "url": "https://vidsrc.net/embed/tv/90802/1/3"
-                    }
-                  ],
-                  "subtitles": []
-                },
-                {
-                  "id": 7,
-                  "title": "A Hope in Hell",
-                  "episode_number": 4,
-                  "image": "https://image.tmdb.org/t/p/w500/2wBRe3shmk6lwJvwIQuN8PfB2tV.jpg",
-                  "duration": "45:00",
-                  "views": 0,
-                  "downloads": 0,
-                  "sources": [
-                    {
-                      "id": 8,
-                      "type": "video",
-                      "title": "Episode 4 1080p",
-                      "quality": "1080p",
-                      "url": "https://vidsrc.net/embed/tv/90802/1/4"
-                    }
-                  ],
-                  "subtitles": []
-                },
-                {
-                  "id": 9,
-                  "title": "24/7",
-                  "episode_number": 5,
-                  "image": "https://image.tmdb.org/t/p/w500/1srp7lHS239WfXw0gSBllYw8mCx.jpg",
-                  "duration": "54:00",
-                  "views": 0,
-                  "downloads": 0,
-                  "sources": [
-                    {
-                      "id": 10,
-                      "type": "video",
-                      "title": "Episode 5 1080p",
-                      "quality": "1080p",
-                      "url": "https://vidsrc.net/embed/tv/90802/1/5"
-                    }
-                  ],
-                  "subtitles": []
-                },
-                {
-                  "id": 11,
-                  "title": "The Sound of Her Wings",
-                  "episode_number": 6,
-                  "image": "https://image.tmdb.org/t/p/w500/aKekIXd1a6HfgT46kuKco0apV0n.jpg",
-                  "duration": "53:00",
-                  "views": 0,
-                  "downloads": 0,
-                  "sources": [
-                    {
-                      "id": 12,
-                      "type": "video",
-                      "title": "Episode 6 1080p",
-                      "quality": "1080p",
-                      "url": "https://vidsrc.net/embed/tv/90802/1/6"
-                    }
-                  ],
-                  "subtitles": []
-                },
-                {
-                  "id": 13,
-                  "title": "The Doll's House",
-                  "episode_number": 7,
-                  "image": "https://image.tmdb.org/t/p/w500/ckMg5eK20e65czJCfPGJgtyg63H.jpg",
-                  "duration": "49:00",
-                  "views": 0,
-                  "downloads": 0,
-                  "sources": [
-                    {
-                      "id": 14,
-                      "type": "video",
-                      "title": "Episode 7 1080p",
-                      "quality": "1080p",
-                      "url": "https://vidsrc.net/embed/tv/90802/1/7"
-                    }
-                  ],
-                  "subtitles": []
-                },
-                {
-                  "id": 15,
-                  "title": "Playing House",
-                  "episode_number": 8,
-                  "image": "https://image.tmdb.org/t/p/w500/xGE5htx5TTbTrRFasgxJpZm8dSA.jpg",
-                  "duration": "50:00",
-                  "views": 0,
-                  "downloads": 0,
-                  "sources": [
-                    {
-                      "id": 16,
-                      "type": "video",
-                      "title": "Episode 8 1080p",
-                      "quality": "1080p",
-                      "url": "https://vidsrc.net/embed/tv/90802/1/8"
-                    }
-                  ],
-                  "subtitles": []
-                },
-                {
-                  "id": 17,
-                  "title": "Collectors",
-                  "episode_number": 9,
-                  "image": "https://image.tmdb.org/t/p/w500/m95ZlPULJoinfXNwMmdbckIXvTz.jpg",
-                  "duration": "49:00",
-                  "views": 0,
-                  "downloads": 0,
-                  "sources": [
-                    {
-                      "id": 18,
-                      "type": "video",
-                      "title": "Episode 9 1080p",
-                      "quality": "1080p",
-                      "url": "https://vidsrc.net/embed/tv/90802/1/9"
-                    }
-                  ],
-                  "subtitles": []
-                },
-                {
-                  "id": 19,
-                  "title": "Lost Hearts",
-                  "episode_number": 10,
-                  "image": "https://image.tmdb.org/t/p/w500/b4UgJQr2Ov2Mg8HZQP4K90xjNBh.jpg",
-                  "duration": "46:00",
-                  "views": 0,
-                  "downloads": 0,
-                  "sources": [
-                    {
-                      "id": 20,
-                      "type": "video",
-                      "title": "Episode 10 1080p",
-                      "quality": "1080p",
-                      "url": "https://vidsrc.net/embed/tv/90802/1/10"
-                    }
-                  ],
-                  "subtitles": []
-                },
-                {
-                  "id": 21,
-                  "title": "Dream of a Thousand Cats/Calliope",
-                  "episode_number": 11,
-                  "image": "https://image.tmdb.org/t/p/w500/vWzr1iaBqOW1G8PiESdcxSrNWku.jpg",
-                  "duration": "64:00",
-                  "views": 0,
-                  "downloads": 0,
-                  "sources": [
-                    {
-                      "id": 22,
-                      "type": "video",
-                      "title": "Episode 11 1080p",
-                      "quality": "1080p",
-                      "url": "https://vidsrc.net/embed/tv/90802/1/11"
-                    }
-                  ],
-                  "subtitles": []
-                }
-              ]
-            },
-            {
-              "id": 48,
-              "title": "Season 2",
-              "episodes": [
-                {
-                  "id": 24,
-                  "title": "Season of Mists",
-                  "episode_number": 1,
-                  "image": "https://image.tmdb.org/t/p/w500/gdRVJGhE2hHFNd5q0mQZizRWO9w.jpg",
-                  "duration": "46:00",
-                  "views": 0,
-                  "downloads": 0,
-                  "sources": [
-                    {
-                      "id": 25,
-                      "type": "video",
-                      "title": "Episode 1 1080p",
-                      "quality": "1080p",
-                      "url": "https://vidsrc.net/embed/tv/90802/2/1"
-                    }
-                  ],
-                  "subtitles": []
-                },
-                {
-                  "id": 26,
-                  "title": "The Ruler of Hell",
-                  "episode_number": 2,
-                  "image": "https://image.tmdb.org/t/p/w500/n9NIf3PHHc0ApXAp5G8kFcdXesM.jpg",
-                  "duration": "51:00",
-                  "views": 0,
-                  "downloads": 0,
-                  "sources": [
-                    {
-                      "id": 27,
-                      "type": "video",
-                      "title": "Episode 2 1080p",
-                      "quality": "1080p",
-                      "url": "https://vidsrc.net/embed/tv/90802/2/2"
-                    }
-                  ],
-                  "subtitles": []
-                },
-                {
-                  "id": 28,
-                  "title": "More Devils Than Vast Hell Can Hold",
-                  "episode_number": 3,
-                  "image": "https://image.tmdb.org/t/p/w500/2ALbQ7b8ICWfcuVIcOKxCCWHbK9.jpg",
-                  "duration": "51:00",
-                  "views": 0,
-                  "downloads": 0,
-                  "sources": [
-                    {
-                      "id": 29,
-                      "type": "video",
-                      "title": "Episode 3 1080p",
-                      "quality": "1080p",
-                      "url": "https://vidsrc.net/embed/tv/90802/2/3"
-                    }
-                  ],
-                  "subtitles": []
-                },
-                {
-                  "id": 30,
-                  "title": "Brief Lives",
-                  "episode_number": 4,
-                  "image": "https://image.tmdb.org/t/p/w500/4OZcba8f9qcMMEiTf4svtLxhRav.jpg",
-                  "duration": "45:00",
-                  "views": 0,
-                  "downloads": 0,
-                  "sources": [
-                    {
-                      "id": 31,
-                      "type": "video",
-                      "title": "Episode 4 1080p",
-                      "quality": "1080p",
-                      "url": "https://vidsrc.net/embed/tv/90802/2/4"
-                    }
-                  ],
-                  "subtitles": []
-                },
-                {
-                  "id": 32,
-                  "title": "The Song of Orpheus",
-                  "episode_number": 5,
-                  "image": "https://image.tmdb.org/t/p/w500/cu6tPZ4RyHTEErEwfK0Wh7cJFiP.jpg",
-                  "duration": "65:00",
-                  "views": 0,
-                  "downloads": 0,
-                  "sources": [
-                    {
-                      "id": 33,
-                      "type": "video",
-                      "title": "Episode 5 1080p",
-                      "quality": "1080p",
-                      "url": "https://vidsrc.net/embed/tv/90802/2/5"
-                    }
-                  ],
-                  "subtitles": []
-                },
-                {
-                  "id": 34,
-                  "title": "Family Blood",
-                  "episode_number": 6,
-                  "image": "https://image.tmdb.org/t/p/w500/474h1MDAS0ylszh7vhYsrOIJX8K.jpg",
-                  "duration": "59:00",
-                  "views": 0,
-                  "downloads": 0,
-                  "sources": [
-                    {
-                      "id": 35,
-                      "type": "video",
-                      "title": "Episode 6 1080p",
-                      "quality": "1080p",
-                      "url": "https://vidsrc.net/embed/tv/90802/2/6"
-                    }
-                  ],
-                  "subtitles": []
-                },
-                {
-                  "id": 36,
-                  "title": "Time and Night",
-                  "episode_number": 7,
-                  "image": "https://image.tmdb.org/t/p/w500/3raXaPXCxhKCUcN0vDpkX7M8S1x.jpg",
-                  "duration": "50:00",
-                  "views": 0,
-                  "downloads": 0,
-                  "sources": [
-                    {
-                      "id": 37,
-                      "type": "video",
-                      "title": "Episode 7 1080p",
-                      "quality": "1080p",
-                      "url": "https://vidsrc.net/embed/tv/90802/2/7"
-                    }
-                  ],
-                  "subtitles": []
-                },
-                {
-                  "id": 38,
-                  "title": "Fuel for the Fire",
-                  "episode_number": 8,
-                  "image": "https://image.tmdb.org/t/p/w500/oU6g3xvPXPkQiQEkkgm9jMymwVS.jpg",
-                  "duration": "48:00",
-                  "views": 0,
-                  "downloads": 0,
-                  "sources": [
-                    {
-                      "id": 39,
-                      "type": "video",
-                      "title": "Episode 8 1080p",
-                      "quality": "1080p",
-                      "url": "https://vidsrc.net/embed/tv/90802/2/8"
-                    }
-                  ],
-                  "subtitles": []
-                },
-                {
-                  "id": 40,
-                  "title": "The Kindly Ones",
-                  "episode_number": 9,
-                  "image": "https://image.tmdb.org/t/p/w500/o6gKGocuv98ZNmBGAdiNW5YdXgt.jpg",
-                  "duration": "54:00",
-                  "views": 0,
-                  "downloads": 0,
-                  "sources": [
-                    {
-                      "id": 41,
-                      "type": "video",
-                      "title": "Episode 9 1080p",
-                      "quality": "1080p",
-                      "url": "https://vidsrc.net/embed/tv/90802/2/9"
-                    }
-                  ],
-                  "subtitles": []
-                },
-                {
-                  "id": 42,
-                  "title": "Long Live the King",
-                  "episode_number": 10,
-                  "image": "https://image.tmdb.org/t/p/w500/k2xGycTbss6rZi3jMFjzg4CJyOa.jpg",
-                  "duration": "45:00",
-                  "views": 0,
-                  "downloads": 0,
-                  "sources": [
-                    {
-                      "id": 43,
-                      "type": "video",
-                      "title": "Episode 10 1080p",
-                      "quality": "1080p",
-                      "url": "https://vidsrc.net/embed/tv/90802/2/10"
-                    }
-                  ],
-                  "subtitles": []
-                },
-                {
-                  "id": 44,
-                  "title": "A Tale of Graceful Ends",
-                  "episode_number": 11,
-                  "image": "https://image.tmdb.org/t/p/w500/iMbt6UaHo09sSAlCkiL7ANmKal6.jpg",
-                  "duration": "70:00",
-                  "views": 0,
-                  "downloads": 0,
-                  "sources": [
-                    {
-                      "id": 45,
-                      "type": "video",
-                      "title": "Episode 11 1080p",
-                      "quality": "1080p",
-                      "url": "https://vidsrc.net/embed/tv/90802/2/11"
-                    }
-                  ],
-                  "subtitles": []
-                },
-                {
-                  "id": 46,
-                  "title": "A Special Episode - Death: The High Cost of Living",
-                  "episode_number": 12,
-                  "image": "https://image.tmdb.org/t/p/w500/lGXkdwfOzpy17OLOnkyJBE8avWT.jpg",
-                  "duration": "58:00",
-                  "views": 0,
-                  "downloads": 0,
-                  "sources": [
-                    {
-                      "id": 47,
-                      "type": "video",
-                      "title": "Episode 12 1080p",
-                      "quality": "1080p",
-                      "url": "https://vidsrc.net/embed/tv/90802/2/12"
-                    }
-                  ],
-                  "subtitles": []
-                }
-              ]
-            }
-          ]
+          "shares": 0
         }
       ]
     }
