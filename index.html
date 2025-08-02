@@ -1708,10 +1708,33 @@
                         image: item.image,
                         url: item.url,
                         poster: item.contentType === 'movie' ? { 
-                            ...item,
-                            label: item.contentType === 'movie' ? 'Latest Movie' : 'Featured Content',
+                            id: item.id,
+                            type: item.type || item.contentType,
+                            title: item.title,
+                            year: item.year,
+                            image: item.image,
+                            cover: item.cover || item.image,
+                            label: item.type === 'series' ? 'Latest Series' : 'Latest Movie',
                             sublabel: item.year ? `Released ${item.year}` : 'New Release',
-                            description: item.description || item.overview || 'Check out this amazing content!'
+                            description: item.description || item.overview || 'Check out this amazing content!',
+                            imdb: item.imdb || '0.0',
+                            downloadas: item.downloadas || item.title?.toLowerCase().replace(/[^a-z0-9]/g, '-') || '',
+                            comment: item.comment !== undefined ? item.comment : true,
+                            playas: item.playas || 'video',
+                            classification: item.classification || 'PG-13',
+                            duration: item.duration || '00:00',
+                            rating: item.rating || 0,
+                            trailer: item.trailer,
+                            sources: item.sources || [],
+                            subtitles: item.subtitles || [],
+                            comments: item.comments || [],
+                            views: item.views || 0,
+                            downloads: item.downloads || 0,
+                            shares: item.shares || 0,
+                            created_at: item.created_at || new Date().toISOString().split('T')[0],
+                            genres: item.genres || [],
+                            actors: item.actors || []
+                            // Only excluding: seasons (for series) to avoid deep episode duplication
                         } : null,
                         channel: item.contentType === 'channel' ? { ...item } : null
                     }));
@@ -1723,14 +1746,15 @@
             function autoGenerateFeaturedMovies() {
                 console.log('⭐ Generating featured movies...');
                 
-                // Get movies with rating >= 7 or recent movies (last 3 years)
+                // Get movies with rating >= 7 or recent movies (last 3 years) - EXCLUDE SERIES
                 const currentYear = new Date().getFullYear();
                 const featuredMovies = (jsonData.movies || [])
                     .filter(movie => {
                         const hasGoodRating = movie.rating >= 7;
                         const isRecent = movie.year >= (currentYear - 3);
                         const hasImage = movie.image;
-                        return (hasGoodRating || isRecent) && hasImage;
+                        const isNotSeries = movie.type !== 'series' && !movie.seasons; // Exclude series
+                        return (hasGoodRating || isRecent) && hasImage && isNotSeries;
                     })
                     .sort((a, b) => {
                         // First sort by rating (high to low)
@@ -3227,6 +3251,14 @@
                     }];
                     renderMovieSources();
                     
+                    // ACTUALLY SAVE THE MOVIE TO THE DATA (this was missing!)
+                    const movieObject = createCineMaxMovieFromTMDB(movieData, {cast: currentMovieActors}, trailer);
+                    movieObject.sources = currentMovieSources;
+                    movieObject.actors = currentMovieActors;
+                    movieObject.genres = currentMovieGenres;
+                    jsonData.movies.push(movieObject);
+                    console.log(`✅ Movie "${movieData.title}" saved to jsonData.movies`);
+                    
                     // Auto-generate related content after TMDB fetch
                     console.log('🔄 Auto-generating related content after TMDB movie fetch...');
                     showNotification('Fetching movie data and generating related content...', true);
@@ -3329,6 +3361,14 @@
                     
                     // Render seasons
                     renderSeasons(currentSeriesData.seasons);
+                    
+                    // ACTUALLY SAVE THE SERIES TO THE DATA (this was missing!)
+                    const seriesObject = createCineMaxSeriesFromTMDB(seriesData, {cast: currentSeriesActors}, null);
+                    seriesObject.seasons = currentSeriesData.seasons;
+                    seriesObject.actors = currentSeriesActors;
+                    seriesObject.genres = currentSeriesGenres;
+                    jsonData.movies.push(seriesObject);
+                    console.log(`✅ Series "${seriesData.name}" saved to jsonData.movies`);
                     
                     // Auto-generate related content after TMDB fetch
                     console.log('🔄 Auto-generating related content after TMDB series fetch...');
