@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Test Fixes</title>
+</head>
+<body>
+    <h1>Testing the Fixes</h1>
+    <div id="output"></div>
+
+    <script>
+        // Copy the helper function from index.html
+        function detectSourceTypeAndKind(url) {
+            if (!url) return { type: 'video', kind: 'both' };
+            
+            const urlLower = url.toLowerCase();
+            
+            // Detect type
+            let type = 'video';
+            if (urlLower.includes('youtube.com') || urlLower.includes('youtu.be')) {
+                type = 'youtube';
+            } else if (urlLower.includes('embed') || urlLower.includes('iframe')) {
+                type = 'embed';
+            } else if (urlLower.includes('live') || urlLower.includes('stream')) {
+                type = 'video';
+            }
+            
+            // Detect kind
+            let kind = 'both';
+            if (type === 'youtube' || type === 'embed') {
+                kind = 'play';
+            } else if (urlLower.match(/\.(mp4|mkv|avi|mov|wmv|flv|webm)$/)) {
+                kind = 'both';
+            } else if (urlLower.includes('live') || urlLower.includes('stream')) {
+                kind = 'play';
+            }
+            
+            return { type, kind };
+        }
+
+        // Test the function
+        const testUrls = [
+            'https://vidsrc.net/embed/tv/90802/1/1',
+            'https://www.youtube.com/watch?v=abc123',
+            'https://example.com/video.mp4',
+            'https://live.stream.com/channel1'
+        ];
+
+        const output = document.getElementById('output');
+        output.innerHTML = '<h2>Test Results:</h2>';
+
+        testUrls.forEach(url => {
+            const result = detectSourceTypeAndKind(url);
+            output.innerHTML += `
+                <div style="margin: 10px; padding: 10px; border: 1px solid #ccc;">
+                    <strong>URL:</strong> ${url}<br>
+                    <strong>Type:</strong> ${result.type}<br>
+                    <strong>Kind:</strong> ${result.kind}
+                </div>
+            `;
+        });
+
+        // Test episode source creation
+        const episodeUrl = 'https://vidsrc.net/embed/tv/90802/1/1';
+        const { type, kind } = detectSourceTypeAndKind(episodeUrl);
+        
+        const episodeSource = {
+            id: 1,
+            type: type,
+            title: 'Episode 1 1080p',
+            quality: '1080p',
+            size: '0MB',
+            kind: kind,
+            premium: 'false',
+            external: false,
+            url: episodeUrl
+        };
+
+        output.innerHTML += `
+            <h2>Episode Source Example:</h2>
+            <pre>${JSON.stringify(episodeSource, null, 2)}</pre>
+        `;
+    </script>
+</body>
+</html>
