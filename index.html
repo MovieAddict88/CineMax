@@ -1562,6 +1562,17 @@
                         if (parsed.data) {
                             jsonData = parsed.data;
                             
+                            // Initialize missing arrays
+                            if (!jsonData.series) jsonData.series = [];
+                            
+                            // MIGRATE SERIES FROM MOVIES ARRAY (for backward compatibility)
+                            const seriesToMigrate = jsonData.movies.filter(m => m.type === 'series' || m.seasons);
+                            if (seriesToMigrate.length > 0) {
+                                console.log(`Migrating ${seriesToMigrate.length} series from localStorage...`);
+                                jsonData.series = [...jsonData.series, ...seriesToMigrate];
+                                jsonData.movies = jsonData.movies.filter(m => m.type !== 'series' && !m.seasons);
+                            }
+                            
                             // Initialize the UI
                             editorDiv.style.display = 'block';
                             saveSectionDiv.style.display = 'block';
@@ -1590,6 +1601,7 @@
                         description: "Enhanced Free Movie & TV Streaming JSON API with Full Actor Support",
                         last_updated: new Date().toISOString().split('T')[0],
                         total_movies: 0,
+                        total_series: 0,
                         total_channels: 0,
                         total_actors: 0
                     },
@@ -1598,6 +1610,7 @@
                         featured_movies: []
                     },
                     movies: [],
+                    series: [],
                     channels: [],
                     actors: [],
                     genres: []
@@ -1623,6 +1636,11 @@
                 }
                 
                 console.log('🔄 Auto-generating slides, featured content, actors, and genres...');
+                console.log('Current data state:', {
+                    movies: jsonData.movies?.length || 0,
+                    series: jsonData.series?.length || 0,
+                    channels: jsonData.channels?.length || 0
+                });
                 
                 try {
                     // Initialize structures
@@ -2102,14 +2120,29 @@
                         console.log('No movies array found, creating empty array');
                         jsonData.movies = [];
                     }
+                    if (!jsonData.series) {
+                        console.log('No series array found, creating empty array');
+                        jsonData.series = [];
+                    }
                     if (!jsonData.channels) {
                         console.log('No channels array found, creating empty array');
                         jsonData.channels = [];
                     }
                     
+                    // MIGRATE SERIES FROM MOVIES ARRAY (for backward compatibility)
+                    console.log('🔄 Migrating series from movies array...');
+                    const seriesToMigrate = jsonData.movies.filter(m => m.type === 'series' || m.seasons);
+                    if (seriesToMigrate.length > 0) {
+                        console.log(`Found ${seriesToMigrate.length} series in movies array, migrating...`);
+                        jsonData.series = [...jsonData.series, ...seriesToMigrate];
+                        jsonData.movies = jsonData.movies.filter(m => m.type !== 'series' && !m.seasons);
+                        console.log(`Migrated ${seriesToMigrate.length} series to series array`);
+                    }
+                    
                     // CLEAN EMPTY ENTRIES IMMEDIATELY to prevent crashes
                     console.log('🧹 Cleaning empty entries from loaded data...');
                     jsonData.movies = jsonData.movies.filter(m => m.title && m.title.trim() !== '');
+                    jsonData.series = jsonData.series.filter(s => s.title && s.title.trim() !== '');
                     jsonData.channels = jsonData.channels.filter(c => c.title && c.title.trim() !== '');
                     
                     if (jsonData.home) {
@@ -2128,6 +2161,7 @@
                     }
                     
                     console.log('Movies count:', jsonData.movies.length);
+                    console.log('Series count:', jsonData.series.length);
                     console.log('Channels count:', jsonData.channels.length);
                     
                     // AUTO-GENERATE IMMEDIATELY AFTER LOADING DATA
@@ -2141,7 +2175,7 @@
                     // Auto-save the loaded data
                     saveToLocalStorage();
                     
-                    const totalItems = (jsonData.movies?.length || 0) + (jsonData.channels?.length || 0);
+                    const totalItems = (jsonData.movies?.length || 0) + (jsonData.series?.length || 0) + (jsonData.channels?.length || 0);
                     showNotification(`Data loaded successfully! Found ${totalItems} items.`, true);
                     console.log('Data loading completed successfully');
                 } catch (error) {
@@ -3737,10 +3771,15 @@
                 if (hasRestored) {
                     console.log('✅ Auto-saved data restored successfully');
                 } else {
-                    console.log('ℹ️ No auto-saved data found');
+                    console.log('ℹ️ No auto-saved data found, creating new structure');
+                    createNewCineMaxAPI();
                 }
             } else {
                 console.log('⏸️ Auto-save disabled, skipping auto-load');
+                // Still create a new structure if no data exists
+                if (!jsonData) {
+                    createNewCineMaxAPI();
+                }
             }
         });
     </script>
