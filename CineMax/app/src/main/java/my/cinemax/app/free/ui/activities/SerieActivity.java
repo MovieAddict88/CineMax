@@ -424,42 +424,35 @@ public class SerieActivity extends AppCompatActivity implements PlaylistDownload
         }
     }
     private void getSeasons() {
+        // Use embedded seasons data from the poster object instead of API call
+        if (poster != null && poster.getSeasons() != null && poster.getSeasons().size() > 0) {
+            seasonArrayList.clear();
+            List<Season> posterSeasons = poster.getSeasons();
+            final String[] seasonTitles = new String[posterSeasons.size()];
 
-        Retrofit retrofit = apiClient.getClient();
-        apiRest service = retrofit.create(apiRest.class);
-
-        Call<List<Season>> call = service.getSeasonsBySerie(poster.getId());
-        call.enqueue(new Callback<List<Season>>() {
-            @Override
-            public void onResponse(Call<List<Season>> call, Response<List<Season>> response) {
-                if (response.isSuccessful()){
-                    if (response.body().size()>0) {
-                        seasonArrayList.clear();
-                        final String[] countryCodes = new String[response.body().size()];
-
-                        for (int i = 0; i < response.body().size(); i++) {
-                            countryCodes[i] = response.body().get(i).getTitle();
-                            seasonArrayList.add(response.body().get(i));
-                        }
-                        ArrayAdapter<String> filtresAdapter = new ArrayAdapter<String>(SerieActivity.this,
-                                R.layout.spinner_layout_season,R.id.textView,countryCodes);
-                        filtresAdapter.setDropDownViewResource(R.layout.simple_spinner_dropdown_season_item);
-                        spinner_activity_serie_season_list.setAdapter(filtresAdapter);
-
-                        linear_layout_activity_serie_seasons.setVisibility(View.VISIBLE);
-                    }else{
-                        linear_layout_activity_serie_seasons.setVisibility(View.GONE);
-                    }
-                }else{
-                    linear_layout_activity_serie_seasons.setVisibility(View.VISIBLE);
+            for (int i = 0; i < posterSeasons.size(); i++) {
+                Season season = posterSeasons.get(i);
+                if (season.getTitle() != null) {
+                    seasonTitles[i] = season.getTitle();
+                } else {
+                    seasonTitles[i] = "Season " + (i + 1); // Fallback title
                 }
+                seasonArrayList.add(season);
             }
-            @Override
-            public void onFailure(Call<List<Season>> call, Throwable t) {
-                linear_layout_activity_serie_seasons.setVisibility(View.GONE);
+            
+            ArrayAdapter<String> filtresAdapter = new ArrayAdapter<String>(SerieActivity.this,
+                    R.layout.spinner_layout_season, R.id.textView, seasonTitles);
+            filtresAdapter.setDropDownViewResource(R.layout.simple_spinner_dropdown_season_item);
+            spinner_activity_serie_season_list.setAdapter(filtresAdapter);
 
-            }
-        });
+            linear_layout_activity_serie_seasons.setVisibility(View.VISIBLE);
+            
+            Log.d("SerieActivity", "Loaded " + posterSeasons.size() + " seasons from poster data");
+        } else {
+            // Hide seasons section if no seasons data available
+            linear_layout_activity_serie_seasons.setVisibility(View.GONE);
+            Log.w("SerieActivity", "No seasons data available in poster object");
+        }
     }
     private void getPosterCastings() {
         Retrofit retrofit = apiClient.getClient();
