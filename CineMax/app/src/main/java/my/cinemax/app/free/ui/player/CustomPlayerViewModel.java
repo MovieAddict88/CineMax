@@ -100,15 +100,29 @@ public class CustomPlayerViewModel extends BaseObservable implements ExoPlayer.E
     }
 
     public void onStart(SimpleExoPlayerView simpleExoPlayerView, Bundle bundle) {
+        if (bundle == null) {
+            Log.e("CustomPlayerViewModel", "Bundle is null");
+            return;
+        }
+        
         mSimpleExoPlayerView = simpleExoPlayerView;
         mUrl = bundle.getString("videoUrl");
-        isLive = bundle.getBoolean("isLive");
+        isLive = bundle.getBoolean("isLive", false);
         videoType = bundle.getString("videoType");
         videoTitle = bundle.getString("videoTitle");
         videoSubTile = bundle.getString("videoSubTile");
         videoImage = bundle.getString("videoImage");
+        
+        // Validate required data
+        if (mUrl == null || mUrl.isEmpty()) {
+            Log.e("CustomPlayerViewModel", "Video URL is null or empty");
+            return;
+        }
+        
         initPlayer();
-        mSimpleExoPlayerView.setPlayer(mExoPlayer);
+        if (mSimpleExoPlayerView != null) {
+            mSimpleExoPlayerView.setPlayer(mExoPlayer);
+        }
 
         preparePlayer(null,0);
         updateCastSessionAndSessionManager();
@@ -126,6 +140,11 @@ public class CustomPlayerViewModel extends BaseObservable implements ExoPlayer.E
         mSimpleExoPlayerView.setResizeMode(AspectRatioFrameLayout.RESIZE_MODE_FIT);
     }
     private void initPlayer() {
+        if (mActivity == null) {
+            Log.e("CustomPlayerViewModel", "Activity is null");
+            return;
+        }
+        
         // 1. Create a default TrackSelector
         Handler mainHandler = new Handler();
         BandwidthMeter bandwidthMeter = new DefaultBandwidthMeter();
@@ -142,28 +161,28 @@ public class CustomPlayerViewModel extends BaseObservable implements ExoPlayer.E
 
     public void preparePlayer(Subtitle subtitle,long seekTo) {
 
+        // Validate URL
+        if (mUrl == null || mUrl.isEmpty()) {
+            Log.e("CustomPlayerViewModel", "Video URL is null or empty");
+            return;
+        }
 
+        try {
+            // Measures bandwidth during playback. Can be null if not required.
+            DefaultBandwidthMeter bandwidthMeter = new DefaultBandwidthMeter();
+            // Produces DataSource instances through which media data is loaded.
+            DataSource.Factory dataSourceFactory = new DefaultDataSourceFactory(mActivity,
+                    Util.getUserAgent(mActivity, "ExoPlayer2"), bandwidthMeter);
+            // Produces Extractor instances for parsing the media data.
+            // This is the MediaSource representing the media to be played.
+            Uri videoUri = Uri.parse(mUrl);
+            MediaSource mediaSource1;
+            int sourceSize = 0;
 
-
-
-    // Produces Extractor instances for parsing the media data.
-//    ExtractorsFactory extractorsFactory = new DefaultExtractorsFactory();
-//    Handler mainHandler = new Handler();
-//    MediaSource mediaSource = new HlsMediaSource(Uri.parse(
-//    "https://live3-mediaset-it.akamaized.net/content/hls_clr_xo/live/channel(ch09)/Stream(02)/index.m3u8"),
-//        dataSourceFactory, null, null);
-
-        // Measures bandwidth during playback. Can be null if not required.
-        DefaultBandwidthMeter bandwidthMeter = new DefaultBandwidthMeter();
-        // Produces DataSource instances through which media data is loaded.
-        DataSource.Factory dataSourceFactory = new DefaultDataSourceFactory(mActivity,
-                Util.getUserAgent(mActivity, "ExoPlayer2"), bandwidthMeter);
-        // Produces Extractor instances for parsing the media data.
-        // This is the MediaSource representing the media to be played.
-        Uri videoUri = Uri.parse(mUrl);
-        MediaSource mediaSource1;
-        int sourceSize = 0;
-
+        if (videoType == null) {
+            videoType = "mp4"; // Default to mp4 if type is null
+        }
+        
         if (videoType.equals("mp4")){
             ExtractorsFactory extractorsFactory = new DefaultExtractorsFactory();
             //  mediaSource1 = new ExtractorMediaSource(videoUri, dataSourceFactory, extractorsFactory, null, null);
@@ -215,14 +234,26 @@ public class CustomPlayerViewModel extends BaseObservable implements ExoPlayer.E
 
         MediaSource mediaSource = new MergingMediaSource(mediaSources);
 
-
-
-        // Prepare the player with the source.
-        mExoPlayer.prepare(mediaSource,false,false);
-        mExoPlayer.seekTo(seekTo);
-        mExoPlayer.addListener(this);
-        mExoPlayer.setPlayWhenReady(SHOULD_AUTO_PLAY);
+        try {
+            // Prepare the player with the source.
+            if (mExoPlayer != null) {
+                mExoPlayer.prepare(mediaSource,false,false);
+                mExoPlayer.seekTo(seekTo);
+                mExoPlayer.addListener(this);
+                mExoPlayer.setPlayWhenReady(SHOULD_AUTO_PLAY);
+            } else {
+                Log.e("CustomPlayerViewModel", "ExoPlayer is null");
+            }
+        } catch (Exception e) {
+            Log.e("CustomPlayerViewModel", "Error preparing player: " + e.getMessage());
+            // Handle the error gracefully
+        }
        // mExoPlayer.setPlayWhenReady(true);
+
+        } catch (Exception e) {
+            Log.e("CustomPlayerViewModel", "Error in preparePlayer: " + e.getMessage());
+            // Handle the error gracefully
+        }
 
     }
 

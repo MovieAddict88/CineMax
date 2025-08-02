@@ -413,12 +413,16 @@ public class SerieActivity extends AppCompatActivity implements PlaylistDownload
         if (checkSUBSCRIBED()){
             showSourcesPlayDialog();
         }else{
-            if (selectedEpisode.getPlayas().equals("2")){
-                showDialog(false);
-            }else if(selectedEpisode.getPlayas().equals("3") ){
-                showDialog(true);
-                operationAfterAds = 200;
-            }else{
+            if (selectedEpisode != null && selectedEpisode.getPlayas() != null) {
+                if (selectedEpisode.getPlayas().equals("2")){
+                    showDialog(false);
+                }else if(selectedEpisode.getPlayas().equals("3") ){
+                    showDialog(true);
+                    operationAfterAds = 200;
+                }else{
+                    showSourcesPlayDialog();
+                }
+            } else {
                 showSourcesPlayDialog();
             }
         }
@@ -677,15 +681,35 @@ public class SerieActivity extends AppCompatActivity implements PlaylistDownload
     public void playSource(int position){
         addView();
 
-        if (playableList.get(position).getType().equals("youtube")){
+        // Validate position and playableList
+        if (position < 0 || position >= playableList.size()) {
+            Toasty.error(getApplicationContext(), "Invalid source selected", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        Source source = playableList.get(position);
+        if (source == null) {
+            Toasty.error(getApplicationContext(), "Source is null", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        String sourceType = source.getType();
+        String sourceUrl = source.getUrl();
+
+        if (sourceType == null || sourceUrl == null) {
+            Toasty.error(getApplicationContext(), "Invalid source data", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        if (sourceType.equals("youtube")){
             Intent intent = new Intent(SerieActivity.this,YoutubeActivity.class);
-            intent.putExtra("url",playableList.get(position).getUrl());
+            intent.putExtra("url", sourceUrl);
             startActivity(intent);
             return;
         }
-        if (playableList.get(position).getType().equals("embed")){
+        if (sourceType.equals("embed")){
             Intent intent = new Intent(SerieActivity.this,EmbedActivity.class);
-            intent.putExtra("url",playableList.get(position).getUrl());
+            intent.putExtra("url", sourceUrl);
             startActivity(intent);
             return;
         }
@@ -696,24 +720,45 @@ public class SerieActivity extends AppCompatActivity implements PlaylistDownload
             loadSubtitles(position);
         } else {
             Intent intent = new Intent(SerieActivity.this,PlayerActivity.class);
-            intent.putExtra("id",selectedEpisode.getId());
-            intent.putExtra("url",playableList.get(position).getUrl());
+            
+            // Validate selectedEpisode
+            if (selectedEpisode == null || selectedEpisode.getId() == null) {
+                Toasty.error(getApplicationContext(), "Episode data is invalid", Toast.LENGTH_SHORT).show();
+                return;
+            }
+            
+            intent.putExtra("id", selectedEpisode.getId());
+            intent.putExtra("url", sourceUrl);
             
             // Fix video type for streaming URLs
-            String videoType = playableList.get(position).getType();
-            String url = playableList.get(position).getUrl();
-            if (url != null) {
-                if (url.contains(".m3u8")) {
+            String videoType = sourceType;
+            if (sourceUrl != null) {
+                if (sourceUrl.contains(".m3u8")) {
                     videoType = "m3u8";  // Player expects "m3u8" for HLS streams
-                } else if (url.contains(".mpd")) {
+                } else if (sourceUrl.contains(".mpd")) {
                     videoType = "dash";  // Player expects "dash" for MPD/DASH streams
                 }
             }
             intent.putExtra("type", videoType);
             intent.putExtra("kind","episode");
-            intent.putExtra("image",poster.getImage());
-            intent.putExtra("title",poster.getTitle());
-            intent.putExtra("subtitle",seasonArrayList.get(spinner_activity_serie_season_list.getSelectedItemPosition()).getTitle()+" : "+selectedEpisode.getTitle());
+            
+            // Validate poster data
+            if (poster != null) {
+                intent.putExtra("image", poster.getImage());
+                intent.putExtra("title", poster.getTitle());
+            }
+            
+            // Validate season and episode data
+            if (seasonArrayList != null && seasonArrayList.size() > 0 && 
+                spinner_activity_serie_season_list != null && 
+                spinner_activity_serie_season_list.getSelectedItemPosition() >= 0 &&
+                spinner_activity_serie_season_list.getSelectedItemPosition() < seasonArrayList.size()) {
+                String subtitle = seasonArrayList.get(spinner_activity_serie_season_list.getSelectedItemPosition()).getTitle() + " : " + selectedEpisode.getTitle();
+                intent.putExtra("subtitle", subtitle);
+            } else {
+                intent.putExtra("subtitle", selectedEpisode.getTitle());
+            }
+            
             startActivity(intent);
         }
 
