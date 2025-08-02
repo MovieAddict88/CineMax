@@ -1,0 +1,703 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PHP API to CineMax JSON Converter</title>
+    <style>
+        :root {
+            --primary: #3498db;
+            --success: #2ecc71;
+            --warning: #f39c12;
+            --danger: #e74c3c;
+            --dark: #2c3e50;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f4f7f9;
+            margin: 0;
+            padding: 20px;
+            color: #333;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding: 20px;
+            background: linear-gradient(135deg, #2c3e50, #4a6491);
+            color: white;
+            border-radius: 10px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+        
+        .card {
+            background-color: #ffffff;
+            border-radius: 10px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+            padding: 25px;
+            margin-bottom: 25px;
+        }
+        
+        .btn {
+            background: linear-gradient(135deg, var(--primary), #2980b9);
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+            margin: 10px 5px;
+            transition: all 0.3s ease;
+        }
+        
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgba(52, 152, 219, 0.4);
+        }
+        
+        .btn-success {
+            background: linear-gradient(135deg, var(--success), #27ae60);
+        }
+        
+        .btn-warning {
+            background: linear-gradient(135deg, var(--warning), #e67e22);
+        }
+        
+        textarea {
+            width: 100%;
+            height: 300px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            padding: 15px;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            resize: vertical;
+        }
+        
+        .progress {
+            background-color: #f0f0f0;
+            border-radius: 10px;
+            overflow: hidden;
+            margin: 20px 0;
+            height: 30px;
+        }
+        
+        .progress-bar {
+            background: linear-gradient(135deg, var(--success), #27ae60);
+            height: 100%;
+            width: 0%;
+            transition: width 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+        }
+        
+        .status {
+            padding: 15px;
+            border-radius: 8px;
+            margin: 10px 0;
+            font-weight: bold;
+        }
+        
+        .status.success {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        
+        .status.error {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        
+        .status.info {
+            background-color: #d1ecf1;
+            color: #0c5460;
+            border: 1px solid #bee5eb;
+        }
+        
+        .grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+        
+        @media (max-width: 768px) {
+            .grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🎬 PHP API to CineMax JSON Converter</h1>
+            <p>Convert your original PHP API data structure to CineMax-compatible JSON format</p>
+        </header>
+        
+        <div class="card">
+            <h2>📥 Input: Original PHP API Response</h2>
+            <p>Paste the JSON response from your original PHP API endpoint (e.g., from "first/" endpoint):</p>
+            <textarea id="phpApiInput" placeholder='Paste your PHP API JSON response here, for example:
+{
+  "slides": [...],
+  "posters": [...],
+  "channels": [...],
+  "actors": [...],
+  "genres": [...]
+}'></textarea>
+            <button class="btn" onclick="convertPhpToJson()">🔄 Convert to CineMax Format</button>
+            <button class="btn btn-warning" onclick="loadSampleData()">📋 Load Sample Data</button>
+        </div>
+        
+        <div id="progressSection" style="display: none;">
+            <div class="progress">
+                <div class="progress-bar" id="progressBar"></div>
+            </div>
+            <div id="statusMessage" class="status info">Converting...</div>
+        </div>
+        
+        <div class="grid">
+            <div class="card">
+                <h2>📤 Output: CineMax JSON</h2>
+                <textarea id="cineMaxOutput" placeholder="Converted CineMax-compatible JSON will appear here..."></textarea>
+                <button class="btn btn-success" onclick="downloadJson()">💾 Download JSON</button>
+                <button class="btn" onclick="copyToClipboard()">📋 Copy to Clipboard</button>
+            </div>
+            
+            <div class="card">
+                <h2>📊 Conversion Summary</h2>
+                <div id="conversionSummary">
+                    <p>Upload PHP API data to see conversion statistics...</p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="card">
+            <h2>ℹ️ Instructions</h2>
+            <ol>
+                <li><strong>Get your PHP API data:</strong> Make a request to your original API endpoint (e.g., https://webflix.virmana.com/api/first/)</li>
+                <li><strong>Paste the response:</strong> Copy the entire JSON response and paste it in the input area above</li>
+                <li><strong>Convert:</strong> Click "Convert to CineMax Format" to transform the data</li>
+                <li><strong>Download:</strong> Save the converted JSON file</li>
+                <li><strong>Use with API Manager:</strong> Load the converted JSON in the main index.html API manager</li>
+            </ol>
+            
+            <h3>🔧 What this converter does:</h3>
+            <ul>
+                <li>Converts "posters" array to "movies" with proper video sources</li>
+                <li>Transforms PHP API structure to match CineMax JSON schema</li>
+                <li>Adds missing fields required by the Android app</li>
+                <li>Creates proper video sources for both movies and series episodes</li>
+                <li>Generates home slides and featured content sections</li>
+                <li>Ensures all data types match CineMax expectations</li>
+            </ul>
+        </div>
+    </div>
+
+    <script>
+        let convertedData = null;
+        
+        function loadSampleData() {
+            const sampleData = {
+                "slides": [
+                    {
+                        "id": 1,
+                        "title": "Sample Movie",
+                        "description": "This is a sample movie from PHP API",
+                        "image": "https://image.tmdb.org/t/p/w500/sample.jpg",
+                        "url": "movies/1"
+                    }
+                ],
+                "posters": [
+                    {
+                        "id": 1,
+                        "title": "Sample Movie",
+                        "type": "movie",
+                        "label": "HD",
+                        "sublabel": "2023",
+                        "imdb": "8.5",
+                        "description": "A sample movie for testing the converter",
+                        "classification": "PG-13",
+                        "year": "2023",
+                        "duration": "120",
+                        "rating": 8.5,
+                        "image": "https://image.tmdb.org/t/p/w500/sample.jpg",
+                        "cover": "https://image.tmdb.org/t/p/original/sample.jpg",
+                        "playas": "video",
+                        "comment": true,
+                        "sources": [
+                            {
+                                "id": 1,
+                                "type": "video",
+                                "title": "HD Quality",
+                                "quality": "1080p",
+                                "url": "https://sample-video.com/movie.mp4"
+                            }
+                        ],
+                        "trailer": {
+                            "id": 1,
+                            "type": "video",
+                            "title": "Trailer",
+                            "url": "https://youtube.com/watch?v=sample"
+                        },
+                        "genres": [
+                            {
+                                "id": 1,
+                                "name": "Action"
+                            }
+                        ]
+                    }
+                ],
+                "channels": [
+                    {
+                        "id": 1,
+                        "title": "Sample Channel",
+                        "label": "Live TV",
+                        "sublabel": "HD",
+                        "description": "Sample TV channel",
+                        "image": "https://sample.com/channel.png",
+                        "sources": [
+                            {
+                                "id": 1,
+                                "type": "live",
+                                "title": "Main Stream",
+                                "quality": "HD",
+                                "url": "https://sample.com/stream.m3u8"
+                            }
+                        ]
+                    }
+                ],
+                "actors": [
+                    {
+                        "id": 1,
+                        "name": "Sample Actor",
+                        "image": "https://sample.com/actor.jpg"
+                    }
+                ],
+                "genres": [
+                    {
+                        "id": 1,
+                        "name": "Action"
+                    }
+                ]
+            };
+            
+            document.getElementById('phpApiInput').value = JSON.stringify(sampleData, null, 2);
+        }
+        
+        function convertPhpToJson() {
+            const input = document.getElementById('phpApiInput').value.trim();
+            
+            if (!input) {
+                showStatus('error', 'Please paste your PHP API JSON data first!');
+                return;
+            }
+            
+            try {
+                const phpData = JSON.parse(input);
+                showProgress();
+                
+                setTimeout(() => {
+                    const cineMaxData = transformToCineMaxFormat(phpData);
+                    convertedData = cineMaxData;
+                    
+                    document.getElementById('cineMaxOutput').value = JSON.stringify(cineMaxData, null, 2);
+                    showConversionSummary(phpData, cineMaxData);
+                    showStatus('success', 'Conversion completed successfully!');
+                    hideProgress();
+                }, 1500);
+                
+            } catch (error) {
+                showStatus('error', 'Invalid JSON format: ' + error.message);
+                hideProgress();
+            }
+        }
+        
+        function transformToCineMaxFormat(phpData) {
+            console.log('Starting PHP to CineMax conversion...');
+            
+            // Initialize CineMax structure
+            const cineMaxData = {
+                "api_info": {
+                    "version": "2.0",
+                    "description": "Converted from PHP API to CineMax JSON API",
+                    "last_updated": new Date().toISOString().split('T')[0],
+                    "total_movies": 0,
+                    "total_channels": 0,
+                    "total_actors": 0
+                },
+                "home": {
+                    "slides": [],
+                    "featuredMovies": [],
+                    "channels": [],
+                    "actors": [],
+                    "genres": []
+                },
+                "movies": [],
+                "channels": [],
+                "actors": [],
+                "genres": []
+            };
+            
+            // Convert slides
+            if (phpData.slides && Array.isArray(phpData.slides)) {
+                cineMaxData.home.slides = phpData.slides.map(slide => ({
+                    id: slide.id || 1,
+                    title: slide.title || "Untitled",
+                    type: slide.type || "movie",
+                    image: slide.image || slide.cover || "",
+                    url: slide.url || `movies/${slide.id || 1}`,
+                    poster: convertPosterToCineMax(slide)
+                }));
+            }
+            
+            // Convert posters (movies/series) to movies
+            if (phpData.posters && Array.isArray(phpData.posters)) {
+                cineMaxData.movies = phpData.posters.map(poster => convertPosterToCineMax(poster));
+                cineMaxData.api_info.total_movies = cineMaxData.movies.length;
+                
+                // Create featured movies from high-rated ones
+                cineMaxData.home.featuredMovies = cineMaxData.movies
+                    .filter(movie => movie.rating > 7)
+                    .slice(0, 10)
+                    .map(movie => ({
+                        id: movie.id,
+                        title: movie.title,
+                        image: movie.image,
+                        url: `movies/${movie.id}`
+                    }));
+            }
+            
+            // Convert channels
+            if (phpData.channels && Array.isArray(phpData.channels)) {
+                cineMaxData.channels = phpData.channels.map(channel => convertChannelToCineMax(channel));
+                cineMaxData.home.channels = cineMaxData.channels.slice(0, 10);
+                cineMaxData.api_info.total_channels = cineMaxData.channels.length;
+            }
+            
+            // Convert actors
+            if (phpData.actors && Array.isArray(phpData.actors)) {
+                cineMaxData.actors = phpData.actors.map(actor => convertActorToCineMax(actor));
+                cineMaxData.home.actors = cineMaxData.actors.slice(0, 20);
+                cineMaxData.api_info.total_actors = cineMaxData.actors.length;
+            }
+            
+            // Convert genres
+            if (phpData.genres && Array.isArray(phpData.genres)) {
+                cineMaxData.genres = phpData.genres.map(genre => convertGenreToCineMax(genre));
+                cineMaxData.home.genres = cineMaxData.genres;
+            }
+            
+            console.log('Conversion completed:', cineMaxData);
+            return cineMaxData;
+        }
+        
+        function convertPosterToCineMax(poster) {
+            if (!poster) return null;
+            
+            const converted = {
+                id: poster.id || Math.floor(Math.random() * 10000),
+                title: poster.title || "Untitled",
+                type: poster.type || "movie",
+                label: poster.label || "HD",
+                sublabel: poster.sublabel || new Date().getFullYear().toString(),
+                imdb: poster.imdb || poster.rating || "0",
+                downloadas: poster.downloadas || (poster.title || "movie").toLowerCase().replace(/[^a-z0-9]/g, '-'),
+                comment: poster.comment !== undefined ? poster.comment : true,
+                playas: poster.playas || "video",
+                description: poster.description || "No description available",
+                classification: poster.classification || "PG-13",
+                year: poster.year || new Date().getFullYear().toString(),
+                duration: poster.duration || "00:00",
+                rating: parseFloat(poster.rating || poster.imdb || 0),
+                created_at: new Date().toISOString().split('T')[0],
+                image: poster.image || "",
+                cover: poster.cover || poster.image || "",
+                genres: convertGenresArray(poster.genres),
+                actors: convertActorsArray(poster.actors),
+                sources: convertSourcesArray(poster.sources, poster.id),
+                trailer: convertTrailer(poster.trailer, poster.id),
+                subtitles: poster.subtitles || [],
+                comments: poster.comments || [],
+                views: poster.views || 0,
+                downloads: poster.downloads || 0,
+                shares: poster.shares || 0,
+                seasons: convertSeasonsArray(poster.seasons)
+            };
+            
+            // Add seasons for series
+            if (poster.type === 'series' && (!poster.seasons || poster.seasons.length === 0)) {
+                // Create default season if it's a series but has no seasons
+                converted.seasons = [{
+                    id: poster.id || 1,
+                    title: "Season 1",
+                    episodes: createDefaultEpisodes(poster.id || 1, poster.sources)
+                }];
+            }
+            
+            return converted;
+        }
+        
+        function convertChannelToCineMax(channel) {
+            return {
+                id: channel.id || Math.floor(Math.random() * 10000),
+                title: channel.title || "Untitled Channel",
+                label: channel.label || "Live TV",
+                sublabel: channel.sublabel || "HD",
+                description: channel.description || "Live TV Channel",
+                website: channel.website || "https://example.com",
+                classification: channel.classification || "Entertainment",
+                views: channel.views || 0,
+                shares: channel.shares || 0,
+                rating: parseFloat(channel.rating || 0),
+                comment: channel.comment !== undefined ? channel.comment : true,
+                image: channel.image || "",
+                playas: channel.playas || "live",
+                sources: convertSourcesArray(channel.sources, channel.id, "live"),
+                categories: convertCategoriesArray(channel.categories),
+                countries: convertCountriesArray(channel.countries),
+                comments: channel.comments || []
+            };
+        }
+        
+        function convertActorToCineMax(actor) {
+            return {
+                id: actor.id || Math.floor(Math.random() * 10000),
+                name: actor.name || "Unknown Actor",
+                type: actor.type || "actor",
+                role: actor.role || "",
+                image: actor.image || "",
+                born: actor.born || "",
+                height: actor.height || "",
+                bio: actor.bio || ""
+            };
+        }
+        
+        function convertGenreToCineMax(genre) {
+            return {
+                id: genre.id || Math.floor(Math.random() * 1000),
+                name: genre.name || "Unknown Genre"
+            };
+        }
+        
+        function convertSourcesArray(sources, id, defaultType = "video") {
+            if (!sources || !Array.isArray(sources)) {
+                // Create default source if none exist
+                return [{
+                    id: id || 1,
+                    type: defaultType,
+                    title: `${defaultType === "live" ? "Main Stream" : "HD Quality"}`,
+                    quality: defaultType === "live" ? "HD" : "1080p",
+                    url: defaultType === "live" 
+                        ? `https://vidsrc.net/embed/tv/${id || 1}/1/1`
+                        : `https://vidsrc.net/embed/movie/${id || 1}`
+                }];
+            }
+            
+            return sources.map(source => ({
+                id: source.id || id || 1,
+                type: source.type || defaultType,
+                title: source.title || "Video Source",
+                quality: source.quality || "1080p",
+                size: source.size || "",
+                kind: source.kind || "",
+                premium: source.premium || "",
+                external: source.external || false,
+                url: source.url || ""
+            }));
+        }
+        
+        function convertTrailer(trailer, id) {
+            if (trailer && trailer.url) {
+                return {
+                    id: trailer.id || id || 1,
+                    type: trailer.type || "video",
+                    title: trailer.title || "Trailer",
+                    url: trailer.url
+                };
+            }
+            
+            // Create default trailer
+            return {
+                id: id || 1,
+                type: "video",
+                title: "Trailer",
+                url: "https://www.youtube.com/watch?v=dQw4w9WgXcQ"
+            };
+        }
+        
+        function convertGenresArray(genres) {
+            if (!genres || !Array.isArray(genres)) {
+                return [{ id: 1, name: "Drama" }];
+            }
+            return genres.map(genre => convertGenreToCineMax(genre));
+        }
+        
+        function convertActorsArray(actors) {
+            if (!actors || !Array.isArray(actors)) {
+                return [];
+            }
+            return actors.map(actor => convertActorToCineMax(actor));
+        }
+        
+        function convertCategoriesArray(categories) {
+            if (!categories || !Array.isArray(categories)) {
+                return [{ id: 1, title: "Entertainment" }];
+            }
+            return categories.map(cat => ({
+                id: cat.id || 1,
+                title: cat.title || cat.name || "Category"
+            }));
+        }
+        
+        function convertCountriesArray(countries) {
+            if (!countries || !Array.isArray(countries)) {
+                return [{ id: 1, title: "US" }];
+            }
+            return countries.map(country => ({
+                id: country.id || 1,
+                title: country.title || country.name || "Country"
+            }));
+        }
+        
+        function convertSeasonsArray(seasons) {
+            if (!seasons || !Array.isArray(seasons)) {
+                return [];
+            }
+            return seasons.map(season => ({
+                id: season.id || 1,
+                title: season.title || "Season 1",
+                episodes: convertEpisodesArray(season.episodes, season.id)
+            }));
+        }
+        
+        function convertEpisodesArray(episodes, seasonId) {
+            if (!episodes || !Array.isArray(episodes)) {
+                return [];
+            }
+            return episodes.map((episode, index) => ({
+                id: episode.id || index + 1,
+                title: episode.title || `Episode ${index + 1}`,
+                episode_number: episode.episode_number || index + 1,
+                image: episode.image || "",
+                duration: episode.duration || "45:00",
+                views: episode.views || 0,
+                downloads: episode.downloads || 0,
+                sources: convertSourcesArray(episode.sources, episode.id || index + 1),
+                subtitles: episode.subtitles || []
+            }));
+        }
+        
+        function createDefaultEpisodes(seriesId, sources) {
+            // Create 10 default episodes for series
+            const episodes = [];
+            for (let i = 1; i <= 10; i++) {
+                episodes.push({
+                    id: `${seriesId}_${i}`,
+                    title: `Episode ${i}`,
+                    episode_number: i,
+                    image: "",
+                    duration: "45:00",
+                    views: 0,
+                    downloads: 0,
+                    sources: [{
+                        id: `${seriesId}_${i}`,
+                        type: "video",
+                        title: `Episode ${i} 1080p`,
+                        quality: "1080p",
+                        url: `https://vidsrc.net/embed/tv/${seriesId}/1/${i}`
+                    }],
+                    subtitles: []
+                });
+            }
+            return episodes;
+        }
+        
+        function showProgress() {
+            document.getElementById('progressSection').style.display = 'block';
+            const progressBar = document.getElementById('progressBar');
+            let width = 0;
+            const interval = setInterval(() => {
+                width += 10;
+                progressBar.style.width = width + '%';
+                progressBar.textContent = width + '%';
+                if (width >= 100) {
+                    clearInterval(interval);
+                }
+            }, 150);
+        }
+        
+        function hideProgress() {
+            document.getElementById('progressSection').style.display = 'none';
+        }
+        
+        function showStatus(type, message) {
+            const statusElement = document.getElementById('statusMessage');
+            statusElement.className = `status ${type}`;
+            statusElement.textContent = message;
+            statusElement.style.display = 'block';
+        }
+        
+        function showConversionSummary(phpData, cineMaxData) {
+            const summary = document.getElementById('conversionSummary');
+            summary.innerHTML = `
+                <h3>✅ Conversion Statistics</h3>
+                <ul>
+                    <li><strong>Movies/Series:</strong> ${cineMaxData.movies.length} converted</li>
+                    <li><strong>Channels:</strong> ${cineMaxData.channels.length} converted</li>
+                    <li><strong>Actors:</strong> ${cineMaxData.actors.length} converted</li>
+                    <li><strong>Genres:</strong> ${cineMaxData.genres.length} converted</li>
+                    <li><strong>Home Slides:</strong> ${cineMaxData.home.slides.length} created</li>
+                    <li><strong>Featured Movies:</strong> ${cineMaxData.home.featuredMovies.length} created</li>
+                </ul>
+                <h4>🔧 Transformations Applied:</h4>
+                <ul>
+                    <li>✅ PHP "posters" → CineMax "movies"</li>
+                    <li>✅ Added missing video sources</li>
+                    <li>✅ Created proper API info structure</li>
+                    <li>✅ Generated home section data</li>
+                    <li>✅ Ensured all required fields are present</li>
+                </ul>
+            `;
+        }
+        
+        function downloadJson() {
+            if (!convertedData) {
+                showStatus('error', 'No converted data to download. Please convert first!');
+                return;
+            }
+            
+            const blob = new Blob([JSON.stringify(convertedData, null, 2)], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'cinemax_converted_api.json';
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+            
+            showStatus('success', 'JSON file downloaded successfully!');
+        }
+        
+        function copyToClipboard() {
+            const output = document.getElementById('cineMaxOutput');
+            output.select();
+            document.execCommand('copy');
+            showStatus('success', 'JSON copied to clipboard!');
+        }
+    </script>
+</body>
+</html>
