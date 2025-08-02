@@ -1430,6 +1430,71 @@
             };
             console.log('✅ You can test auto-generation with: testAutoGeneration() in console');
             
+            // Add manual test for detectSourceKind function
+            window.testDetectSourceKind = function() {
+                console.log('🧪 MANUAL TEST: Testing detectSourceKind function...');
+                
+                const testCases = [
+                    { url: 'https://vidsrc.net/embed/movie/90802', type: 'video', context: null },
+                    { url: 'https://vidsrc.net/embed/tv/90802/1/1', type: 'video', context: null },
+                    { url: 'https://example.com/video.mp4', type: 'video', context: null },
+                    { url: 'https://vidsrc.net/embed/movie/90802', type: 'video', context: 'slide' },
+                    { url: 'https://vidsrc.net/embed/movie/90802', type: 'video', context: 'featured' },
+                    { url: 'https://vidsrc.net/embed/movie/90802', type: 'video', context: 'genre' },
+                    { url: 'https://example.com/live.m3u8', type: 'live', context: null }
+                ];
+                
+                console.log('Running detectSourceKind tests:');
+                testCases.forEach((test, i) => {
+                    const result = detectSourceKind(test.url, test.type, test.context);
+                    console.log(`Test ${i+1}: URL="${test.url}", type="${test.type}", context="${test.context || 'none'}" -> kind="${result}"`);
+                });
+                
+                alert('detectSourceKind test completed! Check console for results.');
+            };
+            console.log('✅ You can test detectSourceKind with: testDetectSourceKind() in console');
+            
+            // Add manual test for episode image generation
+            window.testEpisodeImages = function() {
+                console.log('🧪 MANUAL TEST: Testing episode image generation...');
+                
+                // Test the episode image generation logic
+                function generateEpisodeImage(seriesPosterPath, seasonNumber, episodeNumber) {
+                    if (seriesPosterPath) {
+                        return `https://image.tmdb.org/t/p/w500${seriesPosterPath}`;
+                    } else {
+                        return null; // Android app will handle null gracefully
+                    }
+                }
+                
+                const testCases = [
+                    { poster: '/abc123.jpg', season: 1, episode: 1 },
+                    { poster: '', season: 1, episode: 1 },
+                    { poster: '/def456.jpg', season: 2, episode: 5 },
+                    { poster: '', season: 2, episode: 10 },
+                    { poster: null, season: 3, episode: 2 }
+                ];
+                
+                console.log('Testing episode image generation:');
+                testCases.forEach((test, i) => {
+                    const result = generateEpisodeImage(test.poster, test.season, test.episode);
+                    console.log(`Test ${i+1}: Poster="${test.poster || 'empty'}", S${test.season}E${test.episode} -> "${result}"`);
+                });
+                
+                // Check current series input
+                const currentSeriesPoster = seriesImageInput.value.trim();
+                console.log(`Current series poster input: "${currentSeriesPoster}"`);
+                
+                if (currentSeriesPoster) {
+                    console.log(`Episode images would use: ${currentSeriesPoster}`);
+                } else {
+                    console.log('Episode images would use null (Android app will use series poster)');
+                }
+                
+                alert('Episode image test completed! Check console for results.');
+            };
+            console.log('✅ You can test episode images with: testEpisodeImages() in console');
+            
             // --- Auto-Generation Control ---
             const autoGenToggle = document.getElementById('autoGenToggle');
             const manualGenButton = document.getElementById('manualGenButton');
@@ -1709,11 +1774,21 @@
                         url: item.url,
                         poster: item.contentType === 'movie' ? { 
                             ...item,
+                            sources: (item.sources || []).map(source => ({
+                                ...source,
+                                kind: detectSourceKind(source.url, source.type, 'slide')
+                            })),
                             label: item.contentType === 'movie' ? 'Latest Movie' : 'Featured Content',
                             sublabel: item.year ? `Released ${item.year}` : 'New Release',
                             description: item.description || item.overview || 'Check out this amazing content!'
                         } : null,
-                        channel: item.contentType === 'channel' ? { ...item } : null
+                        channel: item.contentType === 'channel' ? { 
+                            ...item,
+                            sources: (item.sources || []).map(source => ({
+                                ...source,
+                                kind: detectSourceKind(source.url, source.type, 'slide')
+                            }))
+                        } : null
                     }));
                 }
                 
@@ -1750,12 +1825,20 @@
                     
                     jsonData.home.featured_movies = fallbackMovies.map(movie => ({
                         ...movie,
+                        sources: (movie.sources || []).map(source => ({
+                            ...source,
+                            kind: detectSourceKind(source.url, source.type, 'featured')
+                        })),
                         views: movie.views || Math.floor(Math.random() * 10000) + 1000, // Random views
                         created_at: movie.created_at || new Date().toISOString().split('T')[0]
                     }));
                 } else {
                     jsonData.home.featured_movies = featuredMovies.map(movie => ({
                         ...movie,
+                        sources: (movie.sources || []).map(source => ({
+                            ...source,
+                            kind: detectSourceKind(source.url, source.type, 'featured')
+                        })),
                         views: movie.views || Math.floor(Math.random() * 10000) + 1000, // Random views
                         created_at: movie.created_at || new Date().toISOString().split('T')[0]
                     }));
@@ -1871,7 +1954,10 @@
                                         actors: movie.actors || [],
                                         views: movie.views || 0,
                                         created_at: movie.created_at || new Date().toISOString().split('T')[0],
-                                        sources: movie.sources || [],
+                                        sources: (movie.sources || []).map(source => ({
+                                            ...source,
+                                            kind: detectSourceKind(source.url, source.type, 'genre')
+                                        })),
                                         trailer: movie.trailer || null,
                                         subtitles: movie.subtitles || [],
                                         comments: movie.comments || [],
@@ -1913,6 +1999,116 @@
             }
             
             // --- Utility Functions ---
+            function detectSourceKind(url, sourceType = 'video', contentContext = null) {
+                if (!url) return 'both'; // Default fallback
+                
+                const urlLower = url.toLowerCase();
+                
+                // Content from slides, featured, and genres are always play-only
+                if (contentContext === 'slide' || contentContext === 'featured' || contentContext === 'genre') {
+                    return 'play';
+                }
+                
+                // Live TV streams are always play-only
+                if (sourceType === 'live') {
+                    return 'play';
+                }
+                
+                // Embed patterns (play-only)
+                const embedPatterns = [
+                    '/embed/',
+                    '/player/',
+                    'iframe',
+                    'embedded',
+                    'player.php',
+                    'embed.php',
+                    'iframe.php',
+                    'vidcloud',
+                    'streamwish',
+                    'filemoon',
+                    'doodstream',
+                    'upstream',
+                    'mixdrop',
+                    'mp4upload',
+                    'streamtape',
+                    'streamhub',
+                    'fembed',
+                    'sbembed',
+                    'streamsb',
+                    'tubeload',
+                    'jawcloud',
+                    'videovard',
+                    'streamlare'
+                ];
+                
+                // Live streaming patterns (play-only)
+                const liveStreamPatterns = [
+                    '.m3u8',
+                    '.mpd',
+                    'rtmp://',
+                    'rtsp://',
+                    'hls://',
+                    'dash://',
+                    'stream',
+                    'live',
+                    'channel',
+                    'broadcast'
+                ];
+                
+                // Direct download patterns (both download and play)
+                const directPatterns = [
+                    '.mp4',
+                    '.mkv',
+                    '.avi',
+                    '.mov',
+                    '.wmv',
+                    '.flv',
+                    '.webm',
+                    '.m4v',
+                    'direct',
+                    'download',
+                    'file/'
+                ];
+                
+                // Check for embed patterns first
+                for (const pattern of embedPatterns) {
+                    if (urlLower.includes(pattern)) {
+                        return 'play';
+                    }
+                }
+                
+                // Check for live streaming patterns
+                for (const pattern of liveStreamPatterns) {
+                    if (urlLower.includes(pattern)) {
+                        return 'play';
+                    }
+                }
+                
+                // Check for direct download patterns
+                for (const pattern of directPatterns) {
+                    if (urlLower.includes(pattern)) {
+                        return 'both';
+                    }
+                }
+                
+                // Default: if it contains common streaming domains but no clear indicators
+                const streamingDomains = [
+                    'youtube.com',
+                    'vimeo.com',
+                    'dailymotion.com',
+                    'twitch.tv'
+                ];
+                
+                for (const domain of streamingDomains) {
+                    if (urlLower.includes(domain)) {
+                        return 'play';
+                    }
+                }
+                
+                // Default to 'both' if no clear pattern is detected
+                return 'both';
+            }
+            
             function showNotification(message, isSuccess = true) {
                 try {
                     console.log('Showing notification:', message, 'Success:', isSuccess);
@@ -2459,7 +2655,7 @@
                                 id: generateNewId(),
                                 title: episodeTitle,
                                 episode_number: episodeNumber,
-                                image: '',
+                                image: seriesImageInput.value.trim() || null,
                                 duration: '45:00',
                                 views: 0,
                                 downloads: 0,
@@ -2678,7 +2874,7 @@
                         title: name,
                         quality: name.includes('1080') ? '1080p' : name.includes('720') ? '720p' : name.includes('480') ? '480p' : 'HD',
                         size: '0MB',
-                        kind: 'both',
+                        kind: detectSourceKind(url, 'video'),
                         premium: 'false',
                         external: false,
                         url: url 
@@ -2717,7 +2913,7 @@
                                 id: generateNewId(),
                                 title: 'Episode 1',
                                 episode_number: 1,
-                                image: '',
+                                image: seriesImageInput.value.trim() || null,
                                 duration: '45:00',
                                 views: 0,
                                 downloads: 0,
@@ -2783,7 +2979,7 @@
                             id: generateNewId(),
                             title: `Episode ${newEpisodeNumber}`,
                             episode_number: newEpisodeNumber,
-                            image: '',
+                            image: seriesImageInput.value.trim() || null,
                             duration: '45:00',
                             views: 0,
                             downloads: 0,
@@ -3056,7 +3252,7 @@
                         title: 'vidsrc.net 1080p',
                         quality: '1080p',
                         size: '0MB',
-                        kind: 'both',
+                        kind: detectSourceKind(`https://vidsrc.net/embed/movie/${movieData.id}`, 'video'),
                         premium: 'false',
                         external: false,
                         url: `https://vidsrc.net/embed/movie/${movieData.id}`
@@ -3220,7 +3416,7 @@
                         title: 'vidsrc.net 1080p',
                         quality: '1080p',
                         size: '0MB',
-                        kind: 'both',
+                        kind: detectSourceKind(vidsrcUrl, 'video'),
                         premium: 'false',
                         external: false,
                         url: vidsrcUrl 
@@ -3297,7 +3493,7 @@
                         console.warn('Could not fetch series credits:', error);
                     }
                     
-                    // Prepare seasons data with auto vidsrc URLs
+                    // Prepare seasons data with auto vidsrc URLs and episode images
                     currentSeriesData = {
                         ...seriesData,
                         seasons: seriesData.seasons.filter(s => s.season_number > 0).map(season => ({
@@ -3306,11 +3502,18 @@
                             episodes: Array.from({length: season.episode_count || 1}, (_, i) => {
                                 const episodeNumber = i + 1;
                                 const vidsrcEpisodeUrl = `https://vidsrc.net/embed/tv/${tmdbId}/${season.season_number}/${episodeNumber}`;
+                                
+                                // Use series poster for episode image (like reference file does)
+                                // If no series poster, use null so Android app handles gracefully
+                                const episodeImageUrl = seriesData.poster_path ? 
+                                    `https://image.tmdb.org/t/p/w500${seriesData.poster_path}` : 
+                                    null;
+                                
                                 return {
                                     id: generateNewId(),
                                     title: `Episode ${episodeNumber}`,
                                     episode_number: episodeNumber,
-                                    image: '',
+                                    image: episodeImageUrl,
                                     duration: '45:00',
                                     views: 0,
                                     downloads: 0,
