@@ -687,9 +687,6 @@
                 <button id="clearStorageButton" class="btn btn-secondary" style="margin-left: 20px; background-color: var(--danger);">
                     <i class="fas fa-trash"></i> Clear Saved Data
                 </button>
-                <button id="cleanDuplicatesButton" class="btn btn-secondary" style="margin-left: 10px; background-color: var(--warning);">
-                    <i class="fas fa-broom"></i> Clean Duplicates
-                </button>
                 <div id="autoSaveStatus" style="margin-left: 20px; font-size: 0.9rem; color: var(--success); display: none;">
                     <i class="fas fa-save"></i> Auto-save active <span id="lastSaveTime"></span>
                 </div>
@@ -1089,11 +1086,13 @@
             event.preventDefault();
         });
 
-        // Initialize app when DOM is loaded
+        // IMMEDIATE TEST - This should show up first
         console.log('🔥 JAVASCRIPT IS LOADING! 🔥');
+        alert('JavaScript is working! Check console for details.');
 
         document.addEventListener('DOMContentLoaded', () => {
             console.log('🚀 DOM Content Loaded - Initializing app...');
+            alert('DOM loaded! App is starting...');
             
             // --- Constants and Config ---
             const tmdbApiKey = 'ec926176bf467b3f7735e3154238c161';
@@ -1161,7 +1160,6 @@
             let currentSeriesGenres = [];
             let currentSeriesActors = [];
             let autoGenerationEnabled = true; // Global control for auto-generation
-            let isSaving = false; // Flag to prevent double submissions
             
             const STORAGE_KEY = 'cinemax_api_data';
             const AUTO_SAVE_ENABLED_KEY = 'cinemax_auto_save_enabled';
@@ -1169,21 +1167,26 @@
             // SIMPLE CLICK TEST
             console.log('🧪 Setting up simple click tests...');
             
-            // Initialize element references
-            console.log('🔧 Setting up element references...');
-            
+            // Test 1: Save button
             const testButton = document.querySelector('#saveButton');
             if (testButton) {
                 console.log('✅ Save button found!');
+                testButton.addEventListener('click', () => {
+                    console.log('🎯 SAVE BUTTON WAS CLICKED!');
+                    alert('Save button clicked! This means event listeners work.');
+                });
             } else {
                 console.log('❌ Save button NOT found!');
             }
 
+            // Test 2: Form
             const testForm = document.querySelector('#entryForm');
             if (testForm) {
                 console.log('✅ Entry form found!');
+                // We'll add the real form handler later - this is just for testing if the form exists
             } else {
                 console.log('❌ Entry form NOT found!');
+                alert('CRITICAL ERROR: Entry form not found! Modal form is missing.');
             }
 
             // Test 3: Add new entry button
@@ -1198,25 +1201,90 @@
                 console.log('❌ Add new entry button NOT found!');
             }
 
-            // Modal Save Button - Simplified to prevent duplication
+            // Test 4: Modal Save Button (the one that's not working)
             const modalSaveButton = document.querySelector('#modalSaveButton');
             if (modalSaveButton) {
                 console.log('✅ Modal Save button found!');
                 modalSaveButton.addEventListener('click', (e) => {
+                    console.log('🎯 MODAL SAVE BUTTON WAS CLICKED DIRECTLY!');
+                    console.log('Button type:', modalSaveButton.type);
+                    console.log('Form element:', modalSaveButton.form);
+                    
+                    // The issue is likely that the form isn't submitting
+                    // Let's manually trigger the form submit
                     e.preventDefault(); // Prevent default button behavior
                     
-                    // Simply trigger the form submit to use the main handler
                     if (modalSaveButton.form) {
-                        console.log('🚀 Triggering form submit from modal save button...');
+                        console.log('🚀 Manually triggering form submit...');
                         const submitEvent = new Event('submit', { bubbles: true, cancelable: true });
                         modalSaveButton.form.dispatchEvent(submitEvent);
-                                            } else {
-                            console.log('❌ Button is not associated with a form!');
-                            showNotification('Form not found. Please try again.', false);
+                    } else {
+                        console.log('❌ Button is not associated with a form! Calling save directly...');
+                        
+                        // Direct save as fallback
+                        try {
+                            console.log('🔧 DIRECT SAVE FALLBACK TRIGGERED!');
+                            
+                            if (!jsonData) {
+                                alert('ERROR: No JSON data loaded. Please load a JSON file first.');
+                                return;
+                            }
+                            
+                            const activeTabElement = document.querySelector('.tab-btn.active');
+                            if (!activeTabElement) {
+                                alert('ERROR: No active tab found. Please select Movie, Series, or Channel.');
+                                return;
+                            }
+                            
+                            const activeTab = activeTabElement.dataset.type;
+                            console.log('Active tab for direct save:', activeTab);
+                            
+                            // Get form data and save
+                            const id = entryIdInput.value;
+                            
+                            if (activeTab === 'movie') {
+                                if (!movieTitleInput.value.trim()) {
+                                    alert('ERROR: Movie title is required');
+                                    return;
+                                }
+                                saveMovie(id);
+                                alert('Movie saved successfully!');
+                            } else if (activeTab === 'series') {
+                                if (!seriesTitleInput.value.trim()) {
+                                    alert('ERROR: Series title is required');
+                                    return;
+                                }
+                                saveSeries(id);
+                                alert('Series saved successfully!');
+                            } else if (activeTab === 'channel') {
+                                if (!channelTitleInput.value.trim()) {
+                                    alert('ERROR: Channel name is required');
+                                    return;
+                                }
+                                if (!channelStreamUrlInput.value.trim()) {
+                                    alert('ERROR: Stream URL is required');
+                                    return;
+                                }
+                                saveChannel(id);
+                                alert('Channel saved successfully!');
+                            }
+                            
+                            // Update UI and auto-generate related content
+                            autoGenerateRelatedContent();
+                            renderEntries();
+                            // Auto-save after adding/editing entry
+                            saveToLocalStorage();
+                            closeModal();
+                            
+                        } catch (error) {
+                            console.error('Direct save error:', error);
+                            alert('Save error: ' + error.message);
                         }
+                    }
                 });
             } else {
                 console.log('❌ Modal Save button NOT found!');
+                alert('CRITICAL: Modal Save button not found!');
             }
 
             // REAL FORM SUBMIT HANDLER - This is the important one!
@@ -1226,26 +1294,23 @@
                     event.preventDefault();
                     
                     console.log('🔥 REAL FORM SUBMIT TRIGGERED! 🔥');
+                    alert('REAL form submit working! Now processing...');
                     
                     try {
                         console.log('=== FORM SUBMIT STARTED ===');
                         console.log('Event:', event);
                         
                         // Prevent double submission
-                        if (isSaving) {
-                            console.log('Already saving - preventing double submit');
-                            showNotification('Please wait, saving in progress...', false);
+                        const submitButton = event.target.querySelector('button[type="submit"]');
+                        if (submitButton.disabled) {
+                            console.log('Button already disabled - preventing double submit');
+                            alert('Please wait, saving in progress...');
                             return;
                         }
                         
-                        isSaving = true;
-                        
                         // Disable submit button temporarily
-                        const submitButton = event.target.querySelector('button[type="submit"]');
-                        if (submitButton) {
-                            submitButton.disabled = true;
-                            submitButton.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Saving...';
-                        }
+                        submitButton.disabled = true;
+                        submitButton.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Saving...';
                         
                         console.log('=== CHECKING BASIC ELEMENTS ===');
                         
@@ -1296,7 +1361,7 @@
                         
                         if (!isValid) {
                             console.log('Validation failed:', errorMessage);
-                            showNotification('Validation failed: ' + errorMessage, false);
+                            alert('Validation failed: ' + errorMessage);
                             return;
                         }
                         
@@ -1316,17 +1381,14 @@
                         console.log('=== UPDATING UI ===');
                         renderEntries();
                         closeModal();
-                        showNotification(`${activeTab.charAt(0).toUpperCase() + activeTab.slice(1)} saved successfully!`, true);
+                        alert(`${activeTab.charAt(0).toUpperCase() + activeTab.slice(1)} saved successfully!`);
                         console.log('=== SAVE COMPLETED SUCCESSFULLY ===');
                         
                     } catch (error) {
                         console.error('=== SAVE ERROR ===', error);
                         console.error('Error stack:', error.stack);
-                        showNotification(`Error saving content: ${error.message}`, false);
+                        alert(`Error saving content: ${error.message}`);
                     } finally {
-                        // Reset saving flag
-                        isSaving = false;
-                        
                         // Re-enable submit button
                         const submitButton = event.target.querySelector('button[type="submit"]');
                         if (submitButton) {
@@ -1338,9 +1400,11 @@
                 console.log('✅ Real form submit handler attached successfully!');
             } else {
                 console.log('❌ Cannot attach form handler - form not found!');
+                alert('CRITICAL: Cannot attach form submit handler!');
             }
 
-            // Manual test functions for debugging
+            // Test 5: Manual Form Submit Test
+            console.log('🧪 Adding manual form submit test...');
             window.testFormSubmit = function() {
                 console.log('🔥 MANUAL TEST: Triggering form submit...');
                 if (testForm) {
@@ -1351,17 +1415,20 @@
                     console.log('❌ Cannot test - form not found');
                 }
             };
+            console.log('✅ You can now test with: testFormSubmit() in console');
             
+            // Add manual test for auto-generation
             window.testAutoGeneration = function() {
                 console.log('🧪 MANUAL TEST: Running auto-generation...');
                 if (jsonData) {
                     autoGenerateRelatedContent();
                     renderEntries();
-                    console.log('✅ Auto-generation test completed!');
+                    alert('Auto-generation test completed! Check console and filters.');
                 } else {
-                    console.log('❌ No JSON data loaded. Load data first.');
+                    alert('ERROR: No JSON data loaded. Load data first.');
                 }
             };
+            console.log('✅ You can test auto-generation with: testAutoGeneration() in console');
             
             // --- Auto-Generation Control ---
             const autoGenToggle = document.getElementById('autoGenToggle');
@@ -1461,30 +1528,6 @@
                 });
             }
             
-            // Clean duplicates button event listener
-            const cleanDuplicatesButton = document.getElementById('cleanDuplicatesButton');
-            if (cleanDuplicatesButton) {
-                cleanDuplicatesButton.addEventListener('click', () => {
-                    if (!jsonData) {
-                        showNotification('No data loaded. Please load data first.', false);
-                        return;
-                    }
-                    
-                    const beforeCount = (jsonData.movies?.length || 0) + (jsonData.channels?.length || 0);
-                    removeDuplicates();
-                    const afterCount = (jsonData.movies?.length || 0) + (jsonData.channels?.length || 0);
-                    const removedCount = beforeCount - afterCount;
-                    
-                    if (removedCount > 0) {
-                        showNotification(`Cleaned ${removedCount} duplicate entries!`, true);
-                        renderEntries();
-                        saveToLocalStorage();
-                    } else {
-                        showNotification('No duplicates found!', true);
-                    }
-                });
-            }
-            
             // --- Auto-Save Functions ---
             function saveToLocalStorage() {
                 if (!autoSaveEnabled || !jsonData) return;
@@ -1518,9 +1561,6 @@
                         const parsed = JSON.parse(savedData);
                         if (parsed.data) {
                             jsonData = parsed.data;
-                            
-                            // Clean up duplicates when loading data
-                            removeDuplicates();
                             
                             // Initialize the UI
                             editorDiv.style.display = 'block';
@@ -2360,7 +2400,7 @@
                     );
                     if (existingMovie) {
                         console.log('Duplicate movie found:', existingMovie.title);
-                        showNotification(`Movie "${title}" already exists! Please use a different title or edit the existing entry.`, false);
+                        alert(`Movie "${title}" already exists! Please use a different title or edit the existing entry.`);
                         return;
                     }
                 }
@@ -2382,7 +2422,7 @@
                     label: 'Movie',
                     sublabel: movieYearInput.value.trim() || 'N/A',
                     imdb: '0.0',
-                    downloadas: title.toLowerCase().replace(/[^a-z0-9]/g, '-'),
+                    downloadas: movieTitleInput.value.trim().toLowerCase().replace(/[^a-z0-9]/g, '-'),
                     comment: true,
                     playas: 'video',
                     classification: 'N/A',
@@ -2426,7 +2466,7 @@
                     );
                     if (existingSeries) {
                         console.log('Duplicate series found:', existingSeries.title);
-                        showNotification(`Series "${title}" already exists! Please use a different title or edit the existing entry.`, false);
+                        alert(`Series "${title}" already exists! Please use a different title or edit the existing entry.`);
                         return;
                     }
                 }
@@ -2479,7 +2519,7 @@
                 
                 const entryData = {
                     type: 'series',
-                    title: title,
+                    title: seriesTitleInput.value.trim(),
                     year: seriesYearInput.value.trim(),
                     description: seriesDescriptionInput.value.trim(),
                     image: seriesImageInput.value.trim(),
@@ -2487,13 +2527,13 @@
                     trailer: seriesTrailerInput.value.trim() ? { 
                         id: generateNewId(),
                         type: 'video',
-                        title: `${title} Trailer`,
+                        title: `${seriesTitleInput.value.trim()} Trailer`,
                         url: seriesTrailerInput.value.trim() 
                     } : null,
                     label: 'Series',
                     sublabel: `${seasons.length} Season${seasons.length !== 1 ? 's' : ''}`,
                     imdb: '0.0',
-                    downloadas: title.toLowerCase().replace(/[^a-z0-9]/g, '-'),
+                    downloadas: seriesTitleInput.value.trim().toLowerCase().replace(/[^a-z0-9]/g, '-'),
                     comment: true,
                     playas: 'video',
                     classification: 'TV-PG',
@@ -2532,7 +2572,7 @@
                     );
                     if (existingChannel) {
                         console.log('Duplicate channel found:', existingChannel.title);
-                        showNotification(`Channel "${title}" already exists! Please use a different title or edit the existing entry.`, false);
+                        alert(`Channel "${title}" already exists! Please use a different title or edit the existing entry.`);
                         return;
                     }
                 }
@@ -2641,58 +2681,6 @@
                         }
                     });
                 }
-                
-                return ids;
-            }
-            
-            // Function to remove duplicates from existing data
-            function removeDuplicates() {
-                console.log('🧹 Cleaning up duplicates...');
-                
-                if (jsonData.movies) {
-                    const seen = new Map();
-                    const uniqueMovies = [];
-                    
-                    jsonData.movies.forEach(movie => {
-                        const key = `${movie.title.toLowerCase()}-${movie.type || 'movie'}`;
-                        if (!seen.has(key)) {
-                            seen.set(key, true);
-                            uniqueMovies.push(movie);
-                        } else {
-                            console.log(`Removing duplicate: ${movie.title} (${movie.type || 'movie'})`);
-                        }
-                    });
-                    
-                    const removedCount = jsonData.movies.length - uniqueMovies.length;
-                    if (removedCount > 0) {
-                        console.log(`Removed ${removedCount} duplicate movies/series`);
-                        jsonData.movies = uniqueMovies;
-                    }
-                }
-                
-                if (jsonData.channels) {
-                    const seen = new Map();
-                    const uniqueChannels = [];
-                    
-                    jsonData.channels.forEach(channel => {
-                        const key = channel.title.toLowerCase();
-                        if (!seen.has(key)) {
-                            seen.set(key, true);
-                            uniqueChannels.push(channel);
-                        } else {
-                            console.log(`Removing duplicate channel: ${channel.title}`);
-                        }
-                    });
-                    
-                    const removedCount = jsonData.channels.length - uniqueChannels.length;
-                    if (removedCount > 0) {
-                        console.log(`Removed ${removedCount} duplicate channels`);
-                        jsonData.channels = uniqueChannels;
-                    }
-                }
-                
-                console.log('✅ Duplicate cleanup completed');
-            }
                 
                 // Collect IDs from channel sources
                 if (jsonData.channels) {
