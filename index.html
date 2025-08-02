@@ -2469,7 +2469,7 @@
                                     title: `${episodeTitle} 1080p`,
                                     quality: '1080p',
                                     size: '0MB',
-                                    kind: 'both',
+                                    kind: 'embed',
                                     premium: 'false',
                                     external: false,
                                     url: sourceUrl 
@@ -2676,12 +2676,22 @@
                 const name = movieSourceNameInput.value.trim() || 'Source';
                 const url = movieSourceUrlInput.value.trim();
                 if (url) {
-                    // Determine type based on URL
+                    // Determine type and kind based on URL
                     let sourceType = 'video';
+                    let sourceKind = 'both';
+                    
                     if (url.includes('vidsrc.net')) {
                         sourceType = 'embed';
+                        sourceKind = 'embed';
                     } else if (url.includes('youtube.com') || url.includes('youtu.be')) {
                         sourceType = 'youtube';
+                        sourceKind = 'youtube';
+                    } else if (url.includes('.mpd') || url.includes('.m3u8') || url.includes('.hls')) {
+                        sourceType = 'video';
+                        sourceKind = 'play';
+                    } else if (url.includes('.mp4') || url.includes('.avi') || url.includes('.mkv')) {
+                        sourceType = 'video';
+                        sourceKind = 'both';
                     }
                     currentMovieSources.push({ 
                         id: generateNewId(),
@@ -2689,7 +2699,7 @@
                         title: name,
                         quality: name.includes('1080') ? '1080p' : name.includes('720') ? '720p' : name.includes('480') ? '480p' : 'HD',
                         size: '0MB',
-                        kind: 'both',
+                        kind: sourceKind,
                         premium: 'false',
                         external: false,
                         url: url 
@@ -3067,7 +3077,7 @@
                         title: 'vidsrc.net 1080p',
                         quality: '1080p',
                         size: '0MB',
-                        kind: 'both',
+                        kind: 'embed',
                         premium: 'false',
                         external: false,
                         url: `https://vidsrc.net/embed/movie/${movieData.id}`
@@ -3331,7 +3341,7 @@
                                         title: `Episode ${episodeNumber} 1080p`,
                                         quality: '1080p',
                                         size: '0MB',
-                                        kind: 'both',
+                                        kind: 'embed',
                                         premium: 'false',
                                         external: false,
                                         url: vidsrcEpisodeUrl
@@ -3443,7 +3453,9 @@
                                     ...source,
                                     type: source.type || (source.url?.includes('vidsrc.net') ? 'embed' : 'video'),
                                     size: source.size || '0MB',
-                                    kind: source.kind || 'both',
+                                    kind: source.kind || (source.url?.includes('vidsrc.net') ? 'embed' : 
+                                                         source.url?.includes('youtube.com') || source.url?.includes('youtu.be') ? 'youtube' :
+                                                         source.url?.includes('.mpd') || source.url?.includes('.m3u8') || source.url?.includes('.hls') ? 'play' : 'both'),
                                     premium: source.premium || 'false',
                                     external: source.external !== undefined ? source.external : false
                                 }))
