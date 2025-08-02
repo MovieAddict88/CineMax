@@ -2796,6 +2796,64 @@
                 });
             }
             
+            // --- Source Type and Kind Detection ---
+            function detectSourceType(url) {
+                if (!url) return 'video';
+                
+                const urlLower = url.toLowerCase();
+                
+                // YouTube detection
+                if (urlLower.includes('youtube.com') || urlLower.includes('youtu.be')) {
+                    return 'youtube';
+                }
+                
+                // Embedded source detection
+                if (urlLower.includes('embed') || 
+                    urlLower.includes('vidsrc') || 
+                    urlLower.includes('streamtape') ||
+                    urlLower.includes('doodstream') ||
+                    urlLower.includes('upstream') ||
+                    urlLower.includes('mixdrop')) {
+                    return 'embed';
+                }
+                
+                // Direct video file detection
+                if (urlLower.match(/\.(mp4|mkv|avi|mov|wmv|flv|webm|m4v)(\?|$)/)) {
+                    return 'video';
+                }
+                
+                // Default to video for unknown types
+                return 'video';
+            }
+            
+            function detectSourceKind(url) {
+                if (!url) return 'both';
+                
+                const urlLower = url.toLowerCase();
+                
+                // Direct download links (mp4, mkv, etc.)
+                if (urlLower.match(/\.(mp4|mkv|avi|mov|wmv|flv|webm|m4v)(\?|$)/)) {
+                    return 'both'; // Can be both played and downloaded
+                }
+                
+                // Live TV or embedded sources (can only be played)
+                if (urlLower.includes('embed') || 
+                    urlLower.includes('vidsrc') ||
+                    urlLower.includes('streamtape') ||
+                    urlLower.includes('doodstream') ||
+                    urlLower.includes('upstream') ||
+                    urlLower.includes('mixdrop') ||
+                    urlLower.includes('youtube.com') ||
+                    urlLower.includes('youtu.be') ||
+                    urlLower.includes('m3u8') ||
+                    urlLower.includes('stream')) {
+                    return 'play'; // Can only be played
+                }
+                
+                // Default to both for unknown types
+                return 'both';
+            }
+
             // --- TMDb Integration ---
             async function fetchTMDbData(type, tmdbId) {
                 const baseUrl = 'https://api.themoviedb.org/3';
@@ -3052,11 +3110,11 @@
                     } : null,
                     sources: [{
                         id: generateNewId(),
-                        type: 'video',
+                        type: detectSourceType(`https://vidsrc.net/embed/movie/${movieData.id}`),
                         title: 'vidsrc.net 1080p',
                         quality: '1080p',
                         size: '0MB',
-                        kind: 'both',
+                        kind: detectSourceKind(`https://vidsrc.net/embed/movie/${movieData.id}`),
                         premium: 'false',
                         external: false,
                         url: `https://vidsrc.net/embed/movie/${movieData.id}`
@@ -3216,11 +3274,11 @@
                     const vidsrcUrl = `https://vidsrc.net/embed/movie/${tmdbId}`;
                     currentMovieSources = [{ 
                         id: generateNewId(),
-                        type: 'video',
+                        type: detectSourceType(vidsrcUrl),
                         title: 'vidsrc.net 1080p',
                         quality: '1080p',
                         size: '0MB',
-                        kind: 'both',
+                        kind: detectSourceKind(vidsrcUrl),
                         premium: 'false',
                         external: false,
                         url: vidsrcUrl 
@@ -3297,33 +3355,85 @@
                         console.warn('Could not fetch series credits:', error);
                     }
                     
-                    // Prepare seasons data with auto vidsrc URLs
+                    // Prepare seasons data with auto vidsrc URLs and enhanced episode details
                     currentSeriesData = {
                         ...seriesData,
-                        seasons: seriesData.seasons.filter(s => s.season_number > 0).map(season => ({
-                            id: generateNewId(),
-                            title: `Season ${season.season_number}`,
-                            episodes: Array.from({length: season.episode_count || 1}, (_, i) => {
-                                const episodeNumber = i + 1;
-                                const vidsrcEpisodeUrl = `https://vidsrc.net/embed/tv/${tmdbId}/${season.season_number}/${episodeNumber}`;
-                                return {
-                                    id: generateNewId(),
-                                    title: `Episode ${episodeNumber}`,
-                                    episode_number: episodeNumber,
-                                    image: '',
-                                    duration: '45:00',
-                                    views: 0,
-                                    downloads: 0,
-                                    sources: [{
+                        seasons: await Promise.all(seriesData.seasons.filter(s => s.season_number > 0).map(async season => {
+                            const seasonNumber = season.season_number;
+                            
+                            // Fetch season details to get episode information
+                            let seasonDetails = null;
+                            try {
+                                const seasonUrl = `https://api.themoviedb.org/3/tv/${tmdbId}/season/${seasonNumber}?api_key=${tmdbApiKey}`;
+                                const seasonRes = await fetch(seasonUrl);
+                                seasonDetails = seasonRes.ok ? await seasonRes.json() : null;
+                            } catch (error) {
+                                console.warn(`Could not fetch season ${seasonNumber} details:`, error);
+                            }
+                            
+                            const episodes = seasonDetails && seasonDetails.episodes 
+                                ? seasonDetails.episodes.map((episode, i) => {
+                                    const episodeNumber = episode.episode_number || (i + 1);
+                                    const vidsrcEpisodeUrl = `https://vidsrc.net/embed/tv/${tmdbId}/${seasonNumber}/${episodeNumber}`;
+                                    
+                                    // Format duration properly
+                                    const duration = episode.runtime 
+                                        ? `${Math.floor(episode.runtime / 60)}:${(episode.runtime % 60).toString().padStart(2, '0')}`
+                                        : '45:00';
+                                    
+                                    return {
                                         id: generateNewId(),
-                                        type: 'video',
-                                        title: `Episode ${episodeNumber} 1080p`,
-                                        quality: '1080p',
-                                        url: vidsrcEpisodeUrl
-                                    }],
-                                    subtitles: []
-                                };
-                            })
+                                        title: episode.name || `Episode ${episodeNumber}`,
+                                        episode_number: episodeNumber,
+                                        image: episode.still_path ? `https://image.tmdb.org/t/p/w500${episode.still_path}` : '',
+                                        duration: duration,
+                                        views: 0,
+                                        downloads: 0,
+                                        sources: [{
+                                            id: generateNewId(),
+                                            type: detectSourceType(vidsrcEpisodeUrl),
+                                            title: `${episode.name || `Episode ${episodeNumber}`} 1080p`,
+                                            quality: '1080p',
+                                            size: '0MB',
+                                            kind: detectSourceKind(vidsrcEpisodeUrl),
+                                            premium: 'false',
+                                            external: false,
+                                            url: vidsrcEpisodeUrl
+                                        }],
+                                        subtitles: []
+                                    };
+                                })
+                                : Array.from({length: season.episode_count || 1}, (_, i) => {
+                                    const episodeNumber = i + 1;
+                                    const vidsrcEpisodeUrl = `https://vidsrc.net/embed/tv/${tmdbId}/${seasonNumber}/${episodeNumber}`;
+                                    return {
+                                        id: generateNewId(),
+                                        title: `Episode ${episodeNumber}`,
+                                        episode_number: episodeNumber,
+                                        image: '',
+                                        duration: '45:00',
+                                        views: 0,
+                                        downloads: 0,
+                                        sources: [{
+                                            id: generateNewId(),
+                                            type: detectSourceType(vidsrcEpisodeUrl),
+                                            title: `Episode ${episodeNumber} 1080p`,
+                                            quality: '1080p',
+                                            size: '0MB',
+                                            kind: detectSourceKind(vidsrcEpisodeUrl),
+                                            premium: 'false',
+                                            external: false,
+                                            url: vidsrcEpisodeUrl
+                                        }],
+                                        subtitles: []
+                                    };
+                                });
+                            
+                            return {
+                                id: generateNewId(),
+                                title: `Season ${seasonNumber}`,
+                                episodes: episodes
+                            };
                         }))
                     };
                     
