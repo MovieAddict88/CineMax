@@ -2437,6 +2437,40 @@
                 console.log('Total movies after save:', jsonData.movies.length);
             }
             
+                    // Utility function to determine source type and kind based on URL
+        function getSourceTypeAndKind(url) {
+            const lowerUrl = url.toLowerCase();
+            
+            // Determine type
+            let type = 'video'; // default
+            if (lowerUrl.includes('youtube.com') || lowerUrl.includes('youtu.be')) {
+                type = 'youtube';
+            } else if (lowerUrl.match(/\.(mp4|mkv|avi|mov|wmv|flv|webm|m4v)$/)) {
+                type = 'video'; // Direct video file links
+            } else if (lowerUrl.includes('embed') || lowerUrl.includes('iframe') || 
+                       lowerUrl.includes('vidsrc') || lowerUrl.includes('player') ||
+                       lowerUrl.includes('stream') && !lowerUrl.match(/\.(mp4|mkv|avi|mov|wmv|flv|webm|m4v)$/)) {
+                type = 'embed'; // Embedded players and streaming services
+            } else if (lowerUrl.includes('live') || lowerUrl.includes('tv') || 
+                       lowerUrl.includes('hls') || lowerUrl.includes('.m3u8')) {
+                type = 'video'; // Live TV streams use video type for player compatibility
+            }
+            
+            // Determine kind
+            let kind = 'play'; // default for embedded and live content
+            if (lowerUrl.match(/\.(mp4|mkv|avi|mov|wmv|flv|webm|m4v)$/)) {
+                kind = 'both'; // Direct download links can be played and downloaded
+            } else if (type === 'embed' || lowerUrl.includes('live') || 
+                       lowerUrl.includes('stream') || lowerUrl.includes('hls') ||
+                       lowerUrl.includes('.m3u8')) {
+                kind = 'play'; // Embedded, live, and streaming content is play-only
+            } else if (type === 'youtube') {
+                kind = 'play'; // YouTube is play-only
+            }
+            
+            return { type, kind };
+        }
+
             function saveSeries(id) {
                 // Collect season/episode data from the form
                 const seasons = [];
@@ -2455,6 +2489,9 @@
                             const titleElement = episodeElement.querySelector('.episode-title');
                             const episodeTitle = titleElement ? titleElement.textContent.replace(/^Episode \d+: /, '') : `Episode ${episodeNumber}`;
                             
+                            // Get dynamic type and kind based on URL
+                            const { type, kind } = getSourceTypeAndKind(sourceUrl);
+                            
                             episodes.push({
                                 id: generateNewId(),
                                 title: episodeTitle,
@@ -2465,9 +2502,13 @@
                                 downloads: 0,
                                 sources: [{ 
                                     id: generateNewId(),
-                                    type: 'video', 
+                                    type: type, 
                                     title: `${episodeTitle} 1080p`,
                                     quality: '1080p',
+                                    size: '0MB',
+                                    kind: kind,
+                                    premium: 'false',
+                                    external: false,
                                     url: sourceUrl 
                                 }],
                                 subtitles: []
@@ -2532,26 +2573,32 @@
             function saveChannel(id) {
                 const sources = [];
                 if (channelStreamUrlInput.value.trim()) {
+                    // Get dynamic type and kind based on URL
+                    const { type, kind } = getSourceTypeAndKind(channelStreamUrlInput.value.trim());
+                    
                     sources.push({ 
                         id: generateNewId(),
-                        type: 'live',
+                        type: type,
                         title: 'Live Stream',
                         quality: 'HD',
                         size: 'Live',
-                        kind: 'play',
+                        kind: kind,
                         premium: 'false',
                         external: false,
                         url: channelStreamUrlInput.value.trim() 
                     });
                 }
                 if (channelBackupUrlInput.value.trim()) {
+                    // Get dynamic type and kind based on URL
+                    const { type, kind } = getSourceTypeAndKind(channelBackupUrlInput.value.trim());
+                    
                     sources.push({ 
                         id: generateNewId(),
-                        type: 'live',
+                        type: type,
                         title: 'Backup Stream',
                         quality: 'HD',
                         size: 'Live',
-                        kind: 'play',
+                        kind: kind,
                         premium: 'false',
                         external: false,
                         url: channelBackupUrlInput.value.trim() 
@@ -2672,13 +2719,16 @@
                 const name = movieSourceNameInput.value.trim() || 'Source';
                 const url = movieSourceUrlInput.value.trim();
                 if (url) {
+                    // Get dynamic type and kind based on URL
+                    const { type, kind } = getSourceTypeAndKind(url);
+                    
                     currentMovieSources.push({ 
                         id: generateNewId(),
-                        type: 'video',
+                        type: type,
                         title: name,
                         quality: name.includes('1080') ? '1080p' : name.includes('720') ? '720p' : name.includes('480') ? '480p' : 'HD',
                         size: '0MB',
-                        kind: 'both',
+                        kind: kind,
                         premium: 'false',
                         external: false,
                         url: url 
@@ -3046,17 +3096,17 @@
                     cover: movieData.backdrop_path ? `https://image.tmdb.org/t/p/original${movieData.backdrop_path}` : '',
                     trailer: trailer ? {
                         id: generateNewId(),
-                        type: 'video',
+                        type: getSourceTypeAndKind(`https://www.youtube.com/watch?v=${trailer.key}`).type,
                         title: `${movieData.title} Trailer`,
                         url: `https://www.youtube.com/watch?v=${trailer.key}`
                     } : null,
                     sources: [{
                         id: generateNewId(),
-                        type: 'video',
+                        type: getSourceTypeAndKind(`https://vidsrc.net/embed/movie/${movieData.id}`).type,
                         title: 'vidsrc.net 1080p',
                         quality: '1080p',
                         size: '0MB',
-                        kind: 'both',
+                        kind: getSourceTypeAndKind(`https://vidsrc.net/embed/movie/${movieData.id}`).kind,
                         premium: 'false',
                         external: false,
                         url: `https://vidsrc.net/embed/movie/${movieData.id}`
@@ -3214,13 +3264,17 @@
                     
                     // Auto-add vidsrc source
                     const vidsrcUrl = `https://vidsrc.net/embed/movie/${tmdbId}`;
+                    
+                    // Get dynamic type and kind based on URL
+                    const { type, kind } = getSourceTypeAndKind(vidsrcUrl);
+                    
                     currentMovieSources = [{ 
                         id: generateNewId(),
-                        type: 'video',
+                        type: type,
                         title: 'vidsrc.net 1080p',
                         quality: '1080p',
                         size: '0MB',
-                        kind: 'both',
+                        kind: kind,
                         premium: 'false',
                         external: false,
                         url: vidsrcUrl 
@@ -3306,6 +3360,10 @@
                             episodes: Array.from({length: season.episode_count || 1}, (_, i) => {
                                 const episodeNumber = i + 1;
                                 const vidsrcEpisodeUrl = `https://vidsrc.net/embed/tv/${tmdbId}/${season.season_number}/${episodeNumber}`;
+                                
+                                // Get dynamic type and kind based on URL
+                                const { type, kind } = getSourceTypeAndKind(vidsrcEpisodeUrl);
+                                
                                 return {
                                     id: generateNewId(),
                                     title: `Episode ${episodeNumber}`,
@@ -3316,9 +3374,13 @@
                                     downloads: 0,
                                     sources: [{
                                         id: generateNewId(),
-                                        type: 'video',
+                                        type: type,
                                         title: `Episode ${episodeNumber} 1080p`,
                                         quality: '1080p',
+                                        size: '0MB',
+                                        kind: kind,
+                                        premium: 'false',
+                                        external: false,
                                         url: vidsrcEpisodeUrl
                                     }],
                                     subtitles: []
