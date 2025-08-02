@@ -1454,6 +1454,47 @@
             };
             console.log('✅ You can test detectSourceKind with: testDetectSourceKind() in console');
             
+            // Add manual test for episode image generation
+            window.testEpisodeImages = function() {
+                console.log('🧪 MANUAL TEST: Testing episode image generation...');
+                
+                // Test the episode image generation logic
+                function generateEpisodeImage(seriesPosterPath, seasonNumber, episodeNumber) {
+                    if (seriesPosterPath) {
+                        return `https://image.tmdb.org/t/p/w500${seriesPosterPath}`;
+                    } else {
+                        return `https://via.placeholder.com/500x750/2c3e50/ffffff?text=S${seasonNumber}E${episodeNumber}`;
+                    }
+                }
+                
+                const testCases = [
+                    { poster: '/abc123.jpg', season: 1, episode: 1 },
+                    { poster: '', season: 1, episode: 1 },
+                    { poster: '/def456.jpg', season: 2, episode: 5 },
+                    { poster: '', season: 2, episode: 10 },
+                    { poster: null, season: 3, episode: 2 }
+                ];
+                
+                console.log('Testing episode image generation:');
+                testCases.forEach((test, i) => {
+                    const result = generateEpisodeImage(test.poster, test.season, test.episode);
+                    console.log(`Test ${i+1}: Poster="${test.poster || 'empty'}", S${test.season}E${test.episode} -> "${result}"`);
+                });
+                
+                // Check current series input
+                const currentSeriesPoster = seriesImageInput.value.trim();
+                console.log(`Current series poster input: "${currentSeriesPoster}"`);
+                
+                if (currentSeriesPoster) {
+                    console.log(`Episode images would use: ${currentSeriesPoster}`);
+                } else {
+                    console.log('Episode images would use placeholders with S#E# format');
+                }
+                
+                alert('Episode image test completed! Check console for results.');
+            };
+            console.log('✅ You can test episode images with: testEpisodeImages() in console');
+            
             // --- Auto-Generation Control ---
             const autoGenToggle = document.getElementById('autoGenToggle');
             const manualGenButton = document.getElementById('manualGenButton');
@@ -1965,7 +2006,6 @@
                 
                 // Content from slides, featured, and genres are always play-only
                 if (contentContext === 'slide' || contentContext === 'featured' || contentContext === 'genre') {
-                    console.log(`🎯 detectSourceKind: ${url} (context: ${contentContext}) -> play`);
                     return 'play';
                 }
                 
@@ -2033,7 +2073,6 @@
                 // Check for embed patterns first
                 for (const pattern of embedPatterns) {
                     if (urlLower.includes(pattern)) {
-                        console.log(`🎯 detectSourceKind: ${url} (pattern: ${pattern}) -> play`);
                         return 'play';
                     }
                 }
@@ -2067,7 +2106,6 @@
                 }
                 
                 // Default to 'both' if no clear pattern is detected
-                console.log(`🎯 detectSourceKind: ${url} (default) -> both`);
                 return 'both';
             }
             
@@ -2617,7 +2655,7 @@
                                 id: generateNewId(),
                                 title: episodeTitle,
                                 episode_number: episodeNumber,
-                                image: '',
+                                image: seriesImageInput.value.trim() || 'https://via.placeholder.com/500x750/2c3e50/ffffff?text=Episode+' + episodeNumber,
                                 duration: '45:00',
                                 views: 0,
                                 downloads: 0,
@@ -2627,11 +2665,7 @@
                                     title: `${episodeTitle} 1080p`,
                                     quality: '1080p',
                                     size: '0MB',
-                                    kind: (function() {
-                                        const kind = detectSourceKind(sourceUrl, 'video');
-                                        console.log(`📺 saveSeries episode source: ${sourceUrl} -> kind: ${kind}`);
-                                        return kind;
-                                    })(),
+                                    kind: detectSourceKind(sourceUrl, 'video'),
                                     premium: 'false',
                                     external: false,
                                     url: sourceUrl 
@@ -2883,7 +2917,7 @@
                                 id: generateNewId(),
                                 title: 'Episode 1',
                                 episode_number: 1,
-                                image: '',
+                                image: seriesImageInput.value.trim() || 'https://via.placeholder.com/500x750/2c3e50/ffffff?text=Episode+1',
                                 duration: '45:00',
                                 views: 0,
                                 downloads: 0,
@@ -2949,7 +2983,7 @@
                             id: generateNewId(),
                             title: `Episode ${newEpisodeNumber}`,
                             episode_number: newEpisodeNumber,
-                            image: '',
+                            image: seriesImageInput.value.trim() || `https://via.placeholder.com/500x750/2c3e50/ffffff?text=Episode+${newEpisodeNumber}`,
                             duration: '45:00',
                             views: 0,
                             downloads: 0,
@@ -3463,7 +3497,7 @@
                         console.warn('Could not fetch series credits:', error);
                     }
                     
-                    // Prepare seasons data with auto vidsrc URLs
+                    // Prepare seasons data with auto vidsrc URLs and episode images
                     currentSeriesData = {
                         ...seriesData,
                         seasons: seriesData.seasons.filter(s => s.season_number > 0).map(season => ({
@@ -3472,11 +3506,18 @@
                             episodes: Array.from({length: season.episode_count || 1}, (_, i) => {
                                 const episodeNumber = i + 1;
                                 const vidsrcEpisodeUrl = `https://vidsrc.net/embed/tv/${tmdbId}/${season.season_number}/${episodeNumber}`;
+                                
+                                // Generate episode image URL from TMDB or use series poster as fallback
+                                // Try to get episode-specific image, fallback to series poster, then placeholder
+                                const episodeImageUrl = seriesData.poster_path ? 
+                                    `https://image.tmdb.org/t/p/w500${seriesData.poster_path}` : 
+                                    `https://via.placeholder.com/500x750/2c3e50/ffffff?text=S${season.season_number}E${episodeNumber}`;
+                                
                                 return {
                                     id: generateNewId(),
                                     title: `Episode ${episodeNumber}`,
                                     episode_number: episodeNumber,
-                                    image: '',
+                                    image: episodeImageUrl,
                                     duration: '45:00',
                                     views: 0,
                                     downloads: 0,
@@ -3486,11 +3527,7 @@
                                         title: `Episode ${episodeNumber} 1080p`,
                                         quality: '1080p',
                                         size: '0MB',
-                                        kind: (function() {
-                                            const kind = detectSourceKind(vidsrcEpisodeUrl, 'video');
-                                            console.log(`📺 TMDB fetch episode source: ${vidsrcEpisodeUrl} -> kind: ${kind}`);
-                                            return kind;
-                                        })(),
+                                        kind: detectSourceKind(vidsrcEpisodeUrl, 'video'),
                                         premium: 'false',
                                         external: false,
                                         url: vidsrcEpisodeUrl
