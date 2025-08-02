@@ -1913,6 +1913,111 @@
             }
             
             // --- Utility Functions ---
+            function detectSourceKind(url, sourceType = 'video') {
+                if (!url) return 'both'; // Default fallback
+                
+                const urlLower = url.toLowerCase();
+                
+                // Live TV streams are always play-only
+                if (sourceType === 'live') {
+                    return 'play';
+                }
+                
+                // Embed patterns (play-only)
+                const embedPatterns = [
+                    '/embed/',
+                    '/player/',
+                    'iframe',
+                    'embedded',
+                    'player.php',
+                    'embed.php',
+                    'iframe.php',
+                    'vidcloud',
+                    'streamwish',
+                    'filemoon',
+                    'doodstream',
+                    'upstream',
+                    'mixdrop',
+                    'mp4upload',
+                    'streamtape',
+                    'streamhub',
+                    'fembed',
+                    'sbembed',
+                    'streamsb',
+                    'tubeload',
+                    'jawcloud',
+                    'videovard',
+                    'streamlare'
+                ];
+                
+                // Live streaming patterns (play-only)
+                const liveStreamPatterns = [
+                    '.m3u8',
+                    '.mpd',
+                    'rtmp://',
+                    'rtsp://',
+                    'hls://',
+                    'dash://',
+                    'stream',
+                    'live',
+                    'channel',
+                    'broadcast'
+                ];
+                
+                // Direct download patterns (both download and play)
+                const directPatterns = [
+                    '.mp4',
+                    '.mkv',
+                    '.avi',
+                    '.mov',
+                    '.wmv',
+                    '.flv',
+                    '.webm',
+                    '.m4v',
+                    'direct',
+                    'download',
+                    'file/'
+                ];
+                
+                // Check for embed patterns first
+                for (const pattern of embedPatterns) {
+                    if (urlLower.includes(pattern)) {
+                        return 'play';
+                    }
+                }
+                
+                // Check for live streaming patterns
+                for (const pattern of liveStreamPatterns) {
+                    if (urlLower.includes(pattern)) {
+                        return 'play';
+                    }
+                }
+                
+                // Check for direct download patterns
+                for (const pattern of directPatterns) {
+                    if (urlLower.includes(pattern)) {
+                        return 'both';
+                    }
+                }
+                
+                // Default: if it contains common streaming domains but no clear indicators
+                const streamingDomains = [
+                    'youtube.com',
+                    'vimeo.com',
+                    'dailymotion.com',
+                    'twitch.tv'
+                ];
+                
+                for (const domain of streamingDomains) {
+                    if (urlLower.includes(domain)) {
+                        return 'play';
+                    }
+                }
+                
+                // Default to 'both' if no clear pattern is detected
+                return 'both';
+            }
+            
             function showNotification(message, isSuccess = true) {
                 try {
                     console.log('Showing notification:', message, 'Success:', isSuccess);
