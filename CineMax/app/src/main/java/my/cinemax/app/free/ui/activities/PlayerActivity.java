@@ -129,60 +129,96 @@ public class PlayerActivity extends AppCompatActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        mSessionManager = CastContext.getSharedInstance(this).getSessionManager();
-
         super.onCreate(savedInstanceState);
-        requestWindowFeature(Window.FEATURE_NO_TITLE);
-        getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,
-                WindowManager.LayoutParams.FLAG_FULLSCREEN);
-        setContentView(R.layout.activity_main);
-        View decorView = getWindow().getDecorView();
-        decorView.setSystemUiVisibility(View.SYSTEM_UI_FLAG_LAYOUT_STABLE
-                | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
-                | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
-                | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
-                | View.SYSTEM_UI_FLAG_FULLSCREEN
-                | View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY);
-        mScaleGestureDetector = new ScaleGestureDetector(this, new ScaleListener());
-        mCastContext = CastContext.getSharedInstance(this);
-        Bundle bundle = getIntent().getExtras();
-        if (bundle == null) {
-            Log.e("PlayerActivity", "No bundle data received");
-            finish();
-            return;
-        }
+        setContentView(R.layout.activity_player);
         
-        vodeoId = bundle.getInt("id", 0);
-        videoUrl = bundle.getString("url");
-        videoKind = bundle.getString("kind");
-        isLive = bundle.getBoolean("isLive", false);
-        videoType = bundle.getString("type");
-        videoTitle = bundle.getString("title");
-        videoSubTile = bundle.getString("subtitle");
-        videoImage = bundle.getString("image");
-        
-        // Validate required data
-        if (videoUrl == null || videoUrl.isEmpty()) {
-            Log.e("PlayerActivity", "Video URL is null or empty");
-            android.widget.Toast.makeText(this, "Video URL not available", android.widget.Toast.LENGTH_LONG).show();
+        try {
+            View decorView = getWindow().getDecorView();
+            decorView.setSystemUiVisibility(View.SYSTEM_UI_FLAG_LAYOUT_STABLE
+                    | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
+                    | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
+                    | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
+                    | View.SYSTEM_UI_FLAG_FULLSCREEN
+                    | View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY);
+            mScaleGestureDetector = new ScaleGestureDetector(this, new ScaleListener());
+            
+            // Initialize Cast Context safely
+            try {
+                mCastContext = CastContext.getSharedInstance(this);
+                mSessionManager = mCastContext.getSessionManager();
+            } catch (Exception e) {
+                Log.w("PlayerActivity", "Cast initialization failed: " + e.getMessage());
+                // Continue without cast support
+            }
+            
+            Bundle bundle = getIntent().getExtras();
+            if (bundle == null) {
+                Log.e("PlayerActivity", "No bundle data received");
+                android.widget.Toast.makeText(this, "No video data provided", android.widget.Toast.LENGTH_LONG).show();
+                finish();
+                return;
+            }
+            
+            vodeoId = bundle.getInt("id", 0);
+            videoUrl = bundle.getString("url");
+            videoKind = bundle.getString("kind");
+            isLive = bundle.getBoolean("isLive", false);
+            videoType = bundle.getString("type");
+            videoTitle = bundle.getString("title");
+            videoSubTile = bundle.getString("subtitle");
+            videoImage = bundle.getString("image");
+            
+            // Validate required data
+            if (videoUrl == null || videoUrl.trim().isEmpty()) {
+                Log.e("PlayerActivity", "Video URL is null or empty");
+                android.widget.Toast.makeText(this, "Video URL not available", android.widget.Toast.LENGTH_LONG).show();
+                finish();
+                return;
+            }
+            
+            // Validate video type
+            if (videoType == null || videoType.trim().isEmpty()) {
+                Log.w("PlayerActivity", "Video type is null, defaulting to mp4");
+                videoType = "mp4";
+            }
+            
+            // Clean up the video URL
+            videoUrl = videoUrl.trim();
+            Log.d("PlayerActivity", "Initializing player with URL: " + videoUrl + " Type: " + videoType);
+            
+            getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+
+            if (savedInstanceState == null) {
+                try {
+                    customPlayerFragment = CustomPlayerFragment.newInstance(
+                        getVideoUrl(), isLive, videoType, videoTitle, videoSubTile, videoImage, vodeoId, videoKind);
+                    launchFragment(customPlayerFragment);
+                } catch (Exception e) {
+                    Log.e("PlayerActivity", "Error creating player fragment: " + e.getMessage(), e);
+                    android.widget.Toast.makeText(this, "Error initializing video player", android.widget.Toast.LENGTH_LONG).show();
+                    finish();
+                    return;
+                }
+            }
+        } catch (Exception e) {
+            Log.e("PlayerActivity", "Critical error in onCreate: " + e.getMessage(), e);
+            android.widget.Toast.makeText(this, "Error starting video player", android.widget.Toast.LENGTH_LONG).show();
             finish();
-            return;
         }
-        getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
-
-        if (savedInstanceState == null) {
-            customPlayerFragment =
-                    CustomPlayerFragment.newInstance(getVideoUrl(),isLive,videoType,videoTitle,videoSubTile,videoImage,vodeoId,videoKind);
-            launchFragment(customPlayerFragment);
-        }
-
     }
 
     @Override
     protected void onResume() {
         super.onResume();
-        mCastSession = mSessionManager.getCurrentCastSession();
-        mSessionManager.addSessionManagerListener(mSessionManagerListener);
+        
+        try {
+            if (mSessionManager != null) {
+                mCastSession = mSessionManager.getCurrentCastSession();
+                mSessionManager.addSessionManagerListener(mSessionManagerListener);
+            }
+        } catch (Exception e) {
+            Log.w("PlayerActivity", "Error handling cast session in onResume: " + e.getMessage());
+        }
 
         View decorView = getWindow().getDecorView();
         decorView.setSystemUiVisibility(View.SYSTEM_UI_FLAG_LAYOUT_STABLE
@@ -196,7 +232,13 @@ public class PlayerActivity extends AppCompatActivity {
 
     @Override
     protected void onPause() {
-        mSessionManager.removeSessionManagerListener(mSessionManagerListener);
+        try {
+            if (mSessionManager != null) {
+                mSessionManager.removeSessionManagerListener(mSessionManagerListener);
+            }
+        } catch (Exception e) {
+            Log.w("PlayerActivity", "Error handling cast session in onPause: " + e.getMessage());
+        }
         mCastSession = null;
         super.onPause();
     }

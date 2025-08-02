@@ -849,14 +849,24 @@ public class SerieActivity extends AppCompatActivity implements PlaylistDownload
             return;
         }
         
+        // Validate source and URL
+        if (source == null) {
+            Log.e("SerieActivity", "Source is null");
+            android.widget.Toast.makeText(this, "Episode source not available", android.widget.Toast.LENGTH_LONG).show();
+            return;
+        }
+        
         String url = source.getUrl();
         String type = source.getType();
         
-        if (url == null || url.isEmpty()) {
-            Log.e("SerieActivity", "URL is null or empty for source: " + source.getTitle());
-            Toast.makeText(this, "Video URL not available", Toast.LENGTH_SHORT).show();
+        if (url == null || url.trim().isEmpty()) {
+            Log.e("SerieActivity", "Episode URL is null or empty for source: " + source.getTitle());
+            android.widget.Toast.makeText(this, "Episode URL not available", android.widget.Toast.LENGTH_LONG).show();
             return;
         }
+        
+        // Clean up URL
+        url = url.trim();
 
         // Add logging for debugging
         Log.d("SerieActivity", "Playing source: " + source.getTitle() + " URL: " + url + " Type: " + type);
@@ -876,24 +886,39 @@ public class SerieActivity extends AppCompatActivity implements PlaylistDownload
                 @Override
                 public void onSuccess(String directUrl, String quality) {
                     runOnUiThread(() -> {
-                        progressDialog.dismiss();
-                        Log.d("SerieActivity", "Successfully extracted video URL: " + directUrl);
-                        
-                        // Play the extracted URL in ExoPlayer
-                        playExtractedVideo(directUrl, quality);
+                        try {
+                            progressDialog.dismiss();
+                            Log.d("SerieActivity", "Successfully extracted video URL: " + directUrl);
+                            
+                            if (directUrl != null && !directUrl.trim().isEmpty()) {
+                                // Play the extracted URL in ExoPlayer
+                                playExtractedVideo(directUrl.trim(), quality);
+                            } else {
+                                Log.e("SerieActivity", "Extracted URL is null or empty");
+                                android.widget.Toast.makeText(SerieActivity.this, "Could not extract video URL", android.widget.Toast.LENGTH_LONG).show();
+                            }
+                        } catch (Exception e) {
+                            Log.e("SerieActivity", "Error in extraction success: " + e.getMessage(), e);
+                            android.widget.Toast.makeText(SerieActivity.this, "Error processing extracted video", android.widget.Toast.LENGTH_LONG).show();
+                        }
                     });
                 }
                 
                 @Override
                 public void onFailure(String error) {
                     runOnUiThread(() -> {
-                        progressDialog.dismiss();
-                        Log.w("SerieActivity", "Video extraction failed: " + error + ". Falling back to WebView.");
-                        
-                        // Fallback to EmbedActivity (WebView)
-                        Intent intent = new Intent(SerieActivity.this, EmbedActivity.class);
-                        intent.putExtra("url", url);
-                        startActivity(intent);
+                        try {
+                            progressDialog.dismiss();
+                            Log.w("SerieActivity", "Video extraction failed: " + error + ". Falling back to WebView.");
+                            
+                            // Fallback to EmbedActivity (WebView)
+                            Intent intent = new Intent(SerieActivity.this, EmbedActivity.class);
+                            intent.putExtra("url", url);
+                            startActivity(intent);
+                        } catch (Exception e) {
+                            Log.e("SerieActivity", "Error in extraction failure: " + e.getMessage(), e);
+                            android.widget.Toast.makeText(SerieActivity.this, "Unable to play video: " + error, android.widget.Toast.LENGTH_LONG).show();
+                        }
                     });
                 }
             });
@@ -907,9 +932,15 @@ public class SerieActivity extends AppCompatActivity implements PlaylistDownload
             return;
         }
 
-        if (mCastSession == null) {
-            mCastSession = mSessionManager.getCurrentCastSession();
+        // Handle direct video URLs
+        try {
+            if (mCastSession == null && mSessionManager != null) {
+                mCastSession = mSessionManager.getCurrentCastSession();
+            }
+        } catch (Exception e) {
+            Log.w("SerieActivity", "Error getting cast session: " + e.getMessage());
         }
+        
         if (mCastSession != null) {
             loadSubtitles(position);
         } else {
@@ -926,16 +957,22 @@ public class SerieActivity extends AppCompatActivity implements PlaylistDownload
                     videoType = "dash";  // Player expects "dash" for MPD/DASH streams
                 } else if (url.contains(".mp4") || url.contains(".avi") || url.contains(".mkv")) {
                     videoType = "mp4";  // Player expects "mp4" for direct video files
-                } else {
+                } else if (videoType == null || videoType.trim().isEmpty()) {
                     // Default to mp4 for unknown formats
                     videoType = "mp4";
                 }
+            } else {
+                videoType = "mp4"; // Fallback
             }
+            
             intent.putExtra("type", videoType);
             intent.putExtra("kind","episode");
-            intent.putExtra("image",poster.getImage());
-            intent.putExtra("title",poster.getTitle());
-            intent.putExtra("subtitle",seasonArrayList.get(spinner_activity_serie_season_list.getSelectedItemPosition()).getTitle()+" : "+selectedEpisode.getTitle());
+            intent.putExtra("image", selectedEpisode.getImage() != null ? selectedEpisode.getImage() : poster.getImage());
+            intent.putExtra("title", selectedEpisode.getTitle() != null ? selectedEpisode.getTitle() : "Episode");
+            intent.putExtra("subtitle", seasonArrayList.get(spinner_activity_serie_season_list.getSelectedItemPosition()).getTitle()+" : "+selectedEpisode.getTitle());
+            intent.putExtra("isLive", false);
+            
+            Log.d("SerieActivity", "Starting PlayerActivity with URL: " + url + ", Type: " + videoType);
             startActivity(intent);
         }
 
@@ -2539,13 +2576,36 @@ public class SerieActivity extends AppCompatActivity implements PlaylistDownload
     }
     
     private void playExtractedVideo(String directUrl, String quality) {
-        if (mCastSession == null) {
-            mCastSession = mSessionManager.getCurrentCastSession();
+        if (directUrl == null || directUrl.trim().isEmpty()) {
+            Log.e("SerieActivity", "Direct URL is null or empty");
+            android.widget.Toast.makeText(this, "Invalid video URL extracted", android.widget.Toast.LENGTH_LONG).show();
+            return;
+        }
+        
+        if (selectedEpisode == null) {
+            Log.e("SerieActivity", "Selected episode is null");
+            android.widget.Toast.makeText(this, "Episode data not available", android.widget.Toast.LENGTH_LONG).show();
+            return;
+        }
+        
+        directUrl = directUrl.trim();
+        
+        try {
+            if (mCastSession == null && mSessionManager != null) {
+                mCastSession = mSessionManager.getCurrentCastSession();
+            }
+        } catch (Exception e) {
+            Log.w("SerieActivity", "Error getting cast session: " + e.getMessage());
         }
         
         if (mCastSession != null) {
             // Cast the extracted video
-            loadSubtitles(0); // Use default position for cast
+            try {
+                loadSubtitles(0); // Use default position for cast
+            } catch (Exception e) {
+                Log.w("SerieActivity", "Error loading subtitles for cast: " + e.getMessage());
+                // Continue without subtitles
+            }
         } else {
             // Play in ExoPlayer
             Intent intent = new Intent(SerieActivity.this, PlayerActivity.class);
@@ -2554,21 +2614,35 @@ public class SerieActivity extends AppCompatActivity implements PlaylistDownload
             
             // Determine video type from URL
             String videoType = "mp4"; // Default
-            if (directUrl.contains(".m3u8")) {
-                videoType = "m3u8";
-            } else if (directUrl.contains(".mpd")) {
-                videoType = "dash";
+            try {
+                if (directUrl.contains(".m3u8")) {
+                    videoType = "m3u8";
+                } else if (directUrl.contains(".mpd")) {
+                    videoType = "dash";
+                } else if (directUrl.contains(".avi") || directUrl.contains(".mkv")) {
+                    videoType = "mp4"; // Treat all other video files as mp4
+                }
+            } catch (Exception e) {
+                Log.w("SerieActivity", "Error determining video type, using default: " + e.getMessage());
+                videoType = "mp4";
             }
             
             intent.putExtra("type", videoType);
             intent.putExtra("isLive", false);
-            intent.putExtra("title", selectedEpisode.getTitle());
-            intent.putExtra("subtitle", poster.getTitle());
-            intent.putExtra("image", selectedEpisode.getImage());
+            intent.putExtra("title", selectedEpisode.getTitle() != null ? selectedEpisode.getTitle() : "Episode");
+            intent.putExtra("subtitle", poster != null ? poster.getTitle() : "Series");
+            intent.putExtra("image", selectedEpisode.getImage() != null ? selectedEpisode.getImage() : 
+                          (poster != null ? poster.getImage() : ""));
             intent.putExtra("kind", "episode");
             
             Log.d("SerieActivity", "Playing extracted video - URL: " + directUrl + ", Type: " + videoType);
-            startActivity(intent);
+            
+            try {
+                startActivity(intent);
+            } catch (Exception e) {
+                Log.e("SerieActivity", "Error starting PlayerActivity: " + e.getMessage(), e);
+                android.widget.Toast.makeText(this, "Error starting video player", android.widget.Toast.LENGTH_LONG).show();
+            }
         }
     }
 }

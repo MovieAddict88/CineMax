@@ -146,6 +146,11 @@ public class CustomPlayerViewModel extends BaseObservable implements ExoPlayer.E
     }
     private void initPlayer() {
         try {
+            if (mActivity == null) {
+                Log.e("CustomPlayerViewModel", "Activity is null, cannot initialize player");
+                return;
+            }
+            
             // 1. Create a default TrackSelector
             Handler mainHandler = new Handler();
             BandwidthMeter bandwidthMeter = new DefaultBandwidthMeter();
@@ -156,8 +161,18 @@ public class CustomPlayerViewModel extends BaseObservable implements ExoPlayer.E
             LoadControl loadControl = new DefaultLoadControl();
 
             // 3. Create the player
-            mExoPlayer = ExoPlayerFactory.newSimpleInstance(mActivity,
-                    trackSelector, loadControl);
+            mExoPlayer = ExoPlayerFactory.newSimpleInstance(mActivity, trackSelector, loadControl);
+            
+            if (mExoPlayer == null) {
+                Log.e("CustomPlayerViewModel", "Failed to create ExoPlayer instance");
+                if (mActivity != null) {
+                    android.widget.Toast.makeText(mActivity, "Failed to create video player", android.widget.Toast.LENGTH_LONG).show();
+                }
+                return;
+            }
+            
+            Log.d("CustomPlayerViewModel", "ExoPlayer initialized successfully");
+            
         } catch (Exception e) {
             Log.e("CustomPlayerViewModel", "Error initializing player: " + e.getMessage(), e);
             if (mActivity != null) {
@@ -167,17 +182,26 @@ public class CustomPlayerViewModel extends BaseObservable implements ExoPlayer.E
     }
 
     public void preparePlayer(Subtitle subtitle,long seekTo) {
-
-
-
-
-
-    // Produces Extractor instances for parsing the media data.
-//    ExtractorsFactory extractorsFactory = new DefaultExtractorsFactory();
-//    Handler mainHandler = new Handler();
-//    MediaSource mediaSource = new HlsMediaSource(Uri.parse(
-//    "https://live3-mediaset-it.akamaized.net/content/hls_clr_xo/live/channel(ch09)/Stream(02)/index.m3u8"),
-//        dataSourceFactory, null, null);
+        if (mExoPlayer == null) {
+            Log.e("CustomPlayerViewModel", "ExoPlayer is null, cannot prepare player");
+            if (mActivity != null) {
+                android.widget.Toast.makeText(mActivity, "Video player not initialized", android.widget.Toast.LENGTH_LONG).show();
+            }
+            return;
+        }
+        
+        if (mUrl == null || mUrl.trim().isEmpty()) {
+            Log.e("CustomPlayerViewModel", "Video URL is null or empty");
+            if (mActivity != null) {
+                android.widget.Toast.makeText(mActivity, "Invalid video URL", android.widget.Toast.LENGTH_LONG).show();
+            }
+            return;
+        }
+        
+        if (mActivity == null) {
+            Log.e("CustomPlayerViewModel", "Activity is null, cannot prepare player");
+            return;
+        }
 
         // Measures bandwidth during playback. Can be null if not required.
         DefaultBandwidthMeter bandwidthMeter = new DefaultBandwidthMeter();
@@ -188,7 +212,14 @@ public class CustomPlayerViewModel extends BaseObservable implements ExoPlayer.E
         // This is the MediaSource representing the media to be played.
         Uri videoUri;
         try {
-            videoUri = Uri.parse(mUrl);
+            videoUri = Uri.parse(mUrl.trim());
+            if (videoUri == null) {
+                Log.e("CustomPlayerViewModel", "Failed to parse video URL: " + mUrl);
+                if (mActivity != null) {
+                    android.widget.Toast.makeText(mActivity, "Invalid video URL format", android.widget.Toast.LENGTH_LONG).show();
+                }
+                return;
+            }
         } catch (Exception e) {
             Log.e("CustomPlayerViewModel", "Invalid URL: " + mUrl, e);
             if (mActivity != null) {
@@ -203,41 +234,59 @@ public class CustomPlayerViewModel extends BaseObservable implements ExoPlayer.E
         MediaSource mediaSource1;
         int sourceSize = 0;
 
-        if (videoType.equals("mp4")){
-            ExtractorsFactory extractorsFactory = new DefaultExtractorsFactory();
-            //  mediaSource1 = new ExtractorMediaSource(videoUri, dataSourceFactory, extractorsFactory, null, null);
-            mediaSource1 =  new ProgressiveMediaSource.Factory(dataSourceFactory)
-                    .setExtractorsFactory(extractorsFactory)
-                    .createMediaSource(videoUri);
-            sourceSize++;
-        }else if (videoType.equals("dash")){
-           // mediaSource1 = new DashMediaSource(videoUri,dataSourceFactory, new DefaultDashChunkSource.Factory(dataSourceFactory),null,null);
-            mediaSource1=  new DashMediaSource.Factory(dataSourceFactory)
-                    .createMediaSource(videoUri);
-            sourceSize++;
-        }else if (videoType.equals("m3u8")){
-
-            mediaSource1 = new HlsMediaSource.Factory(dataSourceFactory)
-                     .createMediaSource(videoUri);
-            // mediaSource1 = new HlsMediaSource(videoUri, dataSourceFactory,  new DefaultDashChunkSource.Factory(dataSourceFactory), null,null);
-            sourceSize++;
-        }else if (videoType.equals("embed")){
-            // Embed URLs should have been extracted to direct URLs before reaching here
-            // If an embed URL still reaches here, treat it as MP4 and let ExoPlayer try
-            Log.w("CustomPlayerViewModel", "Embed URL reached ExoPlayer - treating as MP4: " + mUrl);
-            ExtractorsFactory extractorsFactory = new DefaultExtractorsFactory();
-            mediaSource1 =  new ProgressiveMediaSource.Factory(dataSourceFactory)
-                    .setExtractorsFactory(extractorsFactory)
-                    .createMediaSource(videoUri);
-            sourceSize++;
-        }else{
-            ExtractorsFactory extractorsFactory = new DefaultExtractorsFactory();
-            //  mediaSource1 = new ExtractorMediaSource(videoUri, dataSourceFactory, extractorsFactory, null, null);
-            mediaSource1 =  new ProgressiveMediaSource.Factory(dataSourceFactory)
-                    .setExtractorsFactory(extractorsFactory)
-                    .createMediaSource(videoUri);
-            sourceSize++;
+        // Ensure video type is not null
+        if (videoType == null || videoType.trim().isEmpty()) {
+            Log.w("CustomPlayerViewModel", "Video type is null or empty, defaulting to mp4");
+            videoType = "mp4";
         }
+        
+        videoType = videoType.trim().toLowerCase();
+        Log.d("CustomPlayerViewModel", "Preparing media source for type: " + videoType + " URL: " + mUrl);
+
+        try {
+            if (videoType.equals("mp4")){
+                ExtractorsFactory extractorsFactory = new DefaultExtractorsFactory();
+                mediaSource1 =  new ProgressiveMediaSource.Factory(dataSourceFactory)
+                        .setExtractorsFactory(extractorsFactory)
+                        .createMediaSource(videoUri);
+                sourceSize++;
+            }else if (videoType.equals("dash")){
+                mediaSource1=  new DashMediaSource.Factory(dataSourceFactory)
+                        .createMediaSource(videoUri);
+                sourceSize++;
+            }else if (videoType.equals("m3u8") || videoType.equals("hls")){
+                mediaSource1 = new HlsMediaSource.Factory(dataSourceFactory)
+                         .createMediaSource(videoUri);
+                sourceSize++;
+            }else if (videoType.equals("embed")){
+                // Embed URLs should have been extracted to direct URLs before reaching here
+                // If an embed URL still reaches here, treat it as MP4 and let ExoPlayer try
+                Log.w("CustomPlayerViewModel", "Embed URL reached ExoPlayer - treating as MP4: " + mUrl);
+                ExtractorsFactory extractorsFactory = new DefaultExtractorsFactory();
+                mediaSource1 =  new ProgressiveMediaSource.Factory(dataSourceFactory)
+                        .setExtractorsFactory(extractorsFactory)
+                        .createMediaSource(videoUri);
+                sourceSize++;
+            }else{
+                // Default to progressive (MP4) for unknown formats
+                Log.w("CustomPlayerViewModel", "Unknown video type '" + videoType + "', defaulting to progressive");
+                ExtractorsFactory extractorsFactory = new DefaultExtractorsFactory();
+                mediaSource1 =  new ProgressiveMediaSource.Factory(dataSourceFactory)
+                        .setExtractorsFactory(extractorsFactory)
+                        .createMediaSource(videoUri);
+                sourceSize++;
+            }
+        } catch (Exception e) {
+            Log.e("CustomPlayerViewModel", "Error creating media source: " + e.getMessage(), e);
+            if (mActivity != null) {
+                android.widget.Toast.makeText(mActivity, "Error preparing video source", android.widget.Toast.LENGTH_LONG).show();
+            }
+            isLoadingNow = false;
+            notifyPropertyChanged(0);
+            setLoadingComplete(false);
+            return;
+        }
+
         SingleSampleMediaSource subtitleSource = null;
         if (subtitle!=null){
             if (subtitle.getType().equals("srt")) {

@@ -646,6 +646,68 @@
                 grid-template-columns: 1fr;
             }
         }
+        
+        .validation-section {
+            margin: 15px 0;
+            padding: 15px;
+            border-radius: 8px;
+            border-left: 4px solid;
+        }
+        
+        .validation-section.errors {
+            background-color: #ffebee;
+            border-left-color: #f44336;
+            color: #d32f2f;
+        }
+        
+        .validation-section.warnings {
+            background-color: #fff3e0;
+            border-left-color: #ff9800;
+            color: #f57c00;
+        }
+        
+        .validation-section.success {
+            background-color: #e8f5e8;
+            border-left-color: #4caf50;
+            color: #388e3c;
+        }
+        
+        .validation-section.fix-suggestion {
+            background-color: #e3f2fd;
+            border-left-color: #2196f3;
+            color: #1976d2;
+        }
+        
+        .validation-section h5 {
+            margin: 0 0 10px 0;
+            font-weight: bold;
+        }
+        
+        .validation-section ul {
+            margin: 0;
+            padding-left: 20px;
+        }
+        
+        .validation-section li {
+            margin-bottom: 5px;
+        }
+        
+        #fixButton {
+            background: linear-gradient(135deg, #ff6b6b, #ff4757);
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 8px;
+            font-weight: bold;
+            box-shadow: 0 4px 12px rgba(255, 107, 107, 0.3);
+            transition: all 0.3s ease;
+        }
+        
+        #fixButton:hover {
+            background: linear-gradient(135deg, #ff5252, #ff3838);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgba(255, 107, 107, 0.4);
+        }
     </style>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
@@ -3598,101 +3660,116 @@
                     if (!jsonData.api_info.version) warnings.push('Missing API version');
                     if (!jsonData.api_info.description) warnings.push('Missing API description');
                     if (!jsonData.api_info.last_updated) warnings.push('Missing last_updated date');
+                    if (!jsonData.api_info.total_movies) warnings.push('Missing total_movies count');
+                    if (!jsonData.api_info.total_channels) warnings.push('Missing total_channels count');
+                    if (!jsonData.api_info.total_actors) warnings.push('Missing total_actors count');
+                } else {
+                    errors.push('api_info object is null or undefined');
                 }
                 
-                // Check movies structure
-                if (jsonData.movies && jsonData.movies.length > 0) {
-                    let movieCount = 0;
-                    let seriesCount = 0;
-                    
-                    jsonData.movies.forEach((item, index) => {
-                        if (!item.id) errors.push(`Item ${index + 1}: Missing id`);
-                        if (!item.title) errors.push(`Item ${index + 1}: Missing title`);
-                        
-                        if (item.type === 'series') {
-                            seriesCount++;
-                            // For series, check if seasons/episodes have sources
-                            if (!item.seasons || item.seasons.length === 0) {
-                                warnings.push(`Series "${item.title}": No seasons defined`);
-                            } else {
-                                let hasEpisodeSources = false;
-                                item.seasons.forEach(season => {
-                                    if (season.episodes && season.episodes.length > 0) {
+                // Critical checks for video sources that could cause app crashes
+                let moviesWithoutSources = 0;
+                let seriesWithoutEpisodeSources = 0;
+                let totalMovies = 0;
+                let totalSeries = 0;
+                
+                if (jsonData.movies && Array.isArray(jsonData.movies)) {
+                    jsonData.movies.forEach((movie, index) => {
+                        if (movie.type === 'series') {
+                            totalSeries++;
+                            
+                            // Check series episode sources
+                            if (movie.seasons && Array.isArray(movie.seasons)) {
+                                movie.seasons.forEach(season => {
+                                    if (season.episodes && Array.isArray(season.episodes)) {
                                         season.episodes.forEach(episode => {
-                                            if (episode.sources && episode.sources.length > 0) {
-                                                hasEpisodeSources = true;
+                                            if (!episode.sources || !Array.isArray(episode.sources) || episode.sources.length === 0) {
+                                                seriesWithoutEpisodeSources++;
                                             }
                                         });
                                     }
                                 });
-                                if (!hasEpisodeSources) {
-                                    warnings.push(`Series "${item.title}": No episode sources found`);
-                                }
                             }
                         } else {
-                            // For movies, check direct sources
-                            movieCount++;
-                            if (!item.sources || item.sources.length === 0) {
-                                warnings.push(`Movie "${item.title}": No sources defined`);
+                            totalMovies++;
+                            
+                            // Check movie sources
+                            if (!movie.sources || !Array.isArray(movie.sources) || movie.sources.length === 0) {
+                                moviesWithoutSources++;
                             }
                         }
+                        
+                        // Check for other potential crash causes
+                        if (!movie.id) warnings.push(`Movie/Series at index ${index} missing ID`);
+                        if (!movie.title) warnings.push(`Movie/Series at index ${index} missing title`);
+                        if (movie.playas === undefined) warnings.push(`Movie/Series "${movie.title || index}" missing playas field`);
+                        if (movie.comment === undefined) warnings.push(`Movie/Series "${movie.title || index}" missing comment field`);
                     });
-                    
-                    info.push(`${movieCount} movies and ${seriesCount} series validated`);
-                } else {
-                    warnings.push('No movies/series in API');
                 }
                 
-                // Check channels structure
-                if (jsonData.channels && jsonData.channels.length > 0) {
+                // Report critical issues
+                if (moviesWithoutSources > 0) {
+                    errors.push(`CRITICAL: ${moviesWithoutSources} out of ${totalMovies} movies have no video sources - THIS WILL CAUSE APP CRASHES!`);
+                }
+                
+                if (seriesWithoutEpisodeSources > 0) {
+                    errors.push(`CRITICAL: ${seriesWithoutEpisodeSources} episodes across ${totalSeries} series have no video sources - THIS WILL CAUSE APP CRASHES!`);
+                }
+                
+                // Check channels
+                let channelsWithoutSources = 0;
+                let totalChannels = 0;
+                
+                if (jsonData.channels && Array.isArray(jsonData.channels)) {
+                    totalChannels = jsonData.channels.length;
                     jsonData.channels.forEach((channel, index) => {
-                        if (!channel.id) errors.push(`Channel ${index + 1}: Missing id`);
-                        if (!channel.title) errors.push(`Channel ${index + 1}: Missing title`);
-                        if (!channel.sources || channel.sources.length === 0) {
-                            warnings.push(`Channel "${channel.title}": No sources defined`);
+                        if (!channel.sources || !Array.isArray(channel.sources) || channel.sources.length === 0) {
+                            channelsWithoutSources++;
                         }
+                        if (!channel.id) warnings.push(`Channel at index ${index} missing ID`);
+                        if (!channel.title) warnings.push(`Channel at index ${index} missing title`);
                     });
-                    info.push(`${jsonData.channels.length} channels validated`);
-                } else {
-                    info.push('No channels in API');
                 }
                 
-                // Generate report
-                let report = '';
-                let reportClass = 'success';
-                
-                if (errors.length > 0) {
-                    reportClass = 'error';
-                    report += `<strong>❌ ${errors.length} Error(s):</strong><br>`;
-                    errors.forEach(error => report += `• ${error}<br>`);
+                if (channelsWithoutSources > 0) {
+                    warnings.push(`${channelsWithoutSources} out of ${totalChannels} channels have no sources`);
                 }
                 
-                if (warnings.length > 0) {
-                    if (reportClass !== 'error') reportClass = 'warning';
-                    report += `<strong>⚠️ ${warnings.length} Warning(s):</strong><br>`;
-                    warnings.forEach(warning => report += `• ${warning}<br>`);
-                }
-                
-                if (info.length > 0) {
-                    report += `<strong>ℹ️ Info:</strong><br>`;
-                    info.forEach(i => report += `• ${i}<br>`);
-                }
-                
-                if (errors.length === 0 && warnings.length === 0) {
-                    report = '<strong>✅ API validation passed!</strong><br>Your CineMax API is ready for use.';
-                    reportClass = 'success';
-                }
-                
-                results.innerHTML = report;
-                results.style.backgroundColor = reportClass === 'error' ? '#ffebee' : 
-                                                reportClass === 'warning' ? '#fff3e0' : '#e8f5e8';
-                results.style.color = reportClass === 'error' ? '#c62828' : 
-                                     reportClass === 'warning' ? '#ef6c00' : '#2e7d32';
-                results.style.border = `1px solid ${reportClass === 'error' ? '#c62828' : 
-                                                   reportClass === 'warning' ? '#ef6c00' : '#2e7d32'}`;
-                
-                showNotification(`Validation completed: ${errors.length} errors, ${warnings.length} warnings`, 
-                               errors.length === 0);
+                // Display results
+                results.innerHTML = `
+                    <h4>Validation Results</h4>
+                    ${errors.length > 0 ? `
+                        <div class="validation-section errors">
+                            <h5><i class="fas fa-times-circle"></i> Errors (${errors.length})</h5>
+                            <ul>${errors.map(error => `<li>${error}</li>`).join('')}</ul>
+                        </div>
+                    ` : ''}
+                    
+                    ${warnings.length > 0 ? `
+                        <div class="validation-section warnings">
+                            <h5><i class="fas fa-exclamation-triangle"></i> Warnings (${warnings.length})</h5>
+                            <ul>${warnings.map(warning => `<li>${warning}</li>`).join('')}</ul>
+                        </div>
+                    ` : ''}
+                    
+                    <div class="validation-section success">
+                        <h5><i class="fas fa-check-circle"></i> Summary</h5>
+                        <ul>
+                            <li>Total Movies: ${totalMovies}</li>
+                            <li>Total Series: ${totalSeries}</li>
+                            <li>Total Channels: ${totalChannels}</li>
+                            <li>Movies with sources: ${totalMovies - moviesWithoutSources}</li>
+                            <li>Episodes with missing sources: ${seriesWithoutEpisodeSources}</li>
+                        </ul>
+                    </div>
+                    
+                    ${(moviesWithoutSources > 0 || seriesWithoutEpisodeSources > 0) ? `
+                        <div class="validation-section fix-suggestion">
+                            <h5><i class="fas fa-tools"></i> Recommended Action</h5>
+                            <p><strong>Click the "Fix API Structure for CineMax" button above to automatically fix missing video sources!</strong></p>
+                        </div>
+                    ` : ''}
+                `;
             }
             
             // --- Info Toggle Function ---
@@ -3943,6 +4020,138 @@
                         showNotification(`Episode ${newEpisodeNumber} added to Season ${seasonNumber}!`, true);
                     }
                 }
+            });
+
+            function fixAPIStructure() {
+                console.log('Fixing API structure for CineMax compatibility...');
+                
+                if (!jsonData.movies || !Array.isArray(jsonData.movies)) {
+                    console.warn('No movies array found');
+                    return;
+                }
+                
+                let fixedCount = 0;
+                
+                jsonData.movies.forEach((movie, index) => {
+                    let needsFix = false;
+                    
+                    // Fix missing or empty sources array
+                    if (!movie.sources || !Array.isArray(movie.sources) || movie.sources.length === 0) {
+                        needsFix = true;
+                        
+                        // Create a default video source based on movie type
+                        if (movie.type === 'series') {
+                            // For series, sources will be in episodes
+                            movie.sources = [];
+                        } else {
+                            // For movies, create a default source
+                            movie.sources = [
+                                {
+                                    id: movie.id || index + 1,
+                                    type: "video",
+                                    title: `${movie.title || 'Movie'} 1080p`,
+                                    quality: "1080p",
+                                    url: `https://vidsrc.net/embed/movie/${movie.id || index + 1}`
+                                }
+                            ];
+                        }
+                    }
+                    
+                    // Fix missing trailer structure
+                    if (!movie.trailer || typeof movie.trailer !== 'object') {
+                        needsFix = true;
+                        movie.trailer = {
+                            id: movie.id || index + 1,
+                            type: "video",
+                            title: `${movie.title || 'Movie'} Trailer`,
+                            url: "https://www.youtube.com/watch?v=dQw4w9WgXcQ" // Default trailer
+                        };
+                    }
+                    
+                    // Fix missing playas field
+                    if (!movie.playas) {
+                        needsFix = true;
+                        movie.playas = movie.type === 'series' ? 'video' : 'video';
+                    }
+                    
+                    // Fix missing comment field
+                    if (movie.comment === undefined || movie.comment === null) {
+                        needsFix = true;
+                        movie.comment = true;
+                    }
+                    
+                    // Fix missing arrays
+                    if (!movie.subtitles || !Array.isArray(movie.subtitles)) {
+                        needsFix = true;
+                        movie.subtitles = [];
+                    }
+                    
+                    if (!movie.comments || !Array.isArray(movie.comments)) {
+                        needsFix = true;
+                        movie.comments = [];
+                    }
+                    
+                    // For series, fix episode sources
+                    if (movie.type === 'series' && movie.seasons && Array.isArray(movie.seasons)) {
+                        movie.seasons.forEach(season => {
+                            if (season.episodes && Array.isArray(season.episodes)) {
+                                season.episodes.forEach((episode, episodeIndex) => {
+                                    if (!episode.sources || !Array.isArray(episode.sources) || episode.sources.length === 0) {
+                                        needsFix = true;
+                                        episode.sources = [
+                                            {
+                                                id: episode.id || `${movie.id}_${episodeIndex + 1}`,
+                                                type: "video",
+                                                title: `${episode.title || 'Episode'} 1080p`,
+                                                quality: "1080p",
+                                                url: `https://vidsrc.net/embed/tv/${movie.id || index + 1}/${season.id || 1}/${episode.episode_number || episodeIndex + 1}`
+                                            }
+                                        ];
+                                    }
+                                    
+                                    // Fix missing episode fields
+                                    if (!episode.subtitles || !Array.isArray(episode.subtitles)) {
+                                        episode.subtitles = [];
+                                    }
+                                });
+                            }
+                        });
+                    }
+                    
+                    if (needsFix) {
+                        fixedCount++;
+                    }
+                });
+                
+                console.log(`Fixed ${fixedCount} movies/series with missing or invalid sources`);
+                return fixedCount;
+            }
+            
+            // Add fix button to the interface
+            function addFixButton() {
+                const container = document.querySelector('.container');
+                if (container && !document.getElementById('fixButton')) {
+                    const fixButton = document.createElement('button');
+                    fixButton.id = 'fixButton';
+                    fixButton.className = 'btn btn-primary';
+                    fixButton.style.margin = '10px';
+                    fixButton.innerHTML = '<i class="fas fa-wrench"></i> Fix API Structure for CineMax';
+                    fixButton.onclick = () => {
+                        const fixed = fixAPIStructure();
+                        alert(`Fixed ${fixed} movies/series. Don't forget to download the updated JSON!`);
+                    };
+                    
+                    // Insert after the header
+                    const header = container.querySelector('header');
+                    if (header) {
+                        header.insertAdjacentElement('afterend', fixButton);
+                    }
+                }
+            }
+            
+            // Call addFixButton when the page loads
+            document.addEventListener('DOMContentLoaded', () => {
+                setTimeout(addFixButton, 1000);
             });
         });
     </script>
