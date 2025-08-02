@@ -3408,8 +3408,9 @@
             }
             
             function prepareCineMaxAPIFormat() {
-                // Update API info with current stats
-                const updatedApiInfo = {
+                try {
+                    // Update API info with current stats
+                    const updatedApiInfo = {
                     ...jsonData.api_info,
                     total_movies: jsonData.movies?.length || 0,
                     total_channels: jsonData.channels?.length || 0,
@@ -3418,7 +3419,14 @@
                 };
                 
                 // Ensure all movies have complete CineMax structure
-                const processedMovies = (jsonData.movies || []).map(movie => ({
+                const processedMovies = (jsonData.movies || []).map(movie => {
+                    // Validate movie object
+                    if (!movie || typeof movie !== 'object') {
+                        console.warn('Invalid movie object:', movie);
+                        return null;
+                    }
+                    
+                    return {
                     id: movie.id,
                     type: movie.type || 'movie',
                     title: movie.title,
@@ -3446,19 +3454,38 @@
                     downloads: movie.downloads || 0,
                     shares: movie.shares || 0,
                     ...(movie.type === 'series' && {
-                        seasons: (movie.seasons || []).map(season => ({
-                            ...season,
-                            episodes: (season.episodes || []).map(episode => ({
+                        seasons: (movie.seasons || []).map(season => {
+                            if (!season || typeof season !== 'object') return season;
+                            return {
+                                ...season,
+                                episodes: (season.episodes || []).map(episode => {
+                                    if (!episode || typeof episode !== 'object') return episode;
+                                    return {
                                 ...episode,
                                 sources: (episode.sources || []).map(source => {
                                     if (!source || typeof source !== 'object') return source;
+                                    
+                                    // Simple kind detection
+                                    let kind = source.kind || 'both';
+                                    let type = source.type || 'video';
+                                    
+                                    if (source.url) {
+                                        if (source.url.includes('vidsrc.net')) {
+                                            kind = 'embed';
+                                            type = 'embed';
+                                        } else if (source.url.includes('youtube.com') || source.url.includes('youtu.be')) {
+                                            kind = 'youtube';
+                                            type = 'youtube';
+                                        } else if (source.url.includes('.mpd') || source.url.includes('.m3u8') || source.url.includes('.hls')) {
+                                            kind = 'play';
+                                        }
+                                    }
+                                    
                                     return {
                                         ...source,
-                                        type: source.type || (source.url && source.url.includes('vidsrc.net') ? 'embed' : 'video'),
+                                        type: type,
                                         size: source.size || '0MB',
-                                        kind: source.kind || (source.url && source.url.includes('vidsrc.net') ? 'embed' : 
-                                                             source.url && (source.url.includes('youtube.com') || source.url.includes('youtu.be')) ? 'youtube' :
-                                                             source.url && (source.url.includes('.mpd') || source.url.includes('.m3u8') || source.url.includes('.hls')) ? 'play' : 'both'),
+                                        kind: kind,
                                         premium: source.premium || 'false',
                                         external: source.external !== undefined ? source.external : false
                                     };
@@ -3466,7 +3493,7 @@
                             }))
                         }))
                     })
-                }));
+                })).filter(movie => movie !== null);
                 
                 // Ensure all channels have complete CineMax structure
                 const processedChannels = (jsonData.channels || []).map(channel => ({
@@ -3554,6 +3581,31 @@
                     actors: jsonData.actors || [],  // Keep a copy at root for backward compatibility
                     genres: jsonData.genres || []   // Keep a copy at root for backward compatibility
                 };
+                } catch (error) {
+                    console.error('Error in prepareCineMaxAPIFormat:', error);
+                    // Return a safe fallback
+                    return {
+                        api_info: {
+                            version: '1.0',
+                            description: 'CineMax API',
+                            total_movies: 0,
+                            total_channels: 0,
+                            total_actors: 0,
+                            last_updated: new Date().toISOString().split('T')[0]
+                        },
+                        home: {
+                            slides: [],
+                            featuredMovies: [],
+                            channels: [],
+                            actors: [],
+                            genres: []
+                        },
+                        movies: [],
+                        channels: [],
+                        actors: [],
+                        genres: []
+                    };
+                }
             }
             
             function validateCineMaxAPI() {
