@@ -1,0 +1,199 @@
+{
+  "slides": [
+    {
+      "id": 1,
+      "title": "Featured Movie",
+      "type": "movie",
+      "image": "https://example.com/slide1.jpg",
+      "url": "movies/1",
+      "poster": {
+        "id": 1,
+        "title": "Sample Movie",
+        "type": "movie",
+        "label": "2024",
+        "sublabel": "Action",
+        "imdb": "8.5",
+        "downloadas": "sample-movie",
+        "comment": true,
+        "playas": "video",
+        "description": "A great action movie",
+        "image": "https://example.com/poster1.jpg",
+        "cover": "https://example.com/cover1.jpg",
+        "sources": [
+          {
+            "id": 1,
+            "type": "video",
+            "title": "1080p HD",
+            "quality": "1080p",
+            "size": "2.5GB",
+            "kind": "direct",
+            "premium": "0",
+            "external": false,
+            "url": "https://example.com/video1.mp4"
+          }
+        ]
+      }
+    }
+  ],
+  "posters": [
+    {
+      "id": 1,
+      "title": "Sample Movie",
+      "type": "movie",
+      "label": "2024",
+      "sublabel": "Action",
+      "imdb": "8.5",
+      "downloadas": "sample-movie",
+      "comment": true,
+      "playas": "video",
+      "description": "A thrilling action movie with amazing stunts",
+      "image": "https://example.com/poster1.jpg",
+      "cover": "https://example.com/cover1.jpg",
+      "rating": "8.5",
+      "year": "2024",
+      "duration": "120",
+      "sources": [
+        {
+          "id": 1,
+          "type": "video",
+          "title": "1080p HD",
+          "quality": "1080p",
+          "size": "2.5GB",
+          "kind": "direct",
+          "premium": "0",
+          "external": false,
+          "url": "https://example.com/video1.mp4"
+        },
+        {
+          "id": 2,
+          "type": "video",
+          "title": "720p HD",
+          "quality": "720p",
+          "size": "1.5GB",
+          "kind": "embed",
+          "premium": "0",
+          "external": true,
+          "url": "https://vidsrc.net/embed/movie/1"
+        }
+      ],
+      "genres": [
+        {
+          "id": 1,
+          "title": "Action",
+          "color": "#FF5722"
+        }
+      ],
+      "actors": [
+        {
+          "id": 1,
+          "name": "John Doe",
+          "image": "https://example.com/actor1.jpg"
+        }
+      ],
+      "countries": [
+        {
+          "id": 1,
+          "title": "USA"
+        }
+      ]
+    },
+    {
+      "id": 2,
+      "title": "Sample Series",
+      "type": "series",
+      "label": "2024",
+      "sublabel": "Drama",
+      "imdb": "9.0",
+      "downloadas": "sample-series",
+      "comment": true,
+      "playas": "video",
+      "description": "An amazing drama series",
+      "image": "https://example.com/poster2.jpg",
+      "cover": "https://example.com/cover2.jpg",
+      "rating": "9.0",
+      "year": "2024",
+      "duration": "45",
+      "sources": [],
+      "seasons": [
+        {
+          "id": 1,
+          "title": "Season 1",
+          "episodes": [
+            {
+              "id": 1,
+              "title": "Episode 1",
+              "episode_number": 1,
+              "description": "The pilot episode",
+              "image": "https://example.com/episode1.jpg",
+              "duration": "45",
+              "sources": [
+                {
+                  "id": 1,
+                  "type": "video",
+                  "title": "1080p HD",
+                  "quality": "1080p",
+                  "size": "1.2GB",
+                  "kind": "direct",
+                  "premium": "0",
+                  "external": false,
+                  "url": "https://example.com/series/s1e1.mp4"
+                }
+              ]
+            },
+            {
+              "id": 2,
+              "title": "Episode 2",
+              "episode_number": 2,
+              "description": "The second episode",
+              "image": "https://example.com/episode2.jpg",
+              "duration": "45",
+              "sources": [
+                {
+                  "id": 2,
+                  "type": "video",
+                  "title": "1080p HD",
+                  "quality": "1080p",
+                  "size": "1.2GB",
+                  "kind": "embed",
+                  "premium": "0",
+                  "external": true,
+                  "url": "https://vidsrc.net/embed/tv/2/1/2"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "channels": [
+    {
+      "id": 1,
+      "title": "Live TV Channel",
+      "image": "https://example.com/channel1.jpg",
+      "url": "https://example.com/live/channel1.m3u8",
+      "type": "live",
+      "category": "Entertainment"
+    }
+  ],
+  "actors": [
+    {
+      "id": 1,
+      "name": "John Doe",
+      "image": "https://example.com/actor1.jpg",
+      "biography": "Famous actor"
+    }
+  ],
+  "genres": [
+    {
+      "id": 1,
+      "title": "Action",
+      "color": "#FF5722"
+    },
+    {
+      "id": 2,
+      "title": "Drama",
+      "color": "#2196F3"
+    }
+  ]
+}
