@@ -29,6 +29,7 @@ import my.cinemax.app.free.ui.player.CustomPlayerFragment;
 
 import org.greenrobot.eventbus.EventBus;
 import es.dmoral.toasty.Toasty;
+import android.widget.Toast;
 
 
 /**
