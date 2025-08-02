@@ -405,8 +405,37 @@
                 </div>
             </div>
 
+            <div class="form-row">
+                <div class="form-col">
+                    <div class="form-group">
+                        <label for="maxSeasons">Max Seasons (TV Series)</label>
+                        <select id="maxSeasons">
+                            <option value="1">1 Season</option>
+                            <option value="2">2 Seasons</option>
+                            <option value="3" selected>3 Seasons</option>
+                            <option value="5">5 Seasons</option>
+                            <option value="10">All Seasons</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-col">
+                    <div class="form-group">
+                        <label for="maxEpisodes">Max Episodes per Season</label>
+                        <select id="maxEpisodes">
+                            <option value="5">5 Episodes</option>
+                            <option value="10" selected>10 Episodes</option>
+                            <option value="20">20 Episodes</option>
+                            <option value="50">All Episodes</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
             <div class="form-group">
                 <label>Additional Servers</label>
+                <p style="font-size: 0.9em; color: #666; margin-bottom: 10px;">
+                    For TV series episodes, use placeholders: {series_id}, {season}, {episode}
+                </p>
                 <div id="additionalServers" class="server-list"></div>
                 <button type="button" class="btn btn-secondary" onclick="addServer()">+ Add Server</button>
             </div>
@@ -689,6 +718,19 @@
             }
         }
 
+        async function fetchTMDBSeason(seriesId, seasonNumber) {
+            const url = `${TMDB_BASE_URL}/tv/${seriesId}/season/${seasonNumber}?api_key=${TMDB_API_KEY}`;
+            
+            try {
+                const response = await fetch(url);
+                if (!response.ok) throw new Error('TMDB Season API request failed');
+                return await response.json();
+            } catch (error) {
+                console.error('TMDB Season API Error:', error);
+                throw error;
+            }
+        }
+
         // Video source generation
         function generateVideoSources(tmdbData, type, sourceType = 'vidsrc') {
             const sources = [];
@@ -748,7 +790,7 @@
         }
 
         // Content generation
-        function convertTMDBToCineMax(tmdbData, type) {
+        async function convertTMDBToCineMax(tmdbData, type) {
             const isMovie = type === 'movie';
             const title = isMovie ? tmdbData.title : tmdbData.name;
             const releaseDate = isMovie ? tmdbData.release_date : tmdbData.first_air_date;
@@ -770,6 +812,9 @@
                 external: server.external || false,
                 url: server.url
             })));
+            
+            // Generate seasons with episodes for TV series
+            const seasons = isMovie ? [] : await generateSeasons(tmdbData);
             
             const content = {
                 id: generateId(),
@@ -797,7 +842,7 @@
                 })),
                 actors: getActors(tmdbData),
                 views: Math.floor(Math.random() * 10000) + 1000,
-                seasons: isMovie ? [] : generateSeasons(tmdbData)
+                seasons: seasons
             };
             
             return content;
@@ -829,21 +874,135 @@
             }));
         }
 
-        function generateSeasons(tmdbData) {
-            // For TV series, generate basic season structure
+        async function generateSeasons(tmdbData) {
+            // For TV series, generate seasons with episodes
             const numberOfSeasons = tmdbData.number_of_seasons || 1;
             const seasons = [];
             
-            for (let i = 1; i <= numberOfSeasons; i++) {
-                seasons.push({
-                    id: generateId(),
-                    season_number: i,
-                    name: `Season ${i}`,
-                    episodes: [] // Episodes would need separate TMDB calls
-                });
+            // Get user configuration for max seasons
+            const maxSeasonsConfig = parseInt(document.getElementById('maxSeasons')?.value || '3');
+            const maxSeasons = maxSeasonsConfig === 10 ? numberOfSeasons : Math.min(numberOfSeasons, maxSeasonsConfig);
+            
+            for (let i = 1; i <= maxSeasons; i++) {
+                try {
+                    const seasonData = await fetchTMDBSeason(tmdbData.id, i);
+                    const episodes = generateEpisodes(seasonData, tmdbData.id, i);
+                    
+                    seasons.push({
+                        id: generateId(),
+                        season_number: i,
+                        name: `Season ${i}`,
+                        air_date: seasonData.air_date || '',
+                        episode_count: seasonData.episodes?.length || 0,
+                        overview: seasonData.overview || '',
+                        poster_path: seasonData.poster_path || '',
+                        episodes: episodes
+                    });
+                    
+                    // Small delay to avoid rate limiting
+                    await new Promise(resolve => setTimeout(resolve, 200));
+                    
+                } catch (error) {
+                    console.error(`Error fetching season ${i}:`, error);
+                    // Fallback to basic season structure
+                    seasons.push({
+                        id: generateId(),
+                        season_number: i,
+                        name: `Season ${i}`,
+                        air_date: '',
+                        episode_count: 0,
+                        overview: '',
+                        poster_path: '',
+                        episodes: []
+                    });
+                }
             }
             
             return seasons;
+        }
+
+        function generateEpisodes(seasonData, seriesId, seasonNumber) {
+            const episodes = [];
+            const episodeList = seasonData.episodes || [];
+            
+            // Get user configuration for max episodes
+            const maxEpisodesConfig = parseInt(document.getElementById('maxEpisodes')?.value || '10');
+            const maxEpisodes = maxEpisodesConfig === 50 ? episodeList.length : Math.min(episodeList.length, maxEpisodesConfig);
+            
+            for (let i = 0; i < maxEpisodes; i++) {
+                const episode = episodeList[i];
+                const episodeNumber = episode.episode_number;
+                
+                // Generate video sources for this episode
+                const sources = generateEpisodeVideoSources(seriesId, seasonNumber, episodeNumber);
+                
+                episodes.push({
+                    id: generateId(),
+                    episode_number: episodeNumber,
+                    title: episode.name || `Episode ${episodeNumber}`,
+                    description: episode.overview || '',
+                    air_date: episode.air_date || '',
+                    duration: episode.runtime ? `${Math.floor(episode.runtime / 60)}:${(episode.runtime % 60).toString().padStart(2, '0')}` : '00:45',
+                    image: episode.still_path ? `https://image.tmdb.org/t/p/w300${episode.still_path}` : '',
+                    rating: episode.vote_average || 0,
+                    downloadas: `${episode.name || `episode-${episodeNumber}`}`.toLowerCase().replace(/[^a-z0-9]/g, '-'),
+                    playas: 'video',
+                    sources: sources
+                });
+            }
+            
+            return episodes;
+        }
+
+        function generateEpisodeVideoSources(seriesId, seasonNumber, episodeNumber) {
+            const sources = [];
+            const sourceType = document.getElementById('videoSource')?.value || 'vidsrc';
+            
+            // VidSrc.net episode format: /embed/tv/{tmdb_id}/{season}/{episode}
+            if (sourceType === 'vidsrc' || sourceType === 'both') {
+                sources.push({
+                    id: generateId(),
+                    type: 'play',
+                    title: 'VidSrc 1080p',
+                    quality: '1080p',
+                    size: '0MB',
+                    kind: 'embed',
+                    premium: 'false',
+                    external: false,
+                    url: `${VIDSRC_BASE}/tv/${seriesId}/${seasonNumber}/${episodeNumber}`
+                });
+            }
+            
+            // VidJoy.pro episode format: /embed/tv/{tmdb_id}/{season}/{episode}  
+            if (sourceType === 'vidjoy' || sourceType === 'both') {
+                sources.push({
+                    id: generateId(),
+                    type: 'play',
+                    title: 'VidJoy 1080p',
+                    quality: '1080p',
+                    size: '0MB',
+                    kind: 'embed',
+                    premium: 'false',
+                    external: false,
+                    url: `${VIDJOY_BASE}/tv/${seriesId}/${seasonNumber}/${episodeNumber}`
+                });
+            }
+            
+            // Add additional servers for episodes
+            const additionalServers = getAdditionalServers();
+            sources.push(...additionalServers.map(server => ({
+                id: generateId(),
+                type: server.type || 'both',
+                title: server.name,
+                quality: server.quality || '1080p',
+                size: '0MB',
+                kind: server.kind || 'video',
+                premium: 'false',
+                external: server.external || false,
+                url: server.url.replace('{series_id}', seriesId).replace('{season}', seasonNumber).replace('{episode}', episodeNumber)
+            })));
+            
+            return sources;
         }
 
         // UI Functions
@@ -860,7 +1019,6 @@
             
             try {
                 const tmdbData = await fetchTMDBData(contentType, tmdbId);
-                const content = convertTMDBToCineMax(tmdbData, contentType);
                 
                 // Check for duplicates
                 const exists = generatedContent.find(c => c.id === tmdbData.id);
@@ -868,6 +1026,8 @@
                     showError('Content already exists in generated list');
                     return;
                 }
+                
+                const content = await convertTMDBToCineMax(tmdbData, contentType);
                 
                 generatedContent.push(content);
                 saveData();
@@ -895,7 +1055,7 @@
             
             try {
                 const tmdbData = await fetchTMDBData(contentType, tmdbId);
-                const content = convertTMDBToCineMax(tmdbData, contentType);
+                const content = await convertTMDBToCineMax(tmdbData, contentType);
                 
                 displayContent([content], true);
                 
@@ -939,7 +1099,7 @@
                         
                         try {
                             const fullData = await fetchTMDBData(type, item.id);
-                            const content = convertTMDBToCineMax(fullData, type);
+                            const content = await convertTMDBToCineMax(fullData, type);
                             generatedContent.push(content);
                             
                             // Update display every 5 items
@@ -949,7 +1109,7 @@
                             }
                             
                             // Small delay to avoid rate limiting
-                            await new Promise(resolve => setTimeout(resolve, 100));
+                            await new Promise(resolve => setTimeout(resolve, 300));
                             
                         } catch (error) {
                             console.error('Error generating item:', error);
@@ -1203,6 +1363,17 @@
                                 `<span class="source-item">${source.title} (${source.kind})</span>`
                             ).join('')}
                         </div>
+                        ${item.type === 'series' && item.seasons && item.seasons.length > 0 ? `
+                        <div class="seasons-info" style="margin-top: 10px;">
+                            <strong>Seasons:</strong> ${item.seasons.length} 
+                            <strong>Episodes:</strong> ${item.seasons.reduce((total, season) => total + (season.episodes?.length || 0), 0)}
+                            <div style="font-size: 0.8em; color: #666; margin-top: 5px;">
+                                ${item.seasons.map(season => 
+                                    `S${season.season_number}: ${season.episodes?.length || 0} episodes`
+                                ).join(' • ')}
+                            </div>
+                        </div>
+                        ` : ''}
                         ${!isPreview ? `<button class="btn btn-danger" onclick="removeContent(${item.id})" style="margin-top: 10px;">Remove</button>` : ''}
                     </div>
                 `;
