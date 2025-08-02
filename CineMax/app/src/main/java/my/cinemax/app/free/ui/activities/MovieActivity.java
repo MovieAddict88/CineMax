@@ -361,9 +361,16 @@ public class MovieActivity extends AppCompatActivity {
         if (poster != null && poster.getSources() != null) {
             for (int i = 0; i < poster.getSources().size(); i++) {
                 Source source = poster.getSources().get(i);
-                if (source != null && source.getKind() != null && 
-                    (source.getKind().equals("both") || source.getKind().equals("play"))) {
-                    playSources.add(source);
+                if (source != null) {
+                    // Handle sources with kind field (movies)
+                    if (source.getKind() != null && 
+                        (source.getKind().equals("both") || source.getKind().equals("play"))) {
+                        playSources.add(source);
+                    }
+                    // Handle sources without kind field - treat as playable by default
+                    else if (source.getKind() == null && source.getUrl() != null && !source.getUrl().isEmpty()) {
+                        playSources.add(source);
+                    }
                 }
             }
         }
@@ -372,10 +379,19 @@ public class MovieActivity extends AppCompatActivity {
         if (poster != null && poster.getSources() != null) {
             for (int i = 0; i < poster.getSources().size(); i++) {
                 Source source = poster.getSources().get(i);
-                if (source != null && source.getKind() != null && source.getType() != null &&
-                    (source.getKind().equals("both") || source.getKind().equals("download"))) {
-                    if (!source.getType().equals("youtube") && !source.getType().equals("embed")) {
-                        downloadableList.add(source);
+                if (source != null) {
+                    // Handle sources with kind field (movies)
+                    if (source.getKind() != null && source.getType() != null &&
+                        (source.getKind().equals("both") || source.getKind().equals("download"))) {
+                        if (!source.getType().equals("youtube") && !source.getType().equals("embed")) {
+                            downloadableList.add(source);
+                        }
+                    }
+                    // Handle sources without kind field - treat as downloadable by default
+                    else if (source.getKind() == null && source.getUrl() != null && !source.getUrl().isEmpty()) {
+                        if (source.getType() == null || (!source.getType().equals("youtube") && !source.getType().equals("embed"))) {
+                            downloadableList.add(source);
+                        }
                     }
                 }
             }

@@ -302,9 +302,16 @@ public class ChannelActivity extends AppCompatActivity {
         if (channel != null && channel.getSources() != null) {
             for (int i = 0; i < channel.getSources().size(); i++) {
                 Source source = channel.getSources().get(i);
-                if (source != null && source.getKind() != null && 
-                    (source.getKind().equals("both") || source.getKind().equals("play"))) {
-                    playSources.add(source);
+                if (source != null) {
+                    // Handle sources with kind field
+                    if (source.getKind() != null && 
+                        (source.getKind().equals("both") || source.getKind().equals("play"))) {
+                        playSources.add(source);
+                    }
+                    // Handle sources without kind field - treat as playable by default
+                    else if (source.getKind() == null && source.getUrl() != null && !source.getUrl().isEmpty()) {
+                        playSources.add(source);
+                    }
                 }
             }
         }
