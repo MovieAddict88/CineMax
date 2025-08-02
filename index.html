@@ -1430,6 +1430,30 @@
             };
             console.log('✅ You can test auto-generation with: testAutoGeneration() in console');
             
+            // Add manual test for detectSourceKind function
+            window.testDetectSourceKind = function() {
+                console.log('🧪 MANUAL TEST: Testing detectSourceKind function...');
+                
+                const testCases = [
+                    { url: 'https://vidsrc.net/embed/movie/90802', type: 'video', context: null },
+                    { url: 'https://vidsrc.net/embed/tv/90802/1/1', type: 'video', context: null },
+                    { url: 'https://example.com/video.mp4', type: 'video', context: null },
+                    { url: 'https://vidsrc.net/embed/movie/90802', type: 'video', context: 'slide' },
+                    { url: 'https://vidsrc.net/embed/movie/90802', type: 'video', context: 'featured' },
+                    { url: 'https://vidsrc.net/embed/movie/90802', type: 'video', context: 'genre' },
+                    { url: 'https://example.com/live.m3u8', type: 'live', context: null }
+                ];
+                
+                console.log('Running detectSourceKind tests:');
+                testCases.forEach((test, i) => {
+                    const result = detectSourceKind(test.url, test.type, test.context);
+                    console.log(`Test ${i+1}: URL="${test.url}", type="${test.type}", context="${test.context || 'none'}" -> kind="${result}"`);
+                });
+                
+                alert('detectSourceKind test completed! Check console for results.');
+            };
+            console.log('✅ You can test detectSourceKind with: testDetectSourceKind() in console');
+            
             // --- Auto-Generation Control ---
             const autoGenToggle = document.getElementById('autoGenToggle');
             const manualGenButton = document.getElementById('manualGenButton');
@@ -1941,6 +1965,7 @@
                 
                 // Content from slides, featured, and genres are always play-only
                 if (contentContext === 'slide' || contentContext === 'featured' || contentContext === 'genre') {
+                    console.log(`🎯 detectSourceKind: ${url} (context: ${contentContext}) -> play`);
                     return 'play';
                 }
                 
@@ -2008,6 +2033,7 @@
                 // Check for embed patterns first
                 for (const pattern of embedPatterns) {
                     if (urlLower.includes(pattern)) {
+                        console.log(`🎯 detectSourceKind: ${url} (pattern: ${pattern}) -> play`);
                         return 'play';
                     }
                 }
@@ -2041,6 +2067,7 @@
                 }
                 
                 // Default to 'both' if no clear pattern is detected
+                console.log(`🎯 detectSourceKind: ${url} (default) -> both`);
                 return 'both';
             }
             
@@ -2600,7 +2627,11 @@
                                     title: `${episodeTitle} 1080p`,
                                     quality: '1080p',
                                     size: '0MB',
-                                    kind: detectSourceKind(sourceUrl, 'video'),
+                                    kind: (function() {
+                                        const kind = detectSourceKind(sourceUrl, 'video');
+                                        console.log(`📺 saveSeries episode source: ${sourceUrl} -> kind: ${kind}`);
+                                        return kind;
+                                    })(),
                                     premium: 'false',
                                     external: false,
                                     url: sourceUrl 
@@ -3455,7 +3486,11 @@
                                         title: `Episode ${episodeNumber} 1080p`,
                                         quality: '1080p',
                                         size: '0MB',
-                                        kind: detectSourceKind(vidsrcEpisodeUrl, 'video'),
+                                        kind: (function() {
+                                            const kind = detectSourceKind(vidsrcEpisodeUrl, 'video');
+                                            console.log(`📺 TMDB fetch episode source: ${vidsrcEpisodeUrl} -> kind: ${kind}`);
+                                            return kind;
+                                        })(),
                                         premium: 'false',
                                         external: false,
                                         url: vidsrcEpisodeUrl
