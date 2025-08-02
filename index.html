@@ -2693,6 +2693,7 @@
                         sourceType = 'video';
                         sourceKind = 'both';
                     }
+                    
                     currentMovieSources.push({ 
                         id: generateNewId(),
                         type: sourceType,
@@ -3067,7 +3068,7 @@
                     cover: movieData.backdrop_path ? `https://image.tmdb.org/t/p/original${movieData.backdrop_path}` : '',
                     trailer: trailer ? {
                         id: generateNewId(),
-                        type: 'youtube',
+                        type: 'video',
                         title: `${movieData.title} Trailer`,
                         url: `https://www.youtube.com/watch?v=${trailer.key}`
                     } : null,
@@ -3142,7 +3143,7 @@
                     cover: seriesData.backdrop_path ? `https://image.tmdb.org/t/p/original${seriesData.backdrop_path}` : '',
                     trailer: trailer ? {
                         id: generateNewId(),
-                        type: 'youtube',
+                        type: 'video',
                         title: `${seriesData.name} Trailer`,
                         url: `https://www.youtube.com/watch?v=${trailer.key}`
                     } : null,
@@ -3241,7 +3242,7 @@
                         title: 'vidsrc.net 1080p',
                         quality: '1080p',
                         size: '0MB',
-                        kind: 'both',
+                        kind: 'embed',
                         premium: 'false',
                         external: false,
                         url: vidsrcUrl 
@@ -3444,27 +3445,7 @@
                     views: movie.views || 0,
                     downloads: movie.downloads || 0,
                     shares: movie.shares || 0,
-                    ...(movie.type === 'series' && { 
-                        seasons: (movie.seasons || []).map(season => ({
-                            ...season,
-                            episodes: (season.episodes || []).map(episode => ({
-                                ...episode,
-                                sources: (episode.sources || []).map(source => {
-                                    if (!source || typeof source !== 'object') return source;
-                                    return {
-                                        ...source,
-                                        type: source.type || (source.url && source.url.includes('vidsrc.net') ? 'embed' : 'video'),
-                                        size: source.size || '0MB',
-                                        kind: source.kind || (source.url && source.url.includes('vidsrc.net') ? 'embed' : 
-                                                             source.url && (source.url.includes('youtube.com') || source.url.includes('youtu.be')) ? 'youtube' :
-                                                             source.url && (source.url.includes('.mpd') || source.url.includes('.m3u8') || source.url.includes('.hls')) ? 'play' : 'both'),
-                                        premium: source.premium || 'false',
-                                        external: source.external !== undefined ? source.external : false
-                                    };
-                                })
-                            }))
-                        }))
-                    })
+                    ...(movie.type === 'series' && { seasons: movie.seasons || [] })
                 }));
                 
                 // Ensure all channels have complete CineMax structure
@@ -3515,7 +3496,8 @@
                             title: movie.title,
                             type: movie.type,
                             image: movie.cover || movie.image,
-                            url: `movies/${movie.id}`
+                            url: `movies/${movie.id}`,
+                            poster: movie
                         });
                     });
                 }
