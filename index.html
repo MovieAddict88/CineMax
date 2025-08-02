@@ -1709,11 +1709,21 @@
                         url: item.url,
                         poster: item.contentType === 'movie' ? { 
                             ...item,
+                            sources: (item.sources || []).map(source => ({
+                                ...source,
+                                kind: detectSourceKind(source.url, source.type, 'slide')
+                            })),
                             label: item.contentType === 'movie' ? 'Latest Movie' : 'Featured Content',
                             sublabel: item.year ? `Released ${item.year}` : 'New Release',
                             description: item.description || item.overview || 'Check out this amazing content!'
                         } : null,
-                        channel: item.contentType === 'channel' ? { ...item } : null
+                        channel: item.contentType === 'channel' ? { 
+                            ...item,
+                            sources: (item.sources || []).map(source => ({
+                                ...source,
+                                kind: detectSourceKind(source.url, source.type, 'slide')
+                            }))
+                        } : null
                     }));
                 }
                 
@@ -1750,12 +1760,20 @@
                     
                     jsonData.home.featured_movies = fallbackMovies.map(movie => ({
                         ...movie,
+                        sources: (movie.sources || []).map(source => ({
+                            ...source,
+                            kind: detectSourceKind(source.url, source.type, 'featured')
+                        })),
                         views: movie.views || Math.floor(Math.random() * 10000) + 1000, // Random views
                         created_at: movie.created_at || new Date().toISOString().split('T')[0]
                     }));
                 } else {
                     jsonData.home.featured_movies = featuredMovies.map(movie => ({
                         ...movie,
+                        sources: (movie.sources || []).map(source => ({
+                            ...source,
+                            kind: detectSourceKind(source.url, source.type, 'featured')
+                        })),
                         views: movie.views || Math.floor(Math.random() * 10000) + 1000, // Random views
                         created_at: movie.created_at || new Date().toISOString().split('T')[0]
                     }));
@@ -1871,7 +1889,10 @@
                                         actors: movie.actors || [],
                                         views: movie.views || 0,
                                         created_at: movie.created_at || new Date().toISOString().split('T')[0],
-                                        sources: movie.sources || [],
+                                        sources: (movie.sources || []).map(source => ({
+                                            ...source,
+                                            kind: detectSourceKind(source.url, source.type, 'genre')
+                                        })),
                                         trailer: movie.trailer || null,
                                         subtitles: movie.subtitles || [],
                                         comments: movie.comments || [],
@@ -1913,10 +1934,15 @@
             }
             
             // --- Utility Functions ---
-            function detectSourceKind(url, sourceType = 'video') {
+            function detectSourceKind(url, sourceType = 'video', contentContext = null) {
                 if (!url) return 'both'; // Default fallback
                 
                 const urlLower = url.toLowerCase();
+                
+                // Content from slides, featured, and genres are always play-only
+                if (contentContext === 'slide' || contentContext === 'featured' || contentContext === 'genre') {
+                    return 'play';
+                }
                 
                 // Live TV streams are always play-only
                 if (sourceType === 'live') {
@@ -2574,7 +2600,7 @@
                                     title: `${episodeTitle} 1080p`,
                                     quality: '1080p',
                                     size: '0MB',
-                                    kind: 'both',
+                                    kind: detectSourceKind(sourceUrl, 'video'),
                                     premium: 'false',
                                     external: false,
                                     url: sourceUrl 
@@ -2787,7 +2813,7 @@
                         title: name,
                         quality: name.includes('1080') ? '1080p' : name.includes('720') ? '720p' : name.includes('480') ? '480p' : 'HD',
                         size: '0MB',
-                        kind: 'both',
+                        kind: detectSourceKind(url, 'video'),
                         premium: 'false',
                         external: false,
                         url: url 
@@ -3165,7 +3191,7 @@
                         title: 'vidsrc.net 1080p',
                         quality: '1080p',
                         size: '0MB',
-                        kind: 'both',
+                        kind: detectSourceKind(`https://vidsrc.net/embed/movie/${movieData.id}`, 'video'),
                         premium: 'false',
                         external: false,
                         url: `https://vidsrc.net/embed/movie/${movieData.id}`
@@ -3329,7 +3355,7 @@
                         title: 'vidsrc.net 1080p',
                         quality: '1080p',
                         size: '0MB',
-                        kind: 'both',
+                        kind: detectSourceKind(vidsrcUrl, 'video'),
                         premium: 'false',
                         external: false,
                         url: vidsrcUrl 
@@ -3429,7 +3455,7 @@
                                         title: `Episode ${episodeNumber} 1080p`,
                                         quality: '1080p',
                                         size: '0MB',
-                                        kind: 'both',
+                                        kind: detectSourceKind(vidsrcEpisodeUrl, 'video'),
                                         premium: 'false',
                                         external: false,
                                         url: vidsrcEpisodeUrl
