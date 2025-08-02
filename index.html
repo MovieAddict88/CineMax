@@ -3437,6 +3437,19 @@
                     // Render seasons
                     renderSeasons(currentSeriesData.seasons);
                     
+                    // ACTUALLY SAVE THE SERIES TO THE DATA
+                    const seriesObject = createCineMaxSeriesFromTMDB(seriesData, {cast: currentSeriesActors}, null);
+                    seriesObject.seasons = currentSeriesData.seasons;
+                    seriesObject.actors = currentSeriesActors;
+                    seriesObject.genres = currentSeriesGenres;
+                    
+                    // Initialize series array if needed
+                    if (!jsonData.series) jsonData.series = [];
+                    
+                    // Add the series to the data
+                    jsonData.series.push(seriesObject);
+                    console.log(`Added series "${seriesData.name}" to jsonData.series`);
+                    
                     // Auto-generate related content after TMDB fetch
                     console.log('🔄 Auto-generating related content after TMDB series fetch...');
                     showNotification('Fetching series data and generating related content...', true);
@@ -3444,6 +3457,7 @@
                     setTimeout(() => {
                         autoGenerateRelatedContent();
                         renderEntries();
+                        saveToLocalStorage();
                         showNotification(`✅ Series "${seriesData.name}" added with auto-generated slides, featured, actors, and genres!`, true);
                     }, 500);
                 } catch (error) {
