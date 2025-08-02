@@ -2682,6 +2682,58 @@
                     });
                 }
                 
+                return ids;
+            }
+            
+            // Function to remove duplicates from existing data
+            function removeDuplicates() {
+                console.log('🧹 Cleaning up duplicates...');
+                
+                if (jsonData.movies) {
+                    const seen = new Map();
+                    const uniqueMovies = [];
+                    
+                    jsonData.movies.forEach(movie => {
+                        const key = `${movie.title.toLowerCase()}-${movie.type || 'movie'}`;
+                        if (!seen.has(key)) {
+                            seen.set(key, true);
+                            uniqueMovies.push(movie);
+                        } else {
+                            console.log(`Removing duplicate: ${movie.title} (${movie.type || 'movie'})`);
+                        }
+                    });
+                    
+                    const removedCount = jsonData.movies.length - uniqueMovies.length;
+                    if (removedCount > 0) {
+                        console.log(`Removed ${removedCount} duplicate movies/series`);
+                        jsonData.movies = uniqueMovies;
+                    }
+                }
+                
+                if (jsonData.channels) {
+                    const seen = new Map();
+                    const uniqueChannels = [];
+                    
+                    jsonData.channels.forEach(channel => {
+                        const key = channel.title.toLowerCase();
+                        if (!seen.has(key)) {
+                            seen.set(key, true);
+                            uniqueChannels.push(channel);
+                        } else {
+                            console.log(`Removing duplicate channel: ${channel.title}`);
+                        }
+                    });
+                    
+                    const removedCount = jsonData.channels.length - uniqueChannels.length;
+                    if (removedCount > 0) {
+                        console.log(`Removed ${removedCount} duplicate channels`);
+                        jsonData.channels = uniqueChannels;
+                    }
+                }
+                
+                console.log('✅ Duplicate cleanup completed');
+            }
+                
                 // Collect IDs from channel sources
                 if (jsonData.channels) {
                     jsonData.channels.forEach(channel => {
