@@ -1708,10 +1708,24 @@
                         image: item.image,
                         url: item.url,
                         poster: item.contentType === 'movie' ? { 
-                            ...item,
-                            label: item.contentType === 'movie' ? 'Latest Movie' : 'Featured Content',
+                            id: item.id,
+                            type: item.type || item.contentType,
+                            title: item.title,
+                            year: item.year,
+                            image: item.image,
+                            cover: item.cover || item.image,
+                            label: item.type === 'series' ? 'Latest Series' : 'Latest Movie',
                             sublabel: item.year ? `Released ${item.year}` : 'New Release',
-                            description: item.description || item.overview || 'Check out this amazing content!'
+                            description: item.description || item.overview || 'Check out this amazing content!',
+                            imdb: item.imdb || '0.0',
+                            downloadas: item.downloadas || item.title?.toLowerCase().replace(/[^a-z0-9]/g, '-') || '',
+                            comment: item.comment !== undefined ? item.comment : true,
+                            playas: item.playas || 'video',
+                            classification: item.classification || 'PG-13',
+                            duration: item.duration || '00:00',
+                            rating: item.rating || 0,
+                            trailer: item.trailer || null
+                            // NOTE: Deliberately NOT including seasons, sources, actors, etc. to avoid duplication
                         } : null,
                         channel: item.contentType === 'channel' ? { ...item } : null
                     }));
