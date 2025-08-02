@@ -3449,16 +3449,19 @@
                             ...season,
                             episodes: (season.episodes || []).map(episode => ({
                                 ...episode,
-                                sources: (episode.sources || []).map(source => ({
-                                    ...source,
-                                    type: source.type || (source.url?.includes('vidsrc.net') ? 'embed' : 'video'),
-                                    size: source.size || '0MB',
-                                    kind: source.kind || (source.url?.includes('vidsrc.net') ? 'embed' : 
-                                                         source.url?.includes('youtube.com') || source.url?.includes('youtu.be') ? 'youtube' :
-                                                         source.url?.includes('.mpd') || source.url?.includes('.m3u8') || source.url?.includes('.hls') ? 'play' : 'both'),
-                                    premium: source.premium || 'false',
-                                    external: source.external !== undefined ? source.external : false
-                                }))
+                                sources: (episode.sources || []).map(source => {
+                                    if (!source || typeof source !== 'object') return source;
+                                    return {
+                                        ...source,
+                                        type: source.type || (source.url && source.url.includes('vidsrc.net') ? 'embed' : 'video'),
+                                        size: source.size || '0MB',
+                                        kind: source.kind || (source.url && source.url.includes('vidsrc.net') ? 'embed' : 
+                                                             source.url && (source.url.includes('youtube.com') || source.url.includes('youtu.be')) ? 'youtube' :
+                                                             source.url && (source.url.includes('.mpd') || source.url.includes('.m3u8') || source.url.includes('.hls')) ? 'play' : 'both'),
+                                        premium: source.premium || 'false',
+                                        external: source.external !== undefined ? source.external : false
+                                    };
+                                })
                             }))
                         }))
                     })
