@@ -2465,7 +2465,7 @@
                                 downloads: 0,
                                 sources: [{ 
                                     id: generateNewId(),
-                                    type: 'video', 
+                                    type: 'embed', 
                                     title: `${episodeTitle} 1080p`,
                                     quality: '1080p',
                                     size: '0MB',
@@ -2676,9 +2676,11 @@
                 const name = movieSourceNameInput.value.trim() || 'Source';
                 const url = movieSourceUrlInput.value.trim();
                 if (url) {
+                    // Determine type based on URL
+                    const sourceType = url.includes('vidsrc.net') ? 'embed' : 'video';
                     currentMovieSources.push({ 
                         id: generateNewId(),
-                        type: 'video',
+                        type: sourceType,
                         title: name,
                         quality: name.includes('1080') ? '1080p' : name.includes('720') ? '720p' : name.includes('480') ? '480p' : 'HD',
                         size: '0MB',
@@ -3056,7 +3058,7 @@
                     } : null,
                     sources: [{
                         id: generateNewId(),
-                        type: 'video',
+                        type: 'embed',
                         title: 'vidsrc.net 1080p',
                         quality: '1080p',
                         size: '0MB',
@@ -3220,7 +3222,7 @@
                     const vidsrcUrl = `https://vidsrc.net/embed/movie/${tmdbId}`;
                     currentMovieSources = [{ 
                         id: generateNewId(),
-                        type: 'video',
+                        type: 'embed',
                         title: 'vidsrc.net 1080p',
                         quality: '1080p',
                         size: '0MB',
@@ -3320,7 +3322,7 @@
                                     downloads: 0,
                                     sources: [{
                                         id: generateNewId(),
-                                        type: 'video',
+                                        type: 'embed',
                                         title: `Episode ${episodeNumber} 1080p`,
                                         quality: '1080p',
                                         size: '0MB',
