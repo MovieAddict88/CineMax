@@ -1089,13 +1089,11 @@
             event.preventDefault();
         });
 
-        // IMMEDIATE TEST - This should show up first
+        // Initialize app when DOM is loaded
         console.log('🔥 JAVASCRIPT IS LOADING! 🔥');
-        alert('JavaScript is working! Check console for details.');
 
         document.addEventListener('DOMContentLoaded', () => {
             console.log('🚀 DOM Content Loaded - Initializing app...');
-            alert('DOM loaded! App is starting...');
             
             // --- Constants and Config ---
             const tmdbApiKey = 'ec926176bf467b3f7735e3154238c161';
@@ -1171,26 +1169,21 @@
             // SIMPLE CLICK TEST
             console.log('🧪 Setting up simple click tests...');
             
-            // Test 1: Save button
+            // Initialize element references
+            console.log('🔧 Setting up element references...');
+            
             const testButton = document.querySelector('#saveButton');
             if (testButton) {
                 console.log('✅ Save button found!');
-                testButton.addEventListener('click', () => {
-                    console.log('🎯 SAVE BUTTON WAS CLICKED!');
-                    alert('Save button clicked! This means event listeners work.');
-                });
             } else {
                 console.log('❌ Save button NOT found!');
             }
 
-            // Test 2: Form
             const testForm = document.querySelector('#entryForm');
             if (testForm) {
                 console.log('✅ Entry form found!');
-                // We'll add the real form handler later - this is just for testing if the form exists
             } else {
                 console.log('❌ Entry form NOT found!');
-                alert('CRITICAL ERROR: Entry form not found! Modal form is missing.');
             }
 
             // Test 3: Add new entry button
@@ -1217,10 +1210,10 @@
                         console.log('🚀 Triggering form submit from modal save button...');
                         const submitEvent = new Event('submit', { bubbles: true, cancelable: true });
                         modalSaveButton.form.dispatchEvent(submitEvent);
-                    } else {
-                        console.log('❌ Button is not associated with a form!');
-                        alert('Form not found. Please try again.');
-                    }
+                                            } else {
+                            console.log('❌ Button is not associated with a form!');
+                            showNotification('Form not found. Please try again.', false);
+                        }
                 });
             } else {
                 console.log('❌ Modal Save button NOT found!');
@@ -1233,7 +1226,6 @@
                     event.preventDefault();
                     
                     console.log('🔥 REAL FORM SUBMIT TRIGGERED! 🔥');
-                    alert('REAL form submit working! Now processing...');
                     
                     try {
                         console.log('=== FORM SUBMIT STARTED ===');
@@ -1242,7 +1234,7 @@
                         // Prevent double submission
                         if (isSaving) {
                             console.log('Already saving - preventing double submit');
-                            alert('Please wait, saving in progress...');
+                            showNotification('Please wait, saving in progress...', false);
                             return;
                         }
                         
@@ -1304,7 +1296,7 @@
                         
                         if (!isValid) {
                             console.log('Validation failed:', errorMessage);
-                            alert('Validation failed: ' + errorMessage);
+                            showNotification('Validation failed: ' + errorMessage, false);
                             return;
                         }
                         
@@ -1324,13 +1316,13 @@
                         console.log('=== UPDATING UI ===');
                         renderEntries();
                         closeModal();
-                        alert(`${activeTab.charAt(0).toUpperCase() + activeTab.slice(1)} saved successfully!`);
+                        showNotification(`${activeTab.charAt(0).toUpperCase() + activeTab.slice(1)} saved successfully!`, true);
                         console.log('=== SAVE COMPLETED SUCCESSFULLY ===');
                         
                     } catch (error) {
                         console.error('=== SAVE ERROR ===', error);
                         console.error('Error stack:', error.stack);
-                        alert(`Error saving content: ${error.message}`);
+                        showNotification(`Error saving content: ${error.message}`, false);
                     } finally {
                         // Reset saving flag
                         isSaving = false;
@@ -1346,11 +1338,9 @@
                 console.log('✅ Real form submit handler attached successfully!');
             } else {
                 console.log('❌ Cannot attach form handler - form not found!');
-                alert('CRITICAL: Cannot attach form submit handler!');
             }
 
-            // Test 5: Manual Form Submit Test
-            console.log('🧪 Adding manual form submit test...');
+            // Manual test functions for debugging
             window.testFormSubmit = function() {
                 console.log('🔥 MANUAL TEST: Triggering form submit...');
                 if (testForm) {
@@ -1361,20 +1351,17 @@
                     console.log('❌ Cannot test - form not found');
                 }
             };
-            console.log('✅ You can now test with: testFormSubmit() in console');
             
-            // Add manual test for auto-generation
             window.testAutoGeneration = function() {
                 console.log('🧪 MANUAL TEST: Running auto-generation...');
                 if (jsonData) {
                     autoGenerateRelatedContent();
                     renderEntries();
-                    alert('Auto-generation test completed! Check console and filters.');
+                    console.log('✅ Auto-generation test completed!');
                 } else {
-                    alert('ERROR: No JSON data loaded. Load data first.');
+                    console.log('❌ No JSON data loaded. Load data first.');
                 }
             };
-            console.log('✅ You can test auto-generation with: testAutoGeneration() in console');
             
             // --- Auto-Generation Control ---
             const autoGenToggle = document.getElementById('autoGenToggle');
@@ -2373,7 +2360,7 @@
                     );
                     if (existingMovie) {
                         console.log('Duplicate movie found:', existingMovie.title);
-                        alert(`Movie "${title}" already exists! Please use a different title or edit the existing entry.`);
+                        showNotification(`Movie "${title}" already exists! Please use a different title or edit the existing entry.`, false);
                         return;
                     }
                 }
@@ -2439,7 +2426,7 @@
                     );
                     if (existingSeries) {
                         console.log('Duplicate series found:', existingSeries.title);
-                        alert(`Series "${title}" already exists! Please use a different title or edit the existing entry.`);
+                        showNotification(`Series "${title}" already exists! Please use a different title or edit the existing entry.`, false);
                         return;
                     }
                 }
@@ -2545,7 +2532,7 @@
                     );
                     if (existingChannel) {
                         console.log('Duplicate channel found:', existingChannel.title);
-                        alert(`Channel "${title}" already exists! Please use a different title or edit the existing entry.`);
+                        showNotification(`Channel "${title}" already exists! Please use a different title or edit the existing entry.`, false);
                         return;
                     }
                 }
