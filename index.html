@@ -1724,8 +1724,17 @@
                             classification: item.classification || 'PG-13',
                             duration: item.duration || '00:00',
                             rating: item.rating || 0,
-                            trailer: item.trailer || null
-                            // NOTE: Deliberately NOT including seasons, sources, actors, etc. to avoid duplication
+                            trailer: item.trailer,
+                            sources: item.sources || [],
+                            subtitles: item.subtitles || [],
+                            comments: item.comments || [],
+                            views: item.views || 0,
+                            downloads: item.downloads || 0,
+                            shares: item.shares || 0,
+                            created_at: item.created_at || new Date().toISOString().split('T')[0],
+                            genres: item.genres || [],
+                            actors: item.actors || []
+                            // Only excluding: seasons (for series) to avoid deep episode duplication
                         } : null,
                         channel: item.contentType === 'channel' ? { ...item } : null
                     }));
