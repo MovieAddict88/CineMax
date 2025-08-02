@@ -2463,12 +2463,17 @@
                                 duration: '45:00',
                                 views: 0,
                                 downloads: 0,
-                                sources: [createCompleteSource(
-                                    generateNewId(),
-                                    `${episodeTitle} 1080p`,
-                                    '1080p',
-                                    sourceUrl
-                                )],
+                                sources: [{
+                                    id: generateNewId(),
+                                    type: 'embed',
+                                    title: `${episodeTitle} 1080p`,
+                                    quality: '1080p',
+                                    size: '0MB',
+                                    kind: 'play',
+                                    premium: 'false',
+                                    external: false,
+                                    url: sourceUrl
+                                }],
                                 subtitles: []
                             });
                         }
@@ -3392,15 +3397,10 @@
                         console.warn('Could not fetch series credits:', error);
                     }
                     
-                    // Prepare seasons data with auto vidsrc URLs and episode images
-                    showNotification('Fetching episode images from TMDB...', true);
-                    
-                    const seasonsWithImages = [];
-                    for (const season of seriesData.seasons.filter(s => s.season_number > 0)) {
-                        // Fetch episode images for this season
-                        const episodeImages = await fetchSeasonEpisodeImages(tmdbId, season.season_number, season.episode_count || 1);
-                        
-                        const seasonData = {
+                    // Prepare seasons data with auto vidsrc URLs
+                    currentSeriesData = {
+                        ...seriesData,
+                        seasons: seriesData.seasons.filter(s => s.season_number > 0).map(season => ({
                             id: generateNewId(),
                             title: `Season ${season.season_number}`,
                             episodes: Array.from({length: season.episode_count || 1}, (_, i) => {
@@ -3410,26 +3410,25 @@
                                     id: generateNewId(),
                                     title: `Episode ${episodeNumber}`,
                                     episode_number: episodeNumber,
-                                    image: episodeImages[episodeNumber] || getDefaultEpisodeImage(),
+                                    image: '',
                                     duration: '45:00',
                                     views: 0,
                                     downloads: 0,
-                                    sources: [createCompleteSource(
-                                        generateNewId(),
-                                        `Episode ${episodeNumber} 1080p`,
-                                        '1080p',
-                                        vidsrcEpisodeUrl
-                                    )],
+                                    sources: [{
+                                        id: generateNewId(),
+                                        type: 'embed',
+                                        title: `Episode ${episodeNumber} 1080p`,
+                                        quality: '1080p',
+                                        size: '0MB',
+                                        kind: 'play',
+                                        premium: 'false',
+                                        external: false,
+                                        url: vidsrcEpisodeUrl
+                                    }],
                                     subtitles: []
                                 };
                             })
-                        };
-                        seasonsWithImages.push(seasonData);
-                    }
-                    
-                    currentSeriesData = {
-                        ...seriesData,
-                        seasons: seasonsWithImages
+                        }))
                     };
                     
                     // Render seasons
