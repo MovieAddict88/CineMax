@@ -3434,7 +3434,22 @@
                     views: movie.views || 0,
                     downloads: movie.downloads || 0,
                     shares: movie.shares || 0,
-                    ...(movie.type === 'series' && { seasons: movie.seasons || [] })
+                    ...(movie.type === 'series' && { 
+                        seasons: (movie.seasons || []).map(season => ({
+                            ...season,
+                            episodes: (season.episodes || []).map(episode => ({
+                                ...episode,
+                                sources: (episode.sources || []).map(source => ({
+                                    ...source,
+                                    type: source.type || (source.url?.includes('vidsrc.net') ? 'embed' : 'video'),
+                                    size: source.size || '0MB',
+                                    kind: source.kind || 'both',
+                                    premium: source.premium || 'false',
+                                    external: source.external !== undefined ? source.external : false
+                                }))
+                            }))
+                        }))
+                    })
                 }));
                 
                 // Ensure all channels have complete CineMax structure
