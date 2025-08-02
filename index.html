@@ -2465,9 +2465,13 @@
                                 downloads: 0,
                                 sources: [{ 
                                     id: generateNewId(),
-                                    type: 'video', 
+                                    type: determineSourceType(sourceUrl), 
                                     title: `${episodeTitle} 1080p`,
                                     quality: '1080p',
+                                    size: '0MB',
+                                    kind: determineSourceKind(sourceUrl),
+                                    premium: 'false',
+                                    external: false,
                                     url: sourceUrl 
                                 }],
                                 subtitles: []
@@ -2605,6 +2609,42 @@
                 ];
                 return allIds.length > 0 ? Math.max(...allIds) + 1 : 1;
             }
+
+            // Helper function to determine source type based on URL
+            function determineSourceType(url) {
+                if (!url) return 'video';
+                
+                const urlLower = url.toLowerCase();
+                
+                if (urlLower.includes('youtube.com') || urlLower.includes('youtu.be')) {
+                    return 'youtube';
+                } else if (urlLower.includes('embed') || urlLower.includes('iframe') || urlLower.includes('vidsrc.net')) {
+                    return 'embed';
+                } else if (urlLower.includes('.mp4') || urlLower.includes('.mkv') || urlLower.includes('.avi') || urlLower.includes('.mov')) {
+                    return 'video';
+                } else if (urlLower.includes('live') || urlLower.includes('stream')) {
+                    return 'video';
+                } else {
+                    return 'video'; // default for direct links
+                }
+            }
+
+            // Helper function to determine source kind based on URL
+            function determineSourceKind(url) {
+                if (!url) return 'both';
+                
+                const urlLower = url.toLowerCase();
+                
+                if (urlLower.includes('youtube.com') || urlLower.includes('youtu.be')) {
+                    return 'play'; // YouTube links are play-only
+                } else if (urlLower.includes('embed') || urlLower.includes('iframe') || urlLower.includes('vidsrc.net')) {
+                    return 'play'; // Embedded links are play-only
+                } else if (urlLower.includes('live') || urlLower.includes('stream')) {
+                    return 'play'; // Live TV is play-only
+                } else {
+                    return 'both'; // Direct links (mp4, mkv, etc.) can be both played and downloaded
+                }
+            }
             
             function getAllNestedIds() {
                 const ids = [];
@@ -2674,11 +2714,11 @@
                 if (url) {
                     currentMovieSources.push({ 
                         id: generateNewId(),
-                        type: 'video',
+                        type: determineSourceType(url),
                         title: name,
                         quality: name.includes('1080') ? '1080p' : name.includes('720') ? '720p' : name.includes('480') ? '480p' : 'HD',
                         size: '0MB',
-                        kind: 'both',
+                        kind: determineSourceKind(url),
                         premium: 'false',
                         external: false,
                         url: url 
@@ -3052,11 +3092,11 @@
                     } : null,
                     sources: [{
                         id: generateNewId(),
-                        type: 'video',
+                        type: determineSourceType(`https://vidsrc.net/embed/movie/${movieData.id}`),
                         title: 'vidsrc.net 1080p',
                         quality: '1080p',
                         size: '0MB',
-                        kind: 'both',
+                        kind: determineSourceKind(`https://vidsrc.net/embed/movie/${movieData.id}`),
                         premium: 'false',
                         external: false,
                         url: `https://vidsrc.net/embed/movie/${movieData.id}`
@@ -3216,11 +3256,11 @@
                     const vidsrcUrl = `https://vidsrc.net/embed/movie/${tmdbId}`;
                     currentMovieSources = [{ 
                         id: generateNewId(),
-                        type: 'video',
+                        type: determineSourceType(vidsrcUrl),
                         title: 'vidsrc.net 1080p',
                         quality: '1080p',
                         size: '0MB',
-                        kind: 'both',
+                        kind: determineSourceKind(vidsrcUrl),
                         premium: 'false',
                         external: false,
                         url: vidsrcUrl 
@@ -3316,9 +3356,13 @@
                                     downloads: 0,
                                     sources: [{
                                         id: generateNewId(),
-                                        type: 'video',
+                                        type: determineSourceType(vidsrcEpisodeUrl),
                                         title: `Episode ${episodeNumber} 1080p`,
                                         quality: '1080p',
+                                        size: '0MB',
+                                        kind: determineSourceKind(vidsrcEpisodeUrl),
+                                        premium: 'false',
+                                        external: false,
                                         url: vidsrcEpisodeUrl
                                     }],
                                     subtitles: []
