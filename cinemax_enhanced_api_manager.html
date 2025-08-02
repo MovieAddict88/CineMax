@@ -1771,10 +1771,13 @@
             currentData.api_info.last_updated = new Date().toISOString().split('T')[0];
         }
         
-        // Generate unique ID
-        function generateId() {
-            return Date.now() + Math.random().toString(36).substr(2, 9);
-        }
+                 // Generate unique numeric ID (CineMax compatible)
+         function generateId() {
+             // Generate a numeric ID using timestamp + random number
+             const timestamp = Date.now();
+             const random = Math.floor(Math.random() * 999999);
+             return parseInt(timestamp.toString() + random.toString().padStart(6, '0'));
+         }
         
         // Update progress bar
         function updateProgress(percent) {
