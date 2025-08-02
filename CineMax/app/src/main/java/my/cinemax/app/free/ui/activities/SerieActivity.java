@@ -424,63 +424,86 @@ public class SerieActivity extends AppCompatActivity implements PlaylistDownload
         }
     }
     private void getSeasons() {
-
-        Retrofit retrofit = apiClient.getClient();
-        apiRest service = retrofit.create(apiRest.class);
-
-        Call<List<Season>> call = service.getSeasonsBySerie(poster.getId());
-        call.enqueue(new Callback<List<Season>>() {
+        // Use JSON API instead of old REST API
+        apiClient.getJsonApiData(new retrofit2.Callback<my.cinemax.app.free.entity.JsonApiResponse>() {
             @Override
-            public void onResponse(Call<List<Season>> call, Response<List<Season>> response) {
-                if (response.isSuccessful()){
-                    if (response.body().size()>0) {
-                        seasonArrayList.clear();
-                        final String[] countryCodes = new String[response.body().size()];
-
-                        for (int i = 0; i < response.body().size(); i++) {
-                            countryCodes[i] = response.body().get(i).getTitle();
-                            seasonArrayList.add(response.body().get(i));
+            public void onResponse(Call<my.cinemax.app.free.entity.JsonApiResponse> call, retrofit2.Response<my.cinemax.app.free.entity.JsonApiResponse> response) {
+                if (response.isSuccessful() && response.body() != null) {
+                    my.cinemax.app.free.entity.JsonApiResponse apiResponse = response.body();
+                    
+                    if (apiResponse.getMovies() != null) {
+                        // Find the specific series by ID
+                        Poster targetSeries = null;
+                        for (Poster movie : apiResponse.getMovies()) {
+                            if (movie.getId() != null && movie.getId().equals(poster.getId())) {
+                                targetSeries = movie;
+                                break;
+                            }
                         }
-                        ArrayAdapter<String> filtresAdapter = new ArrayAdapter<String>(SerieActivity.this,
-                                R.layout.spinner_layout_season,R.id.textView,countryCodes);
-                        filtresAdapter.setDropDownViewResource(R.layout.simple_spinner_dropdown_season_item);
-                        spinner_activity_serie_season_list.setAdapter(filtresAdapter);
+                        
+                        if (targetSeries != null && targetSeries.getSeasons() != null && targetSeries.getSeasons().size() > 0) {
+                            seasonArrayList.clear();
+                            final String[] countryCodes = new String[targetSeries.getSeasons().size()];
 
-                        linear_layout_activity_serie_seasons.setVisibility(View.VISIBLE);
-                    }else{
+                            for (int i = 0; i < targetSeries.getSeasons().size(); i++) {
+                                countryCodes[i] = targetSeries.getSeasons().get(i).getTitle();
+                                seasonArrayList.add(targetSeries.getSeasons().get(i));
+                            }
+                            ArrayAdapter<String> filtresAdapter = new ArrayAdapter<String>(SerieActivity.this,
+                                    R.layout.spinner_layout_season,R.id.textView,countryCodes);
+                            filtresAdapter.setDropDownViewResource(R.layout.simple_spinner_dropdown_season_item);
+                            spinner_activity_serie_season_list.setAdapter(filtresAdapter);
+
+                            linear_layout_activity_serie_seasons.setVisibility(View.VISIBLE);
+                        } else {
+                            linear_layout_activity_serie_seasons.setVisibility(View.GONE);
+                        }
+                    } else {
                         linear_layout_activity_serie_seasons.setVisibility(View.GONE);
                     }
-                }else{
-                    linear_layout_activity_serie_seasons.setVisibility(View.VISIBLE);
+                } else {
+                    linear_layout_activity_serie_seasons.setVisibility(View.GONE);
                 }
             }
+            
             @Override
-            public void onFailure(Call<List<Season>> call, Throwable t) {
+            public void onFailure(Call<my.cinemax.app.free.entity.JsonApiResponse> call, Throwable t) {
                 linear_layout_activity_serie_seasons.setVisibility(View.GONE);
-
             }
         });
     }
     private void getPosterCastings() {
-        Retrofit retrofit = apiClient.getClient();
-        apiRest service = retrofit.create(apiRest.class);
-        Call<List<Actor>> call = service.getRolesByPoster(poster.getId());
-        call.enqueue(new Callback<List<Actor>>() {
+        // Use JSON API instead of old REST API
+        apiClient.getJsonApiData(new retrofit2.Callback<my.cinemax.app.free.entity.JsonApiResponse>() {
             @Override
-            public void onResponse(Call<List<Actor>> call, Response<List<Actor>> response) {
-                if (response.isSuccessful()){
-                    if (response.body().size()>0) {
-                        linearLayoutManagerCast = new LinearLayoutManager(getApplicationContext(), LinearLayoutManager.HORIZONTAL, false);
-                        actorAdapter = new ActorAdapter(response.body(), SerieActivity.this);
-                        recycle_view_activity_activity_serie_cast.setHasFixedSize(true);
-                        recycle_view_activity_activity_serie_cast.setAdapter(actorAdapter);
-                        recycle_view_activity_activity_serie_cast.setLayoutManager(linearLayoutManagerCast);
-                        linear_layout_activity_serie_cast.setVisibility(View.VISIBLE);
+            public void onResponse(Call<my.cinemax.app.free.entity.JsonApiResponse> call, retrofit2.Response<my.cinemax.app.free.entity.JsonApiResponse> response) {
+                if (response.isSuccessful() && response.body() != null) {
+                    my.cinemax.app.free.entity.JsonApiResponse apiResponse = response.body();
+                    
+                    if (apiResponse.getMovies() != null) {
+                        // Find the specific series by ID
+                        Poster targetSeries = null;
+                        for (Poster movie : apiResponse.getMovies()) {
+                            if (movie.getId() != null && movie.getId().equals(poster.getId())) {
+                                targetSeries = movie;
+                                break;
+                            }
+                        }
+                        
+                        if (targetSeries != null && targetSeries.getActors() != null && targetSeries.getActors().size() > 0) {
+                            linearLayoutManagerCast = new LinearLayoutManager(getApplicationContext(), LinearLayoutManager.HORIZONTAL, false);
+                            actorAdapter = new ActorAdapter(targetSeries.getActors(), SerieActivity.this);
+                            recycle_view_activity_activity_serie_cast.setHasFixedSize(true);
+                            recycle_view_activity_activity_serie_cast.setAdapter(actorAdapter);
+                            recycle_view_activity_activity_serie_cast.setLayoutManager(linearLayoutManagerCast);
+                            linear_layout_activity_serie_cast.setVisibility(View.VISIBLE);
+                        }
                     }
                 }
             }
+            
             @Override
-            public void onFailure(Call<List<Actor>> call, Throwable t) {
+            public void onFailure(Call<my.cinemax.app.free.entity.JsonApiResponse> call, Throwable t) {
             }
         });
     }
