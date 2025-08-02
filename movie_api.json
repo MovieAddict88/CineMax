@@ -1,0 +1,1318 @@
+{
+  "api_info": {
+    "version": "3.0",
+    "description": "Complete Movie & TV Streaming JSON API with Full Control Features",
+    "last_updated": "2025-01-18",
+    "total_movies": 50,
+    "total_series": 30,
+    "total_channels": 35,
+    "total_actors": 250,
+    "supported_features": ["movies", "series", "live_tv", "multiple_servers", "premium_content", "downloads", "comments", "subtitles"]
+  },
+  "app_config": {
+    "app_enabled": true,
+    "maintenance_mode": false,
+    "force_update": false,
+    "min_version": "1.0.0",
+    "current_version": "2.1.0",
+    "update_url": "https://github.com/MovieAddict88/movie-api/releases",
+    "update_message": "New features available! Update now for better experience.",
+    "privacy_policy_url": "https://example.com/privacy",
+    "terms_of_service_url": "https://example.com/terms",
+    "contact_email": "support@movieapi.com",
+    "features": {
+      "login_required": false,
+      "registration_enabled": true,
+      "guest_access": true,
+      "premium_features": true,
+      "ads_enabled": true,
+      "downloads_enabled": true,
+      "comments_enabled": true,
+      "social_sharing": true,
+      "offline_mode": true
+    },
+    "ads_config": {
+      "enabled": true,
+      "banner_ads": true,
+      "interstitial_ads": true,
+      "rewarded_ads": true,
+      "native_ads": true,
+      "frequency": {
+        "banner_refresh": 30,
+        "interstitial_interval": 300,
+        "rewarded_after_episodes": 2
+      }
+    },
+    "premium_config": {
+      "enabled": true,
+      "trial_days": 7,
+      "plans": [
+        {
+          "id": "monthly",
+          "name": "Monthly Premium",
+          "price": "$4.99",
+          "duration": "1 month",
+          "features": ["No Ads", "HD Quality", "Unlimited Downloads", "Premium Content"]
+        },
+        {
+          "id": "yearly",
+          "name": "Yearly Premium",
+          "price": "$39.99",
+          "duration": "12 months",
+          "features": ["No Ads", "4K Quality", "Unlimited Downloads", "Premium Content", "Early Access"]
+        }
+      ]
+    }
+  },
+  "home": {
+    "slides": [
+      {
+        "id": 1,
+        "title": "Spider-Man: Across the Spider-Verse",
+        "type": "movie",
+        "image": "https://image.tmdb.org/t/p/w500/8Vt6mWEReuy4Of61Lnj5Xj704m8.jpg",
+        "url": "movies/3001",
+        "poster": {
+          "id": 3001,
+          "type": "movie",
+          "title": "Spider-Man: Across the Spider-Verse",
+          "year": "2023",
+          "description": "Miles Morales catapults across the Multiverse, where he encounters a team of Spider-People charged with protecting its very existence.",
+          "image": "https://image.tmdb.org/t/p/w500/8Vt6mWEReuy4Of61Lnj5Xj704m8.jpg",
+          "cover": "https://image.tmdb.org/t/p/original/nGxUxi3PfXDRm7Vg95VBNgNM8yc.jpg",
+          "trailer": {
+            "id": 3001,
+            "type": "video",
+            "title": "Spider-Man: Across the Spider-Verse Trailer",
+            "url": "https://www.youtube.com/watch?v=cqGjhVJWtEg"
+          },
+          "label": "Latest Movie",
+          "sublabel": "Released 2023",
+          "imdb": "8.7",
+          "downloadas": "spider-man-across-the-spider-verse",
+          "comment": true,
+          "playas": "video",
+          "classification": "PG",
+          "duration": "140:00",
+          "rating": 8.7,
+          "created_at": "2025-01-18",
+          "genres": [
+            {
+              "id": 16,
+              "name": "Animation"
+            },
+            {
+              "id": 28,
+              "name": "Action"
+            },
+            {
+              "id": 12,
+              "name": "Adventure"
+            }
+          ],
+          "actors": [
+            {
+              "id": 3001,
+              "name": "Shameik Moore",
+              "type": "actor",
+              "role": "Miles Morales (voice)",
+              "image": "https://image.tmdb.org/t/p/w200/kI1OluWhLJk3pnR19VjOfABpnTY.jpg",
+              "born": "1995-05-04",
+              "height": "5'7\"",
+              "bio": "Shameik Alti Moore is an American actor, rapper, singer, and dancer."
+            },
+            {
+              "id": 3002,
+              "name": "Hailee Steinfeld",
+              "type": "actor",
+              "role": "Gwen Stacy (voice)",
+              "image": "https://image.tmdb.org/t/p/w200/ev7Vs8XdjehzAxlHIw4YB6FDTsM.jpg",
+              "born": "1996-12-11",
+              "height": "5'8\"",
+              "bio": "Hailee Steinfeld is an American actress and singer."
+            }
+          ],
+          "subtitles": [
+            {
+              "id": 1,
+              "language": "English",
+              "url": "https://example.com/subtitles/spider-verse-en.srt"
+            },
+            {
+              "id": 2,
+              "language": "Spanish",
+              "url": "https://example.com/subtitles/spider-verse-es.srt"
+            }
+          ],
+          "comments": [],
+          "sources": [
+            {
+              "id": 1,
+              "type": "video",
+              "title": "Server 1 - 4K",
+              "quality": "4K",
+              "size": "8.5 GB",
+              "kind": "play",
+              "premium": "false",
+              "external": false,
+              "url": "https://vidsrc.net/embed/movie/569094"
+            },
+            {
+              "id": 2,
+              "type": "video",
+              "title": "Server 2 - 1080p",
+              "quality": "1080p",
+              "size": "3.2 GB",
+              "kind": "play",
+              "premium": "false",
+              "external": false,
+              "url": "https://embedsb.com/e/569094"
+            },
+            {
+              "id": 3,
+              "type": "video",
+              "title": "Server 3 - 720p",
+              "quality": "720p",
+              "size": "1.8 GB",
+              "kind": "play",
+              "premium": "false",
+              "external": false,
+              "url": "https://doodstream.com/e/569094"
+            },
+            {
+              "id": 4,
+              "type": "download",
+              "title": "Download 1080p",
+              "quality": "1080p",
+              "size": "3.2 GB",
+              "kind": "download",
+              "premium": "true",
+              "external": false,
+              "url": "https://example.com/download/spider-verse-1080p.mp4"
+            }
+          ],
+          "seasons": [],
+          "contentType": "movie",
+          "url": "movies/3001",
+          "views": 45230,
+          "downloads": 8920,
+          "shares": 1204
+        },
+        "channel": null
+      },
+      {
+        "id": 2,
+        "title": "The Last of Us",
+        "type": "series",
+        "image": "https://image.tmdb.org/t/p/w500/uKvVjHNqB5VmOrdxqAt2F7J78ED.jpg",
+        "url": "series/3100",
+        "poster": {
+          "id": 3100,
+          "type": "series",
+          "title": "The Last of Us",
+          "year": "2023",
+          "description": "Twenty years after modern civilization has been destroyed, Joel must smuggle Ellie out of an oppressive quarantine zone.",
+          "image": "https://image.tmdb.org/t/p/w500/uKvVjHNqB5VmOrdxqAt2F7J78ED.jpg",
+          "cover": "https://image.tmdb.org/t/p/original/zoGQABAMOOhwPLFWLOA7jz5rYUP.jpg",
+          "trailer": {
+            "id": 3100,
+            "type": "video",
+            "title": "The Last of Us Trailer",
+            "url": "https://www.youtube.com/watch?v=uLtkt8BonwM"
+          },
+          "label": "Popular Series",
+          "sublabel": "2023",
+          "imdb": "8.8",
+          "downloadas": "the-last-of-us",
+          "comment": true,
+          "playas": "video",
+          "classification": "TV-MA",
+          "duration": "60:00",
+          "rating": 8.8,
+          "created_at": "2025-01-18",
+          "genres": [
+            {
+              "id": 18,
+              "name": "Drama"
+            },
+            {
+              "id": 10765,
+              "name": "Sci-Fi & Fantasy"
+            },
+            {
+              "id": 10759,
+              "name": "Action & Adventure"
+            }
+          ],
+          "actors": [
+            {
+              "id": 3100,
+              "name": "Pedro Pascal",
+              "type": "actor",
+              "role": "Joel Miller",
+              "image": "https://image.tmdb.org/t/p/w200/7ttH5LlsyiEJ6Bz7oKFOYgC0fF1.jpg",
+              "born": "1975-04-02",
+              "height": "5'11\"",
+              "bio": "Pedro Pascal is a Chilean-American actor."
+            },
+            {
+              "id": 3101,
+              "name": "Bella Ramsey",
+              "type": "actor",
+              "role": "Ellie Williams",
+              "image": "https://image.tmdb.org/t/p/w200/w4Nze6eJZT2dJhK2jZqSJ3Fgxp2.jpg",
+              "born": "2003-09-30",
+              "height": "5'1\"",
+              "bio": "Bella Ramsey is an English actor."
+            }
+          ],
+          "subtitles": [
+            {
+              "id": 10,
+              "language": "English",
+              "url": "https://example.com/subtitles/tlou-en.srt"
+            }
+          ],
+          "comments": [],
+          "sources": [],
+          "seasons": [
+            {
+              "id": 1,
+              "title": "Season 1",
+              "episodes": [
+                {
+                  "id": 1,
+                  "title": "When You're Lost in the Darkness",
+                  "episode_number": 1,
+                  "image": "https://image.tmdb.org/t/p/w500/6QEcLYJZSvkHT2QvEZ7aSKWtj9l.jpg",
+                  "duration": "81:00",
+                  "description": "On outbreak day, chaos breaks out in Austin. Joel and Tommy fight their way through the chaos to get to Sarah.",
+                  "views": 12450,
+                  "downloads": 3200,
+                  "sources": [
+                    {
+                      "id": 101,
+                      "type": "video",
+                      "title": "Server 1 - 1080p",
+                      "quality": "1080p",
+                      "url": "https://vidsrc.net/embed/tv/100088/1/1"
+                    },
+                    {
+                      "id": 102,
+                      "type": "video",
+                      "title": "Server 2 - 720p",
+                      "quality": "720p",
+                      "url": "https://embedsb.com/tv/100088/1/1"
+                    },
+                    {
+                      "id": 103,
+                      "type": "video",
+                      "title": "Server 3 - 480p",
+                      "quality": "480p",
+                      "url": "https://doodstream.com/tv/100088/1/1"
+                    }
+                  ],
+                  "subtitles": [
+                    {
+                      "id": 100,
+                      "language": "English",
+                      "url": "https://example.com/subtitles/tlou-s1e1-en.srt"
+                    }
+                  ]
+                },
+                {
+                  "id": 2,
+                  "title": "Infected",
+                  "episode_number": 2,
+                  "image": "https://image.tmdb.org/t/p/w500/8QEcLYJZSvkHT2QvEZ7aSKWtj9l.jpg",
+                  "duration": "56:00",
+                  "description": "After 20 years, Joel lives in the quarantine zone and smuggles goods with his partner Tess.",
+                  "views": 11200,
+                  "downloads": 2800,
+                  "sources": [
+                    {
+                      "id": 201,
+                      "type": "video",
+                      "title": "Server 1 - 1080p",
+                      "quality": "1080p",
+                      "url": "https://vidsrc.net/embed/tv/100088/1/2"
+                    },
+                    {
+                      "id": 202,
+                      "type": "video",
+                      "title": "Server 2 - 720p",
+                      "quality": "720p",
+                      "url": "https://embedsb.com/tv/100088/1/2"
+                    }
+                  ],
+                  "subtitles": []
+                }
+              ]
+            }
+          ],
+          "contentType": "series",
+          "url": "series/3100",
+          "views": 67420,
+          "downloads": 15640,
+          "shares": 2890
+        },
+        "channel": null
+      }
+    ],
+    "featuredMovies": [
+      {
+        "id": 3002,
+        "type": "movie",
+        "title": "Oppenheimer",
+        "year": "2023",
+        "description": "The story of American scientist J. Robert Oppenheimer and his role in the development of the atomic bomb.",
+        "image": "https://image.tmdb.org/t/p/w500/8Gxv8gSFCU0XGDykEGv7zR1n2ua.jpg",
+        "cover": "https://image.tmdb.org/t/p/original/fm6KqXpk3M2HVveHwCrBSSBaO0V.jpg",
+        "trailer": {
+          "id": 3002,
+          "type": "video",
+          "title": "Oppenheimer Trailer",
+          "url": "https://www.youtube.com/watch?v=uYPbbksJxIg"
+        },
+        "label": "Trending",
+        "sublabel": "2023",
+        "imdb": "8.3",
+        "downloadas": "oppenheimer",
+        "comment": true,
+        "playas": "video",
+        "classification": "R",
+        "duration": "180:00",
+        "rating": 8.3,
+        "created_at": "2025-01-18",
+        "genres": [
+          {
+            "id": 18,
+            "name": "Drama"
+          },
+          {
+            "id": 36,
+            "name": "History"
+          }
+        ],
+        "actors": [
+          {
+            "id": 3020,
+            "name": "Cillian Murphy",
+            "type": "actor",
+            "role": "J. Robert Oppenheimer",
+            "image": "https://image.tmdb.org/t/p/w200/dm6V24NjjvjMiCtbMkc8Y2WPm2e.jpg",
+            "born": "1976-05-25",
+            "height": "5'7\"",
+            "bio": "Cillian Murphy is an Irish actor."
+          }
+        ],
+        "subtitles": [],
+        "comments": [],
+        "sources": [
+          {
+            "id": 11,
+            "type": "video",
+            "title": "Server 1 - 4K IMAX",
+            "quality": "4K",
+            "size": "12.8 GB",
+            "kind": "play",
+            "premium": "true",
+            "external": false,
+            "url": "https://vidsrc.net/embed/movie/872585"
+          },
+          {
+            "id": 12,
+            "type": "video",
+            "title": "Server 2 - 1080p",
+            "quality": "1080p",
+            "size": "4.2 GB",
+            "kind": "play",
+            "premium": "false",
+            "external": false,
+            "url": "https://embedsb.com/e/872585"
+          }
+        ],
+        "seasons": [],
+        "views": 89340,
+        "downloads": 23120,
+        "shares": 4560
+      }
+    ],
+    "latestMovies": [
+      {
+        "id": 3003,
+        "type": "movie",
+        "title": "Guardians of the Galaxy Vol. 3",
+        "year": "2023",
+        "description": "Peter Quill must rally his team around him on a dangerous mission to save Rocket's life.",
+        "image": "https://image.tmdb.org/t/p/w500/r2J02Z2OpNTctfOSN1Ydgii51I3.jpg",
+        "cover": "https://image.tmdb.org/t/p/original/5YZbUmjbMa3ClvSW1Wj3Gk9QVzY.jpg",
+        "trailer": {
+          "id": 3003,
+          "type": "video",
+          "title": "Guardians of the Galaxy Vol. 3 Trailer",
+          "url": "https://www.youtube.com/watch?v=u3V5KDHRQvk"
+        },
+        "label": "Latest",
+        "sublabel": "2023",
+        "imdb": "7.9",
+        "downloadas": "guardians-of-the-galaxy-vol-3",
+        "comment": true,
+        "playas": "video",
+        "classification": "PG-13",
+        "duration": "150:00",
+        "rating": 7.9,
+        "created_at": "2025-01-18",
+        "genres": [
+          {
+            "id": 28,
+            "name": "Action"
+          },
+          {
+            "id": 12,
+            "name": "Adventure"
+          },
+          {
+            "id": 35,
+            "name": "Comedy"
+          }
+        ],
+        "actors": [
+          {
+            "id": 3030,
+            "name": "Chris Pratt",
+            "type": "actor",
+            "role": "Peter Quill / Star-Lord",
+            "image": "https://image.tmdb.org/t/p/w200/83o3koL82jt30EJ0rz4Bnzrt2dd.jpg",
+            "born": "1979-06-21",
+            "height": "6'2\"",
+            "bio": "Christopher Michael Pratt is an American actor."
+          }
+        ],
+        "subtitles": [],
+        "comments": [],
+        "sources": [
+          {
+            "id": 21,
+            "type": "video",
+            "title": "Server 1 - 1080p",
+            "quality": "1080p",
+            "size": "3.8 GB",
+            "kind": "play",
+            "premium": "false",
+            "external": false,
+            "url": "https://vidsrc.net/embed/movie/447365"
+          },
+          {
+            "id": 22,
+            "type": "video",
+            "title": "Server 2 - 720p",
+            "quality": "720p",
+            "size": "2.1 GB",
+            "kind": "play",
+            "premium": "false",
+            "external": false,
+            "url": "https://embedsb.com/e/447365"
+          }
+        ],
+        "seasons": [],
+        "views": 34560,
+        "downloads": 12340,
+        "shares": 2890
+      }
+    ],
+    "popularSeries": [
+      {
+        "id": 3101,
+        "type": "series",
+        "title": "Wednesday",
+        "year": "2022",
+        "description": "Follows Wednesday Addams' years as a student at Nevermore Academy.",
+        "image": "https://image.tmdb.org/t/p/w500/9PFonBhy4cQy7Jz20NpMygczOkv.jpg",
+        "cover": "https://image.tmdb.org/t/p/original/iHSwvRVsRyxpX7FE7GbviaDvgGZ.jpg",
+        "trailer": {
+          "id": 3101,
+          "type": "video",
+          "title": "Wednesday Trailer",
+          "url": "https://www.youtube.com/watch?v=Di310WS8zLk"
+        },
+        "label": "Popular",
+        "sublabel": "2022",
+        "imdb": "8.1",
+        "downloadas": "wednesday",
+        "comment": true,
+        "playas": "video",
+        "classification": "TV-14",
+        "duration": "45:00",
+        "rating": 8.1,
+        "created_at": "2025-01-18",
+        "genres": [
+          {
+            "id": 35,
+            "name": "Comedy"
+          },
+          {
+            "id": 9648,
+            "name": "Mystery"
+          },
+          {
+            "id": 10765,
+            "name": "Sci-Fi & Fantasy"
+          }
+        ],
+        "actors": [
+          {
+            "id": 3110,
+            "name": "Jenna Ortega",
+            "type": "actor",
+            "role": "Wednesday Addams",
+            "image": "https://image.tmdb.org/t/p/w200/q1NRzyZQlYkxLY07GO9NVPkQnu8.jpg",
+            "born": "2002-09-27",
+            "height": "5'1\"",
+            "bio": "Jenna Marie Ortega is an American actress."
+          }
+        ],
+        "subtitles": [],
+        "comments": [],
+        "sources": [],
+        "seasons": [
+          {
+            "id": 2,
+            "title": "Season 1",
+            "episodes": [
+              {
+                "id": 10,
+                "title": "Wednesday's Child Is Full of Woe",
+                "episode_number": 1,
+                "image": "https://image.tmdb.org/t/p/w500/3FI9iKmzCVoT1s9Y6CtP3jCQcPK.jpg",
+                "duration": "52:00",
+                "description": "Wednesday Addams arrives at Nevermore Academy and immediately gets off on the wrong foot with her new roommate Enid.",
+                "views": 89450,
+                "downloads": 23100,
+                "sources": [
+                  {
+                    "id": 301,
+                    "type": "video",
+                    "title": "Server 1 - 1080p",
+                    "quality": "1080p",
+                    "url": "https://vidsrc.net/embed/tv/119051/1/1"
+                  },
+                  {
+                    "id": 302,
+                    "type": "video",
+                    "title": "Server 2 - 720p",
+                    "quality": "720p",
+                    "url": "https://embedsb.com/tv/119051/1/1"
+                  }
+                ],
+                "subtitles": []
+              }
+            ]
+          }
+        ],
+        "views": 156720,
+        "downloads": 45230,
+        "shares": 8940
+      }
+    ]
+  },
+  "movies": [
+    {
+      "id": 3004,
+      "type": "movie",
+      "title": "Avatar: The Way of Water",
+      "year": "2022",
+      "description": "Jake Sully lives with his newfound family formed on the extrasolar moon Pandora.",
+      "image": "https://image.tmdb.org/t/p/w500/t6HIqrRAclMCA60NsSmeqe9RmNV.jpg",
+      "cover": "https://image.tmdb.org/t/p/original/s16H6tpK2utvwDtzZ8Qy4qm5Emw.jpg",
+      "trailer": {
+        "id": 3004,
+        "type": "video",
+        "title": "Avatar: The Way of Water Trailer",
+        "url": "https://www.youtube.com/watch?v=d9MyW72ELq0"
+      },
+      "label": "Blockbuster",
+      "sublabel": "2022",
+      "imdb": "7.6",
+      "downloadas": "avatar-the-way-of-water",
+      "comment": true,
+      "playas": "video",
+      "classification": "PG-13",
+      "duration": "192:00",
+      "rating": 7.6,
+      "created_at": "2025-01-18",
+      "genres": [
+        {
+          "id": 28,
+          "name": "Action"
+        },
+        {
+          "id": 12,
+          "name": "Adventure"
+        },
+        {
+          "id": 878,
+          "name": "Science Fiction"
+        }
+      ],
+      "actors": [
+        {
+          "id": 3040,
+          "name": "Sam Worthington",
+          "type": "actor",
+          "role": "Jake Sully",
+          "image": "https://image.tmdb.org/t/p/w200/yTNvqiBeN8Rjzz2KaKLt3j6KWqo.jpg",
+          "born": "1976-08-02",
+          "height": "5'9\"",
+          "bio": "Samuel Henry John Worthington is an English-Australian actor."
+        }
+      ],
+      "subtitles": [
+        {
+          "id": 20,
+          "language": "English",
+          "url": "https://example.com/subtitles/avatar2-en.srt"
+        },
+        {
+          "id": 21,
+          "language": "Spanish",
+          "url": "https://example.com/subtitles/avatar2-es.srt"
+        }
+      ],
+      "comments": [],
+      "sources": [
+        {
+          "id": 31,
+          "type": "video",
+          "title": "Server 1 - 4K HDR",
+          "quality": "4K",
+          "size": "15.2 GB",
+          "kind": "play",
+          "premium": "true",
+          "external": false,
+          "url": "https://vidsrc.net/embed/movie/76600"
+        },
+        {
+          "id": 32,
+          "type": "video",
+          "title": "Server 2 - 1080p",
+          "quality": "1080p",
+          "size": "5.8 GB",
+          "kind": "play",
+          "premium": "false",
+          "external": false,
+          "url": "https://embedsb.com/e/76600"
+        },
+        {
+          "id": 33,
+          "type": "video",
+          "title": "Server 3 - 720p",
+          "quality": "720p",
+          "size": "2.9 GB",
+          "kind": "play",
+          "premium": "false",
+          "external": false,
+          "url": "https://doodstream.com/e/76600"
+        },
+        {
+          "id": 34,
+          "type": "download",
+          "title": "Download 1080p",
+          "quality": "1080p",
+          "size": "5.8 GB",
+          "kind": "download",
+          "premium": "true",
+          "external": false,
+          "url": "https://example.com/download/avatar2-1080p.mp4"
+        }
+      ],
+      "seasons": [],
+      "views": 234560,
+      "downloads": 56780,
+      "shares": 12340
+    }
+  ],
+  "series": [
+    {
+      "id": 3102,
+      "type": "series",
+      "title": "House of the Dragon",
+      "year": "2022",
+      "description": "The Targaryen civil war, known as the Dance of the Dragons.",
+      "image": "https://image.tmdb.org/t/p/w500/7QMsOTMUswlwxJP0rTTZfmz2tX2.jpg",
+      "cover": "https://image.tmdb.org/t/p/original/2e7dMdNdDnrzrJjH6mcKRmrRqxh.jpg",
+      "trailer": {
+        "id": 3102,
+        "type": "video",
+        "title": "House of the Dragon Trailer",
+        "url": "https://www.youtube.com/watch?v=DotnJ7tTA34"
+      },
+      "label": "Popular Series",
+      "sublabel": "2022",
+      "imdb": "8.4",
+      "downloadas": "house-of-the-dragon",
+      "comment": true,
+      "playas": "video",
+      "classification": "TV-MA",
+      "duration": "60:00",
+      "rating": 8.4,
+      "created_at": "2025-01-18",
+      "genres": [
+        {
+          "id": 18,
+          "name": "Drama"
+        },
+        {
+          "id": 10759,
+          "name": "Action & Adventure"
+        },
+        {
+          "id": 10765,
+          "name": "Sci-Fi & Fantasy"
+        }
+      ],
+      "actors": [
+        {
+          "id": 3120,
+          "name": "Paddy Considine",
+          "type": "actor",
+          "role": "King Viserys I Targaryen",
+          "image": "https://image.tmdb.org/t/p/w200/lXhp5cJm9nXLNnAg8w5lsYI18xV.jpg",
+          "born": "1973-09-05",
+          "height": "5'8\"",
+          "bio": "Patrick George Considine is an English actor, director, and screenwriter."
+        }
+      ],
+      "subtitles": [],
+      "comments": [],
+      "sources": [],
+      "seasons": [
+        {
+          "id": 3,
+          "title": "Season 1",
+          "episodes": [
+            {
+              "id": 20,
+              "title": "The Heirs of the Dragon",
+              "episode_number": 1,
+              "image": "https://image.tmdb.org/t/p/w500/1X7bHavBqbdZCnHhdJQVPqvKhqT.jpg",
+              "duration": "66:00",
+              "description": "King Viserys hosts a tournament to celebrate the birth of his second child.",
+              "views": 145200,
+              "downloads": 34500,
+              "sources": [
+                {
+                  "id": 401,
+                  "type": "video",
+                  "title": "Server 1 - 1080p",
+                  "quality": "1080p",
+                  "url": "https://vidsrc.net/embed/tv/94997/1/1"
+                },
+                {
+                  "id": 402,
+                  "type": "video",
+                  "title": "Server 2 - 720p",
+                  "quality": "720p",
+                  "url": "https://embedsb.com/tv/94997/1/1"
+                },
+                {
+                  "id": 403,
+                  "type": "video",
+                  "title": "Server 3 - 480p",
+                  "quality": "480p",
+                  "url": "https://doodstream.com/tv/94997/1/1"
+                }
+              ],
+              "subtitles": [
+                {
+                  "id": 30,
+                  "language": "English",
+                  "url": "https://example.com/subtitles/hotd-s1e1-en.srt"
+                }
+              ]
+            },
+            {
+              "id": 21,
+              "title": "The Rogue Prince",
+              "episode_number": 2,
+              "image": "https://image.tmdb.org/t/p/w500/2X7bHavBqbdZCnHhdJQVPqvKhqT.jpg",
+              "duration": "54:00",
+              "description": "Princess Rhaenyra challenges the kingdom's succession order.",
+              "views": 123400,
+              "downloads": 28900,
+              "sources": [
+                {
+                  "id": 411,
+                  "type": "video",
+                  "title": "Server 1 - 1080p",
+                  "quality": "1080p",
+                  "url": "https://vidsrc.net/embed/tv/94997/1/2"
+                },
+                {
+                  "id": 412,
+                  "type": "video",
+                  "title": "Server 2 - 720p",
+                  "quality": "720p",
+                  "url": "https://embedsb.com/tv/94997/1/2"
+                }
+              ],
+              "subtitles": []
+            }
+          ]
+        }
+      ],
+      "views": 345600,
+      "downloads": 89400,
+      "shares": 15670
+    }
+  ],
+  "channels": [
+    {
+      "id": 5001,
+      "title": "CNN International",
+      "label": "News",
+      "sublabel": "International",
+      "description": "CNN International provides 24-hour news and information coverage from around the world.",
+      "website": "https://cnn.com",
+      "classification": "News",
+      "views": 125000,
+      "shares": 2800,
+      "rating": 8.2,
+      "comment": true,
+      "image": "https://upload.wikimedia.org/wikipedia/commons/6/66/CNN_International_logo.svg",
+      "playas": "live",
+      "sources": [
+        {
+          "id": 5001,
+          "type": "live",
+          "title": "1080p HD",
+          "quality": "1080p",
+          "size": "Live",
+          "kind": "play",
+          "premium": "false",
+          "external": false,
+          "url": "https://cnn-cnninternational-1-eu.rakuten.wurl.tv/playlist.m3u8"
+        },
+        {
+          "id": 5002,
+          "type": "live",
+          "title": "720p",
+          "quality": "720p",
+          "size": "Live",
+          "kind": "play",
+          "premium": "false",
+          "external": false,
+          "url": "https://cnn-cnninternational-1-eu.rakuten.wurl.tv/playlist_720.m3u8"
+        },
+        {
+          "id": 5003,
+          "type": "live",
+          "title": "480p",
+          "quality": "480p",
+          "size": "Live",
+          "kind": "play",
+          "premium": "false",
+          "external": false,
+          "url": "https://cnn-cnninternational-1-eu.rakuten.wurl.tv/playlist_480.m3u8"
+        }
+      ],
+      "categories": [
+        {
+          "id": 1,
+          "title": "News"
+        },
+        {
+          "id": 2,
+          "title": "International"
+        }
+      ],
+      "countries": [
+        {
+          "id": 1,
+          "title": "US"
+        }
+      ],
+      "comments": []
+    },
+    {
+      "id": 5002,
+      "title": "BBC World News",
+      "label": "News",
+      "sublabel": "UK",
+      "description": "BBC World News is an international English-language pay television network.",
+      "website": "https://bbc.com/news",
+      "classification": "News",
+      "views": 98000,
+      "shares": 2100,
+      "rating": 8.5,
+      "comment": true,
+      "image": "https://upload.wikimedia.org/wikipedia/commons/8/8b/BBC_World_News_red_logo.svg",
+      "playas": "live",
+      "sources": [
+        {
+          "id": 5010,
+          "type": "live",
+          "title": "1080p HD",
+          "quality": "1080p",
+          "size": "Live",
+          "kind": "play",
+          "premium": "false",
+          "external": false,
+          "url": "https://d2vnbkvjbims7j.cloudfront.net/containerA/LTN/playlist.m3u8"
+        },
+        {
+          "id": 5011,
+          "type": "live",
+          "title": "720p",
+          "quality": "720p",
+          "size": "Live",
+          "kind": "play",
+          "premium": "false",
+          "external": false,
+          "url": "https://d2vnbkvjbims7j.cloudfront.net/containerA/LTN/playlist_720.m3u8"
+        }
+      ],
+      "categories": [
+        {
+          "id": 1,
+          "title": "News"
+        }
+      ],
+      "countries": [
+        {
+          "id": 2,
+          "title": "UK"
+        }
+      ],
+      "comments": []
+    },
+    {
+      "id": 5003,
+      "title": "National Geographic",
+      "label": "Documentary",
+      "sublabel": "Education",
+      "description": "National Geographic Channel features documentaries about nature, science, culture, and history.",
+      "website": "https://nationalgeographic.com",
+      "classification": "Documentary",
+      "views": 156000,
+      "shares": 4200,
+      "rating": 9.1,
+      "comment": true,
+      "image": "https://upload.wikimedia.org/wikipedia/commons/f/fc/Natgeologo.png",
+      "playas": "live",
+      "sources": [
+        {
+          "id": 5020,
+          "type": "live",
+          "title": "1080p HD",
+          "quality": "1080p",
+          "size": "Live",
+          "kind": "play",
+          "premium": "true",
+          "external": false,
+          "url": "https://nationalgeographic.roku.wurl.tv/playlist.m3u8"
+        },
+        {
+          "id": 5021,
+          "type": "live",
+          "title": "720p",
+          "quality": "720p",
+          "size": "Live",
+          "kind": "play",
+          "premium": "false",
+          "external": false,
+          "url": "https://nationalgeographic.roku.wurl.tv/playlist_720.m3u8"
+        },
+        {
+          "id": 5022,
+          "type": "live",
+          "title": "480p",
+          "quality": "480p",
+          "size": "Live",
+          "kind": "play",
+          "premium": "false",
+          "external": false,
+          "url": "https://nationalgeographic.roku.wurl.tv/playlist_480.m3u8"
+        }
+      ],
+      "categories": [
+        {
+          "id": 3,
+          "title": "Documentary"
+        },
+        {
+          "id": 4,
+          "title": "Education"
+        }
+      ],
+      "countries": [
+        {
+          "id": 1,
+          "title": "US"
+        }
+      ],
+      "comments": []
+    },
+    {
+      "id": 5004,
+      "title": "ESPN",
+      "label": "Sports",
+      "sublabel": "Live Sports",
+      "description": "ESPN provides live sports coverage, highlights, and sports news.",
+      "website": "https://espn.com",
+      "classification": "Sports",
+      "views": 234000,
+      "shares": 5600,
+      "rating": 8.8,
+      "comment": true,
+      "image": "https://upload.wikimedia.org/wikipedia/commons/2/2f/ESPN_wordmark.svg",
+      "playas": "live",
+      "sources": [
+        {
+          "id": 5030,
+          "type": "live",
+          "title": "1080p HD",
+          "quality": "1080p",
+          "size": "Live",
+          "kind": "play",
+          "premium": "true",
+          "external": false,
+          "url": "https://espn-live.hls.mux.com/playlist.m3u8"
+        },
+        {
+          "id": 5031,
+          "type": "live",
+          "title": "720p",
+          "quality": "720p",
+          "size": "Live",
+          "kind": "play",
+          "premium": "false",
+          "external": false,
+          "url": "https://espn-live.hls.mux.com/playlist_720.m3u8"
+        }
+      ],
+      "categories": [
+        {
+          "id": 5,
+          "title": "Sports"
+        }
+      ],
+      "countries": [
+        {
+          "id": 1,
+          "title": "US"
+        }
+      ],
+      "comments": []
+    }
+  ],
+  "genres": [
+    {
+      "id": 28,
+      "name": "Action"
+    },
+    {
+      "id": 12,
+      "name": "Adventure"
+    },
+    {
+      "id": 16,
+      "name": "Animation"
+    },
+    {
+      "id": 35,
+      "name": "Comedy"
+    },
+    {
+      "id": 80,
+      "name": "Crime"
+    },
+    {
+      "id": 99,
+      "name": "Documentary"
+    },
+    {
+      "id": 18,
+      "name": "Drama"
+    },
+    {
+      "id": 10751,
+      "name": "Family"
+    },
+    {
+      "id": 14,
+      "name": "Fantasy"
+    },
+    {
+      "id": 36,
+      "name": "History"
+    },
+    {
+      "id": 27,
+      "name": "Horror"
+    },
+    {
+      "id": 10402,
+      "name": "Music"
+    },
+    {
+      "id": 9648,
+      "name": "Mystery"
+    },
+    {
+      "id": 10749,
+      "name": "Romance"
+    },
+    {
+      "id": 878,
+      "name": "Science Fiction"
+    },
+    {
+      "id": 10770,
+      "name": "TV Movie"
+    },
+    {
+      "id": 53,
+      "name": "Thriller"
+    },
+    {
+      "id": 10752,
+      "name": "War"
+    },
+    {
+      "id": 37,
+      "name": "Western"
+    },
+    {
+      "id": 10759,
+      "name": "Action & Adventure"
+    },
+    {
+      "id": 10765,
+      "name": "Sci-Fi & Fantasy"
+    }
+  ],
+  "actors": [
+    {
+      "id": 3001,
+      "name": "Shameik Moore",
+      "type": "actor",
+      "image": "https://image.tmdb.org/t/p/w200/kI1OluWhLJk3pnR19VjOfABpnTY.jpg",
+      "born": "1995-05-04",
+      "height": "5'7\"",
+      "bio": "Shameik Alti Moore is an American actor, rapper, singer, and dancer."
+    },
+    {
+      "id": 3002,
+      "name": "Hailee Steinfeld",
+      "type": "actor",
+      "image": "https://image.tmdb.org/t/p/w200/ev7Vs8XdjehzAxlHIw4YB6FDTsM.jpg",
+      "born": "1996-12-11",
+      "height": "5'8\"",
+      "bio": "Hailee Steinfeld is an American actress and singer."
+    },
+    {
+      "id": 3100,
+      "name": "Pedro Pascal",
+      "type": "actor",
+      "image": "https://image.tmdb.org/t/p/w200/7ttH5LlsyiEJ6Bz7oKFOYgC0fF1.jpg",
+      "born": "1975-04-02",
+      "height": "5'11\"",
+      "bio": "Pedro Pascal is a Chilean-American actor."
+    },
+    {
+      "id": 3101,
+      "name": "Bella Ramsey",
+      "type": "actor",
+      "image": "https://image.tmdb.org/t/p/w200/w4Nze6eJZT2dJhK2jZqSJ3Fgxp2.jpg",
+      "born": "2003-09-30",
+      "height": "5'1\"",
+      "bio": "Bella Ramsey is an English actor."
+    },
+    {
+      "id": 3110,
+      "name": "Jenna Ortega",
+      "type": "actor",
+      "image": "https://image.tmdb.org/t/p/w200/q1NRzyZQlYkxLY07GO9NVPkQnu8.jpg",
+      "born": "2002-09-27",
+      "height": "5'1\"",
+      "bio": "Jenna Marie Ortega is an American actress."
+    }
+  ],
+  "categories": [
+    {
+      "id": 1,
+      "title": "News"
+    },
+    {
+      "id": 2,
+      "title": "International"
+    },
+    {
+      "id": 3,
+      "title": "Documentary"
+    },
+    {
+      "id": 4,
+      "title": "Education"
+    },
+    {
+      "id": 5,
+      "title": "Sports"
+    },
+    {
+      "id": 6,
+      "title": "Entertainment"
+    },
+    {
+      "id": 7,
+      "title": "Movies"
+    },
+    {
+      "id": 8,
+      "title": "Music"
+    }
+  ],
+  "countries": [
+    {
+      "id": 1,
+      "title": "US"
+    },
+    {
+      "id": 2,
+      "title": "UK"
+    },
+    {
+      "id": 3,
+      "title": "CA"
+    },
+    {
+      "id": 4,
+      "title": "AU"
+    },
+    {
+      "id": 5,
+      "title": "DE"
+    },
+    {
+      "id": 6,
+      "title": "FR"
+    },
+    {
+      "id": 7,
+      "title": "ES"
+    },
+    {
+      "id": 8,
+      "title": "IT"
+    },
+    {
+      "id": 9,
+      "title": "JP"
+    },
+    {
+      "id": 10,
+      "title": "KR"
+    }
+  ]
+}
