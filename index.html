@@ -3445,7 +3445,27 @@
                     views: movie.views || 0,
                     downloads: movie.downloads || 0,
                     shares: movie.shares || 0,
-                    ...(movie.type === 'series' && { seasons: movie.seasons || [] })
+                    ...(movie.type === 'series' && {
+                        seasons: (movie.seasons || []).map(season => ({
+                            ...season,
+                            episodes: (season.episodes || []).map(episode => ({
+                                ...episode,
+                                sources: (episode.sources || []).map(source => {
+                                    if (!source || typeof source !== 'object') return source;
+                                    return {
+                                        ...source,
+                                        type: source.type || (source.url && source.url.includes('vidsrc.net') ? 'embed' : 'video'),
+                                        size: source.size || '0MB',
+                                        kind: source.kind || (source.url && source.url.includes('vidsrc.net') ? 'embed' : 
+                                                             source.url && (source.url.includes('youtube.com') || source.url.includes('youtu.be')) ? 'youtube' :
+                                                             source.url && (source.url.includes('.mpd') || source.url.includes('.m3u8') || source.url.includes('.hls')) ? 'play' : 'both'),
+                                        premium: source.premium || 'false',
+                                        external: source.external !== undefined ? source.external : false
+                                    };
+                                })
+                            }))
+                        }))
+                    })
                 }));
                 
                 // Ensure all channels have complete CineMax structure
@@ -3496,8 +3516,7 @@
                             title: movie.title,
                             type: movie.type,
                             image: movie.cover || movie.image,
-                            url: `movies/${movie.id}`,
-                            poster: movie
+                            url: `movies/${movie.id}`
                         });
                     });
                 }
