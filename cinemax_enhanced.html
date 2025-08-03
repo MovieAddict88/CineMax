@@ -1082,51 +1082,67 @@
                      }
                  }
 
-                 // Handle TV series seasons and episodes - ENSURE this is awaited properly
-                 if (contentItem.type === 'tv') {
-                     try {
-                         console.log(`Fetching seasons for TV series: ${contentItem.title} (ID: ${item.id})`);
-                         const seasons = await fetchSeasons(item.id);
-                         console.log(`Received ${seasons.length} seasons for ${contentItem.title}`);
-                         
-                         if (seasons && seasons.length > 0) {
-                             contentItem.seasons = seasons;
-                             
-                             // Count and add episodes to stats properly
-                             seasons.forEach(season => {
-                                 if (season.episodes) {
-                                     season.episodes.forEach(episode => {
-                                         contentLibrary.episodes.push({
-                                             id: episode.id,
-                                             series_id: contentItem.id,
-                                             season_number: season.season_number,
-                                             episode_number: episode.episode_number,
-                                             title: episode.name,
-                                             sources: episode.sources
-                                         });
-                                     });
-                                 }
-                             });
-                             
-                             console.log(`✅ Series ${contentItem.title} now has ${contentItem.seasons.length} seasons`);
-                         } else {
-                             console.warn(`⚠️ No seasons returned for ${contentItem.title}`);
-                             contentItem.seasons = [];
-                         }
-                     } catch (error) {
-                         console.error('❌ Failed to fetch seasons for', contentItem.title, error);
-                         contentItem.seasons = [];
-                     }
-                 }
+                                   // Handle TV series seasons and episodes - ENSURE this is awaited properly
+                  if (contentItem.type === 'tv') {
+                      try {
+                          console.log(`🎬 Fetching seasons for TV series: ${contentItem.title} (ID: ${item.id})`);
+                          const seasons = await fetchSeasons(item.id);
+                          console.log(`📊 Received ${seasons ? seasons.length : 'null/undefined'} seasons for ${contentItem.title}`);
+                          console.log(`🔍 Seasons data:`, seasons);
+                          
+                          // ALWAYS assign seasons array, even if empty
+                          contentItem.seasons = seasons || [];
+                          
+                          if (seasons && seasons.length > 0) {
+                              console.log(`✅ Assigning ${seasons.length} seasons to ${contentItem.title}`);
+                              
+                              // Count and add episodes to stats properly
+                              seasons.forEach(season => {
+                                  if (season.episodes) {
+                                      season.episodes.forEach(episode => {
+                                          contentLibrary.episodes.push({
+                                              id: episode.id,
+                                              series_id: contentItem.id,
+                                              season_number: season.season_number,
+                                              episode_number: episode.episode_number,
+                                              title: episode.name,
+                                              sources: episode.sources
+                                          });
+                                      });
+                                  }
+                              });
+                              
+                              console.log(`🎯 Series ${contentItem.title} now has ${contentItem.seasons.length} seasons`);
+                              console.log(`📊 ContentItem seasons after assignment:`, contentItem.seasons);
+                          } else {
+                              console.warn(`⚠️ No seasons returned for ${contentItem.title}, assigning empty array`);
+                          }
+                          
+                          // Double-check assignment worked
+                          console.log(`🔧 Final verification - contentItem.seasons:`, contentItem.seasons);
+                          console.log(`🔧 Final verification - contentItem.seasons length:`, contentItem.seasons ? contentItem.seasons.length : 'undefined');
+                          
+                      } catch (error) {
+                          console.error('❌ Failed to fetch seasons for', contentItem.title, error);
+                          contentItem.seasons = [];
+                      }
+                  }
 
-                 // Add to library
-                 if (contentItem.type === 'movie') {
-                     contentLibrary.movies.push(contentItem);
-                     console.log(`Added movie: ${contentItem.title}`);
-                 } else {
-                     contentLibrary.series.push(contentItem);
-                     console.log(`Added TV series: ${contentItem.title} with ${contentItem.seasons ? contentItem.seasons.length : 0} seasons`);
-                 }
+                                   // Add to library
+                  if (contentItem.type === 'movie') {
+                      contentLibrary.movies.push(contentItem);
+                      console.log(`📽️ Added movie: ${contentItem.title}`);
+                  } else {
+                      console.log(`📺 About to add TV series to library:`, contentItem);
+                      console.log(`🔍 TV series seasons before adding to library:`, contentItem.seasons);
+                      console.log(`🔍 TV series seasons count before adding:`, contentItem.seasons ? contentItem.seasons.length : 'undefined');
+                      
+                      contentLibrary.series.push(contentItem);
+                      
+                      console.log(`✅ Added TV series: ${contentItem.title} with ${contentItem.seasons ? contentItem.seasons.length : 'undefined'} seasons`);
+                      console.log(`🔍 Verifying series in library:`, contentLibrary.series[contentLibrary.series.length - 1]);
+                      console.log(`🔍 Seasons in library:`, contentLibrary.series[contentLibrary.series.length - 1].seasons);
+                  }
                  
                  // Add a small delay between items to avoid overwhelming the API
                  await new Promise(resolve => setTimeout(resolve, 500));
@@ -2284,26 +2300,47 @@ ${jsonString.split('\n').length > 50 ? '\n... (truncated, full content will be i
             }
         }
 
-        function saveContent() {
-            localStorage.setItem('cinemax_content', JSON.stringify(contentLibrary));
-        }
+                 function saveContent() {
+             console.log(`💾 SAVING CONTENT TO LOCALSTORAGE`);
+             console.log(`📊 Content to save:`, contentLibrary);
+             console.log(`📺 Series count: ${contentLibrary.series.length}`);
+             contentLibrary.series.forEach((series, index) => {
+                 console.log(`📺 Series ${index + 1}: ${series.title} - seasons: ${series.seasons ? series.seasons.length : 'undefined'}`);
+             });
+             
+             localStorage.setItem('cinemax_content', JSON.stringify(contentLibrary));
+             console.log(`✅ Content saved to localStorage`);
+         }
 
-        function loadStoredContent() {
-            const stored = localStorage.getItem('cinemax_content');
-            if (stored) {
-                try {
-                    contentLibrary = JSON.parse(stored);
-                    // Ensure all arrays exist
-                    contentLibrary.movies = contentLibrary.movies || [];
-                    contentLibrary.series = contentLibrary.series || [];
-                    contentLibrary.episodes = contentLibrary.episodes || [];
-                    contentLibrary.channels = contentLibrary.channels || [];
-                } catch (error) {
-                    console.error('Error loading stored content:', error);
-                    contentLibrary = { movies: [], series: [], episodes: [], channels: [] };
-                }
-            }
-        }
+         function loadStoredContent() {
+             console.log(`📖 LOADING CONTENT FROM LOCALSTORAGE`);
+             const stored = localStorage.getItem('cinemax_content');
+             if (stored) {
+                 try {
+                     contentLibrary = JSON.parse(stored);
+                     console.log(`📊 Loaded content:`, contentLibrary);
+                     
+                     // Ensure all arrays exist
+                     contentLibrary.movies = contentLibrary.movies || [];
+                     contentLibrary.series = contentLibrary.series || [];
+                     contentLibrary.episodes = contentLibrary.episodes || [];
+                     contentLibrary.channels = contentLibrary.channels || [];
+                     
+                     console.log(`📺 Loaded ${contentLibrary.series.length} series:`);
+                     contentLibrary.series.forEach((series, index) => {
+                         console.log(`📺 Series ${index + 1}: ${series.title} - seasons: ${series.seasons ? series.seasons.length : 'undefined'}`);
+                         if (series.seasons) {
+                             console.log(`  🎬 Seasons:`, series.seasons.map(s => `S${s.season_number} (${s.episodes?.length || 0} eps)`));
+                         }
+                     });
+                 } catch (error) {
+                     console.error('Error loading stored content:', error);
+                     contentLibrary = { movies: [], series: [], episodes: [], channels: [] };
+                 }
+             } else {
+                 console.log(`📭 No stored content found`);
+             }
+         }
 
         function showLoading() {
             document.getElementById('loading').style.display = 'block';
