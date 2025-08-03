@@ -759,6 +759,18 @@
                  generateFromTMDB('movie', 550); // Fight Club
              };
              
+             // Add TMDB API test
+             window.testTMDBAPI = async function() {
+                 console.log('Testing TMDB API...');
+                 const result = await fetchTMDB('/movie/550');
+                 console.log('TMDB API test result:', result);
+                 if (result && result.title) {
+                     showStatus('success', `TMDB API working! Found: ${result.title}`);
+                 } else {
+                     showStatus('error', 'TMDB API test failed');
+                 }
+             };
+             
              // Add test function to window for debugging
              window.testSourceGeneration = function() {
                  console.log('Testing source generation...');
@@ -1030,7 +1042,7 @@
                         <div class="meta">${year} • ${mediaType.toUpperCase()} • Rating: ${rating}</div>
                         <div class="meta">TMDB ID: ${item.id}</div>
                         <div class="description" style="font-size: 0.9em; color: var(--text-secondary); margin: 8px 0;">${overview}</div>
-                        <button class="btn ${buttonClass} btn-small" onclick="generateFromTMDB('${mediaType}', ${item.id})" ${buttonDisabled}>
+                        <button class="btn ${buttonClass} btn-small" onclick="generateFromTMDB('${mediaType}', ${item.id}); console.log('Generate button clicked for ${title}');" ${buttonDisabled}>
                             ${buttonText}
                         </button>
                         <button class="btn btn-secondary btn-small" onclick="testGenerate()" style="margin-top: 5px;">
@@ -1038,6 +1050,9 @@
                         </button>
                         <button class="btn btn-warning btn-small" onclick="alert('Button clicked for ${title}')" style="margin-top: 5px;">
                             Debug
+                        </button>
+                        <button class="btn btn-accent btn-small" onclick="testTMDBAPI()" style="margin-top: 5px;">
+                            Test API
                         </button>
                     </div>
                 `;
@@ -1048,6 +1063,9 @@
 
                  async function generateFromTMDB(type, tmdbId = null) {
              console.log('generateFromTMDB called with:', { type, tmdbId });
+             
+             // Show immediate feedback
+             showStatus('info', `Starting generation for ${type} with ID ${tmdbId}...`);
              
              // Validate parameters
              if (!type || !tmdbId) {
@@ -1119,16 +1137,23 @@
              }
          }
 
-                 async function generateMovie(tmdbId) {
-             console.log('generateMovie called with tmdbId:', tmdbId);
-             
-             const movieData = await fetchTMDB(`/movie/${tmdbId}`);
-             const credits = await fetchTMDB(`/movie/${tmdbId}/credits`);
-             const videos = await fetchTMDB(`/movie/${tmdbId}/videos`);
-             
-             console.log('Movie data fetched:', movieData);
-             
-             if (!movieData) throw new Error('Failed to fetch movie data');
+                         async function generateMovie(tmdbId) {
+            console.log('generateMovie called with tmdbId:', tmdbId);
+            
+            try {
+                const movieData = await fetchTMDB(`/movie/${tmdbId}`);
+                const credits = await fetchTMDB(`/movie/${tmdbId}/credits`);
+                const videos = await fetchTMDB(`/movie/${tmdbId}/videos`);
+                
+                console.log('Movie data fetched:', movieData);
+                
+                if (!movieData) {
+                    throw new Error('Failed to fetch movie data from TMDB API');
+                }
+                
+                if (!movieData.title) {
+                    throw new Error('Movie data is incomplete - missing title');
+                }
 
              // Get additional servers
              const serverInputs = document.querySelectorAll('#movie-servers .server-item');
