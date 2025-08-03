@@ -661,6 +661,7 @@
         let generatedContent = [];
         let bulkGenerationActive = false;
         let currentBulkPage = 1;
+        let nextId = 1; // Global ID counter
 
         // Initialize
         document.addEventListener('DOMContentLoaded', function() {
@@ -830,6 +831,7 @@
             const contentId = generateId();
             const content = {
                 id: contentId,
+                tmdb_id: tmdbData.id, // Store TMDB ID for duplicate checking
                 type: isMovie ? 'movie' : 'series',
                 title: title,
                 year: year,
@@ -1026,8 +1028,8 @@
             try {
                 const tmdbData = await fetchTMDBData(contentType, tmdbId);
                 
-                // Check for duplicates
-                const exists = generatedContent.find(c => c.id === tmdbData.id);
+                // Check for duplicates using TMDB ID
+                const exists = generatedContent.find(c => c.tmdb_id === tmdbData.id);
                 if (exists) {
                     showError('Content already exists in generated list');
                     return;
@@ -1100,8 +1102,8 @@
                     for (const item of results) {
                         if (!bulkGenerationActive) break;
                         
-                        // Check for duplicates
-                        if (skipDuplicates && generatedContent.find(c => c.id === item.id)) {
+                        // Check for duplicates using TMDB ID
+                        if (skipDuplicates && generatedContent.find(c => c.tmdb_id === item.id)) {
                             continue;
                         }
                         
@@ -1583,7 +1585,7 @@
 
         // Utility functions
         function generateId() {
-            return Math.floor(Math.random() * 1000000) + 1;
+            return nextId++;
         }
 
         function showLoading(show) {
@@ -1642,7 +1644,12 @@
                 try {
                     generatedContent = JSON.parse(stored);
                     console.log('Parsed stored data:', generatedContent); // Debug log
+                    
+                    // Update nextId to avoid conflicts
                     if (generatedContent.length > 0) {
+                        const maxId = Math.max(...generatedContent.map(item => item.id || 0));
+                        nextId = maxId + 1;
+                        console.log('Set nextId to:', nextId);
                         displayContent(generatedContent);
                     }
                 } catch (error) {
