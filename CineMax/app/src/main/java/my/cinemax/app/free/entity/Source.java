@@ -43,6 +43,10 @@ public class Source implements Parcelable {
     @SerializedName("url")
     @Expose
     private String url;
+    
+    @SerializedName("serverType")
+    @Expose
+    private String serverType; // For server categorization (vidsrc_primary, vidjoy_backup, etc.)
 
 
     protected Source(Parcel in) {
@@ -60,6 +64,7 @@ public class Source implements Parcelable {
         byte tmpExternal = in.readByte();
         external = tmpExternal == 0 ? null : tmpExternal == 1;
         url = in.readString();
+        serverType = in.readString();
     }
 
     @Override
@@ -78,6 +83,7 @@ public class Source implements Parcelable {
         dest.writeString(premium);
         dest.writeByte((byte) (external == null ? 0 : external ? 1 : 2));
         dest.writeString(url);
+        dest.writeString(serverType);
     }
 
     @Override
@@ -168,5 +174,42 @@ public class Source implements Parcelable {
 
     public Boolean getExternal() {
         return external;
+    }
+    
+    public String getServerType() {
+        return serverType;
+    }
+    
+    public void setServerType(String serverType) {
+        this.serverType = serverType;
+    }
+    
+    /**
+     * Check if this source is a primary server (not a backup)
+     */
+    public boolean isPrimaryServer() {
+        return serverType != null && serverType.contains("primary");
+    }
+    
+    /**
+     * Check if this source is a backup server
+     */
+    public boolean isBackupServer() {
+        return serverType != null && serverType.contains("backup");
+    }
+    
+    /**
+     * Get server priority (lower number = higher priority)
+     */
+    public int getServerPriority() {
+        if (serverType == null) return 999; // Unknown servers get lowest priority
+        
+        if (serverType.contains("vidsrc_primary")) return 1;
+        if (serverType.contains("vidjoy_primary")) return 2;
+        if (serverType.contains("vidsrc_backup")) return 3;
+        if (serverType.contains("vidjoy_backup")) return 4;
+        if (serverType.contains("additional_backup")) return 5;
+        
+        return 999; // Default lowest priority
     }
 }

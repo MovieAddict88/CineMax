@@ -716,6 +716,199 @@
         const TMDB_IMAGE_BASE = 'https://image.tmdb.org/t/p/w500';
         const VIDSRC_BASE = 'https://vidsrc.net/embed';
         const VIDJOY_BASE = 'https://vidjoy.pro/embed';
+        
+        // Backup server configurations for better reliability
+        const BACKUP_SERVERS = {
+            vidsrc: {
+                primary: 'https://vidsrc.net/embed',
+                backups: [
+                    'https://vidsrc.me/embed',
+                    'https://2embed.to/embed',
+                    'https://www.2embed.to/embed'
+                ]
+            },
+            vidjoy: {
+                primary: 'https://vidjoy.pro/embed',
+                backups: [
+                    'https://vidjoy.me/embed',
+                    'https://embedsito.com/v',
+                    'https://vidsrc.stream/embed'
+                ]
+            },
+            additional: [
+                {
+                    name: 'SuperEmbed',
+                    base: 'https://multiembed.mov/directstream.php?video_id=',
+                    format: 'movie' // or 'tv'
+                },
+                {
+                    name: 'CloudServe',
+                    base: 'https://embed.su/embed/movie/',
+                    format: 'movie'
+                },
+                {
+                    name: 'EmbedSu',
+                    base: 'https://embed.su/embed/tv/',
+                    format: 'tv'
+                }
+            ]
+        };
+        
+        // Helper function to generate all server variations
+        function generateAllServerSources(tmdbId, type = 'movie', season = null, episode = null) {
+            const sources = [];
+            let idCounter = 1;
+            
+            // Primary VidSrc sources
+            const vidsrcPath = type === 'movie' ? 
+                `/movie/${tmdbId}` : 
+                `/tv/${tmdbId}/${season}/${episode}`;
+                
+            sources.push(
+                {
+                    id: idCounter++,
+                    type: "embed",
+                    title: "VidSrc Server 1080p",
+                    quality: "1080p",
+                    size: "Auto",
+                    kind: "play",
+                    premium: "false",
+                    external: false,
+                    url: `${BACKUP_SERVERS.vidsrc.primary}${vidsrcPath}`,
+                    serverType: "vidsrc_primary"
+                },
+                {
+                    id: idCounter++,
+                    type: "embed",
+                    title: "VidSrc Server 720p",
+                    quality: "720p",
+                    size: "Auto",
+                    kind: "play",
+                    premium: "false",
+                    external: false,
+                    url: `${BACKUP_SERVERS.vidsrc.primary}${vidsrcPath}`,
+                    serverType: "vidsrc_primary"
+                }
+            );
+            
+            // VidSrc Backup servers
+            BACKUP_SERVERS.vidsrc.backups.forEach((backupUrl, index) => {
+                sources.push(
+                    {
+                        id: idCounter++,
+                        type: "embed",
+                        title: `VidSrc Backup ${index + 1} 1080p`,
+                        quality: "1080p",
+                        size: "Auto",
+                        kind: "play",
+                        premium: "false",
+                        external: false,
+                        url: `${backupUrl}${vidsrcPath}`,
+                        serverType: "vidsrc_backup"
+                    },
+                    {
+                        id: idCounter++,
+                        type: "embed",
+                        title: `VidSrc Backup ${index + 1} 720p`,
+                        quality: "720p",
+                        size: "Auto",
+                        kind: "play",
+                        premium: "false",
+                        external: false,
+                        url: `${backupUrl}${vidsrcPath}`,
+                        serverType: "vidsrc_backup"
+                    }
+                );
+            });
+            
+            // Primary VidJoy sources
+            const vidjoyPath = type === 'movie' ? 
+                `/movie/${tmdbId}` : 
+                `/tv/${tmdbId}/${season}/${episode}`;
+                
+            sources.push(
+                {
+                    id: idCounter++,
+                    type: "embed",
+                    title: "VidJoy Server 1080p",
+                    quality: "1080p",
+                    size: "Auto",
+                    kind: "play",
+                    premium: "false",
+                    external: false,
+                    url: `${BACKUP_SERVERS.vidjoy.primary}${vidjoyPath}`,
+                    serverType: "vidjoy_primary"
+                },
+                {
+                    id: idCounter++,
+                    type: "embed",
+                    title: "VidJoy Server 720p",
+                    quality: "720p",
+                    size: "Auto",
+                    kind: "play",
+                    premium: "false",
+                    external: false,
+                    url: `${BACKUP_SERVERS.vidjoy.primary}${vidjoyPath}`,
+                    serverType: "vidjoy_primary"
+                }
+            );
+            
+            // VidJoy Backup servers
+            BACKUP_SERVERS.vidjoy.backups.forEach((backupUrl, index) => {
+                sources.push(
+                    {
+                        id: idCounter++,
+                        type: "embed",
+                        title: `VidJoy Backup ${index + 1} 1080p`,
+                        quality: "1080p",
+                        size: "Auto",
+                        kind: "play",
+                        premium: "false",
+                        external: false,
+                        url: `${backupUrl}${vidjoyPath}`,
+                        serverType: "vidjoy_backup"
+                    },
+                    {
+                        id: idCounter++,
+                        type: "embed",
+                        title: `VidJoy Backup ${index + 1} 720p`,
+                        quality: "720p",
+                        size: "Auto",
+                        kind: "play",
+                        premium: "false",
+                        external: false,
+                        url: `${backupUrl}${vidjoyPath}`,
+                        serverType: "vidjoy_backup"
+                    }
+                );
+            });
+            
+            // Additional backup servers (SuperEmbed, CloudServe, etc.)
+            BACKUP_SERVERS.additional.forEach(server => {
+                if ((type === 'movie' && server.format === 'movie') || 
+                    (type === 'tv' && server.format === 'tv')) {
+                    
+                    const serverPath = type === 'movie' ? 
+                        `${tmdbId}` : 
+                        `${tmdbId}/${season}/${episode}`;
+                        
+                    sources.push({
+                        id: idCounter++,
+                        type: "embed",
+                        title: `${server.name} Server`,
+                        quality: "Auto",
+                        size: "Auto",
+                        kind: "play",
+                        premium: "false",
+                        external: false,
+                        url: `${server.base}${serverPath}`,
+                        serverType: "additional_backup"
+                    });
+                }
+            });
+            
+            return sources;
+        }
 
         // Global data storage
         let currentData = {
@@ -1000,55 +1193,8 @@
                  }
              });
 
-             // Auto-generate VidSrc and VidJoy sources with multiple quality options
-             const autoSources = [
-                 // VidSrc Server - Multiple Quality Options
-                 {
-                     id: nextId++,
-                     type: "embed",
-                     title: "VidSrc Server 1080p",
-                     quality: "1080p",
-                     size: "Auto",
-                     kind: "play",
-                     premium: "false",
-                     external: false,
-                     url: `${VIDSRC_BASE}/movie/${tmdbId}`
-                 },
-                 {
-                     id: nextId++,
-                     type: "embed",
-                     title: "VidSrc Server 720p",
-                     quality: "720p",
-                     size: "Auto",
-                     kind: "play",
-                     premium: "false",
-                     external: false,
-                     url: `${VIDSRC_BASE}/movie/${tmdbId}`
-                 },
-                 // VidJoy Server - Multiple Quality Options
-                 {
-                     id: nextId++,
-                     type: "embed", 
-                     title: "VidJoy Server 1080p",
-                     quality: "1080p",
-                     size: "Auto",
-                     kind: "play",
-                     premium: "false",
-                     external: false,
-                     url: `${VIDJOY_BASE}/movie/${tmdbId}`
-                 },
-                 {
-                     id: nextId++,
-                     type: "embed", 
-                     title: "VidJoy Server 720p",
-                     quality: "720p",
-                     size: "Auto",
-                     kind: "play",
-                     premium: "false",
-                     external: false,
-                     url: `${VIDJOY_BASE}/movie/${tmdbId}`
-                 }
-             ];
+                         // Generate all server sources including backups
+            const autoSources = generateAllServerSources(tmdbId, 'movie');
 
              console.log('Auto-generated movie sources:', autoSources);
              console.log('Additional sources:', additionalSources);
@@ -1135,55 +1281,8 @@
                 const episodes = [];
                 
                                  for (const episodeData of seasonData.episodes || []) {
-                     // Auto-generate VidSrc and VidJoy sources with multiple quality options for each episode
-                     const episodeSources = [
-                         // VidSrc Server - Multiple Quality Options
-                         {
-                             id: nextId++,
-                             type: "embed",
-                             title: "VidSrc Server 1080p",
-                             quality: "1080p",
-                             size: "Auto",
-                             kind: "play",
-                             premium: "false",
-                             external: false,
-                             url: `${VIDSRC_BASE}/tv/${tmdbId}/${seasonNum}/${episodeData.episode_number}`
-                         },
-                         {
-                             id: nextId++,
-                             type: "embed",
-                             title: "VidSrc Server 720p",
-                             quality: "720p",
-                             size: "Auto",
-                             kind: "play",
-                             premium: "false",
-                             external: false,
-                             url: `${VIDSRC_BASE}/tv/${tmdbId}/${seasonNum}/${episodeData.episode_number}`
-                         },
-                         // VidJoy Server - Multiple Quality Options
-                         {
-                             id: nextId++,
-                             type: "embed",
-                             title: "VidJoy Server 1080p", 
-                             quality: "1080p",
-                             size: "Auto",
-                             kind: "play",
-                             premium: "false",
-                             external: false,
-                             url: `${VIDJOY_BASE}/tv/${tmdbId}/${seasonNum}/${episodeData.episode_number}`
-                         },
-                         {
-                             id: nextId++,
-                             type: "embed",
-                             title: "VidJoy Server 720p", 
-                             quality: "720p",
-                             size: "Auto",
-                             kind: "play",
-                             premium: "false",
-                             external: false,
-                             url: `${VIDJOY_BASE}/tv/${tmdbId}/${seasonNum}/${episodeData.episode_number}`
-                         }
-                     ];
+                     // Generate all server sources including backups for each episode
+                     const episodeSources = generateAllServerSources(tmdbId, 'tv', seasonNum, episodeData.episode_number);
 
                      console.log(`Auto-generated sources for S${seasonNum}E${episodeData.episode_number}:`, episodeSources);
 
