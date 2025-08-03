@@ -16,6 +16,7 @@ import android.util.Log;
 import android.webkit.WebSettings;
 import android.webkit.WebResourceRequest;
 import android.webkit.WebResourceResponse;
+import android.webkit.SslErrorHandler;
 import android.widget.ProgressBar; // Add loading indicator
 import android.os.Handler; // Add timeout handler
 
@@ -327,6 +328,13 @@ public class EmbedActivity extends AppCompatActivity {
                 Toast.LENGTH_LONG).show();
             
             super.onReceivedHttpError(view, request, errorResponse);
+        }
+        
+        @Override
+        public void onReceivedSslError(WebView view, SslErrorHandler handler, android.net.http.SslError error) {
+            Log.e(TAG, "SSL Error: " + error.toString());
+            // Continue loading despite SSL errors for video servers
+            handler.proceed();
         }
         
         /**
