@@ -660,6 +660,20 @@
                         <button class="btn btn-secondary" onclick="importData()">Import Data</button>
                     </div>
                     <div class="form-group">
+                        <label style="display: flex; align-items: center; gap: 10px;">
+                            <span>Export Format:</span>
+                            <div class="toggle-switch">
+                                <input type="checkbox" id="compact-json-toggle">
+                                <span class="slider"></span>
+                            </div>
+                            <span id="format-label">Pretty (Readable)</span>
+                        </label>
+                        <small style="color: var(--text-secondary); display: block; margin-top: 5px;">
+                            Toggle ON for compact JSON (smaller file size, same functionality)<br>
+                            <strong>Benefits:</strong> 30-50% smaller files, faster loading, same CineMax compatibility
+                        </small>
+                    </div>
+                    <div class="form-group">
                         <button class="btn btn-primary" onclick="exportData()">Export Current Data</button>
                         <button class="btn btn-warning" onclick="exportSample()">Export Sample Format</button>
                     </div>
@@ -741,6 +755,9 @@
              loadSavedData();
              updateDataStats();
              updatePreview();
+             
+             // Initialize compact JSON toggle
+             initializeCompactToggle();
              
              // Add test function to window for debugging
              window.testSourceGeneration = function() {
@@ -896,17 +913,42 @@
                  return { movieSources, seriesSources };
              };
              
-             console.log('✅ CineMax Enhanced API Manager loaded!');
-             console.log('🎬 Multi-Server Sources: VidSrc.net + VidJoy.pro (Matching existing app structure)');
-             console.log('🔧 Fixed: Root-level movies array for GenreActivity & TV Series');
-             console.log('🎯 Fixed: Source kind values - "play" for embeds/live TV, "both" for direct links');
-             console.log('📺 Enhanced: Multiple quality options per server (1080p + 720p + 480p)');
-             console.log('🧪 Test with: testSourceGeneration()');
-             
-             // Show info about the fix
-             setTimeout(() => {
-                 showStatus('success', 'ENHANCED: Multi-server sources matching existing app structure! No CineMax changes needed!');
-             }, 2000);
+                         console.log('✅ CineMax Enhanced API Manager loaded!');
+            console.log('🎬 Multi-Server Sources: VidSrc.net + VidJoy.pro (Matching existing app structure)');
+            console.log('🔧 Fixed: Root-level movies array for GenreActivity & TV Series');
+            console.log('🎯 Fixed: Source kind values - "play" for embeds/live TV, "both" for direct links');
+            console.log('📺 Enhanced: Multiple quality options per server (1080p + 720p + 480p)');
+            console.log('🧪 Test with: testSourceGeneration()');
+            console.log('📦 NEW: Compact JSON export for smaller file sizes (30-50% reduction)');
+            
+            // Add compact JSON test function
+            window.testCompactJSON = function() {
+                if (currentData.home.featuredMovies.length > 0) {
+                    const sampleData = {
+                        api_info: currentData.api_info,
+                        home: {
+                            slides: currentData.home.slides.slice(0, 2),
+                            featuredMovies: currentData.home.featuredMovies.slice(0, 2)
+                        }
+                    };
+                    
+                    const sizeComp = showSizeComparison(sampleData);
+                    console.log('📊 JSON Size Comparison:');
+                    console.log(`   Pretty Format: ${sizeComp.prettySize}`);
+                    console.log(`   Compact Format: ${sizeComp.compactSize}`);
+                    console.log(`   Size Reduction: ${sizeComp.reduction}%`);
+                    
+                    return sizeComp;
+                } else {
+                    console.log('No data available for size comparison. Generate some content first.');
+                    return null;
+                }
+            };
+            
+            // Show info about the fix
+            setTimeout(() => {
+                showStatus('success', 'ENHANCED: Multi-server sources + Compact JSON export! No CineMax changes needed!');
+            }, 2000);
          });
 
         // Tab switching
@@ -916,6 +958,62 @@
             
             event.target.classList.add('active');
             document.getElementById(tabName).classList.add('active');
+        }
+
+        // Compact JSON toggle functionality
+        function initializeCompactToggle() {
+            const toggle = document.getElementById('compact-json-toggle');
+            const label = document.getElementById('format-label');
+            
+            // Load saved preference
+            const savedCompact = localStorage.getItem('compact-json-preference') === 'true';
+            toggle.checked = savedCompact;
+            updateFormatLabel();
+            
+            // Add event listener
+            toggle.addEventListener('change', function() {
+                updateFormatLabel();
+                localStorage.setItem('compact-json-preference', toggle.checked.toString());
+                showStatus('info', `Export format changed to ${toggle.checked ? 'Compact' : 'Pretty'}`);
+            });
+        }
+        
+        function updateFormatLabel() {
+            const toggle = document.getElementById('compact-json-toggle');
+            const label = document.getElementById('format-label');
+            
+            if (toggle.checked) {
+                label.textContent = 'Compact (Smaller)';
+                label.style.color = 'var(--success)';
+            } else {
+                label.textContent = 'Pretty (Readable)';
+                label.style.color = 'var(--text-secondary)';
+            }
+        }
+        
+        function isCompactMode() {
+            return document.getElementById('compact-json-toggle').checked;
+        }
+        
+        // Utility function to calculate and show JSON size difference
+        function showSizeComparison(data) {
+            const prettySize = new Blob([JSON.stringify(data, null, 2)]).size;
+            const compactSize = new Blob([JSON.stringify(data)]).size;
+            const reduction = ((prettySize - compactSize) / prettySize * 100).toFixed(1);
+            
+            return {
+                prettySize: formatBytes(prettySize),
+                compactSize: formatBytes(compactSize),
+                reduction: reduction
+            };
+        }
+        
+        function formatBytes(bytes) {
+            if (bytes === 0) return '0 Bytes';
+            const k = 1024;
+            const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+            const i = Math.floor(Math.log(bytes) / Math.log(k));
+            return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
         }
 
         // TMDB API functions
@@ -1923,15 +2021,23 @@
                  channels: currentData.channels || []
              };
              
-             const dataStr = JSON.stringify(exportData, null, 2);
-             const dataBlob = new Blob([dataStr], { type: 'application/json' });
-             
-             const link = document.createElement('a');
-             link.href = URL.createObjectURL(dataBlob);
-             link.download = `cinemax-data-${new Date().toISOString().split('T')[0]}.json`;
-             link.click();
-             
-             showStatus('success', 'Data exported successfully with root-level movies array!');
+                         // Use compact or pretty formatting based on toggle
+            const compact = isCompactMode();
+            const dataStr = compact ? JSON.stringify(exportData) : JSON.stringify(exportData, null, 2);
+            const dataBlob = new Blob([dataStr], { type: 'application/json' });
+            
+            const link = document.createElement('a');
+            const formatSuffix = compact ? '-compact' : '';
+            link.href = URL.createObjectURL(dataBlob);
+            link.download = `cinemax-data-${new Date().toISOString().split('T')[0]}${formatSuffix}.json`;
+            link.click();
+            
+            // Show size comparison
+            const sizeComp = showSizeComparison(exportData);
+            const sizeInfo = compact ? 
+                ` (Compact: ${sizeComp.compactSize}, ${sizeComp.reduction}% smaller than pretty format)` : 
+                ` (Pretty: ${sizeComp.prettySize}, human readable format)`;
+            showStatus('success', `Data exported successfully with root-level movies array!${sizeInfo}`);
          }
 
                  function exportSample() {
@@ -2058,15 +2164,19 @@
                  channels: []
              };
             
-            const dataStr = JSON.stringify(sampleData, null, 2);
-            const dataBlob = new Blob([dataStr], { type: 'application/json' });
-            
-            const link = document.createElement('a');
-            link.href = URL.createObjectURL(dataBlob);
-            link.download = 'cinemax-sample-format.json';
-            link.click();
-            
-            showStatus('success', 'Sample format exported!');
+                       // Use compact or pretty formatting based on toggle
+           const compact = isCompactMode();
+           const dataStr = compact ? JSON.stringify(sampleData) : JSON.stringify(sampleData, null, 2);
+           const dataBlob = new Blob([dataStr], { type: 'application/json' });
+           
+           const link = document.createElement('a');
+           const formatSuffix = compact ? '-compact' : '';
+           link.href = URL.createObjectURL(dataBlob);
+           link.download = `cinemax-sample-format${formatSuffix}.json`;
+           link.click();
+           
+           const sizeInfo = compact ? ' (Compact format)' : ' (Pretty format)';
+           showStatus('success', `Sample format exported!${sizeInfo}`);
         }
 
         function clearAllData() {
