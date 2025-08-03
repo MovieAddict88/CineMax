@@ -68,7 +68,7 @@ public class MyApplication extends MultiDexApplication {
     }
     
     /**
-     * Initialize the advanced caching system for large datasets
+     * Initialize the simplified caching system for large datasets
      */
     private void initCacheSystem() {
         // Check if cache system should be enabled (can be disabled for debugging)
@@ -77,34 +77,24 @@ public class MyApplication extends MultiDexApplication {
             return;
         }
         
-        // Initialize cache system in background to prevent blocking main thread
-        new Thread(() -> {
-            try {
-                Log.d("MyApplication", "Starting cache system initialization...");
-                
-                // Initialize Unified Cache Manager (coordinates all layers)
-                UnifiedCacheManager.getInstance().initialize(this);
-                
-                // Initialize DataRepository (uses unified cache)
-                DataRepository.getInstance().initialize(this);
-                
-                Log.d("MyApplication", "Advanced multi-layer caching system initialized successfully");
-                
-                // Preload essential data in background (with delay to let app stabilize)
-                new Handler().postDelayed(() -> {
-                    try {
-                        DataRepository.getInstance().preloadEssentialData();
-                        logCacheStatistics();
-                    } catch (Exception e) {
-                        Log.e("MyApplication", "Error in background preload", e);
-                    }
-                }, 3000); // 3 second delay
-                
-            } catch (Exception e) {
-                Log.e("MyApplication", "Error initializing cache system", e);
-                // Don't crash the app, just log the error
-            }
-        }).start();
+        try {
+            Log.d("MyApplication", "Starting simplified cache system initialization...");
+            
+            // Initialize Simple Cache Manager (LruCache + Disk + Network)
+            SimpleCacheManager.getInstance().initialize(this);
+            
+            // Initialize DataRepository (uses simple cache)
+            DataRepository.getInstance().initialize(this);
+            
+            Log.d("MyApplication", "Simplified caching system initialized successfully");
+            
+            // Log cache statistics
+            logCacheStatistics();
+            
+        } catch (Exception e) {
+            Log.e("MyApplication", "Error initializing cache system", e);
+            // Don't crash the app, just log the error
+        }
     }
     
     /**
@@ -112,9 +102,8 @@ public class MyApplication extends MultiDexApplication {
      */
     private void logCacheStatistics() {
         try {
-            UnifiedCacheManager.UnifiedCacheStats stats = 
-                UnifiedCacheManager.getInstance().getCacheStats();
-            Log.d("MyApplication", "Cache Statistics: " + stats.toString());
+            String stats = SimpleCacheManager.getInstance().getCacheStats();
+            Log.d("MyApplication", "Cache Statistics: " + stats);
         } catch (Exception e) {
             Log.e("MyApplication", "Error getting cache statistics", e);
         }

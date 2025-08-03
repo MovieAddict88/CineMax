@@ -1200,8 +1200,8 @@ public class HomeActivity extends AppCompatActivity implements NavigationView.On
         }, 10000); // 10 second timeout
         
         // Show cache statistics
-        CacheManager.CacheStats stats = dataRepository.getCacheStats();
-        Log.d("CACHE_API", "Cache stats: " + stats.toString());
+        String stats = dataRepository.getSimpleCacheStats();
+        Log.d("CACHE_API", "Cache stats: " + stats);
         
         dataRepository.loadAllData(new DataRepository.ApiResponseCallback() {
             @Override
@@ -1283,9 +1283,9 @@ public class HomeActivity extends AppCompatActivity implements NavigationView.On
                 
                 // Show cache info to user (optional)
                 if ("Cache".equals(source)) {
-                    CacheManager.CacheStats stats = dataRepository.getCacheStats();
+                    String stats = dataRepository.getSimpleCacheStats();
                     if (BuildConfig.DEBUG) {
-                        Toasty.info(HomeActivity.this, "Loaded from cache: " + stats.getTotalItems() + " items", Toast.LENGTH_SHORT).show();
+                        Toasty.info(HomeActivity.this, "Loaded from cache: " + stats, Toast.LENGTH_SHORT).show();
                     }
                 }
                 

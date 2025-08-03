@@ -4,7 +4,7 @@ import android.content.Context;
 import android.os.AsyncTask;
 import android.util.Log;
 import my.cinemax.app.free.Utils.CacheManager;
-import my.cinemax.app.free.Utils.UnifiedCacheManager;
+import my.cinemax.app.free.Utils.SimpleCacheManager;
 import my.cinemax.app.free.api.apiClient;
 import my.cinemax.app.free.entity.*;
 import retrofit2.Call;
@@ -34,7 +34,7 @@ public class DataRepository {
     private static DataRepository instance;
     
     private CacheManager cacheManager;
-    private UnifiedCacheManager unifiedCacheManager;
+    private SimpleCacheManager simpleCacheManager;
     private Context context;
     private ExecutorService executorService;
     private boolean isLoading = false;
@@ -56,7 +56,7 @@ public class DataRepository {
     private DataRepository() {
         this.executorService = Executors.newCachedThreadPool();
         this.cacheManager = CacheManager.getInstance();
-        this.unifiedCacheManager = UnifiedCacheManager.getInstance();
+        this.simpleCacheManager = SimpleCacheManager.getInstance();
     }
     
     public static synchronized DataRepository getInstance() {
@@ -72,8 +72,8 @@ public class DataRepository {
     public void initialize(Context context) {
         this.context = context.getApplicationContext();
         cacheManager.initialize(this.context);
-        unifiedCacheManager.initialize(this.context);
-        Log.d(TAG, "DataRepository initialized with unified caching system");
+        simpleCacheManager.initialize(this.context);
+        Log.d(TAG, "DataRepository initialized with simple caching system");
     }
     
     /**
@@ -84,21 +84,14 @@ public class DataRepository {
             callback.onLoading();
         }
         
-        // Check if cache system is ready
-        if (!unifiedCacheManager.isReady()) {
-            Log.w(TAG, "Cache system not ready, loading from API directly");
-            loadFromApi(callback);
-            return;
-        }
-        
-        // Check unified cache first (memory + disk)
-        JsonApiResponse cachedResponse = cacheManager.getCachedApiResponse();
-        if (cachedResponse != null && cacheManager.isCacheValid()) {
-            Log.d(TAG, "Returning cached data from unified cache");
+        // Check simple cache first (memory + disk)
+        JsonApiResponse cachedResponse = simpleCacheManager.getApiResponse();
+        if (cachedResponse != null && simpleCacheManager.isCacheValid("api_response")) {
+            Log.d(TAG, "Returning cached data from simple cache");
             
             // Cache data in memory for faster future access
             try {
-                unifiedCacheManager.cacheAllData(cachedResponse);
+                simpleCacheManager.cacheApiResponse(cachedResponse);
             } catch (Exception e) {
                 Log.e(TAG, "Error caching data in memory", e);
             }
@@ -151,7 +144,7 @@ public class DataRepository {
                     executorService.execute(() -> {
                         Log.d(TAG, "Caching API response in all layers in background");
                         cacheManager.storeApiResponse(apiResponse);
-                        unifiedCacheManager.cacheAllData(apiResponse);
+                        simpleCacheManager.cacheApiResponse(apiResponse);
                         Log.d(TAG, "API response cached successfully in all layers");
                     });
                     
@@ -208,7 +201,7 @@ public class DataRepository {
                 public void onResponse(Call<JsonApiResponse> call, Response<JsonApiResponse> response) {
                     if (response.isSuccessful() && response.body() != null) {
                         cacheManager.storeApiResponse(response.body());
-                        unifiedCacheManager.cacheAllData(response.body());
+                        simpleCacheManager.cacheApiResponse(response.body());
                         Log.d(TAG, "Background refresh completed successfully and cached in all layers");
                     } else {
                         Log.w(TAG, "Background refresh failed: " + response.code());
@@ -550,10 +543,15 @@ public class DataRepository {
     }
     
     /**
-     * Get unified cache statistics
+     * Get simple cache statistics
      */
-    public UnifiedCacheManager.UnifiedCacheStats getUnifiedCacheStats() {
-        return unifiedCacheManager.getCacheStats();
+    public String getSimpleCacheStats() {
+        try {
+            return simpleCacheManager.getCacheStats();
+        } catch (Exception e) {
+            Log.e(TAG, "Error getting simple cache stats", e);
+            return "Error getting cache stats";
+        }
     }
     
     /**
