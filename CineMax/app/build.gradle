@@ -21,8 +21,8 @@ android {
     lintOptions {
         checkReleaseBuilds false
     }
-    compileSdkVersion 31
-    buildToolsVersion '31.0.0'
+    compileSdkVersion 34
+    buildToolsVersion '34.0.0'
     defaultConfig {
         applicationId "my.cinemax.app.free"
         minSdkVersion 19
@@ -67,6 +67,11 @@ android {
 dependencies {
     coreLibraryDesugaring 'com.android.tools:desugar_jdk_libs:1.1.5'
 
+    // Room Database - Compatible with build tools 7.0.2
+    def room_version = "2.5.0"
+    implementation "androidx.room:room-runtime:$room_version"
+    annotationProcessor "androidx.room:room-compiler:$room_version"
+    implementation "androidx.room:room-ktx:$room_version"
 
     implementation fileTree(include: ['*.jar'], dir: 'libs')
     implementation 'androidx.constraintlayout:constraintlayout:2.1.0'
