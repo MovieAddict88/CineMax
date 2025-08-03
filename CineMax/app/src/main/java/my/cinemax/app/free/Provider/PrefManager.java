@@ -59,4 +59,13 @@ public class PrefManager {
     public int getInt(String key) {
         return pref.getInt(key,0);
     }
+    
+    public void setLong(String PREF_NAME, long VAL) {
+        editor.putLong(PREF_NAME, VAL);
+        editor.commit();
+    }
+    
+    public long getLong(String key, long defaultValue) {
+        return pref.getLong(key, defaultValue);
+    }
 }

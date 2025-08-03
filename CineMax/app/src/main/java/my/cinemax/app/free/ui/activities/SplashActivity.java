@@ -29,6 +29,7 @@ import my.cinemax.app.free.api.apiRest;
 import my.cinemax.app.free.config.Global;
 import my.cinemax.app.free.entity.ApiResponse;
 import my.cinemax.app.free.entity.JsonApiResponse;
+import my.cinemax.app.free.database.CacheManager;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -39,6 +40,7 @@ import my.cinemax.app.free.*;
 public class SplashActivity extends AppCompatActivity {
 
     private PrefManager prf;
+    private CacheManager cacheManager;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -48,6 +50,11 @@ public class SplashActivity extends AppCompatActivity {
 
         check();
         prf= new PrefManager(getApplicationContext());
+        cacheManager = CacheManager.getInstance(getApplicationContext());
+        
+        // Initialize cache - this will load data from API if needed
+        cacheManager.initializeCache();
+        
         ( (RubberLoaderView) findViewById(R.id.loader1)).startLoading();
         Timer myTimer = new Timer();
         myTimer.schedule(new TimerTask() {
