@@ -11,6 +11,7 @@ import android.webkit.WebChromeClient;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 import android.widget.FrameLayout;
+import android.webkit.WebSettings;
 
 import my.cinemax.app.free.R;
 
@@ -56,10 +57,31 @@ public class EmbedActivity extends AppCompatActivity {
 
         mWebChromeClient = new myWebChromeClient();
         webView.setWebChromeClient(mWebChromeClient);
-        webView.getSettings().setJavaScriptEnabled(true);
-        webView.getSettings().setAppCacheEnabled(true);
-        webView.getSettings().setBuiltInZoomControls(false);
-        webView.getSettings().setSaveFormData(true);
+        // --- Enhanced WebView configuration for better streaming compatibility ---
+        WebSettings settings = webView.getSettings();
+
+        // Core settings
+        settings.setJavaScriptEnabled(true);
+        settings.setDomStorageEnabled(true);           // Enable DOM storage (local/session storage)
+        settings.setAppCacheEnabled(true);
+
+        // Media playback
+        settings.setMediaPlaybackRequiresUserGesture(false); // Allow autoplay after user gesture within iframe
+
+        // Content access & rendering
+        settings.setAllowFileAccess(true);
+        settings.setBuiltInZoomControls(false);
+        settings.setSaveFormData(true);
+        settings.setJavaScriptCanOpenWindowsAutomatically(true);
+
+        // Allow mixed (HTTP+HTTPS) content & cleartext traffic – required by some third-party players
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.LOLLIPOP) {
+            settings.setMixedContentMode(WebSettings.MIXED_CONTENT_ALWAYS_ALLOW);
+        }
+
+        // Improve compatibility by using a desktop-like user agent (some providers block default Android UA)
+        String defaultUA = settings.getUserAgentString();
+        settings.setUserAgentString(defaultUA + " CineMax/1.0 (StreamingWebView)");
         webView.loadUrl(url);
     }
 
