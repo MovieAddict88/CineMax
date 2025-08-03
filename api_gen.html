@@ -759,6 +759,12 @@
                  generateFromTMDB('movie', 550); // Fight Club
              };
              
+             // Add test for One Piece
+             window.testOnePiece = function() {
+                 console.log('Testing One Piece generation');
+                 generateFromTMDB('tv', 37854); // One Piece TV series
+             };
+             
              // Add TMDB API test
              window.testTMDBAPI = async function() {
                  console.log('Testing TMDB API...');
@@ -769,6 +775,17 @@
                  } else {
                      showStatus('error', 'TMDB API test failed');
                  }
+             };
+             
+             // Add data check function
+             window.checkData = function() {
+                 console.log('Current data check:', {
+                     featuredMovies: currentData.home.featuredMovies.length,
+                     slides: currentData.home.slides.length,
+                     channels: (currentData.home.channels || []).length,
+                     lastItem: currentData.home.featuredMovies[currentData.home.featuredMovies.length - 1]
+                 });
+                 showStatus('info', `Data check: ${currentData.home.featuredMovies.length} movies/series, ${currentData.home.slides.length} slides`);
              };
              
              // Add test function to window for debugging
@@ -1046,7 +1063,7 @@
                         <div class="meta">${year} • ${mediaType.toUpperCase()} • Rating: ${rating}</div>
                         <div class="meta">TMDB ID: ${item.id}</div>
                         <div class="description" style="font-size: 0.9em; color: var(--text-secondary); margin: 8px 0;">${overview}</div>
-                        <button class="btn ${buttonClass} btn-small" onclick="generateFromTMDB('${mediaType}', ${item.id}); console.log('Generate button clicked for ${title}');" ${buttonDisabled}>
+                        <button class="btn ${buttonClass} btn-small" onclick="generateFromTMDB('${mediaType}', ${item.id}); console.log('Generate button clicked for ${title}'); showStatus('info', 'Starting generation...');" ${buttonDisabled}>
                             ${buttonText}
                         </button>
                         <button class="btn btn-secondary btn-small" onclick="testGenerate()" style="margin-top: 5px;">
@@ -1057,6 +1074,9 @@
                         </button>
                         <button class="btn btn-accent btn-small" onclick="testTMDBAPI()" style="margin-top: 5px;">
                             Test API
+                        </button>
+                        <button class="btn btn-info btn-small" onclick="checkData()" style="margin-top: 5px;">
+                            Check Data
                         </button>
                     </div>
                 `;
@@ -2280,7 +2300,10 @@
             const filter = document.getElementById('preview-filter')?.value || 'all';
             const container = document.getElementById('content-preview');
             
-            if (!container) return;
+            if (!container) {
+                console.error('Content preview container not found!');
+                return;
+            }
             
             container.innerHTML = '';
             
@@ -2301,6 +2324,16 @@
             
             // Log for debugging
             console.log('Updating preview with items:', items.length);
+            console.log('Current data:', {
+                featuredMovies: currentData.home.featuredMovies.length,
+                slides: currentData.home.slides.length,
+                channels: (currentData.home.channels || []).length
+            });
+            
+            if (items.length === 0) {
+                container.innerHTML = '<p style="text-align: center; color: var(--text-secondary);">No content found. Generate some content first!</p>';
+                return;
+            }
             
             items.forEach(item => {
                 const div = document.createElement('div');
