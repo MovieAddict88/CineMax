@@ -28,6 +28,7 @@ import my.cinemax.app.free.BuildConfig;
 import my.cinemax.app.free.R;
 import my.cinemax.app.free.Provider.DataRepository;
 import my.cinemax.app.free.Utils.CacheManager;
+import my.cinemax.app.free.Utils.EnhancedCacheManager;
 
 /**
  * Created by Tamim on 28/09/2019.
@@ -66,23 +67,26 @@ public class MyApplication extends MultiDexApplication {
     }
     
     /**
-     * Initialize the advanced caching system for large datasets
+     * Initialize the enhanced multi-layer caching system for large datasets
      */
     private void initCacheSystem() {
         try {
-            // Initialize CacheManager
+            // Initialize Enhanced Cache Manager (new multi-layer system)
+            EnhancedCacheManager.getInstance().initialize(this);
+            
+            // Initialize legacy CacheManager for backward compatibility
             CacheManager.getInstance().initialize(this);
             
             // Initialize DataRepository
             DataRepository.getInstance().initialize(this);
             
-            Log.d("MyApplication", "Advanced caching system initialized successfully");
+            Log.d("MyApplication", "Enhanced multi-layer caching system initialized successfully");
             
             // Preload essential data in background
             DataRepository.getInstance().preloadEssentialData();
             
         } catch (Exception e) {
-            Log.e("MyApplication", "Error initializing cache system", e);
+            Log.e("MyApplication", "Error initializing enhanced cache system", e);
         }
     }
     public static MyApplication getInstance ()
