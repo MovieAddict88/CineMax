@@ -409,6 +409,8 @@
                         <button type="button" class="btn btn-warning" onclick="testMovie(550)">Test Movie (Fight Club - ID: 550)</button>
                         <button type="button" class="btn btn-warning" onclick="testSeries(1399)">Test Series (Game of Thrones - ID: 1399)</button>
                         <button type="button" class="btn btn-warning" onclick="testMovie(13)">Test Movie (Forrest Gump - ID: 13)</button>
+                        <button type="button" class="btn btn-warning" onclick="testSeries(90802)">Test Series (The Sandman - ID: 90802)</button>
+                        <button type="button" class="btn btn-danger" onclick="testSandman()">Debug Sandman</button>
                     </div>
                 </div>
 
@@ -743,17 +745,42 @@
         async function getSeriesDetails(tmdbId) {
             try {
                 console.log(`Fetching series details for ID: ${tmdbId}`);
+                
+                // First, let's check if the series exists
                 const series = await fetchTMDBData(`/tv/${tmdbId}`);
                 console.log('Series data:', series);
                 
-                const credits = await fetchTMDBData(`/tv/${tmdbId}/credits`);
-                console.log('Credits data:', credits);
+                if (!series || !series.id) {
+                    throw new Error(`Series with ID ${tmdbId} not found`);
+                }
                 
-                const videos = await fetchTMDBData(`/tv/${tmdbId}/videos`);
-                console.log('Videos data:', videos);
+                // Check if it's actually a TV series
+                if (series.media_type && series.media_type !== 'tv') {
+                    throw new Error(`ID ${tmdbId} is not a TV series (media_type: ${series.media_type})`);
+                }
+                
+                console.log(`Series found: ${series.name} (${series.first_air_date})`);
+                
+                // Fetch additional data
+                let credits = null;
+                let videos = null;
+                let seasons = null;
+                
+                try {
+                    credits = await fetchTMDBData(`/tv/${tmdbId}/credits`);
+                    console.log('Credits data:', credits);
+                } catch (creditsError) {
+                    console.warn('Could not fetch credits:', creditsError);
+                }
+                
+                try {
+                    videos = await fetchTMDBData(`/tv/${tmdbId}/videos`);
+                    console.log('Videos data:', videos);
+                } catch (videosError) {
+                    console.warn('Could not fetch videos:', videosError);
+                }
                 
                 // Only fetch seasons if the series has seasons
-                let seasons = null;
                 if (series.number_of_seasons > 0) {
                     try {
                         seasons = await fetchTMDBData(`/tv/${tmdbId}/seasons/1`);
@@ -765,9 +792,9 @@
                 
                 return {
                     ...series,
-                    credits,
-                    videos,
-                    seasons
+                    credits: credits || { cast: [], crew: [] },
+                    videos: videos || { results: [] },
+                    seasons: seasons
                 };
             } catch (error) {
                 console.error('Error fetching series details:', error);
@@ -893,6 +920,8 @@
         }
 
         function createCineMaxContent(tmdbData, contentType, sourceType) {
+            console.log('Creating CineMax content for:', tmdbData);
+            
             const tmdbId = tmdbData.id;
             const videoSources = generateVideoSources(tmdbId, contentType, sourceType);
             const trailerSource = generateTrailerSource(tmdbData.videos);
@@ -915,20 +944,35 @@
                 }
             });
             
+            // Handle different title fields
+            const title = tmdbData.title || tmdbData.name || 'Unknown Title';
+            const releaseYear = tmdbData.release_date?.split('-')[0] || tmdbData.first_air_date?.split('-')[0] || 'Unknown';
+            const duration = contentType === 'movie' && tmdbData.runtime ? 
+                `${Math.floor(tmdbData.runtime / 60)}:${(tmdbData.runtime % 60).toString().padStart(2, '0')}` : 
+                '45:00';
+            
+            console.log('Content details:', {
+                title,
+                releaseYear,
+                duration,
+                contentType,
+                tmdbId
+            });
+            
             const content = {
                 id: tmdbId,
-                title: tmdbData.title || tmdbData.name,
+                title: title,
                 type: contentType,
                 label: contentType === 'movie' ? 'Latest Movie' : 'Latest Series',
-                sublabel: `Released ${tmdbData.release_date?.split('-')[0] || tmdbData.first_air_date?.split('-')[0] || 'Unknown'}`,
+                sublabel: `Released ${releaseYear}`,
                 imdb: tmdbData.vote_average?.toString() || '0.0',
-                downloadas: `${tmdbData.title || tmdbData.name}.mp4`,
+                downloadas: `${title}.mp4`,
                 comment: true,
                 playas: contentType === 'movie' ? 'video' : 'play',
                 description: tmdbData.overview || 'No description available',
                 classification: 'PG-13',
-                year: tmdbData.release_date?.split('-')[0] || tmdbData.first_air_date?.split('-')[0] || 'Unknown',
-                duration: contentType === 'movie' ? `${Math.floor(tmdbData.runtime / 60)}:${(tmdbData.runtime % 60).toString().padStart(2, '0')}` : '45:00',
+                year: releaseYear,
+                duration: duration,
                 rating: tmdbData.vote_average || 0.0,
                 image: tmdbData.poster_path ? `${TMDB_IMAGE_BASE}${tmdbData.poster_path}` : '',
                 cover: tmdbData.backdrop_path ? `${TMDB_IMAGE_BASE_ORIGINAL}${tmdbData.backdrop_path}` : '',
@@ -953,6 +997,7 @@
                 seasons: contentType === 'series' ? generateSeasons(tmdbData) : []
             };
             
+            console.log('Generated content:', content);
             return content;
         }
 
@@ -1233,6 +1278,60 @@
             document.getElementById('tmdbId').value = tmdbId;
             document.getElementById('contentType').value = 'series';
             showAlert(`Testing with Series ID: ${tmdbId}`, 'info');
+        }
+
+        // Special test for The Sandman
+        async function testSandman() {
+            console.log('=== TESTING THE SANDMAN (ID: 90802) ===');
+            
+            try {
+                // Test basic series fetch
+                console.log('1. Testing basic series fetch...');
+                const seriesData = await fetchTMDBData('/tv/90802');
+                console.log('Series data received:', seriesData);
+                
+                if (!seriesData || !seriesData.id) {
+                    throw new Error('No series data received');
+                }
+                
+                console.log('2. Testing credits fetch...');
+                const creditsData = await fetchTMDBData('/tv/90802/credits');
+                console.log('Credits data received:', creditsData);
+                
+                console.log('3. Testing videos fetch...');
+                const videosData = await fetchTMDBData('/tv/90802/videos');
+                console.log('Videos data received:', videosData);
+                
+                console.log('4. Testing seasons fetch...');
+                const seasonsData = await fetchTMDBData('/tv/90802/seasons/1');
+                console.log('Seasons data received:', seasonsData);
+                
+                console.log('=== ALL TESTS PASSED ===');
+                showAlert('The Sandman API tests passed! Check console for details.', 'success');
+                
+            } catch (error) {
+                console.error('=== SANDMAN TEST FAILED ===');
+                console.error('Error:', error);
+                showAlert(`The Sandman test failed: ${error.message}`, 'error');
+                
+                // Try alternative IDs
+                console.log('Trying alternative Sandman IDs...');
+                const alternativeIds = [90802, 90803, 90804, 90805];
+                
+                for (const altId of alternativeIds) {
+                    try {
+                        console.log(`Trying ID: ${altId}`);
+                        const altData = await fetchTMDBData(`/tv/${altId}`);
+                        if (altData && altData.name && altData.name.toLowerCase().includes('sandman')) {
+                            console.log(`Found Sandman with ID: ${altId}`);
+                            showAlert(`Found The Sandman with alternative ID: ${altId}`, 'info');
+                            break;
+                        }
+                    } catch (altError) {
+                        console.log(`ID ${altId} failed:`, altError.message);
+                    }
+                }
+            }
         }
 
         // Initialize
