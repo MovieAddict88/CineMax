@@ -943,7 +943,11 @@
             document.querySelectorAll('.tab').forEach(tab => tab.classList.remove('active'));
             document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
             
-            event.target.classList.add('active');
+            // Find the tab button and activate it
+            const tabButton = document.querySelector(`[onclick="switchTab('${tabName}')"]`);
+            if (tabButton) {
+                tabButton.classList.add('active');
+            }
             document.getElementById(tabName).classList.add('active');
         }
 
@@ -1122,11 +1126,16 @@
                      lastAdded: currentData.home.featuredMovies[currentData.home.featuredMovies.length - 1]
                  });
                  
-                 showStatus('success', `${type} generated successfully with automatic video sources!`);
+                 showStatus('success', `${type} generated successfully with automatic video sources! Check the Data Management tab to view your content.`);
                  
                  // Log for debugging
                  const lastItem = currentData.home.featuredMovies[currentData.home.featuredMovies.length - 1];
                  console.log('Generated content:', lastItem);
+                 
+                 // Auto-switch to Data Management tab to show the generated content
+                 setTimeout(() => {
+                     switchTab('data-management');
+                 }, 2000);
                  
                  // Refresh search results to show updated status
                  const searchQuery = document.getElementById('tmdb-search').value.trim();
