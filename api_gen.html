@@ -897,7 +897,7 @@
              };
              
              console.log('✅ CineMax Enhanced API Manager loaded!');
-             console.log('🎬 Multi-Server Sources: VidSrc.net + VidJoy.pro (Separate Sources)');
+             console.log('🎬 Multi-Server Sources: VidSrc.net + VidJoy.pro (Matching existing app structure)');
              console.log('🔧 Fixed: Root-level movies array for GenreActivity & TV Series');
              console.log('🎯 Fixed: Source kind values - "play" for embeds/live TV, "both" for direct links');
              console.log('📺 Enhanced: Multiple quality options per server (1080p + 720p + 480p)');
@@ -905,7 +905,7 @@
              
              // Show info about the fix
              setTimeout(() => {
-                 showStatus('success', 'ENHANCED: Multi-server configuration with separate sources! Users can choose preferred server!');
+                 showStatus('success', 'ENHANCED: Multi-server sources matching existing app structure! No CineMax changes needed!');
              }, 2000);
          });
 
@@ -1044,7 +1044,7 @@
                  }
              });
 
-             // Auto-generate VidSrc and VidJoy sources as separate sources (not fallbacks)
+             // Auto-generate VidSrc and VidJoy sources as separate sources (matching existing app structure)
              const autoSources = [
                  // VidSrc Server - Multiple Quality Options (Separate Sources)
                  {
@@ -1201,7 +1201,7 @@
                 const episodes = [];
                 
                                  for (const episodeData of seasonData.episodes || []) {
-                     // Auto-generate VidSrc and VidJoy sources as separate sources for each episode
+                     // Auto-generate VidSrc and VidJoy sources as separate sources for each episode (matching existing app structure)
                      const episodeSources = [
                          // VidSrc Server - Multiple Quality Options (Separate Sources)
                          {
@@ -1797,7 +1797,7 @@
                          showLoading('bulk-loading', false);
              updateDataStats();
              updatePreview();
-             showStatus('success', `Bulk generation complete! Generated: ${generated} items with multi-server sources (VidSrc + VidJoy), Skipped: ${skipped}`);
+             showStatus('success', `Bulk generation complete! Generated: ${generated} items with multi-server sources (VidSrc + VidJoy) matching existing app structure, Skipped: ${skipped}`);
         }
 
         async function generateByGenre() {
