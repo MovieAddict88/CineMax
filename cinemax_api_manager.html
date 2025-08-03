@@ -1172,15 +1172,20 @@
                             type: 'video',
                             title: parts[0].trim(),
                             quality: parts[2].trim(),
+                            size: '0MB',
+                            kind: 'both',
+                            premium: 'false',
+                            external: false,
                             url: parts[1].trim()
                         });
                     }
                 });
             }
             
+            const manualId = generateId();
             const content = {
-                id: generateId(),
-                type: type,
+                id: manualId,
+                type: type === 'live' ? 'live' : type, // Keep consistent typing
                 title: title,
                 year: year || '',
                 description: description || '',
@@ -1205,6 +1210,8 @@
                 views: Math.floor(Math.random() * 1000) + 100,
                 downloads: 0,
                 shares: 0,
+                contentType: type === 'live' ? 'channel' : type,
+                url: `${type === 'live' ? 'channels' : type === 'movie' ? 'movies' : 'series'}/${manualId}`,
                 seasons: []
             };
             
@@ -1234,9 +1241,10 @@
                 return;
             }
             
+            const channelId = generateId();
             const content = {
-                id: generateId(),
-                type: 'live',
+                id: channelId,
+                type: 'live', // Keep as 'live' internally for our filtering
                 title: name,
                 year: '',
                 description: description || '',
@@ -1248,6 +1256,10 @@
                     type: 'video',
                     title: 'Live Stream',
                     quality: 'HD',
+                    size: '0MB',
+                    kind: 'both',
+                    premium: 'false',
+                    external: false,
                     url: streamUrl
                 }],
                 label: 'Live TV',
@@ -1267,6 +1279,8 @@
                 views: Math.floor(Math.random() * 500) + 50,
                 downloads: 0,
                 shares: 0,
+                contentType: 'channel',
+                url: `channels/${channelId}`,
                 seasons: []
             };
             
@@ -1476,31 +1490,35 @@
             const series = generatedContent.filter(item => item.type === 'series');
             const channels = generatedContent.filter(item => item.type === 'live');
             
+            // Create slides with proper structure
+            const slides = generatedContent.slice(0, 10).map((item, index) => ({
+                id: index + 1,
+                title: item.title,
+                type: item.type === 'live' ? 'channel' : item.type,
+                image: item.image,
+                url: `${item.type === 'live' ? 'channels' : item.type === 'movie' ? 'movies' : 'series'}/${item.id}`,
+                poster: item.type !== 'live' ? item : null,
+                channel: item.type === 'live' ? item : null
+            }));
+            
             const cineMaxData = {
                 api_info: {
                     version: "2.0",
-                    description: "CineMax API Generated Content",
+                    description: "Enhanced Free Movie & TV Streaming JSON API with Full Actor Support",
                     last_updated: new Date().toISOString().split('T')[0],
                     total_movies: movies.length,
-                    total_series: series.length,
                     total_channels: channels.length,
-                    total_actors: generatedContent.reduce((acc, item) => acc + item.actors.length, 0)
+                    total_actors: generatedContent.reduce((acc, item) => acc + (item.actors ? item.actors.length : 0), 0)
                 },
                 home: {
-                    slides: generatedContent.slice(0, 10).map(item => ({
-                        id: item.id,
-                        title: item.title,
-                        type: item.type,
-                        image: item.image,
-                        url: `${item.type}s/${item.id}`,
-                        poster: item
-                    })),
-                    featured: generatedContent.slice(0, 20),
-                    movies: movies.slice(0, 50),
-                    series: series.slice(0, 50),
-                    channels: channels.slice(0, 30)
+                    slides: slides,
+                    featuredMovies: movies.slice(0, 20),
+                    channels: channels.slice(0, 30),
+                    actors: []
                 },
-                content: generatedContent
+                movies: movies,
+                series: series,
+                channels: channels
             };
             
             return JSON.stringify(cineMaxData, null, 2);
@@ -1625,12 +1643,12 @@
         function updateStats() {
             const movies = generatedContent.filter(item => item.type === 'movie').length;
             const series = generatedContent.filter(item => item.type === 'series').length;
-            const liveTV = generatedContent.filter(item => item.type === 'live').length;
+            const channels = generatedContent.filter(item => item.type === 'live').length;
             
             document.getElementById('totalGenerated').textContent = generatedContent.length;
             document.getElementById('totalMovies').textContent = movies;
             document.getElementById('totalSeries').textContent = series;
-            document.getElementById('totalLiveTV').textContent = liveTV;
+            document.getElementById('totalLiveTV').textContent = channels;
         }
 
         function saveData() {
