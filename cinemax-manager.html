@@ -556,7 +556,7 @@
         
         async function processTMDBData(tmdbData, contentType) {
             const content = {
-                id: Date.now(),
+                id: currentContent.length + 1,
                 title: tmdbData.title || tmdbData.name,
                 type: contentType === 'movie' ? 'movie' : 'series',
                 year: tmdbData.release_date ? tmdbData.release_date.split('-')[0] : '',
@@ -565,9 +565,9 @@
                 image: `https://image.tmdb.org/t/p/w500${tmdbData.poster_path}`,
                 cover: `https://image.tmdb.org/t/p/original${tmdbData.backdrop_path}`,
                 rating: tmdbData.vote_average,
-                genres: tmdbData.genres?.map(g => ({ id: g.id, title: g.name })) || [],
-                actors: tmdbData.credits?.cast?.slice(0, 10).map(a => ({
-                    id: a.id,
+                genres: tmdbData.genres?.map((g, index) => ({ id: index + 1, title: g.name })) || [],
+                actors: tmdbData.credits?.cast?.slice(0, 10).map((a, index) => ({
+                    id: index + 1,
                     name: a.name,
                     type: 'actor',
                     role: a.character,
@@ -602,7 +602,7 @@
             
             // VidSrc.net source
             sources.push({
-                id: Date.now(),
+                id: 1,
                 type: 'video',
                 title: `${tmdbData.title || tmdbData.name} - VidSrc`,
                 quality: '1080p',
@@ -615,7 +615,7 @@
             
             // VidJoy.pro source
             sources.push({
-                id: Date.now() + 1,
+                id: 2,
                 type: 'video',
                 title: `${tmdbData.title || tmdbData.name} - VidJoy`,
                 quality: '720p',
@@ -668,7 +668,7 @@
         
         function saveManualContent() {
             const content = {
-                id: Date.now(),
+                id: currentContent.length + 1,
                 title: document.getElementById('manualTitle').value,
                 type: document.getElementById('manualType').value,
                 year: document.getElementById('manualYear').value,
@@ -680,9 +680,9 @@
             
             // Get sources from form
             const sourceItems = document.querySelectorAll('#manualSources .source-item');
-            sourceItems.forEach(item => {
+            sourceItems.forEach((item, index) => {
                 const source = {
-                    id: Date.now() + Math.random(),
+                    id: index + 1,
                     type: item.querySelector('[name="sourceType"]').value,
                     title: item.querySelector('[name="sourceTitle"]').value,
                     quality: item.querySelector('[name="sourceQuality"]').value,
@@ -808,19 +808,96 @@
         }
         
         function saveContent() {
+            // Create proper structure matching free_movie_api.json
+            const movies = currentContent.filter(c => c.type === 'movie');
+            const series = currentContent.filter(c => c.type === 'series');
+            const liveTV = currentContent.filter(c => c.type === 'live');
+            
+            // Get unique actors and genres
+            const allActors = [...new Set(currentContent.flatMap(c => c.actors || []))];
+            const allGenres = [...new Set(currentContent.flatMap(c => c.genres || []))];
+            
+            // Create slides for home section
+            const slides = movies.map((movie, index) => ({
+                id: index + 1,
+                title: movie.title,
+                type: movie.type,
+                image: movie.image,
+                url: `movies/${index + 1}`,
+                poster: {
+                    ...movie,
+                    id: index + 1,
+                    label: "Latest Movie",
+                    sublabel: `Released ${movie.year}`,
+                    imdb: movie.rating ? movie.rating.toString() : "8.5",
+                    downloadas: `${movie.title.toLowerCase().replace(/[^a-z0-9]/g, '-')}.mp4`,
+                    comment: true,
+                    playas: "video",
+                    classification: "PG-13",
+                    sources: movie.sources.map((source, sourceIndex) => ({
+                        ...source,
+                        id: sourceIndex + 1
+                    })),
+                    trailer: movie.trailer ? {
+                        ...movie.trailer,
+                        id: movie.sources.length + 1
+                    } : null,
+                    actors: movie.actors.map((actor, actorIndex) => ({
+                        ...actor,
+                        id: actorIndex + 1
+                    })),
+                    subtitles: [
+                        {
+                            id: 1,
+                            title: "English",
+                            language: "en",
+                            url: `https://example.com/subtitles/${movie.title.toLowerCase().replace(/[^a-z0-9]/g, '-')}-en.vtt`
+                        }
+                    ]
+                }
+            }));
+            
             const data = {
                 api_info: {
                     version: "2.0",
                     description: "Enhanced Free Movie & TV Streaming JSON API with Full Actor Support",
                     last_updated: new Date().toISOString().split('T')[0],
-                    total_movies: currentContent.filter(c => c.type === 'movie').length,
-                    total_channels: currentContent.filter(c => c.type === 'live').length,
-                    total_actors: new Set(currentContent.flatMap(c => c.actors?.map(a => a.id) || [])).size
+                    total_movies: movies.length,
+                    total_channels: liveTV.length,
+                    total_actors: allActors.length
                 },
-                movies: currentContent.filter(c => c.type === 'movie'),
-                channels: currentContent.filter(c => c.type === 'live'),
-                actors: [...new Set(currentContent.flatMap(c => c.actors || []))],
-                genres: [...new Set(currentContent.flatMap(c => c.genres || []))]
+                home: {
+                    slides: slides,
+                    featured_movies: slides,
+                    channels: liveTV.map((channel, index) => ({
+                        ...channel,
+                        id: index + 1
+                    })),
+                    actors: allActors.map((actor, index) => ({
+                        ...actor,
+                        id: index + 1
+                    })),
+                    genres: allGenres.map((genre, index) => ({
+                        ...genre,
+                        id: index + 1
+                    }))
+                },
+                movies: movies.map((movie, index) => ({
+                    ...movie,
+                    id: index + 1
+                })),
+                channels: liveTV.map((channel, index) => ({
+                    ...channel,
+                    id: index + 1
+                })),
+                actors: allActors.map((actor, index) => ({
+                    ...actor,
+                    id: index + 1
+                })),
+                genres: allGenres.map((genre, index) => ({
+                    ...genre,
+                    id: index + 1
+                }))
             };
             
             const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
