@@ -1,0 +1,1781 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CineMax API Manager - TMDB Integration</title>
+    <style>
+        :root {
+            --primary: #3498db;
+            --success: #2ecc71;
+            --warning: #f39c12;
+            --danger: #e74c3c;
+            --dark: #2c3e50;
+            --light: #ecf0f1;
+            --gray: #95a5a6;
+        }
+        
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f4f7f9;
+            color: #333;
+            line-height: 1.6;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding: 20px;
+            background: linear-gradient(135deg, #2c3e50, #4a6491);
+            color: white;
+            border-radius: 10px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+        
+        h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+        }
+        
+        .subtitle {
+            font-size: 1.2rem;
+            opacity: 0.9;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        
+        .card {
+            background-color: #ffffff;
+            border-radius: 10px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+            padding: 25px;
+            margin-bottom: 25px;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.12);
+        }
+        
+        .card h2 {
+            color: var(--dark);
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid var(--primary);
+            display: flex;
+            align-items: center;
+        }
+        
+        .card h2 i {
+            margin-right: 10px;
+            font-size: 1.5rem;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: var(--dark);
+        }
+        
+        input, select, textarea {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e1e8ed;
+            border-radius: 8px;
+            font-size: 14px;
+            transition: border-color 0.3s ease;
+        }
+        
+        input:focus, select:focus, textarea:focus {
+            outline: none;
+            border-color: var(--primary);
+        }
+        
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-block;
+            text-align: center;
+        }
+        
+        .btn-primary {
+            background-color: var(--primary);
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background-color: #2980b9;
+            transform: translateY(-2px);
+        }
+        
+        .btn-success {
+            background-color: var(--success);
+            color: white;
+        }
+        
+        .btn-success:hover {
+            background-color: #27ae60;
+        }
+        
+        .btn-warning {
+            background-color: var(--warning);
+            color: white;
+        }
+        
+        .btn-warning:hover {
+            background-color: #e67e22;
+        }
+        
+        .btn-danger {
+            background-color: var(--danger);
+            color: white;
+        }
+        
+        .btn-danger:hover {
+            background-color: #c0392b;
+        }
+        
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+        
+        .flex {
+            display: flex;
+            gap: 15px;
+            align-items: center;
+        }
+        
+        .flex-1 {
+            flex: 1;
+        }
+        
+        .status {
+            padding: 10px;
+            border-radius: 8px;
+            margin: 10px 0;
+            font-weight: 600;
+        }
+        
+        .status.success {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        
+        .status.error {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        
+        .status.info {
+            background-color: #d1ecf1;
+            color: #0c5460;
+            border: 1px solid #bee5eb;
+        }
+        
+        .preview-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 15px;
+            margin-top: 20px;
+        }
+        
+        .preview-card {
+            background: white;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s ease;
+        }
+        
+        .preview-card:hover {
+            transform: translateY(-5px);
+        }
+        
+        .preview-card img {
+            width: 100%;
+            height: 150px;
+            object-fit: cover;
+        }
+        
+        .preview-card .content {
+            padding: 15px;
+        }
+        
+        .preview-card h4 {
+            margin-bottom: 5px;
+            font-size: 14px;
+        }
+        
+        .preview-card p {
+            font-size: 12px;
+            color: var(--gray);
+        }
+        
+        .tabs {
+            display: flex;
+            border-bottom: 2px solid #e1e8ed;
+            margin-bottom: 20px;
+        }
+        
+        .tab {
+            padding: 12px 24px;
+            cursor: pointer;
+            border-bottom: 3px solid transparent;
+            transition: all 0.3s ease;
+        }
+        
+        .tab.active {
+            border-bottom-color: var(--primary);
+            color: var(--primary);
+            font-weight: 600;
+        }
+        
+        .tab-content {
+            display: none;
+        }
+        
+        .tab-content.active {
+            display: block;
+        }
+        
+        .progress-bar {
+            width: 100%;
+            height: 20px;
+            background-color: #e1e8ed;
+            border-radius: 10px;
+            overflow: hidden;
+            margin: 10px 0;
+        }
+        
+        .progress-fill {
+            height: 100%;
+            background-color: var(--primary);
+            transition: width 0.3s ease;
+        }
+        
+        .source-item {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 10px;
+            border-left: 4px solid var(--primary);
+        }
+        
+        .source-item h4 {
+            margin-bottom: 8px;
+            color: var(--dark);
+        }
+        
+        .source-item p {
+            margin-bottom: 5px;
+            font-size: 14px;
+        }
+        
+        .badge {
+            display: inline-block;
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+        
+        .badge-primary {
+            background-color: var(--primary);
+            color: white;
+        }
+        
+        .badge-success {
+            background-color: var(--success);
+            color: white;
+        }
+        
+        .badge-warning {
+            background-color: var(--warning);
+            color: white;
+        }
+        
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 20px;
+        }
+        
+        .spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid var(--primary);
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 10px;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+        
+        .stat-card {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            text-align: center;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+        
+        .stat-number {
+            font-size: 2rem;
+            font-weight: bold;
+            color: var(--primary);
+        }
+        
+        .stat-label {
+            color: var(--gray);
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🎬 CineMax API Manager</h1>
+            <p class="subtitle">TMDB Integration with Automatic Content Generation & Video Source Management</p>
+        </header>
+
+        <!-- Configuration Section -->
+        <div class="card">
+            <h2>⚙️ Configuration</h2>
+            <div class="grid">
+                <div class="form-group">
+                    <label for="tmdbApiKey">TMDB API Key</label>
+                    <input type="text" id="tmdbApiKey" value="ec926176bf467b3f7735e3154238c161" placeholder="Enter TMDB API Key">
+                </div>
+                <div class="form-group">
+                    <label for="vidsrcBaseUrl">VidSrc Base URL</label>
+                    <input type="text" id="vidsrcBaseUrl" value="https://vidsrc.net/embed/" placeholder="VidSrc embed URL">
+                </div>
+                <div class="form-group">
+                    <label for="vidjoyBaseUrl">VidJoy Base URL</label>
+                    <input type="text" id="vidjoyBaseUrl" value="https://vidjoy.pro/embed/" placeholder="VidJoy embed URL">
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Tabs -->
+        <div class="tabs">
+            <div class="tab active" onclick="showTab('auto-gen')">🤖 Auto Generation</div>
+            <div class="tab" onclick="showTab('individual')">🎯 Individual ID</div>
+            <div class="tab" onclick="showTab('manual')">✏️ Manual Input</div>
+            <div class="tab" onclick="showTab('bulk')">📦 Bulk Operations</div>
+            <div class="tab" onclick="showTab('sources')">🎥 Video Sources</div>
+            <div class="tab" onclick="showTab('preview')">👁️ Preview</div>
+        </div>
+
+        <!-- Auto Generation Tab -->
+        <div id="auto-gen" class="tab-content active">
+            <div class="card">
+                <h2>🎯 TMDB Auto Generation</h2>
+                <div class="grid">
+                    <div class="form-group">
+                        <label for="contentType">Content Type</label>
+                        <select id="contentType">
+                            <option value="movie">Movies</option>
+                            <option value="tv">TV Series</option>
+                            <option value="both">Both</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="yearFrom">Year From</label>
+                        <input type="number" id="yearFrom" value="2020" min="1900" max="2024">
+                    </div>
+                    <div class="form-group">
+                        <label for="yearTo">Year To</label>
+                        <input type="number" id="yearTo" value="2024" min="1900" max="2024">
+                    </div>
+                    <div class="form-group">
+                        <label for="pages">Pages to Generate</label>
+                        <input type="number" id="pages" value="1" min="1" max="50">
+                    </div>
+                </div>
+                <div class="grid">
+                    <div class="form-group">
+                        <label for="genres">Genres (comma separated)</label>
+                        <input type="text" id="genres" placeholder="Action, Drama, Comedy">
+                    </div>
+                    <div class="form-group">
+                        <label for="minRating">Minimum Rating</label>
+                        <input type="number" id="minRating" value="6.0" min="0" max="10" step="0.1">
+                    </div>
+                    <div class="form-group">
+                        <label for="language">Language</label>
+                        <select id="language">
+                            <option value="en-US">English</option>
+                            <option value="es-ES">Spanish</option>
+                            <option value="fr-FR">French</option>
+                            <option value="de-DE">German</option>
+                            <option value="it-IT">Italian</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="sortBy">Sort By</label>
+                        <select id="sortBy">
+                            <option value="popularity.desc">Popularity</option>
+                            <option value="vote_average.desc">Rating</option>
+                            <option value="release_date.desc">Release Date</option>
+                            <option value="revenue.desc">Revenue</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="flex">
+                    <button class="btn btn-primary" onclick="generateContent()">🚀 Generate Content</button>
+                    <button class="btn btn-warning" onclick="previewGeneration()">👁️ Preview</button>
+                    <button class="btn btn-success" onclick="exportContent()" style="margin-left: auto;">📥 Export</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Individual ID Tab -->
+        <div id="individual" class="tab-content">
+            <div class="card">
+                <h2>🎯 Individual TMDB ID Generation</h2>
+                <div class="grid">
+                    <div class="form-group">
+                        <label for="individualTmdbId">TMDB ID</label>
+                        <input type="number" id="individualTmdbId" placeholder="Enter specific TMDB ID">
+                    </div>
+                    <div class="form-group">
+                        <label for="individualContentType">Content Type</label>
+                        <select id="individualContentType">
+                            <option value="movie">Movie</option>
+                            <option value="tv">TV Series</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="grid">
+                    <div class="form-group">
+                        <label for="individualIncludeTrailer">Include Trailer</label>
+                        <select id="individualIncludeTrailer">
+                            <option value="true">Yes</option>
+                            <option value="false">No</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="individualIncludeSubtitles">Include Subtitles</label>
+                        <select id="individualIncludeSubtitles">
+                            <option value="true">Yes</option>
+                            <option value="false">No</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="flex">
+                    <button class="btn btn-primary" onclick="generateIndividualContent()">🎯 Generate Content</button>
+                    <button class="btn btn-warning" onclick="previewIndividualContent()">👁️ Preview</button>
+                    <button class="btn btn-success" onclick="exportContent()" style="margin-left: auto;">📥 Export</button>
+                </div>
+                <div id="individualPreview" class="mt-20" style="display: none;">
+                    <!-- Individual content preview will appear here -->
+                </div>
+            </div>
+        </div>
+
+        <!-- Manual Input Tab -->
+        <div id="manual" class="tab-content">
+            <div class="card">
+                <h2>✏️ Manual Content Input</h2>
+                <div class="grid">
+                    <div class="form-group">
+                        <label for="manualTmdbId">TMDB ID</label>
+                        <input type="number" id="manualTmdbId" placeholder="Enter TMDB ID">
+                    </div>
+                    <div class="form-group">
+                        <label for="manualContentType">Content Type</label>
+                        <select id="manualContentType">
+                            <option value="movie">Movie</option>
+                            <option value="tv">TV Series</option>
+                            <option value="live">Live TV</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="grid">
+                    <div class="form-group">
+                        <label for="manualTitle">Title</label>
+                        <input type="text" id="manualTitle" placeholder="Enter title">
+                    </div>
+                    <div class="form-group">
+                        <label for="manualYear">Year</label>
+                        <input type="number" id="manualYear" placeholder="2024">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="manualDescription">Description</label>
+                    <textarea id="manualDescription" rows="3" placeholder="Enter description"></textarea>
+                </div>
+                <div class="form-group">
+                    <label for="manualSources">Video Sources (JSON)</label>
+                    <textarea id="manualSources" rows="5" placeholder='[{"type": "mp4", "url": "https://example.com/video.mp4", "quality": "1080p", "title": "Direct Link"}]'></textarea>
+                </div>
+                <button class="btn btn-primary" onclick="addManualContent()">➕ Add Content</button>
+            </div>
+        </div>
+
+        <!-- Bulk Operations Tab -->
+        <div id="bulk" class="tab-content">
+            <div class="card">
+                <h2>📦 Bulk Content Generation</h2>
+                <div class="grid">
+                    <div class="form-group">
+                        <label for="bulkYear">Year</label>
+                        <input type="number" id="bulkYear" value="2024" min="1900" max="2024">
+                    </div>
+                    <div class="form-group">
+                        <label for="bulkPages">Pages</label>
+                        <input type="number" id="bulkPages" value="5" min="1" max="100">
+                    </div>
+                    <div class="form-group">
+                        <label for="bulkContentType">Content Type</label>
+                        <select id="bulkContentType">
+                            <option value="movie">Movies</option>
+                            <option value="tv">TV Series</option>
+                            <option value="both">Both</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="bulkGenres">Genres</label>
+                        <input type="text" id="bulkGenres" placeholder="Action, Drama, Comedy">
+                    </div>
+                </div>
+                <div class="flex">
+                    <button class="btn btn-primary" onclick="startBulkGeneration()">🚀 Start Bulk Generation</button>
+                    <button class="btn btn-warning" onclick="stopBulkGeneration()">⏹️ Stop</button>
+                    <button class="btn btn-success" onclick="exportContent()" style="margin-left: auto;">📥 Export</button>
+                </div>
+                <div class="progress-bar">
+                    <div class="progress-fill" id="bulkProgress" style="width: 0%"></div>
+                </div>
+                <div id="bulkStatus" class="status info" style="display: none;"></div>
+            </div>
+        </div>
+
+        <!-- Video Sources Tab -->
+        <div id="sources" class="tab-content">
+            <div class="card">
+                <h2>🎥 Video Source Management</h2>
+                <div class="grid">
+                    <div class="form-group">
+                        <label for="sourceType">Source Type</label>
+                        <select id="sourceType">
+                            <option value="mp4">MP4 (Direct Link)</option>
+                            <option value="m3u8">M3U8 (HLS)</option>
+                            <option value="dash">DASH</option>
+                            <option value="embed">Embed</option>
+                            <option value="youtube">YouTube</option>
+                            <option value="vidsrc">VidSrc</option>
+                            <option value="vidjoy">VidJoy</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="sourceQuality">Quality</label>
+                        <select id="sourceQuality">
+                            <option value="1080p">1080p</option>
+                            <option value="720p">720p</option>
+                            <option value="480p">480p</option>
+                            <option value="360p">360p</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="sourceUrl">URL</label>
+                        <input type="text" id="sourceUrl" placeholder="Enter video URL">
+                    </div>
+                    <div class="form-group">
+                        <label for="sourceTitle">Title</label>
+                        <input type="text" id="sourceTitle" placeholder="Source title">
+                    </div>
+                </div>
+                <button class="btn btn-primary" onclick="addVideoSource()">➕ Add Source</button>
+                
+                <div id="sourcesList" class="mt-20">
+                    <!-- Sources will be listed here -->
+                </div>
+            </div>
+        </div>
+
+        <!-- Preview Tab -->
+        <div id="preview" class="tab-content">
+            <div class="card">
+                <h2>👁️ Content Preview</h2>
+                <div class="stats">
+                    <div class="stat-card">
+                        <div class="stat-number" id="totalMovies">0</div>
+                        <div class="stat-label">Movies</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-number" id="totalSeries">0</div>
+                        <div class="stat-label">TV Series</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-number" id="totalSources">0</div>
+                        <div class="stat-label">Video Sources</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-number" id="totalGenres">0</div>
+                        <div class="stat-label">Genres</div>
+                    </div>
+                </div>
+                <div class="flex" style="margin-bottom: 20px;">
+                    <button class="btn btn-success" onclick="exportContent()">📥 Export JSON</button>
+                    <button class="btn btn-primary" onclick="downloadContent()">💾 Download Content</button>
+                    <button class="btn btn-warning" onclick="clearContent()">🗑️ Clear All</button>
+                </div>
+                <div id="previewGrid" class="preview-grid">
+                    <!-- Preview cards will be generated here -->
+                </div>
+            </div>
+        </div>
+
+        <!-- Loading Indicator -->
+        <div id="loading" class="loading">
+            <div class="spinner"></div>
+            <p>Processing...</p>
+        </div>
+
+        <!-- Status Messages -->
+        <div id="statusContainer"></div>
+        
+        <!-- Floating Export Button -->
+        <div id="floatingExport" style="position: fixed; bottom: 20px; right: 20px; z-index: 1000; display: none;">
+            <button class="btn btn-success" onclick="downloadContent()" style="padding: 15px 20px; border-radius: 50px; box-shadow: 0 4px 15px rgba(0,0,0,0.2);">
+                📥 Download JSON
+            </button>
+        </div>
+    </div>
+
+    <script>
+        // Global variables
+        let generatedContent = [];
+        let videoSources = [];
+        let isBulkGenerating = false;
+        let bulkProgress = 0;
+        let nextId = 1; // Incremental ID counter
+
+        // TMDB API Configuration
+        const TMDB_API_KEY = 'ec926176bf467b3f7735e3154238c161';
+        const TMDB_BASE_URL = 'https://api.themoviedb.org/3';
+        const VIDSRC_BASE_URL = 'https://vidsrc.net/embed/';
+        const VIDJOY_BASE_URL = 'https://vidjoy.pro/embed/';
+
+        // Tab management
+        function showTab(tabName) {
+            // Hide all tab contents
+            document.querySelectorAll('.tab-content').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            
+            // Remove active class from all tabs
+            document.querySelectorAll('.tab').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            
+            // Show selected tab content
+            document.getElementById(tabName).classList.add('active');
+            
+            // Add active class to clicked tab
+            event.target.classList.add('active');
+        }
+
+        // Show status message
+        function showStatus(message, type = 'info') {
+            const statusContainer = document.getElementById('statusContainer');
+            const statusDiv = document.createElement('div');
+            statusDiv.className = `status ${type}`;
+            statusDiv.textContent = message;
+            statusContainer.appendChild(statusDiv);
+            
+            setTimeout(() => {
+                statusDiv.remove();
+            }, 5000);
+        }
+
+        // Show/hide loading
+        function showLoading(show = true) {
+            document.getElementById('loading').style.display = show ? 'block' : 'none';
+        }
+
+        // Fetch data from TMDB API
+        async function fetchFromTMDB(endpoint, params = {}) {
+            const url = new URL(`${TMDB_BASE_URL}${endpoint}`);
+            url.searchParams.append('api_key', TMDB_API_KEY);
+            url.searchParams.append('language', 'en-US');
+            
+            for (const [key, value] of Object.entries(params)) {
+                url.searchParams.append(key, value);
+            }
+            
+            try {
+                const response = await fetch(url);
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                return await response.json();
+            } catch (error) {
+                console.error('Error fetching from TMDB:', error);
+                throw error;
+            }
+        }
+
+        // Generate video sources for a TMDB ID
+        async function generateVideoSources(tmdbId, contentType) {
+            const sources = [];
+            let sourceId = nextId * 100; // Use incremental source IDs
+            
+            // Multiple quality sources for VidSrc
+            const qualities = [
+                { quality: '1080p', size: '264MB' },
+                { quality: '720p', size: '128MB' },
+                { quality: '480p', size: '64MB' }
+            ];
+            
+            qualities.forEach((q, index) => {
+                sources.push({
+                    id: sourceId++,
+                    type: 'video',
+                    title: `${contentType === 'movie' ? 'Movie' : 'Series'} ${q.quality}`,
+                    quality: q.quality,
+                    size: q.size,
+                    kind: 'both',
+                    premium: 'false',
+                    external: false,
+                    url: `${VIDSRC_BASE_URL}${contentType}/${tmdbId}`
+                });
+            });
+            
+            // Add VidJoy as alternative source
+            sources.push({
+                id: sourceId++,
+                type: 'video',
+                title: 'VidJoy Alternative',
+                quality: '720p',
+                size: '128MB',
+                kind: 'both',
+                premium: 'false',
+                external: false,
+                url: `${VIDJOY_BASE_URL}${contentType}/${tmdbId}`
+            });
+            
+            return sources;
+        }
+
+        // Generate YouTube trailer URL
+        function generateTrailerUrl(title, year) {
+            const searchQuery = encodeURIComponent(`${title} ${year} trailer`);
+            return `https://www.youtube.com/embed/?listType=search&list=${searchQuery}`;
+        }
+
+        // Generate content from TMDB
+        async function generateContent() {
+            showLoading(true);
+            
+            // Reset ID counter for new generation
+            nextId = 1;
+            
+            try {
+                const contentType = document.getElementById('contentType').value;
+                const yearFrom = document.getElementById('yearFrom').value;
+                const yearTo = document.getElementById('yearTo').value;
+                const pages = parseInt(document.getElementById('pages').value);
+                const genres = document.getElementById('genres').value;
+                const minRating = parseFloat(document.getElementById('minRating').value);
+                const language = document.getElementById('language').value;
+                const sortBy = document.getElementById('sortBy').value;
+                
+                let allContent = [];
+                
+                for (let page = 1; page <= pages; page++) {
+                    if (contentType === 'movie' || contentType === 'both') {
+                        const movies = await fetchFromTMDB('/discover/movie', {
+                            'primary_release_date.gte': `${yearFrom}-01-01`,
+                            'primary_release_date.lte': `${yearTo}-12-31`,
+                            'vote_average.gte': minRating,
+                            'sort_by': sortBy,
+                            'page': page
+                        });
+                        
+                        for (const movie of movies.results) {
+                            const sources = await generateVideoSources(movie.id, 'movie');
+                            const trailer = generateTrailerUrl(movie.title, movie.release_date?.split('-')[0]);
+                            
+                            allContent.push({
+                                id: nextId++,
+                                tmdb_id: movie.id, // Store original TMDB ID separately
+                                title: movie.title,
+                                type: 'movie',
+                                label: "Latest Movie",
+                                sublabel: `Released ${movie.release_date?.split('-')[0] || 'Unknown'}`,
+                                imdb: movie.vote_average.toString(),
+                                downloadas: `${movie.title.toLowerCase().replace(/\s+/g, '-')}.mp4`,
+                                comment: true,
+                                playas: "video",
+                                description: movie.overview,
+                                classification: "PG-13",
+                                year: movie.release_date?.split('-')[0] || 'Unknown',
+                                duration: `${Math.floor(movie.runtime || 120)}:00`,
+                                rating: movie.vote_average,
+                                image: `https://image.tmdb.org/t/p/w500${movie.poster_path}`,
+                                cover: `https://image.tmdb.org/t/p/original${movie.backdrop_path}`,
+                                genres: movie.genres?.map(g => ({ id: g.id, title: g.name })) || [],
+                                sources: sources,
+                                trailer: {
+                                    id: sourceId++,
+                                    type: 'video',
+                                    title: `${movie.title} Trailer`,
+                                    url: trailer
+                                },
+                                actors: movie.credits?.cast?.slice(0, 5).map(actor => ({
+                                    id: actor.id,
+                                    name: actor.name,
+                                    type: "actor",
+                                    role: actor.character || "Actor",
+                                    image: `https://image.tmdb.org/t/p/w185${actor.profile_path}`,
+                                    born: "Unknown",
+                                    height: "Unknown",
+                                    bio: "Actor"
+                                })) || [],
+                                views: Math.floor(Math.random() * 50000) + 10000,
+                                downloads: Math.floor(Math.random() * 10000) + 1000,
+                                shares: Math.floor(Math.random() * 5000) + 500,
+                                created_at: new Date().toISOString().split('T')[0],
+                                contentType: "movie",
+                                url: `movies/${allContent[allContent.length - 1].id}`
+                            });
+                        }
+                    }
+                    
+                    if (contentType === 'tv' || contentType === 'both') {
+                        const series = await fetchFromTMDB('/discover/tv', {
+                            'first_air_date.gte': `${yearFrom}-01-01`,
+                            'first_air_date.lte': `${yearTo}-12-31`,
+                            'vote_average.gte': minRating,
+                            'sort_by': sortBy,
+                            'page': page
+                        });
+                        
+                        for (const show of series.results) {
+                            const sources = await generateVideoSources(show.id, 'tv');
+                            const trailer = generateTrailerUrl(show.name, show.first_air_date?.split('-')[0]);
+                            
+                            allContent.push({
+                                id: nextId++,
+                                tmdb_id: show.id, // Store original TMDB ID separately
+                                title: show.name,
+                                type: 'series', // Changed from 'tv' to 'series' to match CineMax
+                                label: "Latest Series",
+                                sublabel: `${show.number_of_seasons || 1} Season(s)`,
+                                imdb: show.vote_average.toString(),
+                                downloadas: `${show.name.toLowerCase().replace(/\s+/g, '-')}`,
+                                comment: true,
+                                playas: "video",
+                                description: show.overview,
+                                classification: "TV-14",
+                                year: show.first_air_date?.split('-')[0] || 'Unknown',
+                                duration: "45:00",
+                                rating: show.vote_average,
+                                image: `https://image.tmdb.org/t/p/w500${show.poster_path}`,
+                                cover: `https://image.tmdb.org/t/p/original${show.backdrop_path}`,
+                                genres: show.genres?.map(g => ({ id: g.id, title: g.name })) || [],
+                                sources: sources,
+                                trailer: {
+                                    id: sourceId++,
+                                    type: 'video',
+                                    title: `${show.name} Trailer`,
+                                    url: trailer
+                                },
+                                actors: show.credits?.cast?.slice(0, 5).map(actor => ({
+                                    id: actor.id,
+                                    name: actor.name,
+                                    type: "actor",
+                                    role: actor.character || "Actor",
+                                    image: `https://image.tmdb.org/t/p/w185${actor.profile_path}`,
+                                    born: "Unknown",
+                                    height: "Unknown",
+                                    bio: "Actor"
+                                })) || [],
+                                views: Math.floor(Math.random() * 50000) + 10000,
+                                downloads: Math.floor(Math.random() * 10000) + 1000,
+                                shares: Math.floor(Math.random() * 5000) + 500,
+                                created_at: new Date().toISOString().split('T')[0],
+                                contentType: "series",
+                                url: `movies/${allContent[allContent.length - 1].id}`,
+                                seasons: show.seasons?.map(season => ({
+                                    id: season.id,
+                                    title: `Season ${season.season_number}`,
+                                    episodes: season.episode_count ? Array.from({ length: Math.min(season.episode_count, 5) }, (_, i) => ({
+                                        id: nextId * 1000 + i + 1,
+                                        title: `Episode ${i + 1}`,
+                                        episode_number: i + 1,
+                                        description: `Episode ${i + 1} of ${show.name}`,
+                                        downloadas: `episode-${i + 1}`,
+                                        playas: "video",
+                                        duration: "45:00",
+                                        image: `https://image.tmdb.org/t/p/w500${season.poster_path}`,
+                                        sources: sources,
+                                        subtitles: generateSubtitles(show.id, 'tv'),
+                                        views: Math.floor(Math.random() * 10000) + 1000,
+                                        downloads: Math.floor(Math.random() * 5000) + 500
+                                    })) : []
+                                })) || []
+                            });
+                        }
+                    }
+                }
+                
+                generatedContent = allContent;
+                updatePreview();
+                showStatus(`Generated ${allContent.length} items successfully!`, 'success');
+                
+            } catch (error) {
+                showStatus(`Error generating content: ${error.message}`, 'error');
+            } finally {
+                showLoading(false);
+            }
+        }
+
+        // Preview generation
+        async function previewGeneration() {
+            showLoading(true);
+            
+            try {
+                // Generate a small preview (1 page)
+                const originalPages = document.getElementById('pages').value;
+                document.getElementById('pages').value = '1';
+                
+                await generateContent();
+                
+                document.getElementById('pages').value = originalPages;
+                showStatus('Preview generated successfully!', 'success');
+                
+            } catch (error) {
+                showStatus(`Error generating preview: ${error.message}`, 'error');
+            } finally {
+                showLoading(false);
+            }
+        }
+
+        // Add manual content
+        function addManualContent() {
+            const tmdbId = document.getElementById('manualTmdbId').value;
+            const contentType = document.getElementById('manualContentType').value;
+            const title = document.getElementById('manualTitle').value;
+            const year = document.getElementById('manualYear').value;
+            const description = document.getElementById('manualDescription').value;
+            const sourcesText = document.getElementById('manualSources').value;
+            
+            if (!title) {
+                showStatus('Please enter a title', 'error');
+                return;
+            }
+            
+            let sources = [];
+            if (sourcesText) {
+                try {
+                    sources = JSON.parse(sourcesText);
+                } catch (error) {
+                    showStatus('Invalid JSON format for sources', 'error');
+                    return;
+                }
+            }
+            
+            const content = {
+                id: tmdbId || Date.now(),
+                title: title,
+                type: contentType,
+                description: description,
+                year: year,
+                rating: 0,
+                image: '',
+                cover: '',
+                duration: '',
+                genres: [],
+                sources: sources,
+                trailer: null
+            };
+            
+            generatedContent.push(content);
+            updatePreview();
+            showStatus('Manual content added successfully!', 'success');
+            
+            // Clear form
+            document.getElementById('manualTmdbId').value = '';
+            document.getElementById('manualTitle').value = '';
+            document.getElementById('manualYear').value = '';
+            document.getElementById('manualDescription').value = '';
+            document.getElementById('manualSources').value = '';
+        }
+
+        // Bulk generation
+        async function startBulkGeneration() {
+            if (isBulkGenerating) {
+                showStatus('Bulk generation already in progress', 'warning');
+                return;
+            }
+            
+            isBulkGenerating = true;
+            const year = document.getElementById('bulkYear').value;
+            const pages = parseInt(document.getElementById('bulkPages').value);
+            const contentType = document.getElementById('bulkContentType').value;
+            const genres = document.getElementById('bulkGenres').value;
+            
+            document.getElementById('bulkStatus').style.display = 'block';
+            document.getElementById('bulkStatus').textContent = 'Starting bulk generation...';
+            
+            try {
+                for (let page = 1; page <= pages && isBulkGenerating; page++) {
+                    document.getElementById('bulkStatus').textContent = `Processing page ${page} of ${pages}...`;
+                    bulkProgress = (page / pages) * 100;
+                    document.getElementById('bulkProgress').style.width = `${bulkProgress}%`;
+                    
+                    // Set year range for this iteration
+                    document.getElementById('yearFrom').value = year;
+                    document.getElementById('yearTo').value = year;
+                    document.getElementById('pages').value = '1';
+                    document.getElementById('contentType').value = contentType;
+                    document.getElementById('genres').value = genres;
+                    
+                    await generateContent();
+                    
+                    // Small delay to prevent API rate limiting
+                    await new Promise(resolve => setTimeout(resolve, 1000));
+                }
+                
+                if (isBulkGenerating) {
+                    showStatus(`Bulk generation completed! Generated ${generatedContent.length} items.`, 'success');
+                    document.getElementById('bulkStatus').textContent = 'Bulk generation completed successfully!';
+                }
+                
+            } catch (error) {
+                showStatus(`Error in bulk generation: ${error.message}`, 'error');
+                document.getElementById('bulkStatus').textContent = `Error: ${error.message}`;
+            } finally {
+                isBulkGenerating = false;
+            }
+        }
+
+        // Stop bulk generation
+        function stopBulkGeneration() {
+            isBulkGenerating = false;
+            showStatus('Bulk generation stopped', 'warning');
+            document.getElementById('bulkStatus').textContent = 'Bulk generation stopped by user.';
+        }
+
+        // Add video source
+        function addVideoSource() {
+            const type = document.getElementById('sourceType').value;
+            const quality = document.getElementById('sourceQuality').value;
+            const url = document.getElementById('sourceUrl').value;
+            const title = document.getElementById('sourceTitle').value;
+            
+            if (!url) {
+                showStatus('Please enter a URL', 'error');
+                return;
+            }
+            
+            const source = {
+                type: type,
+                title: title || `${type.toUpperCase()} Source`,
+                quality: quality,
+                url: url,
+                kind: type,
+                premium: 'false',
+                external: true
+            };
+            
+            videoSources.push(source);
+            updateSourcesList();
+            showStatus('Video source added successfully!', 'success');
+            
+            // Clear form
+            document.getElementById('sourceUrl').value = '';
+            document.getElementById('sourceTitle').value = '';
+        }
+
+        // Update sources list
+        function updateSourcesList() {
+            const sourcesList = document.getElementById('sourcesList');
+            sourcesList.innerHTML = '';
+            
+            videoSources.forEach((source, index) => {
+                const sourceDiv = document.createElement('div');
+                sourceDiv.className = 'source-item';
+                sourceDiv.innerHTML = `
+                    <h4>${source.title}</h4>
+                    <p><strong>Type:</strong> <span class="badge badge-primary">${source.type}</span></p>
+                    <p><strong>Quality:</strong> <span class="badge badge-success">${source.quality}</span></p>
+                    <p><strong>URL:</strong> ${source.url}</p>
+                    <button class="btn btn-danger" onclick="removeSource(${index})">Remove</button>
+                `;
+                sourcesList.appendChild(sourceDiv);
+            });
+        }
+
+        // Remove source
+        function removeSource(index) {
+            videoSources.splice(index, 1);
+            updateSourcesList();
+            showStatus('Source removed successfully!', 'success');
+        }
+
+        // Update preview
+        function updatePreview() {
+            const previewGrid = document.getElementById('previewGrid');
+            previewGrid.innerHTML = '';
+            
+            generatedContent.forEach(content => {
+                const card = document.createElement('div');
+                card.className = 'preview-card';
+                card.innerHTML = `
+                    <img src="${content.image || 'https://via.placeholder.com/200x300?text=No+Image'}" alt="${content.title}">
+                    <div class="content">
+                        <h4>${content.title}</h4>
+                        <p><strong>Type:</strong> ${content.type}</p>
+                        <p><strong>Year:</strong> ${content.year}</p>
+                        <p><strong>Rating:</strong> ${content.rating}</p>
+                        <p><strong>Sources:</strong> ${content.sources?.length || 0}</p>
+                    </div>
+                `;
+                previewGrid.appendChild(card);
+            });
+            
+            // Update stats
+            document.getElementById('totalMovies').textContent = generatedContent.filter(c => c.type === 'movie').length;
+            document.getElementById('totalSeries').textContent = generatedContent.filter(c => c.type === 'tv').length;
+            document.getElementById('totalSources').textContent = generatedContent.reduce((sum, c) => sum + (c.sources?.length || 0), 0);
+            document.getElementById('totalGenres').textContent = new Set(generatedContent.flatMap(c => c.genres || [])).size;
+            
+            // Show/hide floating export button
+            const floatingExport = document.getElementById('floatingExport');
+            if (generatedContent.length > 0) {
+                floatingExport.style.display = 'block';
+            } else {
+                floatingExport.style.display = 'none';
+            }
+        }
+
+        // Generate individual content by TMDB ID
+        async function generateIndividualContent() {
+            const tmdbId = document.getElementById('individualTmdbId').value;
+            const contentType = document.getElementById('individualContentType').value;
+            const includeTrailer = document.getElementById('individualIncludeTrailer').value === 'true';
+            const includeSubtitles = document.getElementById('individualIncludeSubtitles').value === 'true';
+            
+            if (!tmdbId) {
+                showStatus('Please enter a TMDB ID', 'error');
+                return;
+            }
+            
+            showLoading(true);
+            
+            // Use next available ID for individual content
+            const contentId = nextId++;
+            
+            try {
+                let content = null;
+                
+                if (contentType === 'movie') {
+                    const movie = await fetchFromTMDB(`/movie/${tmdbId}`, {
+                        'append_to_response': 'credits,videos,images'
+                    });
+                    
+                    const sources = await generateVideoSources(movie.id, 'movie');
+                    const trailer = includeTrailer ? generateTrailerUrl(movie.title, movie.release_date?.split('-')[0]) : null;
+                    
+                    content = {
+                        id: contentId,
+                        tmdb_id: movie.id,
+                        title: movie.title,
+                        type: 'movie',
+                        label: "Latest Movie",
+                        sublabel: `Released ${movie.release_date?.split('-')[0] || 'Unknown'}`,
+                        imdb: movie.vote_average.toString(),
+                        downloadas: `${movie.title.toLowerCase().replace(/\s+/g, '-')}.mp4`,
+                        comment: true,
+                        playas: "video",
+                        description: movie.overview,
+                        classification: "PG-13",
+                        year: movie.release_date?.split('-')[0] || 'Unknown',
+                        duration: `${Math.floor(movie.runtime || 120)}:00`,
+                        rating: movie.vote_average,
+                        image: `https://image.tmdb.org/t/p/w500${movie.poster_path}`,
+                        cover: `https://image.tmdb.org/t/p/original${movie.backdrop_path}`,
+                        genres: movie.genres?.map(g => ({ id: g.id, title: g.name })) || [],
+                        sources: sources,
+                        trailer: trailer ? {
+                            id: nextId * 1000,
+                            type: 'video',
+                            title: `${movie.title} Trailer`,
+                            url: trailer
+                        } : null,
+                        actors: movie.credits?.cast?.slice(0, 5).map(actor => ({
+                            id: actor.id,
+                            name: actor.name,
+                            type: "actor",
+                            role: actor.character || "Actor",
+                            image: `https://image.tmdb.org/t/p/w185${actor.profile_path}`,
+                            born: "Unknown",
+                            height: "Unknown",
+                            bio: "Actor"
+                        })) || [],
+                        views: Math.floor(Math.random() * 50000) + 10000,
+                        downloads: Math.floor(Math.random() * 10000) + 1000,
+                        shares: Math.floor(Math.random() * 5000) + 500,
+                        created_at: new Date().toISOString().split('T')[0],
+                        contentType: "movie",
+                        url: `movies/${content.id}`,
+                        subtitles: includeSubtitles ? await generateSubtitles(movie.id, 'movie') : []
+                    };
+                } else if (contentType === 'tv') {
+                    const series = await fetchFromTMDB(`/tv/${tmdbId}`, {
+                        'append_to_response': 'credits,videos,images,seasons'
+                    });
+                    
+                    const sources = await generateVideoSources(series.id, 'tv');
+                    const trailer = includeTrailer ? generateTrailerUrl(series.name, series.first_air_date?.split('-')[0]) : null;
+                    
+                    content = {
+                        id: contentId,
+                        tmdb_id: series.id,
+                        title: series.name,
+                        type: 'series', // Changed from 'tv' to 'series' to match CineMax
+                        label: "Latest Series",
+                        sublabel: `${series.number_of_seasons || 1} Season(s)`,
+                        imdb: series.vote_average.toString(),
+                        downloadas: `${series.name.toLowerCase().replace(/\s+/g, '-')}`,
+                        comment: true,
+                        playas: "video",
+                        description: series.overview,
+                        classification: "TV-14",
+                        year: series.first_air_date?.split('-')[0] || 'Unknown',
+                        duration: "45:00",
+                        rating: series.vote_average,
+                        image: `https://image.tmdb.org/t/p/w500${series.poster_path}`,
+                        cover: `https://image.tmdb.org/t/p/original${series.backdrop_path}`,
+                        genres: series.genres?.map(g => ({ id: g.id, title: g.name })) || [],
+                        sources: sources,
+                        trailer: trailer ? {
+                            id: nextId * 1000,
+                            type: 'video',
+                            title: `${series.name} Trailer`,
+                            url: trailer
+                        } : null,
+                        actors: series.credits?.cast?.slice(0, 5).map(actor => ({
+                            id: actor.id,
+                            name: actor.name,
+                            type: "actor",
+                            role: actor.character || "Actor",
+                            image: `https://image.tmdb.org/t/p/w185${actor.profile_path}`,
+                            born: "Unknown",
+                            height: "Unknown",
+                            bio: "Actor"
+                        })) || [],
+                        views: Math.floor(Math.random() * 50000) + 10000,
+                        downloads: Math.floor(Math.random() * 10000) + 1000,
+                        shares: Math.floor(Math.random() * 5000) + 500,
+                        created_at: new Date().toISOString().split('T')[0],
+                        contentType: "series",
+                        url: `movies/${content.id}`,
+                        seasons: series.seasons?.map(season => ({
+                            id: season.id,
+                            title: `Season ${season.season_number}`,
+                            episodes: season.episode_count ? Array.from({ length: Math.min(season.episode_count, 5) }, (_, i) => ({
+                                id: nextId * 1000 + i + 1,
+                                        title: `Episode ${i + 1}`,
+                                        episode_number: i + 1,
+                                        description: `Episode ${i + 1} of ${series.name}`,
+                                        downloadas: `episode-${i + 1}`,
+                                        playas: "video",
+                                        duration: "45:00",
+                                        image: `https://image.tmdb.org/t/p/w500${season.poster_path}`,
+                                        sources: sources,
+                                        subtitles: includeSubtitles ? generateSubtitles(series.id, 'tv') : [],
+                                        views: Math.floor(Math.random() * 10000) + 1000,
+                                        downloads: Math.floor(Math.random() * 5000) + 500
+                                    })) : []
+                        })) || [],
+                        subtitles: includeSubtitles ? await generateSubtitles(series.id, 'tv') : []
+                    };
+                }
+                
+                if (content) {
+                    // Check if content already exists
+                    const existingIndex = generatedContent.findIndex(c => c.id === content.id);
+                    if (existingIndex !== -1) {
+                        generatedContent[existingIndex] = content;
+                        showStatus('Content updated successfully!', 'success');
+                    } else {
+                        generatedContent.push(content);
+                        showStatus('Content generated successfully!', 'success');
+                    }
+                    
+                    updatePreview();
+                    showIndividualPreview(content);
+                }
+                
+            } catch (error) {
+                showStatus(`Error generating content: ${error.message}`, 'error');
+            } finally {
+                showLoading(false);
+            }
+        }
+
+        // Preview individual content
+        async function previewIndividualContent() {
+            const tmdbId = document.getElementById('individualTmdbId').value;
+            const contentType = document.getElementById('individualContentType').value;
+            
+            if (!tmdbId) {
+                showStatus('Please enter a TMDB ID', 'error');
+                return;
+            }
+            
+            showLoading(true);
+            
+            try {
+                let content = null;
+                
+                if (contentType === 'movie') {
+                    const movie = await fetchFromTMDB(`/movie/${tmdbId}`);
+                    content = {
+                        id: movie.id,
+                        title: movie.title,
+                        type: 'movie',
+                        description: movie.overview,
+                        year: movie.release_date?.split('-')[0] || 'Unknown',
+                        rating: movie.vote_average,
+                        image: `https://image.tmdb.org/t/p/w500${movie.poster_path}`,
+                        cover: `https://image.tmdb.org/t/p/original${movie.backdrop_path}`,
+                        duration: `${Math.floor(movie.runtime || 120)} min`
+                    };
+                } else if (contentType === 'tv') {
+                    const series = await fetchFromTMDB(`/tv/${tmdbId}`);
+                    content = {
+                        id: series.id,
+                        title: series.name,
+                        type: 'tv',
+                        description: series.overview,
+                        year: series.first_air_date?.split('-')[0] || 'Unknown',
+                        rating: series.vote_average,
+                        image: `https://image.tmdb.org/t/p/w500${series.poster_path}`,
+                        cover: `https://image.tmdb.org/t/p/original${series.backdrop_path}`,
+                        duration: `${series.number_of_seasons || 1} Season(s)`
+                    };
+                }
+                
+                if (content) {
+                    showIndividualPreview(content);
+                    showStatus('Preview generated successfully!', 'success');
+                }
+                
+            } catch (error) {
+                showStatus(`Error generating preview: ${error.message}`, 'error');
+            } finally {
+                showLoading(false);
+            }
+        }
+
+        // Show individual content preview
+        function showIndividualPreview(content) {
+            const previewDiv = document.getElementById('individualPreview');
+            previewDiv.style.display = 'block';
+            
+            previewDiv.innerHTML = `
+                <div class="card">
+                    <h3>🎬 Content Preview</h3>
+                    <div class="grid">
+                        <div>
+                            <img src="${content.image || 'https://via.placeholder.com/300x450?text=No+Image'}" 
+                                 alt="${content.title}" style="width: 100%; max-width: 300px; border-radius: 8px;">
+                        </div>
+                        <div>
+                            <h4>${content.title}</h4>
+                            <p><strong>Type:</strong> ${content.type}</p>
+                            <p><strong>Year:</strong> ${content.year}</p>
+                            <p><strong>Rating:</strong> ${content.rating}</p>
+                            <p><strong>Duration:</strong> ${content.duration}</p>
+                            <p><strong>Description:</strong> ${content.description}</p>
+                            ${content.actors ? `<p><strong>Actors:</strong> ${content.actors.map(a => a.name).join(', ')}</p>` : ''}
+                            ${content.seasons ? `<p><strong>Seasons:</strong> ${content.seasons.length}</p>` : ''}
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        // Generate subtitles for content
+        async function generateSubtitles(tmdbId, contentType) {
+            const subtitles = [];
+            
+            // Add common subtitle languages
+            const languages = [
+                { code: 'en', name: 'English' },
+                { code: 'es', name: 'Spanish' },
+                { code: 'fr', name: 'French' },
+                { code: 'de', name: 'German' },
+                { code: 'it', name: 'Italian' },
+                { code: 'ar', name: 'Arabic' }
+            ];
+            
+            languages.forEach(lang => {
+                subtitles.push({
+                    id: `${tmdbId}_${lang.code}`,
+                    language: lang.name,
+                    language_code: lang.code,
+                    type: 'srt',
+                    url: `https://example.com/subtitles/${contentType}/${tmdbId}/${lang.code}.srt`
+                });
+            });
+            
+            return subtitles;
+        }
+
+        // Export generated content
+        function exportContent() {
+            const dataStr = JSON.stringify(generatedContent, null, 2);
+            const dataBlob = new Blob([dataStr], {type: 'application/json'});
+            const url = URL.createObjectURL(dataBlob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = 'cinemax-content.json';
+            link.click();
+            URL.revokeObjectURL(url);
+            showStatus('Content exported successfully!', 'success');
+        }
+
+        // Clear all generated content
+        function clearContent() {
+            if (confirm('Are you sure you want to clear all generated content?')) {
+                generatedContent = [];
+                updatePreview();
+                showStatus('All content cleared successfully!', 'success');
+            }
+        }
+
+        // Download content as JSON file
+        function downloadContent() {
+            if (generatedContent.length === 0) {
+                showStatus('No content to download!', 'error');
+                return;
+            }
+            
+            const dataStr = JSON.stringify(generatedContent, null, 2);
+            const dataBlob = new Blob([dataStr], {type: 'application/json'});
+            const url = URL.createObjectURL(dataBlob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = `cinemax-content-${new Date().toISOString().split('T')[0]}.json`;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            URL.revokeObjectURL(url);
+            showStatus(`Downloaded ${generatedContent.length} items successfully!`, 'success');
+        }
+
+        // Export content for CineMax format
+        function exportContent() {
+            if (generatedContent.length === 0) {
+                showStatus('No content to export!', 'error');
+                return;
+            }
+            
+            // Convert to complete CineMax format
+            const cinemaxFormat = {
+                api_info: {
+                    version: "2.0",
+                    description: "Enhanced Free Movie & TV Streaming JSON API with Full Actor Support",
+                    last_updated: new Date().toISOString().split('T')[0],
+                    total_movies: generatedContent.length, // All content goes in movies array
+                    total_channels: 0,
+                    total_actors: generatedContent.reduce((sum, c) => sum + (c.actors?.length || 0), 0)
+                },
+                home: {
+                    slides: generateSlides(),
+                    featuredMovies: generatedContent.slice(0, 5), // Include both movies and series
+                    channels: [],
+                    actors: generateActorsList(),
+                    genres: generateGenresList()
+                },
+                movies: generatedContent, // ALL content (movies and series) goes here
+                channels: [],
+                actors: generateActorsList(),
+                genres: generateGenresList(),
+                categories: generateCategories(),
+                countries: generateCountries(),
+                subscription_plans: [],
+                video_sources: {
+                    big_buck_bunny: {
+                        title: "Big Buck Bunny",
+                        description: "Big Buck Bunny tells the story of a giant rabbit with a heart bigger than himself.",
+                        urls: {
+                            "1080p": "http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4",
+                            "720p": "http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4",
+                            "480p": "http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4"
+                        },
+                        duration: "10:00",
+                        size: "264MB",
+                        license: "Creative Commons"
+                    },
+                    elephants_dream: {
+                        title: "Elephants Dream",
+                        description: "The world's first open movie.",
+                        urls: {
+                            "1080p": "http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ElephantsDream.mp4",
+                            "720p": "http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ElephantsDream.mp4",
+                            "480p": "http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ElephantsDream.mp4"
+                        },
+                        duration: "11:00",
+                        size: "128MB",
+                        license: "Creative Commons"
+                    },
+                    live_streams: {
+                        test_hls: {
+                            title: "Test HLS Stream",
+                            description: "Test HLS live stream",
+                            url: "https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8",
+                            quality: "720p",
+                            type: "hls"
+                        }
+                    }
+                },
+                ads_config: {
+                    admob: {
+                        banner_id: "ca-app-pub-3940256099942544/6300978111",
+                        interstitial_id: "ca-app-pub-3940256099942544/1033173712",
+                        rewarded_id: "ca-app-pub-3940256099942544/5224354917",
+                        native_id: "ca-app-pub-3940256099942544/2247696110",
+                        app_id: "ca-app-pub-3940256099942544~3347511713"
+                    },
+                    facebook: {
+                        banner_id: "IMG_16_9_APP_INSTALL#YOUR_PLACEMENT_ID",
+                        interstitial_id: "IMG_16_9_APP_INSTALL#YOUR_PLACEMENT_ID",
+                        rewarded_id: "VID_HD_16_9_15S_APP_INSTALL#YOUR_PLACEMENT_ID",
+                        native_id: "IMG_16_9_APP_INSTALL#YOUR_PLACEMENT_ID"
+                    },
+                    settings: {
+                        banner_enabled: true,
+                        interstitial_enabled: true,
+                        rewarded_enabled: true,
+                        native_enabled: true,
+                        interstitial_clicks: 3,
+                        native_lines: 2,
+                        banner_type: "admob",
+                        interstitial_type: "admob",
+                        native_type: "admob"
+                    }
+                }
+            };
+            
+            const dataStr = JSON.stringify(cinemaxFormat, null, 2);
+            const dataBlob = new Blob([dataStr], {type: 'application/json'});
+            const url = URL.createObjectURL(dataBlob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = `cinemax-export-${new Date().toISOString().split('T')[0]}.json`;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            URL.revokeObjectURL(url);
+            showStatus(`Exported ${generatedContent.length} items in complete CineMax format!`, 'success');
+        }
+
+        // Generate slides for home page
+        function generateSlides() {
+            const slides = [];
+            const content = generatedContent.slice(0, 3); // Take first 3 items (movies or series)
+            
+            content.forEach((item, index) => {
+                slides.push({
+                    id: index + 1,
+                    title: item.title,
+                    type: "movie", // Always "movie" for slides, regardless of content type
+                    image: item.image,
+                    url: `movies/${item.id}`,
+                    poster: {
+                        ...item,
+                        label: item.type === 'movie' ? "Latest Movie" : "Latest Series",
+                        sublabel: item.type === 'movie' ? `Released ${item.year}` : `${item.seasons?.length || 1} Season(s)`,
+                        imdb: item.rating.toString(),
+                        downloadas: item.type === 'movie' ? 
+                            `${item.title.toLowerCase().replace(/\s+/g, '-')}.mp4` : 
+                            item.title.toLowerCase().replace(/\s+/g, '-'),
+                        comment: true,
+                        playas: "video",
+                        classification: item.type === 'movie' ? "PG-13" : "TV-14",
+                        views: Math.floor(Math.random() * 50000) + 10000,
+                        downloads: Math.floor(Math.random() * 10000) + 1000,
+                        shares: Math.floor(Math.random() * 5000) + 500,
+                        contentType: item.type === 'movie' ? "movie" : "series",
+                        url: `movies/${item.id}`,
+                        comments: generateComments(item.id),
+                        subtitles: generateSubtitles(item.id, item.type === 'movie' ? 'movie' : 'tv')
+                    },
+                    channel: null
+                });
+            });
+            
+            return slides;
+        }
+
+        // Generate actors list
+        function generateActorsList() {
+            const actors = [];
+            const allActors = new Map();
+            
+            generatedContent.forEach(content => {
+                if (content.actors) {
+                    content.actors.forEach(actor => {
+                        if (!allActors.has(actor.id)) {
+                            allActors.set(actor.id, {
+                                ...actor,
+                                movies: [{
+                                    id: content.id,
+                                    title: content.title,
+                                    image: content.image,
+                                    year: content.year
+                                }]
+                            });
+                        } else {
+                            allActors.get(actor.id).movies.push({
+                                id: content.id,
+                                title: content.title,
+                                image: content.image,
+                                year: content.year
+                            });
+                        }
+                    });
+                }
+            });
+            
+            return Array.from(allActors.values());
+        }
+
+        // Generate genres list with posters
+        function generateGenresList() {
+            const genres = new Map();
+            
+            generatedContent.forEach(content => {
+                if (content.genres) {
+                    content.genres.forEach(genre => {
+                        // Handle both object format {id, title} and direct ID
+                        const genreId = typeof genre === 'object' ? genre.id : genre;
+                        const genreName = typeof genre === 'object' ? genre.title : getGenreName(genre);
+                        
+                        if (!genres.has(genreId)) {
+                            genres.set(genreId, {
+                                id: genreId,
+                                title: genreName,
+                                posters: [content]
+                            });
+                        } else {
+                            genres.get(genreId).posters.push(content);
+                        }
+                    });
+                }
+            });
+            
+            return Array.from(genres.values());
+        }
+
+        // Get genre name by ID
+        function getGenreName(genreId) {
+            const genreMap = {
+                28: "Action", 12: "Adventure", 16: "Animation", 35: "Comedy",
+                80: "Crime", 99: "Documentary", 18: "Drama", 10751: "Family",
+                14: "Fantasy", 36: "History", 27: "Horror", 10402: "Music",
+                9648: "Mystery", 10749: "Romance", 878: "Science Fiction",
+                10770: "TV Movie", 53: "Thriller", 10752: "War", 37: "Western"
+            };
+            return genreMap[genreId] || "Unknown";
+        }
+
+        // Generate categories
+        function generateCategories() {
+            return [
+                { id: 1, title: "Action" },
+                { id: 2, title: "Drama" },
+                { id: 3, title: "Comedy" },
+                { id: 4, title: "Horror" },
+                { id: 5, title: "Romance" },
+                { id: 6, title: "Animation" }
+            ];
+        }
+
+        // Generate countries
+        function generateCountries() {
+            return [
+                { id: 1, title: "USA" },
+                { id: 2, title: "UK" },
+                { id: 3, title: "Canada" },
+                { id: 4, title: "Australia" },
+                { id: 5, title: "Germany" }
+            ];
+        }
+
+        // Generate comments for content
+        function generateComments(contentId) {
+            const comments = [
+                "Amazing movie! Love this!",
+                "Great content, highly recommended!",
+                "One of the best I've seen this year!",
+                "Fantastic acting and direction!",
+                "Must watch for everyone!"
+            ];
+            
+            return comments.map((comment, index) => ({
+                id: index + 1,
+                user: `User${Math.floor(Math.random() * 1000)}`,
+                comment: comment,
+                created_at: new Date(Date.now() - Math.random() * 30 * 24 * 60 * 60 * 1000).toISOString()
+            }));
+        }
+
+        // Initialize the application
+        document.addEventListener('DOMContentLoaded', function() {
+            showStatus('CineMax API Manager loaded successfully!', 'success');
+            updatePreview();
+        });
+    </script>
+</body>
+</html>
