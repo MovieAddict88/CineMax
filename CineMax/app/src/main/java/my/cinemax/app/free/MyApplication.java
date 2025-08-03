@@ -25,6 +25,7 @@ import com.unity3d.ads.UnityAds;
 
 import my.cinemax.app.free.BuildConfig;
 import my.cinemax.app.free.R;
+import my.cinemax.app.free.database.repository.CineMaxRepository;
 
 /**
  * Created by Tamim on 28/09/2019.
@@ -33,6 +34,7 @@ import my.cinemax.app.free.R;
 
 public class MyApplication extends MultiDexApplication {
     private static MyApplication instance;
+    private CineMaxRepository repository;
 
     protected String mUserAgent;
 
@@ -51,6 +53,9 @@ public class MyApplication extends MultiDexApplication {
         UnityAds.initialize (this, getResources().getString(R.string.unity_ads_app_id));
 //        initCast();
         mUserAgent = Util.getUserAgent(this, "MyApplication");
+        
+        // Initialize database repository
+        repository = new CineMaxRepository(this);
     }
 
     private void initLogger() {
@@ -100,6 +105,10 @@ public class MyApplication extends MultiDexApplication {
     public static boolean hasNetwork ()
     {
         return instance.checkIfHasNetwork();
+    }
+    
+    public CineMaxRepository getRepository() {
+        return repository;
     }
 
 }

@@ -1,7 +1,7 @@
 package my.cinemax.app.free.ui.player;
 
 import androidx.appcompat.widget.SwitchCompat;
-import androidx.databinding.DataBindingUtil;
+
 
 import android.content.pm.ActivityInfo;
 import android.graphics.Color;
@@ -35,7 +35,7 @@ import my.cinemax.app.free.Provider.PrefManager;
 import my.cinemax.app.free.R;
 import my.cinemax.app.free.api.apiClient;
 import my.cinemax.app.free.api.apiRest;
-import my.cinemax.app.free.databinding.FragmentPlayerBinding;
+
 import my.cinemax.app.free.entity.Language;
 import my.cinemax.app.free.entity.Subtitle;
 import my.cinemax.app.free.event.CastSessionEndedEvent;
@@ -133,12 +133,11 @@ public class CustomPlayerFragment extends Fragment {
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        FragmentPlayerBinding binding = DataBindingUtil.inflate(inflater, R.layout.fragment_player, container, false);
-        view = (View) binding.getRoot();
+        view = inflater.inflate(R.layout.fragment_player, container, false);
         this.pref =new  PrefManager(getActivity());
 
         selectedLanguage = pref.getInt("subtitle_default_language");
-        initView(binding);
+        initView();
         initAction();
         loadSubtitles();
         return view;
@@ -173,7 +172,7 @@ public class CustomPlayerFragment extends Fragment {
         relative_layout_dialog_source_text_color_picker.setBackgroundColor(textColor);
         text_view_dialog_source_size_text.setText("Text size : "+textSiz+" pt");
     }
-    private void initView(FragmentPlayerBinding binding) {
+    private void initView() {
         mCustomPlayerViewModel = new CustomPlayerViewModel(getActivity());
 
         image_view_exo_player_back = view.findViewById(R.id.image_view_exo_player_back);
@@ -197,8 +196,7 @@ public class CustomPlayerFragment extends Fragment {
         exo_live = view.findViewById(R.id.exo_live);
         isLive  =  getUrlExtra().getBoolean("isLive");
         mCustomPlayerViewModel.setPayerPausePlay(payer_pause_play);
-        binding.setPlayerVm(mCustomPlayerViewModel);
-        mSimpleExoPlayerView = binding.videoView;
+        mSimpleExoPlayerView = view.findViewById(R.id.video_view);
         setSubtitleView();
         mSimpleExoPlayerView.setShutterBackgroundColor(Color.TRANSPARENT);
         if (isLive) {
