@@ -753,6 +753,12 @@
                  showStatus('info', 'Test function called successfully');
              };
              
+             // Add simple test for generateFromTMDB
+             window.testGenerateFromTMDB = function() {
+                 console.log('Testing generateFromTMDB with sample data');
+                 generateFromTMDB('movie', 550); // Fight Club
+             };
+             
              // Add test function to window for debugging
              window.testSourceGeneration = function() {
                  console.log('Testing source generation...');
@@ -938,10 +944,21 @@
                 url.searchParams.append(key, value);
             });
 
+            console.log('Fetching TMDB:', url.toString());
+
             try {
                 const response = await fetch(url);
-                if (!response.ok) throw new Error(`TMDB API error: ${response.status}`);
-                return await response.json();
+                console.log('TMDB response status:', response.status);
+                
+                if (!response.ok) {
+                    const errorText = await response.text();
+                    console.error('TMDB API error response:', errorText);
+                    throw new Error(`TMDB API error: ${response.status} - ${errorText}`);
+                }
+                
+                const data = await response.json();
+                console.log('TMDB response data:', data);
+                return data;
             } catch (error) {
                 console.error('TMDB fetch error:', error);
                 showStatus('error', `TMDB API Error: ${error.message}`);
@@ -1019,6 +1036,9 @@
                         <button class="btn btn-secondary btn-small" onclick="testGenerate()" style="margin-top: 5px;">
                             Test
                         </button>
+                        <button class="btn btn-warning btn-small" onclick="alert('Button clicked for ${title}')" style="margin-top: 5px;">
+                            Debug
+                        </button>
                     </div>
                 `;
                 
@@ -1029,12 +1049,21 @@
                  async function generateFromTMDB(type, tmdbId = null) {
              console.log('generateFromTMDB called with:', { type, tmdbId });
              
+             // Validate parameters
+             if (!type || !tmdbId) {
+                 console.error('Invalid parameters:', { type, tmdbId });
+                 showStatus('error', 'Invalid parameters for generation');
+                 return;
+             }
+             
              const id = tmdbId || document.getElementById(`${type}-tmdb-id`).value;
              
              if (!id) {
                  showStatus('warning', 'Please enter a TMDB ID');
                  return;
              }
+
+             console.log('Starting generation for:', { type, id });
 
              // Map type to correct loading element
              let loadingElement = `${type}-loading`;
@@ -1046,12 +1075,20 @@
              showStatus('info', `Generating ${type} with automatic VidSrc & VidJoy sources...`);
              
              try {
+                 console.log('Calling generation function for type:', type);
+                 
                  if (type === 'movie') {
+                     console.log('Generating movie with ID:', id);
                      await generateMovie(id);
                  } else if (type === 'series' || type === 'tv') {
+                     console.log('Generating series with ID:', id);
                      // Handle both series and TV shows
                      await generateSeries(id);
+                 } else {
+                     throw new Error(`Unknown type: ${type}`);
                  }
+                 
+                 console.log('Generation completed, saving data...');
                  
                  // Force save data immediately
                  saveData();
@@ -1063,7 +1100,8 @@
                  showStatus('success', `${type} generated successfully with automatic video sources!`);
                  
                  // Log for debugging
-                 console.log('Generated content:', currentData.home.featuredMovies[currentData.home.featuredMovies.length - 1]);
+                 const lastItem = currentData.home.featuredMovies[currentData.home.featuredMovies.length - 1];
+                 console.log('Generated content:', lastItem);
                  
                  // Refresh search results to show updated status
                  const searchQuery = document.getElementById('tmdb-search').value.trim();
@@ -1076,9 +1114,9 @@
              } catch (error) {
                  console.error('Generation error:', error);
                  showStatus('error', `Error generating ${type}: ${error.message}`);
+             } finally {
+                 showLoading(loadingElement, false);
              }
-             
-             showLoading(loadingElement, false);
          }
 
                  async function generateMovie(tmdbId) {
