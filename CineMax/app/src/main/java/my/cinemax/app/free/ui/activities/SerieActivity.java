@@ -401,13 +401,37 @@ public class SerieActivity extends AppCompatActivity implements PlaylistDownload
         selectedEpisode = episode;
         playableList.clear();
         if (episode != null && episode.getSources() != null) {
+            // Collect all playable sources
+            List<Source> allPlayableSources = new ArrayList<>();
             for (int i = 0; i < episode.getSources().size(); i++) {
                 Source source = episode.getSources().get(i);
                 if (source != null && source.getKind() != null && 
                     (source.getKind().equals("both") || source.getKind().equals("play"))) {
-                    playableList.add(source);
+                    allPlayableSources.add(source);
                 }
             }
+            
+            // Sort sources by priority (primary servers first, then backups)
+            allPlayableSources.sort((s1, s2) -> {
+                int priority1 = s1.getServerPriority();
+                int priority2 = s2.getServerPriority();
+                
+                // If priorities are equal, prefer higher quality
+                if (priority1 == priority2) {
+                    String quality1 = s1.getQuality() != null ? s1.getQuality() : "";
+                    String quality2 = s2.getQuality() != null ? s2.getQuality() : "";
+                    
+                    if (quality1.contains("1080p") && !quality2.contains("1080p")) return -1;
+                    if (!quality1.contains("1080p") && quality2.contains("1080p")) return 1;
+                    if (quality1.contains("720p") && !quality2.contains("720p")) return -1;
+                    if (!quality1.contains("720p") && quality2.contains("720p")) return 1;
+                }
+                
+                return Integer.compare(priority1, priority2);
+            });
+            
+            // Add sorted sources to play list
+            playableList.addAll(allPlayableSources);
         }
 
         if (checkSUBSCRIBED()){

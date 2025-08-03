@@ -359,13 +359,37 @@ public class MovieActivity extends AppCompatActivity {
 
     private void setPlayableList() {
         if (poster != null && poster.getSources() != null) {
+            // Collect all playable sources
+            List<Source> allPlayableSources = new ArrayList<>();
             for (int i = 0; i < poster.getSources().size(); i++) {
                 Source source = poster.getSources().get(i);
                 if (source != null && source.getKind() != null && 
                     (source.getKind().equals("both") || source.getKind().equals("play"))) {
-                    playSources.add(source);
+                    allPlayableSources.add(source);
                 }
             }
+            
+            // Sort sources by priority (primary servers first, then backups)
+            allPlayableSources.sort((s1, s2) -> {
+                int priority1 = s1.getServerPriority();
+                int priority2 = s2.getServerPriority();
+                
+                // If priorities are equal, prefer higher quality
+                if (priority1 == priority2) {
+                    String quality1 = s1.getQuality() != null ? s1.getQuality() : "";
+                    String quality2 = s2.getQuality() != null ? s2.getQuality() : "";
+                    
+                    if (quality1.contains("1080p") && !quality2.contains("1080p")) return -1;
+                    if (!quality1.contains("1080p") && quality2.contains("1080p")) return 1;
+                    if (quality1.contains("720p") && !quality2.contains("720p")) return -1;
+                    if (!quality1.contains("720p") && quality2.contains("720p")) return 1;
+                }
+                
+                return Integer.compare(priority1, priority2);
+            });
+            
+            // Add sorted sources to play list
+            playSources.addAll(allPlayableSources);
         }
     }
     private void setDownloadableList() {
