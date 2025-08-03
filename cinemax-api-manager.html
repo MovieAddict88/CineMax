@@ -401,6 +401,7 @@
         <!-- Main Tabs -->
         <div class="tabs">
             <div class="tab active" onclick="showTab('auto-gen')">🤖 Auto Generation</div>
+            <div class="tab" onclick="showTab('individual')">🎯 Individual ID</div>
             <div class="tab" onclick="showTab('manual')">✏️ Manual Input</div>
             <div class="tab" onclick="showTab('bulk')">📦 Bulk Operations</div>
             <div class="tab" onclick="showTab('sources')">🎥 Video Sources</div>
@@ -465,6 +466,49 @@
                 <div class="flex">
                     <button class="btn btn-primary" onclick="generateContent()">🚀 Generate Content</button>
                     <button class="btn btn-warning" onclick="previewGeneration()">👁️ Preview</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Individual ID Tab -->
+        <div id="individual" class="tab-content">
+            <div class="card">
+                <h2>🎯 Individual TMDB ID Generation</h2>
+                <div class="grid">
+                    <div class="form-group">
+                        <label for="individualTmdbId">TMDB ID</label>
+                        <input type="number" id="individualTmdbId" placeholder="Enter specific TMDB ID">
+                    </div>
+                    <div class="form-group">
+                        <label for="individualContentType">Content Type</label>
+                        <select id="individualContentType">
+                            <option value="movie">Movie</option>
+                            <option value="tv">TV Series</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="grid">
+                    <div class="form-group">
+                        <label for="individualIncludeTrailer">Include Trailer</label>
+                        <select id="individualIncludeTrailer">
+                            <option value="true">Yes</option>
+                            <option value="false">No</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="individualIncludeSubtitles">Include Subtitles</label>
+                        <select id="individualIncludeSubtitles">
+                            <option value="true">Yes</option>
+                            <option value="false">No</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="flex">
+                    <button class="btn btn-primary" onclick="generateIndividualContent()">🎯 Generate Content</button>
+                    <button class="btn btn-warning" onclick="previewIndividualContent()">👁️ Preview</button>
+                </div>
+                <div id="individualPreview" class="mt-20" style="display: none;">
+                    <!-- Individual content preview will appear here -->
                 </div>
             </div>
         </div>
@@ -610,6 +654,10 @@
                         <div class="stat-number" id="totalGenres">0</div>
                         <div class="stat-label">Genres</div>
                     </div>
+                </div>
+                <div class="flex" style="margin-bottom: 20px;">
+                    <button class="btn btn-success" onclick="exportContent()">📥 Export JSON</button>
+                    <button class="btn btn-warning" onclick="clearContent()">🗑️ Clear All</button>
                 </div>
                 <div id="previewGrid" class="preview-grid">
                     <!-- Preview cards will be generated here -->
@@ -1043,6 +1091,214 @@
             document.getElementById('totalGenres').textContent = new Set(generatedContent.flatMap(c => c.genres || [])).size;
         }
 
+        // Generate individual content by TMDB ID
+        async function generateIndividualContent() {
+            const tmdbId = document.getElementById('individualTmdbId').value;
+            const contentType = document.getElementById('individualContentType').value;
+            const includeTrailer = document.getElementById('individualIncludeTrailer').value === 'true';
+            const includeSubtitles = document.getElementById('individualIncludeSubtitles').value === 'true';
+            
+            if (!tmdbId) {
+                showStatus('Please enter a TMDB ID', 'error');
+                return;
+            }
+            
+            showLoading(true);
+            
+            try {
+                let content = null;
+                
+                if (contentType === 'movie') {
+                    const movie = await fetchFromTMDB(`/movie/${tmdbId}`, {
+                        'append_to_response': 'credits,videos,images'
+                    });
+                    
+                    const sources = await generateVideoSources(movie.id, 'movie');
+                    const trailer = includeTrailer ? generateTrailerUrl(movie.title, movie.release_date?.split('-')[0]) : null;
+                    
+                    content = {
+                        id: movie.id,
+                        title: movie.title,
+                        type: 'movie',
+                        description: movie.overview,
+                        year: movie.release_date?.split('-')[0] || 'Unknown',
+                        rating: movie.vote_average,
+                        image: `https://image.tmdb.org/t/p/w500${movie.poster_path}`,
+                        cover: `https://image.tmdb.org/t/p/original${movie.backdrop_path}`,
+                        duration: `${Math.floor(movie.runtime || 120)} min`,
+                        genres: movie.genres?.map(g => g.id) || [],
+                        sources: sources,
+                        trailer: trailer ? {
+                            type: 'youtube',
+                            url: trailer,
+                            title: 'Trailer'
+                        } : null,
+                        actors: movie.credits?.cast?.slice(0, 10) || [],
+                        subtitles: includeSubtitles ? await generateSubtitles(movie.id, 'movie') : []
+                    };
+                } else if (contentType === 'tv') {
+                    const series = await fetchFromTMDB(`/tv/${tmdbId}`, {
+                        'append_to_response': 'credits,videos,images,seasons'
+                    });
+                    
+                    const sources = await generateVideoSources(series.id, 'tv');
+                    const trailer = includeTrailer ? generateTrailerUrl(series.name, series.first_air_date?.split('-')[0]) : null;
+                    
+                    content = {
+                        id: series.id,
+                        title: series.name,
+                        type: 'tv',
+                        description: series.overview,
+                        year: series.first_air_date?.split('-')[0] || 'Unknown',
+                        rating: series.vote_average,
+                        image: `https://image.tmdb.org/t/p/w500${series.poster_path}`,
+                        cover: `https://image.tmdb.org/t/p/original${series.backdrop_path}`,
+                        duration: `${series.number_of_seasons || 1} Season(s)`,
+                        genres: series.genres?.map(g => g.id) || [],
+                        sources: sources,
+                        trailer: trailer ? {
+                            type: 'youtube',
+                            url: trailer,
+                            title: 'Trailer'
+                        } : null,
+                        actors: series.credits?.cast?.slice(0, 10) || [],
+                        seasons: series.seasons || [],
+                        subtitles: includeSubtitles ? await generateSubtitles(series.id, 'tv') : []
+                    };
+                }
+                
+                if (content) {
+                    // Check if content already exists
+                    const existingIndex = generatedContent.findIndex(c => c.id === content.id);
+                    if (existingIndex !== -1) {
+                        generatedContent[existingIndex] = content;
+                        showStatus('Content updated successfully!', 'success');
+                    } else {
+                        generatedContent.push(content);
+                        showStatus('Content generated successfully!', 'success');
+                    }
+                    
+                    updatePreview();
+                    showIndividualPreview(content);
+                }
+                
+            } catch (error) {
+                showStatus(`Error generating content: ${error.message}`, 'error');
+            } finally {
+                showLoading(false);
+            }
+        }
+
+        // Preview individual content
+        async function previewIndividualContent() {
+            const tmdbId = document.getElementById('individualTmdbId').value;
+            const contentType = document.getElementById('individualContentType').value;
+            
+            if (!tmdbId) {
+                showStatus('Please enter a TMDB ID', 'error');
+                return;
+            }
+            
+            showLoading(true);
+            
+            try {
+                let content = null;
+                
+                if (contentType === 'movie') {
+                    const movie = await fetchFromTMDB(`/movie/${tmdbId}`);
+                    content = {
+                        id: movie.id,
+                        title: movie.title,
+                        type: 'movie',
+                        description: movie.overview,
+                        year: movie.release_date?.split('-')[0] || 'Unknown',
+                        rating: movie.vote_average,
+                        image: `https://image.tmdb.org/t/p/w500${movie.poster_path}`,
+                        cover: `https://image.tmdb.org/t/p/original${movie.backdrop_path}`,
+                        duration: `${Math.floor(movie.runtime || 120)} min`
+                    };
+                } else if (contentType === 'tv') {
+                    const series = await fetchFromTMDB(`/tv/${tmdbId}`);
+                    content = {
+                        id: series.id,
+                        title: series.name,
+                        type: 'tv',
+                        description: series.overview,
+                        year: series.first_air_date?.split('-')[0] || 'Unknown',
+                        rating: series.vote_average,
+                        image: `https://image.tmdb.org/t/p/w500${series.poster_path}`,
+                        cover: `https://image.tmdb.org/t/p/original${series.backdrop_path}`,
+                        duration: `${series.number_of_seasons || 1} Season(s)`
+                    };
+                }
+                
+                if (content) {
+                    showIndividualPreview(content);
+                    showStatus('Preview generated successfully!', 'success');
+                }
+                
+            } catch (error) {
+                showStatus(`Error generating preview: ${error.message}`, 'error');
+            } finally {
+                showLoading(false);
+            }
+        }
+
+        // Show individual content preview
+        function showIndividualPreview(content) {
+            const previewDiv = document.getElementById('individualPreview');
+            previewDiv.style.display = 'block';
+            
+            previewDiv.innerHTML = `
+                <div class="card">
+                    <h3>🎬 Content Preview</h3>
+                    <div class="grid">
+                        <div>
+                            <img src="${content.image || 'https://via.placeholder.com/300x450?text=No+Image'}" 
+                                 alt="${content.title}" style="width: 100%; max-width: 300px; border-radius: 8px;">
+                        </div>
+                        <div>
+                            <h4>${content.title}</h4>
+                            <p><strong>Type:</strong> ${content.type}</p>
+                            <p><strong>Year:</strong> ${content.year}</p>
+                            <p><strong>Rating:</strong> ${content.rating}</p>
+                            <p><strong>Duration:</strong> ${content.duration}</p>
+                            <p><strong>Description:</strong> ${content.description}</p>
+                            ${content.actors ? `<p><strong>Actors:</strong> ${content.actors.map(a => a.name).join(', ')}</p>` : ''}
+                            ${content.seasons ? `<p><strong>Seasons:</strong> ${content.seasons.length}</p>` : ''}
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        // Generate subtitles for content
+        async function generateSubtitles(tmdbId, contentType) {
+            const subtitles = [];
+            
+            // Add common subtitle languages
+            const languages = [
+                { code: 'en', name: 'English' },
+                { code: 'es', name: 'Spanish' },
+                { code: 'fr', name: 'French' },
+                { code: 'de', name: 'German' },
+                { code: 'it', name: 'Italian' },
+                { code: 'ar', name: 'Arabic' }
+            ];
+            
+            languages.forEach(lang => {
+                subtitles.push({
+                    id: `${tmdbId}_${lang.code}`,
+                    language: lang.name,
+                    language_code: lang.code,
+                    type: 'srt',
+                    url: `https://example.com/subtitles/${contentType}/${tmdbId}/${lang.code}.srt`
+                });
+            });
+            
+            return subtitles;
+        }
+
         // Export generated content
         function exportContent() {
             const dataStr = JSON.stringify(generatedContent, null, 2);
@@ -1054,6 +1310,15 @@
             link.click();
             URL.revokeObjectURL(url);
             showStatus('Content exported successfully!', 'success');
+        }
+
+        // Clear all generated content
+        function clearContent() {
+            if (confirm('Are you sure you want to clear all generated content?')) {
+                generatedContent = [];
+                updatePreview();
+                showStatus('All content cleared successfully!', 'success');
+            }
         }
 
         // Initialize the application
