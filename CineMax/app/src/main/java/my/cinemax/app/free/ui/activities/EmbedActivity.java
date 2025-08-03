@@ -71,17 +71,17 @@ public class EmbedActivity extends AppCompatActivity {
         webView.getSettings().setAllowContentAccess(true);
         webView.getSettings().setMediaPlaybackRequiresUserGesture(false);
         
-        // Load the enhanced URL
-        String enhancedUrl = VideoServerUtils.enhanceVideoUrl(url);
-        Log.d(TAG, "Loading enhanced URL: " + enhancedUrl);
-        webView.loadUrl(enhancedUrl);
+        // Load the original URL without enhancement
+        Log.d(TAG, "Loading URL: " + url);
+        webView.loadUrl(url);
     }
 
     /**
      * Enhance video URL with fallback servers and better parameters
      */
     private String enhanceVideoUrl(String originalUrl) {
-        return VideoServerUtils.enhanceVideoUrl(originalUrl);
+        // Return original URL since VidJoy and VidSrc are separate sources
+        return originalUrl;
     }
 
     public boolean inCustomView() {
@@ -209,20 +209,9 @@ public class EmbedActivity extends AppCompatActivity {
         public void onReceivedError(WebView view, int errorCode, String description, String failingUrl) {
             Log.e(TAG, "WebView error: " + errorCode + " - " + description + " for URL: " + failingUrl);
             
-            loadAttempts++;
-            if (loadAttempts < MAX_ATTEMPTS) {
-                // Try fallback server
-                String fallbackUrl = getFallbackUrl(failingUrl);
-                if (fallbackUrl != null && !fallbackUrl.equals(failingUrl)) {
-                    Log.d(TAG, "Trying fallback URL: " + fallbackUrl);
-                    view.loadUrl(fallbackUrl);
-                    return;
-                }
-            }
-            
             // Show error message to user
             Toast.makeText(EmbedActivity.this, 
-                "Video server unavailable. Please try again later.", 
+                "Video server unavailable. Please try a different source.", 
                 Toast.LENGTH_LONG).show();
             
             super.onReceivedError(view, errorCode, description, failingUrl);
@@ -232,7 +221,8 @@ public class EmbedActivity extends AppCompatActivity {
          * Get fallback URL when primary server fails
          */
         private String getFallbackUrl(String failingUrl) {
-            return VideoServerUtils.getFallbackUrl(failingUrl, loadAttempts - 1);
+            // Since VidJoy and VidSrc are separate sources, we don't need fallback logic
+            return null;
         }
     }
 }

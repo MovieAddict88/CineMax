@@ -1034,12 +1034,11 @@ public class ChannelActivity extends AppCompatActivity {
             return;
         }
         if (playSources.get(position).getType().equals("embed")){
-            // Enhanced embed handling with fallback servers
+            // Use the original URL without enhancement since VidJoy and VidSrc are separate sources
             String originalUrl = playSources.get(position).getUrl();
-            String enhancedUrl = enhanceEmbedUrl(originalUrl);
             
             Intent intent = new Intent(ChannelActivity.this,EmbedActivity.class);
-            intent.putExtra("url", enhancedUrl);
+            intent.putExtra("url", originalUrl);
             startActivity(intent);
             return;
         }
@@ -1077,10 +1076,11 @@ public class ChannelActivity extends AppCompatActivity {
     }
 
     /**
-     * Enhanced embed URL handling with fallback servers
+     * Enhanced embed URL handling - now simplified since sources are separate
      */
     private String enhanceEmbedUrl(String originalUrl) {
-        return VideoServerUtils.enhanceVideoUrl(originalUrl);
+        // Return original URL since VidJoy and VidSrc are separate sources
+        return originalUrl;
     }
     @Override
     protected void onResume() {

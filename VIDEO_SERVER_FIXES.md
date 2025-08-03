@@ -5,139 +5,151 @@
 The CineMax app was experiencing video playback issues with external video servers:
 
 1. **VidJoy Server Issues**: The VidJoy server (`https://vidjoy.pro/embed`) was causing black screens when trying to play videos
-2. **VidSrc Server Problems**: VidSrc.net (`https://vidsrc.net/embed`) was loading initially but failing when users clicked play, requiring manual selection of backup servers (cloudserve, superembed, etc.)
-3. **Missing Fallback Logic**: The app lacked proper fallback mechanisms when primary video servers failed
+2. **VidSrc Server Problems**: VidSrc.net (`https://vidsrc.net/embed`) was loading initially but failing when users clicked play
+3. **Multi-Server Configuration**: VidJoy and VidSrc are configured as **separate sources** in the JSON API, not as fallback servers
+
+## Correct Understanding
+
+### Multi-Server Configuration
+VidJoy and VidSrc are configured as **separate sources** in the JSON API:
+
+```json
+"sources": [
+  {
+    "id": 1,
+    "type": "embed",
+    "title": "VidSrc Server 1080p",
+    "quality": "1080p",
+    "url": "https://vidsrc.net/embed/movie/123"
+  },
+  {
+    "id": 2,
+    "type": "embed", 
+    "title": "VidJoy Server 1080p",
+    "quality": "1080p",
+    "url": "https://vidjoy.pro/embed/movie/123"
+  }
+]
+```
+
+### How It Should Work
+1. **Multiple Sources**: Each movie/series has multiple video sources
+2. **User Choice**: Users can choose which server to use (VidSrc, VidJoy, etc.)
+3. **No Fallback Logic**: Each source is independent, no automatic fallback needed
+4. **Error Handling**: If one source fails, user can try another source
 
 ## Solution Implementation
 
-### 1. Enhanced Video Server Handling
+### 1. Simplified Video Source Handling
 
-#### New Utility Class: `VideoServerUtils.java`
-- Centralized video server configuration management
-- Automatic fallback server selection
-- URL enhancement with reliability parameters
-- Support for multiple video server types
+#### Updated Activity Classes:
+- **MovieActivity.java**: Removed fallback URL enhancement
+- **SerieActivity.java**: Simplified embed handling
+- **ChannelActivity.java**: Clean source URL handling
 
-#### Key Features:
+#### Key Changes:
 ```java
-// Enhanced URL with fallback parameters
-String enhancedUrl = VideoServerUtils.enhanceVideoUrl(originalUrl);
+// Before (incorrect approach)
+String enhancedUrl = enhanceEmbedUrl(originalUrl); // Added fallback parameters
 
-// Automatic fallback when server fails
-String fallbackUrl = VideoServerUtils.getFallbackUrl(failingUrl, attempt);
+// After (correct approach)
+String originalUrl = playSources.get(position).getUrl(); // Use original URL
 ```
 
-### 2. Improved Activity Classes
+### 2. Updated EmbedActivity.java
 
-#### MovieActivity.java
-- Enhanced `playSource()` method with better video type detection
-- Automatic embed URL enhancement
-- Improved error handling for video servers
+#### Simplified WebView Handling:
+- Removed automatic fallback logic
+- Use original URLs without enhancement
+- Better error messages for failed sources
 
-#### SerieActivity.java
-- Similar enhancements for series/episode playback
-- Better validation of episode data
-- Enhanced embed handling
-
-#### ChannelActivity.java
-- Enhanced channel video playback
-- Improved live stream handling
-- Better server fallback support
-
-### 3. Enhanced EmbedActivity.java
-
-#### WebView Improvements:
-- Enhanced WebView settings for better video playback
-- Automatic fallback server selection
-- Better error handling and user feedback
-- Multiple retry attempts with different servers
-
-#### Key Enhancements:
+#### Key Changes:
 ```java
-// Enhanced WebView settings
-webView.getSettings().setDomStorageEnabled(true);
-webView.getSettings().setAllowFileAccess(true);
-webView.getSettings().setMediaPlaybackRequiresUserGesture(false);
+// Load original URL without enhancement
+webView.loadUrl(url);
 
-// Automatic fallback handling
-private String getFallbackUrl(String failingUrl) {
-    return VideoServerUtils.getFallbackUrl(failingUrl, loadAttempts - 1);
+// Simplified error handling
+Toast.makeText(EmbedActivity.this, 
+    "Video server unavailable. Please try a different source.", 
+    Toast.LENGTH_LONG).show();
+```
+
+### 3. Proper JSON Structure
+
+#### Example Multi-Server Configuration:
+```json
+{
+  "sources": [
+    {
+      "id": 1,
+      "type": "embed",
+      "title": "VidSrc Server 1080p",
+      "quality": "1080p",
+      "url": "https://vidsrc.net/embed/movie/123"
+    },
+    {
+      "id": 2,
+      "type": "embed",
+      "title": "VidSrc Server 720p", 
+      "quality": "720p",
+      "url": "https://vidsrc.net/embed/movie/123"
+    },
+    {
+      "id": 3,
+      "type": "embed",
+      "title": "VidJoy Server 1080p",
+      "quality": "1080p", 
+      "url": "https://vidjoy.pro/embed/movie/123"
+    },
+    {
+      "id": 4,
+      "type": "embed",
+      "title": "VidJoy Server 720p",
+      "quality": "720p",
+      "url": "https://vidjoy.pro/embed/movie/123"
+    }
+  ]
 }
 ```
 
-### 4. Video Server Configurations
+## User Experience Flow
 
-#### VidSrc.net Enhancements:
-- Primary server: `cloudserve`
-- Backup servers: `superembed`, `auto`
-- Quality options: `1080p`, `720p`, `480p`
-- Automatic fallback parameters
+### Expected Behavior:
+1. **Source Selection**: User sees multiple video sources (VidSrc 1080p, VidJoy 1080p, etc.)
+2. **Server Choice**: User selects preferred server/quality
+3. **Playback**: Video plays from selected source
+4. **Error Handling**: If source fails, user can try another source
 
-#### VidJoy.pro Enhancements:
-- Quality options: `1080p`, `720p`, `480p`
-- Server options: `auto`, `cloudserve`
-- Automatic fallback mechanisms
-
-## URL Enhancement Examples
-
-### Before:
-```
-https://vidsrc.net/embed/movie/123
-https://vidjoy.pro/embed/movie/123
-```
-
-### After:
-```
-https://vidsrc.net/embed/movie/123?server=cloudserve&backup=superembed&fallback=auto&quality=1080p
-https://vidjoy.pro/embed/movie/123?quality=1080p&server=auto&fallback=true&backup=cloudserve
-```
-
-## Fallback Mechanism
-
-### Automatic Retry Logic:
-1. **First Attempt**: Primary server with enhanced parameters
-2. **Second Attempt**: Backup server (superembed for VidSrc, 720p for VidJoy)
-3. **Third Attempt**: Final fallback (auto server for VidSrc, 480p for VidJoy)
-4. **Error Message**: User-friendly error if all attempts fail
-
-### Error Handling:
-- Logs all attempts for debugging
-- Shows user-friendly error messages
-- Graceful degradation when servers are unavailable
+### Error Scenarios:
+- **VidJoy Black Screen**: User can try VidSrc server instead
+- **VidSrc Loading Issues**: User can try VidJoy server instead
+- **Network Problems**: User can try different quality options
 
 ## Benefits
 
-1. **Improved Reliability**: Multiple fallback servers ensure video playback even when primary servers fail
-2. **Better User Experience**: Automatic server switching without user intervention
-3. **Enhanced Debugging**: Comprehensive logging for troubleshooting
-4. **Maintainable Code**: Centralized video server management
-5. **Future-Proof**: Easy to add new video servers or modify configurations
+1. **Clear Source Options**: Users can see all available servers
+2. **User Control**: Users choose which server to use
+3. **Better Reliability**: Multiple independent sources
+4. **Simplified Logic**: No complex fallback mechanisms
+5. **Better UX**: Clear error messages and source selection
+
+## Implementation Notes
+
+- **No URL Enhancement**: Use original URLs from JSON API
+- **No Fallback Logic**: Each source is independent
+- **Better Error Messages**: Guide users to try different sources
+- **Source Selection UI**: Users can choose preferred server/quality
 
 ## Testing
 
 ### Test Cases:
-1. **VidJoy Server Failure**: Should automatically switch to VidSrc or backup servers
-2. **VidSrc Server Issues**: Should try cloudserve, superembed, then auto servers
-3. **Network Issues**: Should show appropriate error messages
-4. **Quality Degradation**: Should automatically try lower quality options
+1. **VidJoy Source**: Should work independently
+2. **VidSrc Source**: Should work independently  
+3. **Source Selection**: User should see multiple options
+4. **Error Handling**: Failed source should show clear error message
 
-### Expected Behavior:
-- Videos should play more reliably
-- Black screen issues should be resolved
-- Users should see fewer playback errors
-- Automatic quality adjustment when needed
-
-## Implementation Notes
-
-- All changes are backward compatible
-- No breaking changes to existing functionality
-- Enhanced logging for debugging
-- User-friendly error messages
-- Automatic retry mechanisms
-
-## Future Enhancements
-
-1. **Server Health Monitoring**: Track server availability and performance
-2. **User Preferences**: Allow users to set preferred servers
-3. **Quality Selection**: Let users choose preferred video quality
-4. **Analytics**: Track which servers work best for different content types
+### Expected Results:
+- ✅ Multiple video sources displayed
+- ✅ Each source works independently
+- ✅ Clear error messages for failed sources
+- ✅ User can choose preferred server/quality

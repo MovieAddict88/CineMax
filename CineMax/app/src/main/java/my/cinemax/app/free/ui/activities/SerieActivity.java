@@ -697,11 +697,9 @@ public class SerieActivity extends AppCompatActivity implements PlaylistDownload
             return;
         }
         if (sourceType.equals("embed")){
-            // Enhanced embed handling with fallback servers
-            String enhancedUrl = enhanceEmbedUrl(sourceUrl);
-            
+            // Use the original URL without enhancement since VidJoy and VidSrc are separate sources
             Intent intent = new Intent(SerieActivity.this,EmbedActivity.class);
-            intent.putExtra("url", enhancedUrl);
+            intent.putExtra("url", sourceUrl);
             startActivity(intent);
             return;
         }
@@ -759,10 +757,11 @@ public class SerieActivity extends AppCompatActivity implements PlaylistDownload
     }
 
     /**
-     * Enhanced embed URL handling with fallback servers
+     * Enhanced embed URL handling - now simplified since sources are separate
      */
     private String enhanceEmbedUrl(String originalUrl) {
-        return VideoServerUtils.enhanceVideoUrl(originalUrl);
+        // Return original URL since VidJoy and VidSrc are separate sources
+        return originalUrl;
     }
 
     public void addView(){
