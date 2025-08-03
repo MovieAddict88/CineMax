@@ -2396,7 +2396,7 @@
                     cover: movieCoverInput.value.trim(),
                     trailer: movieTrailerInput.value.trim() ? { 
                         id: generateNewId(),
-                        type: 'video',
+                        type: 'youtube',
                         title: `${movieTitleInput.value.trim()} Trailer`,
                         url: movieTrailerInput.value.trim() 
                     } : null,
@@ -2465,10 +2465,11 @@
                                 downloads: 0,
                                 sources: [{ 
                                     id: generateNewId(),
-                                    type: 'video', 
+                                    type: 'embed',
                                     title: `${episodeTitle} 1080p`,
                                     quality: '1080p',
-                                    url: sourceUrl 
+                                    url: sourceUrl,
+                                    kind: 'play'
                                 }],
                                 subtitles: []
                             });
@@ -2493,7 +2494,7 @@
                     cover: seriesCoverInput.value.trim(),
                     trailer: seriesTrailerInput.value.trim() ? { 
                         id: generateNewId(),
-                        type: 'video',
+                        type: 'youtube',
                         title: `${seriesTitleInput.value.trim()} Trailer`,
                         url: seriesTrailerInput.value.trim() 
                     } : null,
@@ -3046,21 +3047,34 @@
                     cover: movieData.backdrop_path ? `https://image.tmdb.org/t/p/original${movieData.backdrop_path}` : '',
                     trailer: trailer ? {
                         id: generateNewId(),
-                        type: 'video',
+                        type: 'youtube',
                         title: `${movieData.title} Trailer`,
                         url: `https://www.youtube.com/watch?v=${trailer.key}`
                     } : null,
-                    sources: [{
-                        id: generateNewId(),
-                        type: 'video',
-                        title: 'vidsrc.net 1080p',
-                        quality: '1080p',
-                        size: '0MB',
-                        kind: 'both',
-                        premium: 'false',
-                        external: false,
-                        url: `https://vidsrc.net/embed/movie/${movieData.id}`
-                    }],
+                    sources: [
+                        {
+                            id: generateNewId(),
+                            type: 'embed',
+                            title: 'vidsrc.net',
+                            quality: 'HD',
+                            size: '0MB',
+                            kind: 'play',
+                            premium: 'false',
+                            external: false,
+                            url: `https://vidsrc.net/embed/movie/${movieData.id}`
+                        },
+                        {
+                            id: generateNewId(),
+                            type: 'embed',
+                            title: 'VidJoy',
+                            quality: 'HD',
+                            size: '0MB',
+                            kind: 'play',
+                            premium: 'false',
+                            external: false,
+                            url: `https://vidjoy.pro/embed/${movieData.id}`
+                        }
+                    ],
                     label: 'Movie',
                     sublabel: movieData.release_date ? movieData.release_date.split('-')[0] : 'N/A',
                     imdb: movieData.vote_average ? movieData.vote_average.toString() : '0.0',
@@ -3121,7 +3135,7 @@
                     cover: seriesData.backdrop_path ? `https://image.tmdb.org/t/p/original${seriesData.backdrop_path}` : '',
                     trailer: trailer ? {
                         id: generateNewId(),
-                        type: 'video',
+                        type: 'youtube',
                         title: `${seriesData.name} Trailer`,
                         url: `https://www.youtube.com/watch?v=${trailer.key}`
                     } : null,
@@ -3214,17 +3228,31 @@
                     
                     // Auto-add vidsrc source
                     const vidsrcUrl = `https://vidsrc.net/embed/movie/${tmdbId}`;
-                    currentMovieSources = [{ 
-                        id: generateNewId(),
-                        type: 'video',
-                        title: 'vidsrc.net 1080p',
-                        quality: '1080p',
-                        size: '0MB',
-                        kind: 'both',
-                        premium: 'false',
-                        external: false,
-                        url: vidsrcUrl 
-                    }];
+                    const vidjoyUrl = `https://vidjoy.pro/embed/${tmdbId}`;
+                    currentMovieSources = [
+                        { 
+                            id: generateNewId(),
+                            type: 'embed',
+                            title: 'vidsrc.net',
+                            quality: 'HD',
+                            size: '0MB',
+                            kind: 'play',
+                            premium: 'false',
+                            external: false,
+                            url: vidsrcUrl 
+                        },
+                        {
+                            id: generateNewId(),
+                            type: 'embed',
+                            title: 'VidJoy',
+                            quality: 'HD',
+                            size: '0MB',
+                            kind: 'play',
+                            premium: 'false',
+                            external: false,
+                            url: vidjoyUrl
+                        }
+                    ];
                     renderMovieSources();
                     
                     // Auto-generate related content after TMDB fetch
@@ -3316,10 +3344,11 @@
                                     downloads: 0,
                                     sources: [{
                                         id: generateNewId(),
-                                        type: 'video',
+                                        type: 'embed',
                                         title: `Episode ${episodeNumber} 1080p`,
                                         quality: '1080p',
-                                        url: vidsrcEpisodeUrl
+                                        url: vidsrcEpisodeUrl,
+                                        kind: 'play'
                                     }],
                                     subtitles: []
                                 };
