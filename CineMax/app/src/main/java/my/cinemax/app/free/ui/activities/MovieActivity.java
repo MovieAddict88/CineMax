@@ -116,6 +116,7 @@ import retrofit2.Callback;
 import retrofit2.Response;
 import retrofit2.Retrofit;
 import my.cinemax.app.free.Utils.DownloadProgressManager;
+import my.cinemax.app.free.Utils.VideoServerUtils;
 
 public class MovieActivity extends AppCompatActivity {
     private  static String TAG= "MovieActivity";
@@ -630,8 +631,11 @@ public class MovieActivity extends AppCompatActivity {
             return;
         }
         if (playSources.get(position).getType().equals("embed")){
+            // Use the original URL without enhancement since VidJoy and VidSrc are separate sources
+            String originalUrl = playSources.get(position).getUrl();
+            
             Intent intent = new Intent(MovieActivity.this,EmbedActivity.class);
-            intent.putExtra("url",playSources.get(position).getUrl());
+            intent.putExtra("url", originalUrl);
             startActivity(intent);
             return;
         }
@@ -645,7 +649,7 @@ public class MovieActivity extends AppCompatActivity {
             intent.putExtra("id",poster.getId());
             intent.putExtra("url",playSources.get(position).getUrl());
             
-            // Fix video type for streaming URLs
+            // Enhanced video type detection for streaming URLs
             String videoType = playSources.get(position).getType();
             String url = playSources.get(position).getUrl();
             if (url != null) {
@@ -653,6 +657,8 @@ public class MovieActivity extends AppCompatActivity {
                     videoType = "m3u8";  // Player expects "m3u8" for HLS streams
                 } else if (url.contains(".mpd")) {
                     videoType = "dash";  // Player expects "dash" for MPD/DASH streams
+                } else if (url.contains("vidsrc.net") || url.contains("vidjoy.pro")) {
+                    videoType = "embed"; // Force embed type for external servers
                 }
             }
             intent.putExtra("type", videoType);
@@ -663,6 +669,14 @@ public class MovieActivity extends AppCompatActivity {
             intent.putExtra("subtitle",poster.getTitle() + "("+poster.getYear()+")");
             startActivity(intent);
         }
+    }
+
+    /**
+     * Enhanced embed URL handling - now simplified since sources are separate
+     */
+    private String enhanceEmbedUrl(String originalUrl) {
+        // Return original URL since VidJoy and VidSrc are separate sources
+        return originalUrl;
     }
 
     public void playTrailer(){

@@ -91,6 +91,7 @@ import my.cinemax.app.free.ui.Adapters.ChannelAdapter;
 import my.cinemax.app.free.ui.Adapters.CommentAdapter;
 import my.cinemax.app.free.ui.Adapters.CountryAdapter;
 import com.squareup.picasso.Picasso;
+import my.cinemax.app.free.Utils.VideoServerUtils;
 
 import org.greenrobot.eventbus.EventBus;
 
@@ -1025,6 +1026,7 @@ public class ChannelActivity extends AppCompatActivity {
     }
     public void playSource(int position){
         addView();
+
         if (playSources.get(position).getType().equals("youtube")){
             Intent intent = new Intent(ChannelActivity.this,YoutubeActivity.class);
             intent.putExtra("url",playSources.get(position).getUrl());
@@ -1032,8 +1034,11 @@ public class ChannelActivity extends AppCompatActivity {
             return;
         }
         if (playSources.get(position).getType().equals("embed")){
+            // Use the original URL without enhancement since VidJoy and VidSrc are separate sources
+            String originalUrl = playSources.get(position).getUrl();
+            
             Intent intent = new Intent(ChannelActivity.this,EmbedActivity.class);
-            intent.putExtra("url",playSources.get(position).getUrl());
+            intent.putExtra("url", originalUrl);
             startActivity(intent);
             return;
         }
@@ -1048,7 +1053,7 @@ public class ChannelActivity extends AppCompatActivity {
             intent.putExtra("id",channel.getId());
             intent.putExtra("url",playSources.get(position).getUrl());
             
-            // Fix video type for streaming URLs
+            // Enhanced video type detection for streaming URLs
             String videoType = playSources.get(position).getType();
             String url = playSources.get(position).getUrl();
             if (url != null) {
@@ -1056,6 +1061,8 @@ public class ChannelActivity extends AppCompatActivity {
                     videoType = "m3u8";  // Player expects "m3u8" for HLS streams
                 } else if (url.contains(".mpd")) {
                     videoType = "dash";  // Player expects "dash" for MPD/DASH streams
+                } else if (url.contains("vidsrc.net") || url.contains("vidjoy.pro")) {
+                    videoType = "embed"; // Force embed type for external servers
                 }
             }
             intent.putExtra("type", videoType);
@@ -1066,6 +1073,14 @@ public class ChannelActivity extends AppCompatActivity {
             intent.putExtra("subtitle",channel.getTitle());
             startActivity(intent);
         }
+    }
+
+    /**
+     * Enhanced embed URL handling - now simplified since sources are separate
+     */
+    private String enhanceEmbedUrl(String originalUrl) {
+        // Return original URL since VidJoy and VidSrc are separate sources
+        return originalUrl;
     }
     @Override
     protected void onResume() {
