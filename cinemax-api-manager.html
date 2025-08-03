@@ -466,6 +466,7 @@
                 <div class="flex">
                     <button class="btn btn-primary" onclick="generateContent()">🚀 Generate Content</button>
                     <button class="btn btn-warning" onclick="previewGeneration()">👁️ Preview</button>
+                    <button class="btn btn-success" onclick="exportContent()" style="margin-left: auto;">📥 Export</button>
                 </div>
             </div>
         </div>
@@ -506,6 +507,7 @@
                 <div class="flex">
                     <button class="btn btn-primary" onclick="generateIndividualContent()">🎯 Generate Content</button>
                     <button class="btn btn-warning" onclick="previewIndividualContent()">👁️ Preview</button>
+                    <button class="btn btn-success" onclick="exportContent()" style="margin-left: auto;">📥 Export</button>
                 </div>
                 <div id="individualPreview" class="mt-20" style="display: none;">
                     <!-- Individual content preview will appear here -->
@@ -582,6 +584,7 @@
                 <div class="flex">
                     <button class="btn btn-primary" onclick="startBulkGeneration()">🚀 Start Bulk Generation</button>
                     <button class="btn btn-warning" onclick="stopBulkGeneration()">⏹️ Stop</button>
+                    <button class="btn btn-success" onclick="exportContent()" style="margin-left: auto;">📥 Export</button>
                 </div>
                 <div class="progress-bar">
                     <div class="progress-fill" id="bulkProgress" style="width: 0%"></div>
@@ -657,6 +660,7 @@
                 </div>
                 <div class="flex" style="margin-bottom: 20px;">
                     <button class="btn btn-success" onclick="exportContent()">📥 Export JSON</button>
+                    <button class="btn btn-primary" onclick="downloadContent()">💾 Download Content</button>
                     <button class="btn btn-warning" onclick="clearContent()">🗑️ Clear All</button>
                 </div>
                 <div id="previewGrid" class="preview-grid">
@@ -673,6 +677,13 @@
 
         <!-- Status Messages -->
         <div id="statusContainer"></div>
+        
+        <!-- Floating Export Button -->
+        <div id="floatingExport" style="position: fixed; bottom: 20px; right: 20px; z-index: 1000; display: none;">
+            <button class="btn btn-success" onclick="downloadContent()" style="padding: 15px 20px; border-radius: 50px; box-shadow: 0 4px 15px rgba(0,0,0,0.2);">
+                📥 Download JSON
+            </button>
+        </div>
     </div>
 
     <script>
@@ -1089,6 +1100,14 @@
             document.getElementById('totalSeries').textContent = generatedContent.filter(c => c.type === 'tv').length;
             document.getElementById('totalSources').textContent = generatedContent.reduce((sum, c) => sum + (c.sources?.length || 0), 0);
             document.getElementById('totalGenres').textContent = new Set(generatedContent.flatMap(c => c.genres || [])).size;
+            
+            // Show/hide floating export button
+            const floatingExport = document.getElementById('floatingExport');
+            if (generatedContent.length > 0) {
+                floatingExport.style.display = 'block';
+            } else {
+                floatingExport.style.display = 'none';
+            }
         }
 
         // Generate individual content by TMDB ID
@@ -1319,6 +1338,55 @@
                 updatePreview();
                 showStatus('All content cleared successfully!', 'success');
             }
+        }
+
+        // Download content as JSON file
+        function downloadContent() {
+            if (generatedContent.length === 0) {
+                showStatus('No content to download!', 'error');
+                return;
+            }
+            
+            const dataStr = JSON.stringify(generatedContent, null, 2);
+            const dataBlob = new Blob([dataStr], {type: 'application/json'});
+            const url = URL.createObjectURL(dataBlob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = `cinemax-content-${new Date().toISOString().split('T')[0]}.json`;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            URL.revokeObjectURL(url);
+            showStatus(`Downloaded ${generatedContent.length} items successfully!`, 'success');
+        }
+
+        // Export content for CineMax format
+        function exportContent() {
+            if (generatedContent.length === 0) {
+                showStatus('No content to export!', 'error');
+                return;
+            }
+            
+            // Convert to CineMax format
+            const cinemaxFormat = {
+                movies: generatedContent.filter(c => c.type === 'movie'),
+                series: generatedContent.filter(c => c.type === 'tv'),
+                generated_at: new Date().toISOString(),
+                total_items: generatedContent.length,
+                tmdb_api_key: TMDB_API_KEY
+            };
+            
+            const dataStr = JSON.stringify(cinemaxFormat, null, 2);
+            const dataBlob = new Blob([dataStr], {type: 'application/json'});
+            const url = URL.createObjectURL(dataBlob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = `cinemax-export-${new Date().toISOString().split('T')[0]}.json`;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            URL.revokeObjectURL(url);
+            showStatus(`Exported ${generatedContent.length} items in CineMax format!`, 'success');
         }
 
         // Initialize the application
