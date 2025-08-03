@@ -65,6 +65,15 @@ android {
 
 }
 
+// Force consistent lifecycle versions to avoid conflicts
+configurations.all {
+    resolutionStrategy {
+        force 'androidx.lifecycle:lifecycle-viewmodel:2.2.0'
+        force 'androidx.lifecycle:lifecycle-viewmodel-ktx:2.2.0'
+        force 'androidx.lifecycle:lifecycle-extensions:2.2.0'
+    }
+}
+
 dependencies {
     coreLibraryDesugaring 'com.android.tools:desugar_jdk_libs:1.1.5'
 
@@ -139,13 +148,15 @@ dependencies {
     implementation 'com.github.congle7997:GoogleIAP:1.0.8'
 
     // Room database dependencies
-    implementation 'androidx.room:room-runtime:2.4.2'
+    implementation('androidx.room:room-runtime:2.4.2') {
+        exclude group: 'androidx.lifecycle', module: 'lifecycle-viewmodel'
+        exclude group: 'androidx.lifecycle', module: 'lifecycle-viewmodel-ktx'
+    }
     annotationProcessor 'androidx.room:room-compiler:2.4.2'
-    implementation 'androidx.room:room-rxjava2:2.4.2'
-    
-    // Additional Room support
-    implementation 'androidx.lifecycle:lifecycle-extensions:2.2.0'
-    implementation 'androidx.lifecycle:lifecycle-viewmodel:2.4.1'
+    implementation('androidx.room:room-rxjava2:2.4.2') {
+        exclude group: 'androidx.lifecycle', module: 'lifecycle-viewmodel'
+        exclude group: 'androidx.lifecycle', module: 'lifecycle-viewmodel-ktx'
+    }
 
 }
 apply plugin: 'com.google.gms.google-services'
