@@ -1,0 +1,170 @@
+{
+  "api_info": {
+    "version": "2.0",
+    "description": "Multi-Server Video Configuration Example",
+    "last_updated": "2025-01-02",
+    "total_movies": 1,
+    "total_series": 0,
+    "total_channels": 0
+  },
+  "home": {
+    "slides": [
+      {
+        "id": 1,
+        "title": "Example Movie",
+        "type": "movie",
+        "image": "https://example.com/movie-poster.jpg",
+        "url": "movies/1",
+        "poster": {
+          "id": 1,
+          "title": "Example Movie",
+          "type": "movie",
+          "label": "Latest Movie",
+          "sublabel": "Released 2024",
+          "imdb": "8.5",
+          "downloadas": "example-movie.mp4",
+          "comment": true,
+          "playas": "video",
+          "description": "An example movie with multiple video sources.",
+          "classification": "PG-13",
+          "year": "2024",
+          "duration": "2:15:00",
+          "rating": 8.5,
+          "image": "https://example.com/movie-poster.jpg",
+          "cover": "https://example.com/movie-backdrop.jpg",
+          "genres": [
+            {
+              "id": 1,
+              "title": "Action"
+            },
+            {
+              "id": 2,
+              "title": "Adventure"
+            }
+          ],
+          "sources": [
+            {
+              "id": 1,
+              "type": "embed",
+              "title": "VidSrc Server 1080p",
+              "quality": "1080p",
+              "size": "Auto",
+              "kind": "play",
+              "premium": "false",
+              "external": false,
+              "url": "https://vidsrc.net/embed/movie/123"
+            },
+            {
+              "id": 2,
+              "type": "embed",
+              "title": "VidSrc Server 720p",
+              "quality": "720p",
+              "size": "Auto",
+              "kind": "play",
+              "premium": "false",
+              "external": false,
+              "url": "https://vidsrc.net/embed/movie/123"
+            },
+            {
+              "id": 3,
+              "type": "embed",
+              "title": "VidJoy Server 1080p",
+              "quality": "1080p",
+              "size": "Auto",
+              "kind": "play",
+              "premium": "false",
+              "external": false,
+              "url": "https://vidjoy.pro/embed/movie/123"
+            },
+            {
+              "id": 4,
+              "type": "embed",
+              "title": "VidJoy Server 720p",
+              "quality": "720p",
+              "size": "Auto",
+              "kind": "play",
+              "premium": "false",
+              "external": false,
+              "url": "https://vidjoy.pro/embed/movie/123"
+            },
+            {
+              "id": 5,
+              "type": "video",
+              "title": "Direct Stream 1080p",
+              "quality": "1080p",
+              "size": "2.1GB",
+              "kind": "both",
+              "premium": "false",
+              "external": false,
+              "url": "https://example.com/movie-1080p.mp4"
+            },
+            {
+              "id": 6,
+              "type": "video",
+              "title": "Direct Stream 720p",
+              "quality": "720p",
+              "size": "1.2GB",
+              "kind": "both",
+              "premium": "false",
+              "external": false,
+              "url": "https://example.com/movie-720p.mp4"
+            }
+          ],
+          "trailer": {
+            "id": 7,
+            "type": "video",
+            "title": "Example Movie Trailer",
+            "url": "https://example.com/movie-trailer.mp4"
+          },
+          "actors": [
+            {
+              "id": 1,
+              "name": "John Doe",
+              "type": "actor",
+              "role": "Lead Actor",
+              "image": "https://example.com/john-doe.jpg",
+              "born": "1980-05-15",
+              "height": "6'1\"",
+              "bio": "Professional actor with 20 years of experience"
+            }
+          ],
+          "subtitles": [
+            {
+              "id": 1,
+              "title": "English",
+              "language": "en",
+              "url": "https://example.com/subtitles/movie-en.vtt"
+            },
+            {
+              "id": 2,
+              "title": "Spanish",
+              "language": "es",
+              "url": "https://example.com/subtitles/movie-es.vtt"
+            }
+          ],
+          "comments": [
+            {
+              "id": 1,
+              "user": "MovieFan123",
+              "comment": "Great movie! Highly recommended.",
+              "created_at": "2024-12-15T10:30:00Z"
+            }
+          ],
+          "views": 15000,
+          "downloads": 5000,
+          "shares": 1200,
+          "contentType": "movie",
+          "url": "movies/1"
+        },
+        "channel": null
+      }
+    ],
+    "featuredMovies": [],
+    "channels": []
+  },
+  "movies": [],
+  "series": [],
+  "channels": [],
+  "actors": [],
+  "genres": []
+}

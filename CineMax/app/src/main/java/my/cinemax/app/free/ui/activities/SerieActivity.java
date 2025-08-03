@@ -124,6 +124,7 @@ import java.util.List;
 import java.util.Random;
 
 import my.cinemax.app.free.Utils.DownloadProgressManager;
+import my.cinemax.app.free.Utils.VideoServerUtils;
 
 public class SerieActivity extends AppCompatActivity implements PlaylistDownloader.DownloadListener {
     private  static String TAG= "SerieActivity";
@@ -681,25 +682,13 @@ public class SerieActivity extends AppCompatActivity implements PlaylistDownload
     public void playSource(int position){
         addView();
 
-        // Validate position and playableList
-        if (position < 0 || position >= playableList.size()) {
-            Toasty.error(getApplicationContext(), "Invalid source selected", Toast.LENGTH_SHORT).show();
-            return;
-        }
-
-        Source source = playableList.get(position);
-        if (source == null) {
-            Toasty.error(getApplicationContext(), "Source is null", Toast.LENGTH_SHORT).show();
-            return;
-        }
-
-        String sourceType = source.getType();
-        String sourceUrl = source.getUrl();
-
-        if (sourceType == null || sourceUrl == null) {
+        if (playableList == null || playableList.size() <= position) {
             Toasty.error(getApplicationContext(), "Invalid source data", Toast.LENGTH_SHORT).show();
             return;
         }
+
+        String sourceType = playableList.get(position).getType();
+        String sourceUrl = playableList.get(position).getUrl();
 
         if (sourceType.equals("youtube")){
             Intent intent = new Intent(SerieActivity.this,YoutubeActivity.class);
@@ -708,6 +697,7 @@ public class SerieActivity extends AppCompatActivity implements PlaylistDownload
             return;
         }
         if (sourceType.equals("embed")){
+            // Use the original URL without enhancement since VidJoy and VidSrc are separate sources
             Intent intent = new Intent(SerieActivity.this,EmbedActivity.class);
             intent.putExtra("url", sourceUrl);
             startActivity(intent);
@@ -730,13 +720,15 @@ public class SerieActivity extends AppCompatActivity implements PlaylistDownload
             intent.putExtra("id", selectedEpisode.getId());
             intent.putExtra("url", sourceUrl);
             
-            // Fix video type for streaming URLs
+            // Enhanced video type detection for streaming URLs
             String videoType = sourceType;
             if (sourceUrl != null) {
                 if (sourceUrl.contains(".m3u8")) {
                     videoType = "m3u8";  // Player expects "m3u8" for HLS streams
                 } else if (sourceUrl.contains(".mpd")) {
                     videoType = "dash";  // Player expects "dash" for MPD/DASH streams
+                } else if (sourceUrl.contains("vidsrc.net") || sourceUrl.contains("vidjoy.pro")) {
+                    videoType = "embed"; // Force embed type for external servers
                 }
             }
             intent.putExtra("type", videoType);
@@ -762,6 +754,14 @@ public class SerieActivity extends AppCompatActivity implements PlaylistDownload
             startActivity(intent);
         }
 
+    }
+
+    /**
+     * Enhanced embed URL handling - now simplified since sources are separate
+     */
+    private String enhanceEmbedUrl(String originalUrl) {
+        // Return original URL since VidJoy and VidSrc are separate sources
+        return originalUrl;
     }
 
     public void addView(){
