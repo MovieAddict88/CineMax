@@ -2,6 +2,9 @@ package my.cinemax.app.free.entity;
 
 import android.os.Parcel;
 import android.os.Parcelable;
+import androidx.room.Entity;
+import androidx.room.PrimaryKey;
+import androidx.room.TypeConverters;
 
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
@@ -10,9 +13,12 @@ import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.List;
 
+@Entity(tableName = "posters")
+@TypeConverters(my.cinemax.app.free.database.converters.TypeConverters.class)
 public class Poster implements Parcelable {
     @SerializedName("id")
     @Expose
+    @PrimaryKey
     private Integer id;
 
     @SerializedName("title")

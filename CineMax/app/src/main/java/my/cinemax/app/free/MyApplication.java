@@ -25,6 +25,7 @@ import com.unity3d.ads.UnityAds;
 
 import my.cinemax.app.free.BuildConfig;
 import my.cinemax.app.free.R;
+import my.cinemax.app.free.database.CacheManager;
 
 /**
  * Created by Tamim on 28/09/2019.
@@ -51,6 +52,9 @@ public class MyApplication extends MultiDexApplication {
         UnityAds.initialize (this, getResources().getString(R.string.unity_ads_app_id));
 //        initCast();
         mUserAgent = Util.getUserAgent(this, "MyApplication");
+        
+        // Initialize cache manager early
+        CacheManager.getInstance(this);
     }
 
     private void initLogger() {
