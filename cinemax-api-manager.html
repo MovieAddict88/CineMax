@@ -762,26 +762,38 @@
         async function generateVideoSources(tmdbId, contentType) {
             const sources = [];
             
-            // VidSrc sources
-            sources.push({
-                type: 'embed',
-                title: 'VidSrc',
-                quality: '1080p',
-                url: `${VIDSRC_BASE_URL}${contentType}/${tmdbId}`,
-                kind: 'embed',
-                premium: 'false',
-                external: true
+            // Multiple quality sources for VidSrc
+            const qualities = [
+                { quality: '1080p', size: '264MB', id: tmdbId * 10 + 1 },
+                { quality: '720p', size: '128MB', id: tmdbId * 10 + 2 },
+                { quality: '480p', size: '64MB', id: tmdbId * 10 + 3 }
+            ];
+            
+            qualities.forEach((q, index) => {
+                sources.push({
+                    id: q.id,
+                    type: 'video',
+                    title: `${contentType === 'movie' ? 'Movie' : 'Series'} ${q.quality}`,
+                    quality: q.quality,
+                    size: q.size,
+                    kind: 'both',
+                    premium: 'false',
+                    external: false,
+                    url: `${VIDSRC_BASE_URL}${contentType}/${tmdbId}`
+                });
             });
             
-            // VidJoy sources
+            // Add VidJoy as alternative source
             sources.push({
-                type: 'embed',
-                title: 'VidJoy',
+                id: tmdbId * 10 + 4,
+                type: 'video',
+                title: 'VidJoy Alternative',
                 quality: '720p',
-                url: `${VIDJOY_BASE_URL}${contentType}/${tmdbId}`,
-                kind: 'embed',
+                size: '128MB',
+                kind: 'both',
                 premium: 'false',
-                external: true
+                external: false,
+                url: `${VIDJOY_BASE_URL}${contentType}/${tmdbId}`
             });
             
             return sources;
@@ -827,19 +839,43 @@
                                 id: movie.id,
                                 title: movie.title,
                                 type: 'movie',
+                                label: "Latest Movie",
+                                sublabel: `Released ${movie.release_date?.split('-')[0] || 'Unknown'}`,
+                                imdb: movie.vote_average.toString(),
+                                downloadas: `${movie.title.toLowerCase().replace(/\s+/g, '-')}.mp4`,
+                                comment: true,
+                                playas: "video",
                                 description: movie.overview,
+                                classification: "PG-13",
                                 year: movie.release_date?.split('-')[0] || 'Unknown',
+                                duration: `${Math.floor(movie.runtime || 120)}:00`,
                                 rating: movie.vote_average,
                                 image: `https://image.tmdb.org/t/p/w500${movie.poster_path}`,
                                 cover: `https://image.tmdb.org/t/p/original${movie.backdrop_path}`,
-                                duration: `${Math.floor(movie.runtime || 120)} min`,
-                                genres: movie.genre_ids || [],
+                                genres: movie.genres?.map(g => ({ id: g.id, title: g.name })) || [],
                                 sources: sources,
                                 trailer: {
-                                    type: 'youtube',
-                                    url: trailer,
-                                    title: 'Trailer'
-                                }
+                                    id: movie.id * 1000,
+                                    type: 'video',
+                                    title: `${movie.title} Trailer`,
+                                    url: trailer
+                                },
+                                actors: movie.credits?.cast?.slice(0, 5).map(actor => ({
+                                    id: actor.id,
+                                    name: actor.name,
+                                    type: "actor",
+                                    role: actor.character || "Actor",
+                                    image: `https://image.tmdb.org/t/p/w185${actor.profile_path}`,
+                                    born: "Unknown",
+                                    height: "Unknown",
+                                    bio: "Actor"
+                                })) || [],
+                                views: Math.floor(Math.random() * 50000) + 10000,
+                                downloads: Math.floor(Math.random() * 10000) + 1000,
+                                shares: Math.floor(Math.random() * 5000) + 500,
+                                created_at: new Date().toISOString().split('T')[0],
+                                contentType: "movie",
+                                url: `movies/${movie.id}`
                             });
                         }
                     }
@@ -861,19 +897,58 @@
                                 id: show.id,
                                 title: show.name,
                                 type: 'tv',
+                                label: "Latest Series",
+                                sublabel: `${show.number_of_seasons || 1} Season(s)`,
+                                imdb: show.vote_average.toString(),
+                                downloadas: `${show.name.toLowerCase().replace(/\s+/g, '-')}`,
+                                comment: true,
+                                playas: "video",
                                 description: show.overview,
+                                classification: "TV-14",
                                 year: show.first_air_date?.split('-')[0] || 'Unknown',
+                                duration: "45:00",
                                 rating: show.vote_average,
                                 image: `https://image.tmdb.org/t/p/w500${show.poster_path}`,
                                 cover: `https://image.tmdb.org/t/p/original${show.backdrop_path}`,
-                                duration: `${show.number_of_seasons || 1} Season(s)`,
-                                genres: show.genre_ids || [],
+                                genres: show.genres?.map(g => ({ id: g.id, title: g.name })) || [],
                                 sources: sources,
                                 trailer: {
-                                    type: 'youtube',
-                                    url: trailer,
-                                    title: 'Trailer'
-                                }
+                                    id: show.id * 1000,
+                                    type: 'video',
+                                    title: `${show.name} Trailer`,
+                                    url: trailer
+                                },
+                                actors: show.credits?.cast?.slice(0, 5).map(actor => ({
+                                    id: actor.id,
+                                    name: actor.name,
+                                    type: "actor",
+                                    role: actor.character || "Actor",
+                                    image: `https://image.tmdb.org/t/p/w185${actor.profile_path}`,
+                                    born: "Unknown",
+                                    height: "Unknown",
+                                    bio: "Actor"
+                                })) || [],
+                                views: Math.floor(Math.random() * 50000) + 10000,
+                                downloads: Math.floor(Math.random() * 10000) + 1000,
+                                shares: Math.floor(Math.random() * 5000) + 500,
+                                created_at: new Date().toISOString().split('T')[0],
+                                contentType: "series",
+                                url: `movies/${show.id}`,
+                                seasons: show.seasons?.map(season => ({
+                                    id: season.id,
+                                    title: `Season ${season.season_number}`,
+                                    episodes: season.episode_count ? Array.from({ length: Math.min(season.episode_count, 5) }, (_, i) => ({
+                                        id: season.id * 100 + i + 1,
+                                        title: `Episode ${i + 1}`,
+                                        episode_number: i + 1,
+                                        image: `https://image.tmdb.org/t/p/w500${season.poster_path}`,
+                                        duration: "45:00",
+                                        sources: sources,
+                                        subtitles: generateSubtitles(show.id, 'tv'),
+                                        views: Math.floor(Math.random() * 10000) + 1000,
+                                        downloads: Math.floor(Math.random() * 5000) + 500
+                                    })) : []
+                                })) || []
                             });
                         }
                     }
@@ -1139,20 +1214,43 @@
                         id: movie.id,
                         title: movie.title,
                         type: 'movie',
+                        label: "Latest Movie",
+                        sublabel: `Released ${movie.release_date?.split('-')[0] || 'Unknown'}`,
+                        imdb: movie.vote_average.toString(),
+                        downloadas: `${movie.title.toLowerCase().replace(/\s+/g, '-')}.mp4`,
+                        comment: true,
+                        playas: "video",
                         description: movie.overview,
+                        classification: "PG-13",
                         year: movie.release_date?.split('-')[0] || 'Unknown',
+                        duration: `${Math.floor(movie.runtime || 120)}:00`,
                         rating: movie.vote_average,
                         image: `https://image.tmdb.org/t/p/w500${movie.poster_path}`,
                         cover: `https://image.tmdb.org/t/p/original${movie.backdrop_path}`,
-                        duration: `${Math.floor(movie.runtime || 120)} min`,
-                        genres: movie.genres?.map(g => g.id) || [],
+                        genres: movie.genres?.map(g => ({ id: g.id, title: g.name })) || [],
                         sources: sources,
                         trailer: trailer ? {
-                            type: 'youtube',
-                            url: trailer,
-                            title: 'Trailer'
+                            id: movie.id * 1000,
+                            type: 'video',
+                            title: `${movie.title} Trailer`,
+                            url: trailer
                         } : null,
-                        actors: movie.credits?.cast?.slice(0, 10) || [],
+                        actors: movie.credits?.cast?.slice(0, 5).map(actor => ({
+                            id: actor.id,
+                            name: actor.name,
+                            type: "actor",
+                            role: actor.character || "Actor",
+                            image: `https://image.tmdb.org/t/p/w185${actor.profile_path}`,
+                            born: "Unknown",
+                            height: "Unknown",
+                            bio: "Actor"
+                        })) || [],
+                        views: Math.floor(Math.random() * 50000) + 10000,
+                        downloads: Math.floor(Math.random() * 10000) + 1000,
+                        shares: Math.floor(Math.random() * 5000) + 500,
+                        created_at: new Date().toISOString().split('T')[0],
+                        contentType: "movie",
+                        url: `movies/${movie.id}`,
                         subtitles: includeSubtitles ? await generateSubtitles(movie.id, 'movie') : []
                     };
                 } else if (contentType === 'tv') {
@@ -1167,21 +1265,58 @@
                         id: series.id,
                         title: series.name,
                         type: 'tv',
+                        label: "Latest Series",
+                        sublabel: `${series.number_of_seasons || 1} Season(s)`,
+                        imdb: series.vote_average.toString(),
+                        downloadas: `${series.name.toLowerCase().replace(/\s+/g, '-')}`,
+                        comment: true,
+                        playas: "video",
                         description: series.overview,
+                        classification: "TV-14",
                         year: series.first_air_date?.split('-')[0] || 'Unknown',
+                        duration: "45:00",
                         rating: series.vote_average,
                         image: `https://image.tmdb.org/t/p/w500${series.poster_path}`,
                         cover: `https://image.tmdb.org/t/p/original${series.backdrop_path}`,
-                        duration: `${series.number_of_seasons || 1} Season(s)`,
-                        genres: series.genres?.map(g => g.id) || [],
+                        genres: series.genres?.map(g => ({ id: g.id, title: g.name })) || [],
                         sources: sources,
                         trailer: trailer ? {
-                            type: 'youtube',
-                            url: trailer,
-                            title: 'Trailer'
+                            id: series.id * 1000,
+                            type: 'video',
+                            title: `${series.name} Trailer`,
+                            url: trailer
                         } : null,
-                        actors: series.credits?.cast?.slice(0, 10) || [],
-                        seasons: series.seasons || [],
+                        actors: series.credits?.cast?.slice(0, 5).map(actor => ({
+                            id: actor.id,
+                            name: actor.name,
+                            type: "actor",
+                            role: actor.character || "Actor",
+                            image: `https://image.tmdb.org/t/p/w185${actor.profile_path}`,
+                            born: "Unknown",
+                            height: "Unknown",
+                            bio: "Actor"
+                        })) || [],
+                        views: Math.floor(Math.random() * 50000) + 10000,
+                        downloads: Math.floor(Math.random() * 10000) + 1000,
+                        shares: Math.floor(Math.random() * 5000) + 500,
+                        created_at: new Date().toISOString().split('T')[0],
+                        contentType: "series",
+                        url: `movies/${series.id}`,
+                        seasons: series.seasons?.map(season => ({
+                            id: season.id,
+                            title: `Season ${season.season_number}`,
+                            episodes: season.episode_count ? Array.from({ length: Math.min(season.episode_count, 5) }, (_, i) => ({
+                                id: season.id * 100 + i + 1,
+                                title: `Episode ${i + 1}`,
+                                episode_number: i + 1,
+                                image: `https://image.tmdb.org/t/p/w500${season.poster_path}`,
+                                duration: "45:00",
+                                sources: sources,
+                                subtitles: includeSubtitles ? generateSubtitles(series.id, 'tv') : [],
+                                views: Math.floor(Math.random() * 10000) + 1000,
+                                downloads: Math.floor(Math.random() * 5000) + 500
+                            })) : []
+                        })) || [],
                         subtitles: includeSubtitles ? await generateSubtitles(series.id, 'tv') : []
                     };
                 }
@@ -1367,13 +1502,91 @@
                 return;
             }
             
-            // Convert to CineMax format
+            // Convert to complete CineMax format
             const cinemaxFormat = {
+                api_info: {
+                    version: "2.0",
+                    description: "Enhanced Free Movie & TV Streaming JSON API with Full Actor Support",
+                    last_updated: new Date().toISOString().split('T')[0],
+                    total_movies: generatedContent.filter(c => c.type === 'movie').length,
+                    total_channels: 0,
+                    total_actors: generatedContent.reduce((sum, c) => sum + (c.actors?.length || 0), 0)
+                },
+                home: {
+                    slides: generateSlides(),
+                    featuredMovies: generatedContent.filter(c => c.type === 'movie').slice(0, 5),
+                    channels: [],
+                    actors: generateActorsList(),
+                    genres: generateGenresList()
+                },
                 movies: generatedContent.filter(c => c.type === 'movie'),
-                series: generatedContent.filter(c => c.type === 'tv'),
-                generated_at: new Date().toISOString(),
-                total_items: generatedContent.length,
-                tmdb_api_key: TMDB_API_KEY
+                channels: [],
+                actors: generateActorsList(),
+                genres: generateGenresList(),
+                categories: generateCategories(),
+                countries: generateCountries(),
+                subscription_plans: [],
+                video_sources: {
+                    big_buck_bunny: {
+                        title: "Big Buck Bunny",
+                        description: "Big Buck Bunny tells the story of a giant rabbit with a heart bigger than himself.",
+                        urls: {
+                            "1080p": "http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4",
+                            "720p": "http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4",
+                            "480p": "http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4"
+                        },
+                        duration: "10:00",
+                        size: "264MB",
+                        license: "Creative Commons"
+                    },
+                    elephants_dream: {
+                        title: "Elephants Dream",
+                        description: "The world's first open movie.",
+                        urls: {
+                            "1080p": "http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ElephantsDream.mp4",
+                            "720p": "http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ElephantsDream.mp4",
+                            "480p": "http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ElephantsDream.mp4"
+                        },
+                        duration: "11:00",
+                        size: "128MB",
+                        license: "Creative Commons"
+                    },
+                    live_streams: {
+                        test_hls: {
+                            title: "Test HLS Stream",
+                            description: "Test HLS live stream",
+                            url: "https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8",
+                            quality: "720p",
+                            type: "hls"
+                        }
+                    }
+                },
+                ads_config: {
+                    admob: {
+                        banner_id: "ca-app-pub-3940256099942544/6300978111",
+                        interstitial_id: "ca-app-pub-3940256099942544/1033173712",
+                        rewarded_id: "ca-app-pub-3940256099942544/5224354917",
+                        native_id: "ca-app-pub-3940256099942544/2247696110",
+                        app_id: "ca-app-pub-3940256099942544~3347511713"
+                    },
+                    facebook: {
+                        banner_id: "IMG_16_9_APP_INSTALL#YOUR_PLACEMENT_ID",
+                        interstitial_id: "IMG_16_9_APP_INSTALL#YOUR_PLACEMENT_ID",
+                        rewarded_id: "VID_HD_16_9_15S_APP_INSTALL#YOUR_PLACEMENT_ID",
+                        native_id: "IMG_16_9_APP_INSTALL#YOUR_PLACEMENT_ID"
+                    },
+                    settings: {
+                        banner_enabled: true,
+                        interstitial_enabled: true,
+                        rewarded_enabled: true,
+                        native_enabled: true,
+                        interstitial_clicks: 3,
+                        native_lines: 2,
+                        banner_type: "admob",
+                        interstitial_type: "admob",
+                        native_type: "admob"
+                    }
+                }
             };
             
             const dataStr = JSON.stringify(cinemaxFormat, null, 2);
@@ -1386,7 +1599,153 @@
             link.click();
             document.body.removeChild(link);
             URL.revokeObjectURL(url);
-            showStatus(`Exported ${generatedContent.length} items in CineMax format!`, 'success');
+            showStatus(`Exported ${generatedContent.length} items in complete CineMax format!`, 'success');
+        }
+
+        // Generate slides for home page
+        function generateSlides() {
+            const slides = [];
+            const movies = generatedContent.filter(c => c.type === 'movie').slice(0, 3);
+            
+            movies.forEach((movie, index) => {
+                slides.push({
+                    id: index + 1,
+                    title: movie.title,
+                    type: "movie",
+                    image: movie.image,
+                    url: `movies/${movie.id}`,
+                    poster: {
+                        ...movie,
+                        label: "Latest Movie",
+                        sublabel: `Released ${movie.year}`,
+                        imdb: movie.rating.toString(),
+                        downloadas: `${movie.title.toLowerCase().replace(/\s+/g, '-')}.mp4`,
+                        comment: true,
+                        playas: "video",
+                        classification: "PG-13",
+                        views: Math.floor(Math.random() * 50000) + 10000,
+                        downloads: Math.floor(Math.random() * 10000) + 1000,
+                        shares: Math.floor(Math.random() * 5000) + 500,
+                        contentType: "movie",
+                        url: `movies/${movie.id}`,
+                        comments: generateComments(movie.id),
+                        subtitles: generateSubtitles(movie.id, 'movie')
+                    },
+                    channel: null
+                });
+            });
+            
+            return slides;
+        }
+
+        // Generate actors list
+        function generateActorsList() {
+            const actors = [];
+            const allActors = new Map();
+            
+            generatedContent.forEach(content => {
+                if (content.actors) {
+                    content.actors.forEach(actor => {
+                        if (!allActors.has(actor.id)) {
+                            allActors.set(actor.id, {
+                                ...actor,
+                                movies: [{
+                                    id: content.id,
+                                    title: content.title,
+                                    image: content.image,
+                                    year: content.year
+                                }]
+                            });
+                        } else {
+                            allActors.get(actor.id).movies.push({
+                                id: content.id,
+                                title: content.title,
+                                image: content.image,
+                                year: content.year
+                            });
+                        }
+                    });
+                }
+            });
+            
+            return Array.from(allActors.values());
+        }
+
+        // Generate genres list with posters
+        function generateGenresList() {
+            const genres = new Map();
+            
+            generatedContent.forEach(content => {
+                if (content.genres) {
+                    content.genres.forEach(genreId => {
+                        const genreName = getGenreName(genreId);
+                        if (!genres.has(genreId)) {
+                            genres.set(genreId, {
+                                id: genreId,
+                                title: genreName,
+                                posters: [content]
+                            });
+                        } else {
+                            genres.get(genreId).posters.push(content);
+                        }
+                    });
+                }
+            });
+            
+            return Array.from(genres.values());
+        }
+
+        // Get genre name by ID
+        function getGenreName(genreId) {
+            const genreMap = {
+                28: "Action", 12: "Adventure", 16: "Animation", 35: "Comedy",
+                80: "Crime", 99: "Documentary", 18: "Drama", 10751: "Family",
+                14: "Fantasy", 36: "History", 27: "Horror", 10402: "Music",
+                9648: "Mystery", 10749: "Romance", 878: "Science Fiction",
+                10770: "TV Movie", 53: "Thriller", 10752: "War", 37: "Western"
+            };
+            return genreMap[genreId] || "Unknown";
+        }
+
+        // Generate categories
+        function generateCategories() {
+            return [
+                { id: 1, title: "Action" },
+                { id: 2, title: "Drama" },
+                { id: 3, title: "Comedy" },
+                { id: 4, title: "Horror" },
+                { id: 5, title: "Romance" },
+                { id: 6, title: "Animation" }
+            ];
+        }
+
+        // Generate countries
+        function generateCountries() {
+            return [
+                { id: 1, title: "USA" },
+                { id: 2, title: "UK" },
+                { id: 3, title: "Canada" },
+                { id: 4, title: "Australia" },
+                { id: 5, title: "Germany" }
+            ];
+        }
+
+        // Generate comments for content
+        function generateComments(contentId) {
+            const comments = [
+                "Amazing movie! Love this!",
+                "Great content, highly recommended!",
+                "One of the best I've seen this year!",
+                "Fantastic acting and direction!",
+                "Must watch for everyone!"
+            ];
+            
+            return comments.map((comment, index) => ({
+                id: index + 1,
+                user: `User${Math.floor(Math.random() * 1000)}`,
+                comment: comment,
+                created_at: new Date(Date.now() - Math.random() * 30 * 24 * 60 * 60 * 1000).toISOString()
+            }));
         }
 
         // Initialize the application
