@@ -431,6 +431,8 @@
             <button class="btn btn-primary" onclick="loadContent()">Load Content</button>
             <button class="btn btn-success" onclick="saveContent()">Save Content</button>
             <button class="btn btn-warning" onclick="exportContent()">Export JSON</button>
+            <button class="btn btn-primary" onclick="showCurrentContent()">Show Current Content</button>
+            <button class="btn btn-warning" onclick="addTestMovie()">Add Test Movie</button>
             
             <div id="contentList"></div>
         </div>
@@ -546,11 +548,15 @@
                 // Add to current content
                 currentContent.push(content);
                 
-                showAlert('Content generated successfully!', 'success');
+                showAlert(`Content generated successfully! Added: ${content.title}`, 'success');
                 updateDashboard();
+                
+                // Log for debugging
+                console.log('Current content:', currentContent);
                 
             } catch (error) {
                 showAlert(`Error generating content: ${error.message}`, 'danger');
+                console.error('Generation error:', error);
             }
         }
         
@@ -576,6 +582,14 @@
                 sources: [],
                 trailer: null
             };
+            
+            // Debug logging
+            console.log('Processing TMDB data:', {
+                contentType: contentType,
+                contentType: content.type,
+                title: content.title,
+                year: content.year
+            });
             
             // Generate sources based on providers
             content.sources = await generateSources(tmdbData, contentType);
@@ -817,6 +831,16 @@
             const allActors = [...new Set(currentContent.flatMap(c => c.actors || []))];
             const allGenres = [...new Set(currentContent.flatMap(c => c.genres || []))];
             
+            // Debug logging
+            console.log('Saving content:', {
+                totalContent: currentContent.length,
+                movies: movies.length,
+                series: series.length,
+                liveTV: liveTV.length,
+                actors: allActors.length,
+                genres: allGenres.length
+            });
+            
             // Create slides for home section
             const slides = movies.map((movie, index) => ({
                 id: index + 1,
@@ -937,6 +961,55 @@
         
         function exportContent() {
             showAlert('Export content functionality - implement export options', 'warning');
+        }
+        
+        function showCurrentContent() {
+            const contentList = document.getElementById('contentList');
+            if (currentContent.length === 0) {
+                contentList.innerHTML = '<div class="alert alert-warning">No content generated yet</div>';
+                return;
+            }
+            
+            let html = '<h3>Current Content:</h3>';
+            currentContent.forEach((item, index) => {
+                html += `
+                    <div class="alert alert-success">
+                        <strong>${index + 1}. ${item.title}</strong><br>
+                        Type: ${item.type}<br>
+                        Year: ${item.year}<br>
+                        Sources: ${item.sources.length}<br>
+                        Actors: ${item.actors.length}<br>
+                        Genres: ${item.genres.length}
+                    </div>
+                `;
+            });
+            
+            contentList.innerHTML = html;
+        }
+        
+        function addTestMovie() {
+            const testMovie = {
+                id: currentContent.length + 1,
+                title: "Test Movie",
+                type: "movie",
+                year: "2024",
+                duration: "2:30:00",
+                description: "A test movie for debugging",
+                image: "https://image.tmdb.org/t/p/w500/test.jpg",
+                cover: "https://image.tmdb.org/t/p/original/test.jpg",
+                rating: 8.5,
+                genres: [{ id: 1, title: "Action" }],
+                actors: [{ id: 1, name: "Test Actor", type: "actor", role: "Lead", image: null }],
+                sources: [
+                    { id: 1, type: "video", title: "Test Movie - VidSrc", quality: "1080p", size: "Unknown", kind: "both", premium: "false", external: false, url: "https://vidsrc.net/embed/movie/123" },
+                    { id: 2, type: "video", title: "Test Movie - VidJoy", quality: "720p", size: "Unknown", kind: "both", premium: "false", external: false, url: "https://vidjoy.pro/embed/movie/123" }
+                ],
+                trailer: null
+            };
+            
+            currentContent.push(testMovie);
+            showAlert('Test movie added successfully!', 'success');
+            updateDashboard();
         }
         
         // Initialize
