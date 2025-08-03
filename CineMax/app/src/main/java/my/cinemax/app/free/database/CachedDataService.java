@@ -7,8 +7,7 @@ import java.util.List;
 
 import my.cinemax.app.free.MyApplication;
 import my.cinemax.app.free.api.apiClient;
-import my.cinemax.app.free.database.entities.CachedEpisode;
-import my.cinemax.app.free.database.entities.CachedMovie;
+// Using simplified database implementation
 import my.cinemax.app.free.entity.Episode;
 import my.cinemax.app.free.entity.JsonApiResponse;
 import my.cinemax.app.free.entity.Poster;
@@ -38,11 +37,10 @@ public class CachedDataService {
      */
     public void getMoviesWithCache(int type, DataCallback<List<Poster>> callback) {
         // First, try to load from cache
-        List<CachedMovie> cachedMovies = cacheManager.getCachedMovies(type);
+        List<Poster> cachedMovies = cacheManager.getCachedMovies(type);
         if (!cachedMovies.isEmpty()) {
-            List<Poster> posters = cacheManager.convertCachedMoviesToPosters(cachedMovies);
-            Log.d(TAG, "Loaded " + posters.size() + " movies from cache");
-            callback.onCacheLoaded(posters);
+            Log.d(TAG, "Loaded " + cachedMovies.size() + " movies from cache");
+            callback.onCacheLoaded(cachedMovies);
             
             // Still fetch fresh data in background to update cache
             fetchMoviesFromApi(type, callback, true);
@@ -57,11 +55,10 @@ public class CachedDataService {
      */
     public void getEpisodesWithCache(String serieId, DataCallback<List<Episode>> callback) {
         // First, try to load from cache
-        List<CachedEpisode> cachedEpisodes = cacheManager.getCachedEpisodes(serieId);
+        List<Episode> cachedEpisodes = cacheManager.getCachedEpisodes(serieId);
         if (!cachedEpisodes.isEmpty()) {
-            List<Episode> episodes = cacheManager.convertCachedEpisodesToEpisodes(cachedEpisodes);
-            Log.d(TAG, "Loaded " + episodes.size() + " episodes from cache");
-            callback.onCacheLoaded(episodes);
+            Log.d(TAG, "Loaded " + cachedEpisodes.size() + " episodes from cache");
+            callback.onCacheLoaded(cachedEpisodes);
             
             // Still fetch fresh data in background to update cache
             fetchEpisodesFromApi(serieId, callback, true);
