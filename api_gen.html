@@ -1819,11 +1819,16 @@
                  ...currentData,
                  home: {
                      ...currentData.home,
-                     slides: limitedSlides // Use limited slides instead of all slides
+                     slides: limitedSlides, // Use limited slides instead of all slides
+                     // Add featuredMovies INSIDE home object for LoadActivity compatibility
+                     featuredMovies: currentData.home.featuredMovies || [],
+                     // Add actors and genres INSIDE home object for HomeFragment compatibility
+                     actors: generateActorsFromContent() || [],
+                     genres: generateGenresFromContent() || []
                  },
                  // Add root-level movies array that includes both movies and series
                  movies: currentData.home.featuredMovies || [],
-                 // Add root-level arrays for compatibility - ensure they're always present
+                 // Keep root-level arrays for other fragments compatibility
                  actors: generateActorsFromContent() || [],
                  genres: generateGenresFromContent() || [],
                  // Ensure channels array is present
