@@ -28,6 +28,7 @@ import my.cinemax.app.free.BuildConfig;
 import my.cinemax.app.free.R;
 import my.cinemax.app.free.Provider.DataRepository;
 import my.cinemax.app.free.Utils.CacheManager;
+import my.cinemax.app.free.Utils.UnifiedCacheManager;
 
 /**
  * Created by Tamim on 28/09/2019.
@@ -70,19 +71,35 @@ public class MyApplication extends MultiDexApplication {
      */
     private void initCacheSystem() {
         try {
-            // Initialize CacheManager
-            CacheManager.getInstance().initialize(this);
+            // Initialize Unified Cache Manager (coordinates all layers)
+            UnifiedCacheManager.getInstance().initialize(this);
             
-            // Initialize DataRepository
+            // Initialize DataRepository (uses unified cache)
             DataRepository.getInstance().initialize(this);
             
-            Log.d("MyApplication", "Advanced caching system initialized successfully");
+            Log.d("MyApplication", "Advanced multi-layer caching system initialized successfully");
             
             // Preload essential data in background
             DataRepository.getInstance().preloadEssentialData();
             
+            // Log cache statistics after initialization
+            logCacheStatistics();
+            
         } catch (Exception e) {
             Log.e("MyApplication", "Error initializing cache system", e);
+        }
+    }
+    
+    /**
+     * Log cache statistics for monitoring
+     */
+    private void logCacheStatistics() {
+        try {
+            UnifiedCacheManager.UnifiedCacheStats stats = 
+                UnifiedCacheManager.getInstance().getCacheStats();
+            Log.d("MyApplication", "Cache Statistics: " + stats.toString());
+        } catch (Exception e) {
+            Log.e("MyApplication", "Error getting cache statistics", e);
         }
     }
     public static MyApplication getInstance ()

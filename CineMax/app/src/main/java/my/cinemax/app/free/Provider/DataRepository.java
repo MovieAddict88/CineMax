@@ -4,6 +4,7 @@ import android.content.Context;
 import android.os.AsyncTask;
 import android.util.Log;
 import my.cinemax.app.free.Utils.CacheManager;
+import my.cinemax.app.free.Utils.UnifiedCacheManager;
 import my.cinemax.app.free.api.apiClient;
 import my.cinemax.app.free.entity.*;
 import retrofit2.Call;
@@ -33,6 +34,7 @@ public class DataRepository {
     private static DataRepository instance;
     
     private CacheManager cacheManager;
+    private UnifiedCacheManager unifiedCacheManager;
     private Context context;
     private ExecutorService executorService;
     private boolean isLoading = false;
@@ -53,6 +55,7 @@ public class DataRepository {
     private DataRepository() {
         this.executorService = Executors.newCachedThreadPool();
         this.cacheManager = CacheManager.getInstance();
+        this.unifiedCacheManager = UnifiedCacheManager.getInstance();
     }
     
     public static synchronized DataRepository getInstance() {
@@ -68,21 +71,26 @@ public class DataRepository {
     public void initialize(Context context) {
         this.context = context.getApplicationContext();
         cacheManager.initialize(this.context);
-        Log.d(TAG, "DataRepository initialized");
+        unifiedCacheManager.initialize(this.context);
+        Log.d(TAG, "DataRepository initialized with unified caching system");
     }
     
     /**
-     * Load all data with cache-first strategy
+     * Load all data with enhanced cache-first strategy
      */
     public void loadAllData(ApiResponseCallback callback) {
         if (callback != null) {
             callback.onLoading();
         }
         
-        // Check cache first
+        // Check unified cache first (memory + disk)
         JsonApiResponse cachedResponse = cacheManager.getCachedApiResponse();
         if (cachedResponse != null && cacheManager.isCacheValid()) {
-            Log.d(TAG, "Returning cached data");
+            Log.d(TAG, "Returning cached data from unified cache");
+            
+            // Cache data in memory for faster future access
+            unifiedCacheManager.cacheAllData(cachedResponse);
+            
             if (callback != null) {
                 callback.onFromCache(cachedResponse);
             }
@@ -127,11 +135,12 @@ public class DataRepository {
                 if (response.isSuccessful() && response.body() != null) {
                     JsonApiResponse apiResponse = response.body();
                     
-                    // Cache the response in background
+                    // Cache the response in all layers in background
                     executorService.execute(() -> {
-                        Log.d(TAG, "Caching API response in background");
+                        Log.d(TAG, "Caching API response in all layers in background");
                         cacheManager.storeApiResponse(apiResponse);
-                        Log.d(TAG, "API response cached successfully");
+                        unifiedCacheManager.cacheAllData(apiResponse);
+                        Log.d(TAG, "API response cached successfully in all layers");
                     });
                     
                     if (callback != null) {
@@ -187,7 +196,8 @@ public class DataRepository {
                 public void onResponse(Call<JsonApiResponse> call, Response<JsonApiResponse> response) {
                     if (response.isSuccessful() && response.body() != null) {
                         cacheManager.storeApiResponse(response.body());
-                        Log.d(TAG, "Background refresh completed successfully");
+                        unifiedCacheManager.cacheAllData(response.body());
+                        Log.d(TAG, "Background refresh completed successfully and cached in all layers");
                     } else {
                         Log.w(TAG, "Background refresh failed: " + response.code());
                     }
@@ -278,11 +288,11 @@ public class DataRepository {
     }
     
     /**
-     * Get movie by ID
+     * Get movie by ID with unified caching
      */
     public void getMovieById(int movieId, DataCallback<Poster> callback) {
         executorService.execute(() -> {
-            Poster movie = cacheManager.getMovieById(movieId);
+            Poster movie = unifiedCacheManager.getMovie(movieId);
             if (movie != null) {
                 callback.onSuccess(movie);
             } else {
@@ -525,6 +535,13 @@ public class DataRepository {
      */
     public CacheManager.CacheStats getCacheStats() {
         return cacheManager.getCacheStats();
+    }
+    
+    /**
+     * Get unified cache statistics
+     */
+    public UnifiedCacheManager.UnifiedCacheStats getUnifiedCacheStats() {
+        return unifiedCacheManager.getCacheStats();
     }
     
     /**
