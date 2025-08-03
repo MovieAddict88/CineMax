@@ -349,13 +349,20 @@ public class NetworkCacheManager {
      * Get cache statistics
      */
     public NetworkCacheStats getCacheStats() {
+        long cacheSize = 0;
+        try {
+            cacheSize = cache.size();
+        } catch (IOException e) {
+            Log.e(TAG, "Error getting cache size", e);
+        }
+        
         return new NetworkCacheStats(
             totalRequests,
             cacheHits,
             networkRequests,
             totalBytesTransferred,
             getHitRate(),
-            cache.size(),
+            cacheSize,
             cache.hitCount(),
             0, // OkHttp Cache doesn't have missCount()
             cache.requestCount()

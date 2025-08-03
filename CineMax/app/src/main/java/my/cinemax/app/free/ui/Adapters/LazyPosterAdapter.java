@@ -14,6 +14,7 @@ import com.squareup.picasso.Picasso;
 import my.cinemax.app.free.R;
 import my.cinemax.app.free.Utils.UnifiedCacheManager;
 import my.cinemax.app.free.entity.Poster;
+import my.cinemax.app.free.entity.Genre;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ExecutorService;

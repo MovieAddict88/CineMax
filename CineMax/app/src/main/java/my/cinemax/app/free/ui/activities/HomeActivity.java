@@ -1215,6 +1215,11 @@ public class HomeActivity extends AppCompatActivity implements NavigationView.On
                     Toasty.error(HomeActivity.this, "Failed to load content: " + error, Toast.LENGTH_SHORT).show();
                 });
             }
+            
+            @Override
+            public void onLoading() {
+                Log.d("CACHE_API", "Loading data...");
+            }
         });
     }
     
