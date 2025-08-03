@@ -740,11 +740,11 @@
             if (sourceType === 'vidsrc' || sourceType === 'both') {
                 sources.push({
                     id: generateId(),
-                    type: 'play',
-                    title: 'VidSrc 1080p',
+                    type: 'video',
+                    title: 'vidsrc.net 1080p',
                     quality: '1080p',
                     size: '0MB',
-                    kind: 'embed',
+                    kind: 'both',
                     premium: 'false',
                     external: false,
                     url: `${VIDSRC_BASE}/${type}/${tmdbId}`
@@ -754,11 +754,11 @@
             if (sourceType === 'vidjoy' || sourceType === 'both') {
                 sources.push({
                     id: generateId(),
-                    type: 'play',
-                    title: 'VidJoy 1080p',
+                    type: 'video',
+                    title: 'vidjoy.pro 1080p',
                     quality: '1080p',
                     size: '0MB',
-                    kind: 'embed',
+                    kind: 'both',
                     premium: 'false',
                     external: false,
                     url: `${VIDJOY_BASE}/${type}/${tmdbId}`
@@ -775,13 +775,8 @@
             if (trailer) {
                 return {
                     id: generateId(),
-                    type: 'play',
-                    title: 'YouTube Trailer',
-                    quality: '720p',
-                    size: '0MB',
-                    kind: 'youtube',
-                    premium: 'false',
-                    external: true,
+                    type: 'video',
+                    title: `${tmdbData.title || tmdbData.name} Trailer`,
                     url: `https://www.youtube.com/watch?v=${trailer.key}`
                 };
             }
@@ -803,13 +798,9 @@
             const additionalServers = getAdditionalServers();
             sources.push(...additionalServers.map(server => ({
                 id: generateId(),
-                type: server.type || 'both',
+                type: 'video',
                 title: server.name,
                 quality: server.quality || '1080p',
-                size: '0MB',
-                kind: server.kind || 'video',
-                premium: 'false',
-                external: server.external || false,
                 url: server.url
             })));
             
@@ -826,8 +817,8 @@
                 cover: tmdbData.backdrop_path ? `https://image.tmdb.org/t/p/original${tmdbData.backdrop_path}` : '',
                 trailer: trailer,
                 sources: sources,
-                label: isMovie ? 'Latest Movie' : 'Latest Series',
-                sublabel: `Released ${year}`,
+                label: isMovie ? 'Movie' : 'Series',
+                sublabel: isMovie ? year : `${seasons.length} Season${seasons.length !== 1 ? 's' : ''}`,
                 imdb: tmdbData.vote_average?.toString() || '0.0',
                 downloadas: title.toLowerCase().replace(/[^a-z0-9]/g, '-'),
                 comment: true,
@@ -841,7 +832,11 @@
                     name: g.name
                 })),
                 actors: getActors(tmdbData),
+                subtitles: [],
+                comments: [],
                 views: Math.floor(Math.random() * 10000) + 1000,
+                downloads: 0,
+                shares: 0,
                 seasons: seasons
             };
             
@@ -866,12 +861,24 @@
         }
 
         function getActors(tmdbData) {
-            const cast = tmdbData.credits?.cast?.slice(0, 10) || [];
-            return cast.map(actor => ({
-                id: actor.id,
+            const cast = tmdbData.credits?.cast?.slice(0, 6) || [];
+            const crew = tmdbData.credits?.crew?.filter(c => c.job === 'Director').slice(0, 2) || [];
+            
+            const actors = cast.map(actor => ({
                 name: actor.name,
-                image: actor.profile_path ? `https://image.tmdb.org/t/p/w185${actor.profile_path}` : ''
+                type: 'actor',
+                role: actor.character || 'Unknown',
+                image: actor.profile_path ? `https://image.tmdb.org/t/p/w200${actor.profile_path}` : ''
             }));
+            
+            const directors = crew.map(director => ({
+                name: director.name,
+                type: 'director',
+                role: 'Director',
+                image: director.profile_path ? `https://image.tmdb.org/t/p/w200${director.profile_path}` : ''
+            }));
+            
+            return [...actors, ...directors];
         }
 
         async function generateSeasons(tmdbData) {
@@ -890,12 +897,7 @@
                     
                     seasons.push({
                         id: generateId(),
-                        season_number: i,
-                        name: `Season ${i}`,
-                        air_date: seasonData.air_date || '',
-                        episode_count: seasonData.episodes?.length || 0,
-                        overview: seasonData.overview || '',
-                        poster_path: seasonData.poster_path || '',
+                        title: `Season ${i}`,
                         episodes: episodes
                     });
                     
@@ -907,12 +909,7 @@
                     // Fallback to basic season structure
                     seasons.push({
                         id: generateId(),
-                        season_number: i,
-                        name: `Season ${i}`,
-                        air_date: '',
-                        episode_count: 0,
-                        overview: '',
-                        poster_path: '',
+                        title: `Season ${i}`,
                         episodes: []
                     });
                 }
@@ -938,16 +935,14 @@
                 
                 episodes.push({
                     id: generateId(),
-                    episode_number: episodeNumber,
                     title: episode.name || `Episode ${episodeNumber}`,
-                    description: episode.overview || '',
-                    air_date: episode.air_date || '',
-                    duration: episode.runtime ? `${Math.floor(episode.runtime / 60)}:${(episode.runtime % 60).toString().padStart(2, '0')}` : '00:45',
-                    image: episode.still_path ? `https://image.tmdb.org/t/p/w300${episode.still_path}` : '',
-                    rating: episode.vote_average || 0,
-                    downloadas: `${episode.name || `episode-${episodeNumber}`}`.toLowerCase().replace(/[^a-z0-9]/g, '-'),
-                    playas: 'video',
-                    sources: sources
+                    episode_number: episodeNumber,
+                    image: episode.still_path ? `https://image.tmdb.org/t/p/w500${episode.still_path}` : '',
+                    duration: episode.runtime ? `${Math.floor(episode.runtime / 60)}:${(episode.runtime % 60).toString().padStart(2, '0')}` : '45:00',
+                    views: 0,
+                    downloads: 0,
+                    sources: sources,
+                    subtitles: []
                 });
             }
             
@@ -962,13 +957,9 @@
             if (sourceType === 'vidsrc' || sourceType === 'both') {
                 sources.push({
                     id: generateId(),
-                    type: 'play',
-                    title: 'VidSrc 1080p',
+                    type: 'video',
+                    title: `Episode ${episodeNumber} 1080p`,
                     quality: '1080p',
-                    size: '0MB',
-                    kind: 'embed',
-                    premium: 'false',
-                    external: false,
                     url: `${VIDSRC_BASE}/tv/${seriesId}/${seasonNumber}/${episodeNumber}`
                 });
             }
@@ -977,13 +968,9 @@
             if (sourceType === 'vidjoy' || sourceType === 'both') {
                 sources.push({
                     id: generateId(),
-                    type: 'play',
-                    title: 'VidJoy 1080p',
+                    type: 'video',
+                    title: `Episode ${episodeNumber} VidJoy 1080p`,
                     quality: '1080p',
-                    size: '0MB',
-                    kind: 'embed',
-                    premium: 'false',
-                    external: false,
                     url: `${VIDJOY_BASE}/tv/${seriesId}/${seasonNumber}/${episodeNumber}`
                 });
             }
@@ -992,13 +979,9 @@
             const additionalServers = getAdditionalServers();
             sources.push(...additionalServers.map(server => ({
                 id: generateId(),
-                type: server.type || 'both',
+                type: 'video',
                 title: server.name,
                 quality: server.quality || '1080p',
-                size: '0MB',
-                kind: server.kind || 'video',
-                premium: 'false',
-                external: server.external || false,
                 url: server.url.replace('{series_id}', seriesId).replace('{season}', seasonNumber).replace('{episode}', episodeNumber)
             })));
             
@@ -1159,14 +1142,10 @@
                     if (parts.length >= 5) {
                         sources.push({
                             id: generateId(),
+                            type: 'video',
                             title: parts[0].trim(),
-                            url: parts[1].trim(),
                             quality: parts[2].trim(),
-                            type: parts[3].trim(),
-                            kind: parts[4].trim(),
-                            size: '0MB',
-                            premium: 'false',
-                            external: false
+                            url: parts[1].trim()
                         });
                     }
                 });
@@ -1182,19 +1161,23 @@
                 cover: cover || '',
                 trailer: null,
                 sources: sources,
-                label: type === 'movie' ? 'Manual Movie' : type === 'series' ? 'Manual Series' : 'Live TV',
-                sublabel: year ? `Released ${year}` : 'Manual Entry',
+                label: type === 'movie' ? 'Movie' : type === 'series' ? 'Series' : 'Live TV',
+                sublabel: year || 'Manual Entry',
                 imdb: rating || '0.0',
                 downloadas: title.toLowerCase().replace(/[^a-z0-9]/g, '-'),
                 comment: true,
-                playas: type === 'live' ? 'play' : 'video',
+                playas: 'video',
                 classification: 'PG',
                 duration: '00:00',
                 rating: parseFloat(rating) || 0,
                 created_at: new Date().toISOString().split('T')[0],
                 genres: [],
                 actors: [],
+                subtitles: [],
+                comments: [],
                 views: Math.floor(Math.random() * 1000) + 100,
+                downloads: 0,
+                shares: 0,
                 seasons: []
             };
             
@@ -1235,13 +1218,9 @@
                 trailer: null,
                 sources: [{
                     id: generateId(),
-                    type: 'play',
+                    type: 'video',
                     title: 'Live Stream',
                     quality: 'HD',
-                    size: '0MB',
-                    kind: 'embed',
-                    premium: 'false',
-                    external: false,
                     url: streamUrl
                 }],
                 label: 'Live TV',
@@ -1249,14 +1228,18 @@
                 imdb: '0.0',
                 downloadas: name.toLowerCase().replace(/[^a-z0-9]/g, '-'),
                 comment: false,
-                playas: 'play',
+                playas: 'video',
                 classification: 'G',
                 duration: '00:00',
                 rating: 0,
                 created_at: new Date().toISOString().split('T')[0],
                 genres: [{ id: 0, name: category }],
                 actors: [],
+                subtitles: [],
+                comments: [],
                 views: Math.floor(Math.random() * 500) + 50,
+                downloads: 0,
+                shares: 0,
                 seasons: []
             };
             
@@ -1360,7 +1343,7 @@
                         </div>
                         <div class="sources-list">
                             ${item.sources.map(source => 
-                                `<span class="source-item">${source.title} (${source.kind})</span>`
+                                `<span class="source-item">${source.title}</span>`
                             ).join('')}
                         </div>
                         ${item.type === 'series' && item.seasons && item.seasons.length > 0 ? `
@@ -1368,8 +1351,8 @@
                             <strong>Seasons:</strong> ${item.seasons.length} 
                             <strong>Episodes:</strong> ${item.seasons.reduce((total, season) => total + (season.episodes?.length || 0), 0)}
                             <div style="font-size: 0.8em; color: #666; margin-top: 5px;">
-                                ${item.seasons.map(season => 
-                                    `S${season.season_number}: ${season.episodes?.length || 0} episodes`
+                                ${item.seasons.map((season, index) => 
+                                    `S${index + 1}: ${season.episodes?.length || 0} episodes`
                                 ).join(' • ')}
                             </div>
                         </div>
