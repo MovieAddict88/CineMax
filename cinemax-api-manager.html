@@ -1685,8 +1685,11 @@
             
             generatedContent.forEach(content => {
                 if (content.genres) {
-                    content.genres.forEach(genreId => {
-                        const genreName = getGenreName(genreId);
+                    content.genres.forEach(genre => {
+                        // Handle both object format {id, title} and direct ID
+                        const genreId = typeof genre === 'object' ? genre.id : genre;
+                        const genreName = typeof genre === 'object' ? genre.title : getGenreName(genre);
+                        
                         if (!genres.has(genreId)) {
                             genres.set(genreId, {
                                 id: genreId,
