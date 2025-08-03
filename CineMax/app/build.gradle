@@ -25,8 +25,8 @@ android {
     buildToolsVersion '31.0.0'
     defaultConfig {
         applicationId "my.cinemax.app.free"
-        minSdkVersion 19
-        targetSdkVersion 30
+        minSdkVersion 21
+        targetSdkVersion 31
         versionCode 1
         versionName "1.0"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
@@ -67,7 +67,6 @@ android {
 dependencies {
     coreLibraryDesugaring 'com.android.tools:desugar_jdk_libs:1.1.5'
 
-
     implementation fileTree(include: ['*.jar'], dir: 'libs')
     implementation 'androidx.constraintlayout:constraintlayout:2.1.0'
 
@@ -101,14 +100,12 @@ dependencies {
     implementation 'com.squareup.picasso:picasso:2.5.2'
     implementation 'com.facebook.shimmer:shimmer:0.5.0'
     implementation 'de.hdodenhof:circleimageview:3.1.0'
-    implementation 'com.squareup.picasso:picasso:2.5.2'
     implementation 'com.jackandphantom.android:blurimage:1.2.0'
     implementation 'com.gauravk.bubblenavigation:bubblenavigation:1.0.7'
     implementation 'com.github.GrenderG:Toasty:1.4.2'
     implementation 'com.facebook.android:facebook-android-sdk:5.15.3'
     implementation 'com.google.android.gms:play-services-auth:19.2.0'
     implementation 'com.google.firebase:firebase-auth:21.0.1'
-    implementation 'com.google.android.gms:play-services-auth:19.2.0'
     implementation 'com.google.firebase:firebase-core:19.0.1'
     implementation 'com.google.firebase:firebase-messaging:22.0.0'
     implementation 'com.github.duanhong169:colorpicker:1.1.6'
@@ -125,7 +122,6 @@ dependencies {
     implementation 'com.paypal.sdk:paypal-android-sdk:2.15.3'
     implementation 'com.stripe:stripe-android:14.5.0'
     implementation 'com.google.ads.mediation:facebook:6.6.0.0'
-    implementation 'com.google.android.gms:play-services-ads:20.3.0'
     implementation 'com.google.android.ads:mediation-test-suite:2.0.0'
     implementation 'com.applovin:applovin-sdk:10.3.3'
     implementation 'com.google.ads.mediation:applovin:10.3.3.0'
@@ -133,6 +129,10 @@ dependencies {
     implementation 'com.unity3d.ads:unity-ads:3.7.5'
     implementation 'com.google.ads.mediation:unity:3.7.5.0'
 
+    // Room database dependencies for persistent storage
+    implementation 'androidx.room:room-runtime:2.3.0'
+    annotationProcessor 'androidx.room:room-compiler:2.3.0'
+    implementation 'androidx.room:room-rxjava2:2.3.0'
 
     implementation files('libs/YouTubeAndroidPlayerApi.jar')
     implementation 'com.github.congle7997:GoogleIAP:1.0.8'

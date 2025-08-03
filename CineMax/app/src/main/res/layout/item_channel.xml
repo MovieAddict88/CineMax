@@ -22,10 +22,10 @@
                 android:focusable="true"
                 android:id="@+id/image_view_item_channel"
                 android:scaleType="centerCrop"
-                android:adjustViewBounds="true"
+                android:adjustViewBounds="false"
                 android:src="@drawable/place_holder_channel"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content" />
+                android:layout_height="180dp" />
             <RelativeLayout
                 android:elevation="4dp"
                 android:paddingTop="10dp"
