@@ -137,5 +137,9 @@ dependencies {
     implementation files('libs/YouTubeAndroidPlayerApi.jar')
     implementation 'com.github.congle7997:GoogleIAP:1.0.8'
 
+    // Room database (DAO) for local caching
+    implementation "androidx.room:room-runtime:2.4.2"
+    annotationProcessor "androidx.room:room-compiler:2.4.2"
+
 }
 apply plugin: 'com.google.gms.google-services'
