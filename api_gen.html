@@ -660,8 +660,23 @@
                         <button class="btn btn-secondary" onclick="importData()">Import Data</button>
                     </div>
                     <div class="form-group">
+                        <label>JSON Output Format</label>
+                        <div style="display: flex; align-items: center; gap: 15px; margin-top: 10px;">
+                            <label class="toggle-switch">
+                                <input type="checkbox" id="compact-json">
+                                <span class="slider"></span>
+                            </label>
+                            <span>Compact JSON (smaller file size)</span>
+                        </div>
+                        <small style="color: var(--text-secondary); margin-top: 5px; display: block;">
+                            Compact JSON reduces file size by removing whitespace and formatting. 
+                            Both formats are functionally identical for the CineMax app.
+                        </small>
+                    </div>
+                    <div class="form-group">
                         <button class="btn btn-primary" onclick="exportData()">Export Current Data</button>
                         <button class="btn btn-warning" onclick="exportSample()">Export Sample Format</button>
+                        <button class="btn btn-secondary" onclick="showSizeComparison()">Show Size Comparison</button>
                     </div>
                 </div>
 
@@ -901,11 +916,12 @@
              console.log('🔧 Fixed: Root-level movies array for GenreActivity & TV Series');
              console.log('🎯 Fixed: Source kind values - "play" for embeds/live TV, "both" for direct links');
              console.log('📺 Enhanced: Multiple quality options per server (1080p + 720p + 480p)');
+             console.log('🗜️ NEW: Compact JSON export option for smaller file sizes');
              console.log('🧪 Test with: testSourceGeneration()');
              
-             // Show info about the fix
+             // Show info about the features
              setTimeout(() => {
-                 showStatus('success', 'ENHANCED: Multi-server sources matching existing app structure! No CineMax changes needed!');
+                 showStatus('success', 'ENHANCED: Multi-server sources + Compact JSON export! Both formats work with CineMax app!');
              }, 2000);
          });
 
@@ -1923,7 +1939,9 @@
                  channels: currentData.channels || []
              };
              
-             const dataStr = JSON.stringify(exportData, null, 2);
+             // Check if compact JSON is enabled
+             const isCompact = document.getElementById('compact-json').checked;
+             const dataStr = isCompact ? JSON.stringify(exportData) : JSON.stringify(exportData, null, 2);
              const dataBlob = new Blob([dataStr], { type: 'application/json' });
              
              const link = document.createElement('a');
@@ -1931,7 +1949,9 @@
              link.download = `cinemax-data-${new Date().toISOString().split('T')[0]}.json`;
              link.click();
              
-             showStatus('success', 'Data exported successfully with root-level movies array!');
+             const formatType = isCompact ? 'compact' : 'expanded';
+             const fileSize = (dataStr.length / 1024).toFixed(1);
+             showStatus('success', `Data exported successfully in ${formatType} format! File size: ${fileSize} KB`);
          }
 
                  function exportSample() {
@@ -2058,7 +2078,9 @@
                  channels: []
              };
             
-            const dataStr = JSON.stringify(sampleData, null, 2);
+            // Check if compact JSON is enabled
+            const isCompact = document.getElementById('compact-json').checked;
+            const dataStr = isCompact ? JSON.stringify(sampleData) : JSON.stringify(sampleData, null, 2);
             const dataBlob = new Blob([dataStr], { type: 'application/json' });
             
             const link = document.createElement('a');
@@ -2066,7 +2088,100 @@
             link.download = 'cinemax-sample-format.json';
             link.click();
             
-            showStatus('success', 'Sample format exported!');
+            const formatType = isCompact ? 'compact' : 'expanded';
+            const fileSize = (dataStr.length / 1024).toFixed(1);
+            showStatus('success', `Sample format exported in ${formatType} format! File size: ${fileSize} KB`);
+        }
+
+        function showSizeComparison() {
+            // Create sample data for comparison
+            const sampleData = {
+                api_info: {
+                    version: "2.0",
+                    description: "Sample data for size comparison",
+                    last_updated: new Date().toISOString().split('T')[0],
+                    total_movies: 5,
+                    total_series: 3,
+                    total_channels: 2
+                },
+                home: {
+                    slides: [
+                        {
+                            id: 1,
+                            title: "Sample Movie",
+                            type: "movie",
+                            image: "https://example.com/poster.jpg",
+                            url: "movies/1",
+                            poster: {
+                                id: 1,
+                                title: "Sample Movie",
+                                type: "movie",
+                                sources: [
+                                    {
+                                        id: 1,
+                                        type: "embed",
+                                        title: "VidSrc Server 1080p",
+                                        quality: "1080p",
+                                        size: "Auto",
+                                        kind: "play",
+                                        premium: "false",
+                                        external: false,
+                                        url: "https://vidsrc.net/embed/movie/123"
+                                    }
+                                ]
+                            }
+                        }
+                    ],
+                    featuredMovies: [],
+                    channels: []
+                },
+                movies: [],
+                actors: [],
+                genres: [],
+                channels: []
+            };
+            
+            // Generate both formats
+            const expandedJson = JSON.stringify(sampleData, null, 2);
+            const compactJson = JSON.stringify(sampleData);
+            
+            const expandedSize = expandedJson.length;
+            const compactSize = compactJson.length;
+            const sizeReduction = ((expandedSize - compactSize) / expandedSize * 100).toFixed(1);
+            
+            const comparison = `
+                <div style="background: var(--surface-light); padding: 20px; border-radius: 10px; margin: 15px 0;">
+                    <h3 style="color: var(--primary); margin-bottom: 15px;">📊 JSON Size Comparison</h3>
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+                        <div>
+                            <h4 style="color: var(--success);">📄 Expanded JSON</h4>
+                            <p>Size: ${(expandedSize / 1024).toFixed(1)} KB</p>
+                            <p>Characters: ${expandedSize.toLocaleString()}</p>
+                            <p>Readable format with indentation</p>
+                        </div>
+                        <div>
+                            <h4 style="color: var(--accent);">🗜️ Compact JSON</h4>
+                            <p>Size: ${(compactSize / 1024).toFixed(1)} KB</p>
+                            <p>Characters: ${compactSize.toLocaleString()}</p>
+                            <p>Minimal whitespace, smaller size</p>
+                        </div>
+                    </div>
+                    <div style="margin-top: 15px; padding: 10px; background: var(--background); border-radius: 5px;">
+                        <strong>💾 Size Reduction: ${sizeReduction}% smaller with compact format</strong>
+                        <br><small>Both formats are functionally identical for the CineMax app!</small>
+                    </div>
+                </div>
+            `;
+            
+            // Show in a modal or status
+            showStatus('info', `Size comparison: Expanded ${(expandedSize / 1024).toFixed(1)}KB vs Compact ${(compactSize / 1024).toFixed(1)}KB (${sizeReduction}% smaller)`);
+            
+            // Also log to console for detailed view
+            console.log('JSON Size Comparison:', {
+                expanded: { size: expandedSize, sizeKB: (expandedSize / 1024).toFixed(1) },
+                compact: { size: compactSize, sizeKB: (compactSize / 1024).toFixed(1) },
+                reduction: `${sizeReduction}%`
+            });
         }
 
         function clearAllData() {
