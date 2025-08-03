@@ -442,6 +442,7 @@
 
             <button class="btn" onclick="generateContent()">🚀 Generate Content</button>
             <button class="btn btn-secondary" onclick="previewContent()">👁️ Preview</button>
+            <button class="btn btn-success" onclick="testDisplay()">🧪 Test Display</button>
         </div>
 
         <!-- Manual Input Tab -->
@@ -661,32 +662,46 @@
         let generatedContent = [];
         let bulkGenerationActive = false;
         let currentBulkPage = 1;
-        let nextId = 1; // Global ID counter
+        let nextId = 1; // Start with simple ID counter
+
+        // Test display function
+        function testDisplay() {
+            console.log('Testing display with simple data');
+            const testContent = [{
+                id: nextId++,
+                type: 'movie',
+                title: 'Test Movie',
+                year: '2024',
+                description: 'This is a test movie to verify display works',
+                image: 'https://via.placeholder.com/300x450?text=Test+Movie',
+                rating: 7.5,
+                sources: [{ 
+                    id: nextId++, 
+                    title: 'Test Source 1080p', 
+                    type: 'video', 
+                    quality: '1080p', 
+                    size: '0MB',
+                    kind: 'both',
+                    premium: 'false',
+                    external: false,
+                    url: 'https://example.com/test' 
+                }],
+                actors: [],
+                genres: [],
+                seasons: []
+            }];
+            
+            generatedContent.push(testContent[0]);
+            displayContent(testContent);
+            updateStats();
+            showSuccess('Test content displayed!');
+        }
 
         // Initialize
         document.addEventListener('DOMContentLoaded', function() {
             console.log('DOM loaded, initializing...'); // Debug log
             loadStoredData();
             updateStats();
-            
-            // Test display with dummy data
-            setTimeout(() => {
-                if (generatedContent.length === 0) {
-                    console.log('No stored content, testing display with dummy data');
-                    const testContent = [{
-                        id: 1,
-                        type: 'movie',
-                        title: 'Test Movie',
-                        year: '2024',
-                        description: 'This is a test movie',
-                        image: 'https://via.placeholder.com/300x450?text=Test+Movie',
-                        rating: 7.5,
-                        sources: [{ id: 1, title: 'Test Source', type: 'video', quality: '1080p', url: 'test' }],
-                        seasons: []
-                    }];
-                    displayContent(testContent);
-                }
-            }, 1000);
         });
 
         // Tab switching
@@ -1041,6 +1056,10 @@
                 
                 generatedContent.push(content);
                 saveData();
+                
+                console.log('About to display content:', [content]);
+                console.log('Current generatedContent length:', generatedContent.length);
+                
                 displayContent([content]);
                 updateStats();
                 showSuccess('Content generated successfully!');
@@ -1573,6 +1592,7 @@
         function clearData() {
             if (confirm('Are you sure you want to clear all generated data? This cannot be undone.')) {
                 generatedContent = [];
+                nextId = 1; // Reset ID counter
                 localStorage.removeItem('cinemax_generated_content');
                 document.getElementById('content').innerHTML = '';
                 document.getElementById('results').style.display = 'none';
@@ -1652,6 +1672,7 @@
         }
 
         function saveData() {
+            // Save as direct array, not backup format
             localStorage.setItem('cinemax_generated_content', JSON.stringify(generatedContent));
         }
 
@@ -1660,18 +1681,12 @@
             console.log('Loading stored data:', stored); // Debug log
             if (stored) {
                 try {
-                    const parsedData = JSON.parse(stored);
-                    console.log('Parsed stored data:', parsedData); // Debug log
+                    generatedContent = JSON.parse(stored);
+                    console.log('Parsed stored data:', generatedContent); // Debug log
                     
-                    // Check if it's a backup format with content array
-                    if (parsedData.content && Array.isArray(parsedData.content)) {
-                        generatedContent = parsedData.content;
-                        console.log('Loaded from backup format');
-                    } else if (Array.isArray(parsedData)) {
-                        generatedContent = parsedData;
-                        console.log('Loaded from direct array format');
-                    } else {
-                        console.error('Unknown data format:', parsedData);
+                    // Ensure it's an array
+                    if (!Array.isArray(generatedContent)) {
+                        console.error('Stored data is not an array:', generatedContent);
                         generatedContent = [];
                         return;
                     }
