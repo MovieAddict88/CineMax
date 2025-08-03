@@ -439,13 +439,17 @@ public class LazyPosterAdapter extends RecyclerView.Adapter<LazyPosterAdapter.Po
         private final TextView titleView;
         private final TextView ratingView;
         private final TextView yearView;
+        private final TextView labelView;
+        private final TextView subLabelView;
         
         public PosterViewHolder(@NonNull View itemView) {
             super(itemView);
-            imageView = itemView.findViewById(R.id.image_view_poster);
-            titleView = itemView.findViewById(R.id.text_view_title);
-            ratingView = itemView.findViewById(R.id.text_view_rating);
-            yearView = itemView.findViewById(R.id.text_view_year);
+            imageView = itemView.findViewById(R.id.image_view_item_poster_image);
+            titleView = itemView.findViewById(R.id.text_view_item_poster_label);
+            ratingView = itemView.findViewById(R.id.text_view_item_poster_sub_label);
+            yearView = itemView.findViewById(R.id.text_view_item_poster_label);
+            labelView = itemView.findViewById(R.id.text_view_item_poster_label);
+            subLabelView = itemView.findViewById(R.id.text_view_item_poster_sub_label);
             
             itemView.setOnClickListener(v -> {
                 int position = getAdapterPosition();
@@ -459,14 +463,16 @@ public class LazyPosterAdapter extends RecyclerView.Adapter<LazyPosterAdapter.Po
         }
         
         public void bind(Poster poster) {
-            // Set title
-            if (titleView != null) {
-                titleView.setText(poster.getTitle());
+            // Set title/label
+            if (labelView != null && poster.getTitle() != null) {
+                labelView.setText(poster.getTitle());
+                labelView.setVisibility(View.VISIBLE);
             }
             
-            // Set rating
-            if (ratingView != null && poster.getRating() != null) {
-                ratingView.setText(String.format("%.1f", poster.getRating()));
+            // Set rating/sub-label
+            if (subLabelView != null && poster.getRating() != null) {
+                subLabelView.setText(String.format("%.1f", poster.getRating()));
+                subLabelView.setVisibility(View.VISIBLE);
             }
             
             // Set year
@@ -478,8 +484,8 @@ public class LazyPosterAdapter extends RecyclerView.Adapter<LazyPosterAdapter.Po
             if (imageView != null && poster.getImage() != null) {
                 Picasso.get()
                     .load(poster.getImage())
-                    .placeholder(R.drawable.placeholder_poster)
-                    .error(R.drawable.error_poster)
+                    .placeholder(R.drawable.poster_placeholder)
+                    .error(R.drawable.poster_placeholder)
                     .into(imageView);
             }
         }
