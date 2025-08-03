@@ -692,6 +692,7 @@
         let videoSources = [];
         let isBulkGenerating = false;
         let bulkProgress = 0;
+        let nextId = 1; // Incremental ID counter
 
         // TMDB API Configuration
         const TMDB_API_KEY = 'ec926176bf467b3f7735e3154238c161';
@@ -761,17 +762,18 @@
         // Generate video sources for a TMDB ID
         async function generateVideoSources(tmdbId, contentType) {
             const sources = [];
+            let sourceId = nextId * 100; // Use incremental source IDs
             
             // Multiple quality sources for VidSrc
             const qualities = [
-                { quality: '1080p', size: '264MB', id: tmdbId * 10 + 1 },
-                { quality: '720p', size: '128MB', id: tmdbId * 10 + 2 },
-                { quality: '480p', size: '64MB', id: tmdbId * 10 + 3 }
+                { quality: '1080p', size: '264MB' },
+                { quality: '720p', size: '128MB' },
+                { quality: '480p', size: '64MB' }
             ];
             
             qualities.forEach((q, index) => {
                 sources.push({
-                    id: q.id,
+                    id: sourceId++,
                     type: 'video',
                     title: `${contentType === 'movie' ? 'Movie' : 'Series'} ${q.quality}`,
                     quality: q.quality,
@@ -785,7 +787,7 @@
             
             // Add VidJoy as alternative source
             sources.push({
-                id: tmdbId * 10 + 4,
+                id: sourceId++,
                 type: 'video',
                 title: 'VidJoy Alternative',
                 quality: '720p',
@@ -808,6 +810,9 @@
         // Generate content from TMDB
         async function generateContent() {
             showLoading(true);
+            
+            // Reset ID counter for new generation
+            nextId = 1;
             
             try {
                 const contentType = document.getElementById('contentType').value;
@@ -836,7 +841,8 @@
                             const trailer = generateTrailerUrl(movie.title, movie.release_date?.split('-')[0]);
                             
                             allContent.push({
-                                id: movie.id,
+                                id: nextId++,
+                                tmdb_id: movie.id, // Store original TMDB ID separately
                                 title: movie.title,
                                 type: 'movie',
                                 label: "Latest Movie",
@@ -855,7 +861,7 @@
                                 genres: movie.genres?.map(g => ({ id: g.id, title: g.name })) || [],
                                 sources: sources,
                                 trailer: {
-                                    id: movie.id * 1000,
+                                    id: sourceId++,
                                     type: 'video',
                                     title: `${movie.title} Trailer`,
                                     url: trailer
@@ -875,7 +881,7 @@
                                 shares: Math.floor(Math.random() * 5000) + 500,
                                 created_at: new Date().toISOString().split('T')[0],
                                 contentType: "movie",
-                                url: `movies/${movie.id}`
+                                url: `movies/${allContent[allContent.length - 1].id}`
                             });
                         }
                     }
@@ -894,7 +900,8 @@
                             const trailer = generateTrailerUrl(show.name, show.first_air_date?.split('-')[0]);
                             
                             allContent.push({
-                                id: show.id,
+                                id: nextId++,
+                                tmdb_id: show.id, // Store original TMDB ID separately
                                 title: show.name,
                                 type: 'series', // Changed from 'tv' to 'series' to match CineMax
                                 label: "Latest Series",
@@ -913,7 +920,7 @@
                                 genres: show.genres?.map(g => ({ id: g.id, title: g.name })) || [],
                                 sources: sources,
                                 trailer: {
-                                    id: show.id * 1000,
+                                    id: sourceId++,
                                     type: 'video',
                                     title: `${show.name} Trailer`,
                                     url: trailer
@@ -933,12 +940,12 @@
                                 shares: Math.floor(Math.random() * 5000) + 500,
                                 created_at: new Date().toISOString().split('T')[0],
                                 contentType: "series",
-                                url: `movies/${show.id}`,
+                                url: `movies/${allContent[allContent.length - 1].id}`,
                                 seasons: show.seasons?.map(season => ({
                                     id: season.id,
                                     title: `Season ${season.season_number}`,
                                     episodes: season.episode_count ? Array.from({ length: Math.min(season.episode_count, 5) }, (_, i) => ({
-                                        id: season.id * 100 + i + 1,
+                                        id: nextId * 1000 + i + 1,
                                         title: `Episode ${i + 1}`,
                                         episode_number: i + 1,
                                         description: `Episode ${i + 1} of ${show.name}`,
@@ -1202,6 +1209,9 @@
             
             showLoading(true);
             
+            // Use next available ID for individual content
+            const contentId = nextId++;
+            
             try {
                 let content = null;
                 
@@ -1214,7 +1224,8 @@
                     const trailer = includeTrailer ? generateTrailerUrl(movie.title, movie.release_date?.split('-')[0]) : null;
                     
                     content = {
-                        id: movie.id,
+                        id: contentId,
+                        tmdb_id: movie.id,
                         title: movie.title,
                         type: 'movie',
                         label: "Latest Movie",
@@ -1233,7 +1244,7 @@
                         genres: movie.genres?.map(g => ({ id: g.id, title: g.name })) || [],
                         sources: sources,
                         trailer: trailer ? {
-                            id: movie.id * 1000,
+                            id: nextId * 1000,
                             type: 'video',
                             title: `${movie.title} Trailer`,
                             url: trailer
@@ -1253,7 +1264,7 @@
                         shares: Math.floor(Math.random() * 5000) + 500,
                         created_at: new Date().toISOString().split('T')[0],
                         contentType: "movie",
-                        url: `movies/${movie.id}`,
+                        url: `movies/${content.id}`,
                         subtitles: includeSubtitles ? await generateSubtitles(movie.id, 'movie') : []
                     };
                 } else if (contentType === 'tv') {
@@ -1265,7 +1276,8 @@
                     const trailer = includeTrailer ? generateTrailerUrl(series.name, series.first_air_date?.split('-')[0]) : null;
                     
                     content = {
-                        id: series.id,
+                        id: contentId,
+                        tmdb_id: series.id,
                         title: series.name,
                         type: 'series', // Changed from 'tv' to 'series' to match CineMax
                         label: "Latest Series",
@@ -1284,7 +1296,7 @@
                         genres: series.genres?.map(g => ({ id: g.id, title: g.name })) || [],
                         sources: sources,
                         trailer: trailer ? {
-                            id: series.id * 1000,
+                            id: nextId * 1000,
                             type: 'video',
                             title: `${series.name} Trailer`,
                             url: trailer
@@ -1304,12 +1316,12 @@
                         shares: Math.floor(Math.random() * 5000) + 500,
                         created_at: new Date().toISOString().split('T')[0],
                         contentType: "series",
-                        url: `movies/${series.id}`,
+                        url: `movies/${content.id}`,
                         seasons: series.seasons?.map(season => ({
                             id: season.id,
                             title: `Season ${season.season_number}`,
-                                                                episodes: season.episode_count ? Array.from({ length: Math.min(season.episode_count, 5) }, (_, i) => ({
-                                        id: season.id * 100 + i + 1,
+                            episodes: season.episode_count ? Array.from({ length: Math.min(season.episode_count, 5) }, (_, i) => ({
+                                id: nextId * 1000 + i + 1,
                                         title: `Episode ${i + 1}`,
                                         episode_number: i + 1,
                                         description: `Episode ${i + 1} of ${series.name}`,
