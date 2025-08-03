@@ -1025,6 +1025,20 @@ public class HomeActivity extends AppCompatActivity implements NavigationView.On
         }
     }
 
+    /**
+     * Called when HomeFragment is ready to receive data
+     */
+    public void onHomeFragmentReady() {
+        Log.d("HomeActivity", "HomeFragment is ready, checking for cached data");
+        
+        // If we have cached data but fragment wasn't ready before, update it now
+        if (dataLoaded && cachedJsonResponse != null) {
+            new Handler().postDelayed(() -> {
+                updateHomeFragmentWithJsonData(cachedJsonResponse);
+            }, 100);
+        }
+    }
+
     public void goToTV() {
         viewPager.setCurrentItem(3);
     }
@@ -1291,11 +1305,33 @@ public class HomeActivity extends AppCompatActivity implements NavigationView.On
         // Update HomeFragment with the JSON data
         Log.d("JSON_API", "Updating HomeFragment with JSON data");
         
-        // Get the HomeFragment and update it
-        if (mFragmentList.size() > 0 && mFragmentList.get(0) instanceof HomeFragment) {
-            HomeFragment homeFragment = (HomeFragment) mFragmentList.get(0);
-            // Pass the JSON data to the fragment
-            homeFragment.updateWithJsonData(jsonResponse);
+        try {
+            // First check if fragments are initialized
+            if (mFragmentList == null || mFragmentList.isEmpty()) {
+                Log.w("JSON_API", "Fragment list not initialized, waiting...");
+                // Retry after a short delay
+                new Handler().postDelayed(() -> updateHomeFragmentWithJsonData(jsonResponse), 200);
+                return;
+            }
+            
+            // Get the HomeFragment and update it
+            if (mFragmentList.size() > 0 && mFragmentList.get(0) instanceof HomeFragment) {
+                HomeFragment homeFragment = (HomeFragment) mFragmentList.get(0);
+                
+                // Check if fragment is added and has a view
+                if (homeFragment.isAdded() && homeFragment.getView() != null) {
+                    Log.d("JSON_API", "HomeFragment is ready, updating with data");
+                    homeFragment.updateWithJsonData(jsonResponse);
+                } else {
+                    Log.w("JSON_API", "HomeFragment not ready, retrying...");
+                    // Retry after fragment is ready
+                    new Handler().postDelayed(() -> updateHomeFragmentWithJsonData(jsonResponse), 300);
+                }
+            } else {
+                Log.e("JSON_API", "HomeFragment not found in fragment list");
+            }
+        } catch (Exception e) {
+            Log.e("JSON_API", "Error updating HomeFragment", e);
         }
     }
     

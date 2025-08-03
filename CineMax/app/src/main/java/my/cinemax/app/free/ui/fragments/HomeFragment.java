@@ -87,6 +87,17 @@ public class HomeFragment extends Fragment {
         // Show loading immediately when fragment is created
         showShimmerLoading();
         
+        // Add timeout to prevent infinite loading (10 seconds)
+        new Handler().postDelayed(() -> {
+            if (!isDataLoaded && isLoadingInProgress) {
+                Log.w("HomeFragment", "Loading timeout, stopping shimmer and showing error");
+                isLoadingInProgress = false;
+                if (getActivity() != null && isAdded()) {
+                    showErrorView();
+                }
+            }
+        }, 10000); // 10 second timeout
+        
         Log.d("HomeFragment", "Fragment created, showing shimmer loading");
         
         return view;
@@ -100,6 +111,11 @@ public class HomeFragment extends Fragment {
         if (!isDataLoaded && !isLoadingInProgress) {
             Log.d("HomeFragment", "Fragment resumed without data, showing shimmer");
             showShimmerLoading();
+            
+            // Notify HomeActivity that fragment is ready for data
+            if (getActivity() instanceof HomeActivity) {
+                ((HomeActivity) getActivity()).onHomeFragmentReady();
+            }
         }
     }
 
@@ -357,12 +373,19 @@ public class HomeFragment extends Fragment {
         if (jsonResponse != null) {
             Log.d("HomeFragment", "Updating fragment with JSON data");
             
-            isLoadingInProgress = true;
-            showShimmerLoading();
+            // Don't show shimmer again if we're updating with cached data
+            // Only show loading if we don't have data yet
+            if (!isDataLoaded) {
+                isLoadingInProgress = true;
+                showShimmerLoading();
+            }
             
-            // Clear existing data
-            dataList.clear();
-            dataList.add(new Data().setViewType(0));
+            // Process data in background thread to prevent UI blocking
+            new Thread(() -> {
+                try {
+                    // Clear existing data
+                    dataList.clear();
+                    dataList.add(new Data().setViewType(0));
             
             // Get home data
             JsonApiResponse.HomeData homeData = jsonResponse.getHome();
@@ -421,15 +444,34 @@ public class HomeFragment extends Fragment {
                             }
                         }
                     }
+                    }
                 }
-            }
+                
+                // Update UI on main thread
+                if (getActivity() != null) {
+                    getActivity().runOnUiThread(() -> {
+                        try {
+                            isDataLoaded = true;
+                            isLoadingInProgress = false;
+                            showListView();
+                            homeAdapter.notifyDataSetChanged();
+                            
+                            Log.d("HomeFragment", "Fragment updated with JSON data successfully - Total items: " + dataList.size());
+                        } catch (Exception e) {
+                            Log.e("HomeFragment", "Error updating UI", e);
+                            showErrorView();
+                        }
+                    });
+                }
+                
+                } catch (Exception e) {
+                    Log.e("HomeFragment", "Error processing JSON data", e);
+                    if (getActivity() != null) {
+                        getActivity().runOnUiThread(() -> showErrorView());
+                    }
+                }
+            }).start();
             
-            isDataLoaded = true;
-            isLoadingInProgress = false;
-            showListView();
-            homeAdapter.notifyDataSetChanged();
-            
-            Log.d("HomeFragment", "Fragment updated with JSON data successfully");
         } else {
             Log.w("HomeFragment", "Received null JSON response");
             showErrorView();
