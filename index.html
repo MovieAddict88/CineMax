@@ -748,7 +748,7 @@
                  console.log('VIDSRC_BASE:', VIDSRC_BASE);
                  console.log('VIDJOY_BASE:', VIDJOY_BASE);
                  
-                 // Test movie source generation
+                 // Test movie source generation with multiple quality options
                  const testMovieId = 550; // Fight Club
                  const movieSources = [
                      {
@@ -764,9 +764,31 @@
                      },
                      {
                          id: 2,
+                         type: "embed",
+                         title: "VidSrc Server 720p",
+                         quality: "720p",
+                         size: "Auto",
+                         kind: "play",
+                         premium: "false",
+                         external: false,
+                         url: `${VIDSRC_BASE}/movie/${testMovieId}`
+                     },
+                     {
+                         id: 3,
                          type: "embed", 
                          title: "VidJoy Server 1080p",
                          quality: "1080p",
+                         size: "Auto",
+                         kind: "play",
+                         premium: "false",
+                         external: false,
+                         url: `${VIDJOY_BASE}/movie/${testMovieId}`
+                     },
+                     {
+                         id: 4,
+                         type: "embed", 
+                         title: "VidJoy Server 720p",
+                         quality: "720p",
                          size: "Auto",
                          kind: "play",
                          premium: "false",
@@ -777,11 +799,11 @@
                  
                  console.log('Test movie sources:', movieSources);
                  
-                 // Test series source generation
+                 // Test series source generation with multiple quality options
                  const testSeriesId = 1399; // Game of Thrones
                  const seriesSources = [
                      {
-                         id: 3,
+                         id: 5,
                          type: "embed",
                          title: "VidSrc Server 1080p",
                          quality: "1080p",
@@ -792,10 +814,32 @@
                          url: `${VIDSRC_BASE}/tv/${testSeriesId}/1/1`
                      },
                      {
-                         id: 4,
+                         id: 6,
+                         type: "embed",
+                         title: "VidSrc Server 720p",
+                         quality: "720p",
+                         size: "Auto",
+                         kind: "play",
+                         premium: "false",
+                         external: false,
+                         url: `${VIDSRC_BASE}/tv/${testSeriesId}/1/1`
+                     },
+                     {
+                         id: 7,
                          type: "embed", 
                          title: "VidJoy Server 1080p",
                          quality: "1080p",
+                         size: "Auto",
+                         kind: "play",
+                         premium: "false",
+                         external: false,
+                         url: `${VIDJOY_BASE}/tv/${testSeriesId}/1/1`
+                     },
+                     {
+                         id: 8,
+                         type: "embed", 
+                         title: "VidJoy Server 720p",
+                         quality: "720p",
                          size: "Auto",
                          kind: "play",
                          premium: "false",
@@ -809,14 +853,15 @@
              };
              
              console.log('✅ CineMax Enhanced API Manager loaded!');
-             console.log('🎬 Auto-sources: VidSrc.net + VidJoy.pro');
+             console.log('🎬 Auto-sources: VidSrc.net + VidJoy.pro (Multiple Quality Options)');
              console.log('🔧 Fixed: Root-level movies array for GenreActivity & TV Series');
              console.log('🎯 Fixed: Source kind values - "play" for embeds/live TV, "both" for direct links');
+             console.log('📺 Enhanced: Multiple quality options per server (1080p + 720p)');
              console.log('🧪 Test with: testSourceGeneration()');
              
              // Show info about the fix
              setTimeout(() => {
-                 showStatus('success', 'FIXED: "No sources" issue! Sources now have kind="play" for proper playback!');
+                 showStatus('success', 'ENHANCED: Multiple server quality options like AZ2 channel! Now 4 sources per content!');
              }, 2000);
          });
 
@@ -955,8 +1000,9 @@
                  }
              });
 
-             // Auto-generate VidSrc and VidJoy sources
+             // Auto-generate VidSrc and VidJoy sources with multiple quality options
              const autoSources = [
+                 // VidSrc Server - Multiple Quality Options
                  {
                      id: nextId++,
                      type: "embed",
@@ -970,9 +1016,32 @@
                  },
                  {
                      id: nextId++,
+                     type: "embed",
+                     title: "VidSrc Server 720p",
+                     quality: "720p",
+                     size: "Auto",
+                     kind: "play",
+                     premium: "false",
+                     external: false,
+                     url: `${VIDSRC_BASE}/movie/${tmdbId}`
+                 },
+                 // VidJoy Server - Multiple Quality Options
+                 {
+                     id: nextId++,
                      type: "embed", 
                      title: "VidJoy Server 1080p",
                      quality: "1080p",
+                     size: "Auto",
+                     kind: "play",
+                     premium: "false",
+                     external: false,
+                     url: `${VIDJOY_BASE}/movie/${tmdbId}`
+                 },
+                 {
+                     id: nextId++,
+                     type: "embed", 
+                     title: "VidJoy Server 720p",
+                     quality: "720p",
                      size: "Auto",
                      kind: "play",
                      premium: "false",
@@ -1062,8 +1131,9 @@
                 const episodes = [];
                 
                                  for (const episodeData of seasonData.episodes || []) {
-                     // Auto-generate VidSrc and VidJoy sources for each episode
+                     // Auto-generate VidSrc and VidJoy sources with multiple quality options for each episode
                      const episodeSources = [
+                         // VidSrc Server - Multiple Quality Options
                          {
                              id: nextId++,
                              type: "embed",
@@ -1078,8 +1148,31 @@
                          {
                              id: nextId++,
                              type: "embed",
+                             title: "VidSrc Server 720p",
+                             quality: "720p",
+                             size: "Auto",
+                             kind: "play",
+                             premium: "false",
+                             external: false,
+                             url: `${VIDSRC_BASE}/tv/${tmdbId}/${seasonNum}/${episodeData.episode_number}`
+                         },
+                         // VidJoy Server - Multiple Quality Options
+                         {
+                             id: nextId++,
+                             type: "embed",
                              title: "VidJoy Server 1080p", 
                              quality: "1080p",
+                             size: "Auto",
+                             kind: "play",
+                             premium: "false",
+                             external: false,
+                             url: `${VIDJOY_BASE}/tv/${tmdbId}/${seasonNum}/${episodeData.episode_number}`
+                         },
+                         {
+                             id: nextId++,
+                             type: "embed",
+                             title: "VidJoy Server 720p", 
+                             quality: "720p",
                              size: "Auto",
                              kind: "play",
                              premium: "false",
