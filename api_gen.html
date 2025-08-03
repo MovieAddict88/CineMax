@@ -1092,6 +1092,10 @@
             });
 
             currentData.home.featuredMovies.push(movie);
+            
+            // Ensure movie has actors and genres arrays (even if empty)
+            if (!movie.actors) movie.actors = [];
+            if (!movie.genres) movie.genres = [];
             currentData.api_info.total_movies++;
             
             saveData();
@@ -1259,6 +1263,10 @@
             });
 
             currentData.home.featuredMovies.push(series);
+            
+            // Ensure series has actors and genres arrays (even if empty)
+            if (!series.actors) series.actors = [];
+            if (!series.genres) series.genres = [];
             currentData.api_info.total_series++;
             
             saveData();
@@ -1335,8 +1343,14 @@
          function generateActorsFromContent() {
              const actorMap = new Map();
              
-             (currentData.home.featuredMovies || []).forEach(content => {
-                 if (content.actors) {
+             // Process both slides and featuredMovies to ensure all actors are captured
+             const allContent = [
+                 ...(currentData.home.slides || []).map(slide => slide.poster || slide),
+                 ...(currentData.home.featuredMovies || [])
+             ];
+             
+             allContent.forEach(content => {
+                 if (content && content.actors && Array.isArray(content.actors)) {
                      content.actors.forEach(actor => {
                          if (actor.name && !actorMap.has(actor.name)) {
                              actorMap.set(actor.name, {
@@ -1374,8 +1388,14 @@
          function generateGenresFromContent() {
              const genreMap = new Map();
              
-             (currentData.home.featuredMovies || []).forEach(content => {
-                 if (content.genres) {
+             // Process both slides and featuredMovies to ensure all genres are captured
+             const allContent = [
+                 ...(currentData.home.slides || []).map(slide => slide.poster || slide),
+                 ...(currentData.home.featuredMovies || [])
+             ];
+             
+             allContent.forEach(content => {
+                 if (content && content.genres && Array.isArray(content.genres)) {
                      content.genres.forEach(genre => {
                          const genreTitle = genre.title || genre.name;
                          if (genreTitle && !genreMap.has(genreTitle)) {
@@ -1571,6 +1591,10 @@
                 
                 currentData.home.channels.push(channel);
                 currentData.api_info.total_channels++;
+                
+                // Ensure channel has actors and genres arrays (even if empty)
+                if (!channel.actors) channel.actors = [];
+                if (!channel.genres) channel.genres = [];
             } else {
                 currentData.home.slides.push({
                     id: content.id,
@@ -1582,6 +1606,10 @@
                 });
                 
                 currentData.home.featuredMovies.push(content);
+                
+                // Ensure content has actors and genres arrays (even if empty)
+                if (!content.actors) content.actors = [];
+                if (!content.genres) content.genres = [];
                 
                 if (type === 'movie') {
                     currentData.api_info.total_movies++;
@@ -1782,9 +1810,11 @@
                  ...currentData,
                  // Add root-level movies array that includes both movies and series
                  movies: currentData.home.featuredMovies || [],
-                 // Add root-level arrays for compatibility
-                 actors: generateActorsFromContent(),
-                 genres: generateGenresFromContent()
+                 // Add root-level arrays for compatibility - ensure they're always present
+                 actors: generateActorsFromContent() || [],
+                 genres: generateGenresFromContent() || [],
+                 // Ensure channels array is present
+                 channels: currentData.channels || []
              };
              
              const dataStr = JSON.stringify(exportData, null, 2);
