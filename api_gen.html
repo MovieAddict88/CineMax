@@ -725,12 +725,15 @@
                 last_updated: new Date().toISOString().split('T')[0],
                 total_movies: 0,
                 total_series: 0,
-                total_channels: 0
+                total_channels: 0,
+                total_actors: 0 // NEW: keep track of actors count
             },
             home: {
                 slides: [],
                 featuredMovies: [],
-                channels: []
+                channels: [],
+                actors: [], // NEW: store actors generated from content
+                genres: []  // NEW: store genres generated from content
             }
         };
 
@@ -1777,14 +1780,19 @@
         }
 
                  function exportData() {
+             // Generate fresh actors & genres arrays and sync with home
+             const actorsList = generateActorsFromContent();
+             const genresList = generateGenresFromContent();
+             currentData.home.actors = actorsList;
+             currentData.home.genres = genresList;
              // Create the complete CineMax API structure with root-level movies array
              const exportData = {
                  ...currentData,
                  // Add root-level movies array that includes both movies and series
                  movies: currentData.home.featuredMovies || [],
-                 // Add root-level arrays for compatibility
-                 actors: generateActorsFromContent(),
-                 genres: generateGenresFromContent()
+                 // Root-level actors & genres for compatibility
+                 actors: actorsList,
+                 genres: genresList
              };
              
              const dataStr = JSON.stringify(exportData, null, 2);
@@ -1942,12 +1950,15 @@
                         last_updated: new Date().toISOString().split('T')[0],
                         total_movies: 0,
                         total_series: 0,
-                        total_channels: 0
+                        total_channels: 0,
+                        total_actors: 0 // NEW: keep track of actors count
                     },
                     home: {
                         slides: [],
                         featuredMovies: [],
-                        channels: []
+                        channels: [],
+                        actors: [], // NEW: store actors generated from content
+                        genres: []  // NEW: store genres generated from content
                     }
                 };
                 
@@ -2140,10 +2151,12 @@
             const movieCount = currentData.home.featuredMovies.filter(item => item.type === 'movie').length;
             const seriesCount = currentData.home.featuredMovies.filter(item => item.type === 'series').length;
             const channelCount = (currentData.home.channels || []).length;
+            const actorCount = (currentData.home.actors || generateActorsFromContent()).length;
             
             currentData.api_info.total_movies = movieCount;
             currentData.api_info.total_series = seriesCount;
             currentData.api_info.total_channels = channelCount;
+            currentData.api_info.total_actors = actorCount;
             currentData.api_info.last_updated = new Date().toISOString().split('T')[0];
             
             // Update display
@@ -2187,12 +2200,17 @@
         }
 
                  function saveData() {
+             // Generate and sync actors & genres arrays
+             const actorsList = generateActorsFromContent();
+             const genresList = generateGenresFromContent();
+             currentData.home.actors = actorsList;
+             currentData.home.genres = genresList;
              // Update root-level arrays for CineMax compatibility
              const dataToSave = {
                  ...currentData,
                  movies: currentData.home.featuredMovies || [],
-                 actors: generateActorsFromContent(),
-                 genres: generateGenresFromContent()
+                 actors: actorsList,
+                 genres: genresList
              };
              
              localStorage.setItem('cinemax-data', JSON.stringify(dataToSave));
