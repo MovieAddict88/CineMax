@@ -718,9 +718,14 @@
                             <option value="top-rated-movies">Top Rated Movies</option>
                             <option value="upcoming-movies">Upcoming Movies</option>
                             <option value="now-playing-movies">Now Playing Movies</option>
+                            <option value="movies-by-year">Movies by Year</option>
                             <option value="popular-tv">Popular TV Shows</option>
                             <option value="top-rated-tv">Top Rated TV Shows</option>
                         </select>
+                    </div>
+                    <div class="form-group" id="tmdbBulkYearGroup" style="display: none;">
+                        <label for="tmdbBulkYear">Year:</label>
+                        <input type="number" id="tmdbBulkYear" min="1900" max="2099" value="2023" placeholder="Enter year">
                     </div>
                     <div class="form-group">
                         <label for="tmdbBulkPages">Pages to Import (1-10):</label>
@@ -1073,30 +1078,9 @@
     </div>
 
     <script>
-        // Global error handler to prevent white screen
-        window.addEventListener('error', (event) => {
-            console.error('Global error caught:', event.error);
-            showNotification(`Unexpected error: ${event.error.message}`, false);
-            return true; // Prevent default browser error handling
-        });
-
-        window.addEventListener('unhandledrejection', (event) => {
-            console.error('Unhandled promise rejection:', event.reason);
-            showNotification(`Promise error: ${event.reason}`, false);
-            event.preventDefault();
-        });
-
-        // IMMEDIATE TEST - This should show up first
-        console.log('🔥 JAVASCRIPT IS LOADING! 🔥');
-        alert('JavaScript is working! Check console for details.');
-
         document.addEventListener('DOMContentLoaded', () => {
-            console.log('🚀 DOM Content Loaded - Initializing app...');
-            alert('DOM loaded! App is starting...');
-            
-            // --- Constants and Config ---
             const tmdbApiKey = 'ec926176bf467b3f7735e3154238c161';
-            
+
             // --- Element References ---
             const fileInput = document.getElementById('fileInput');
             const fileInfo = document.getElementById('fileInfo');
@@ -1163,272 +1147,6 @@
             
             const STORAGE_KEY = 'cinemax_api_data';
             const AUTO_SAVE_ENABLED_KEY = 'cinemax_auto_save_enabled';
-
-            // SIMPLE CLICK TEST
-            console.log('🧪 Setting up simple click tests...');
-            
-            // Test 1: Save button
-            const testButton = document.querySelector('#saveButton');
-            if (testButton) {
-                console.log('✅ Save button found!');
-                testButton.addEventListener('click', () => {
-                    console.log('🎯 SAVE BUTTON WAS CLICKED!');
-                    alert('Save button clicked! This means event listeners work.');
-                });
-            } else {
-                console.log('❌ Save button NOT found!');
-            }
-
-            // Test 2: Form
-            const testForm = document.querySelector('#entryForm');
-            if (testForm) {
-                console.log('✅ Entry form found!');
-                // We'll add the real form handler later - this is just for testing if the form exists
-            } else {
-                console.log('❌ Entry form NOT found!');
-                alert('CRITICAL ERROR: Entry form not found! Modal form is missing.');
-            }
-
-            // Test 3: Add new entry button
-            const addButton = document.querySelector('#addNewEntry');
-            if (addButton) {
-                console.log('✅ Add new entry button found!');
-                addButton.addEventListener('click', () => {
-                    console.log('🎯 ADD NEW ENTRY BUTTON CLICKED!');
-                    alert('Add new entry clicked! Modal should open.');
-                });
-            } else {
-                console.log('❌ Add new entry button NOT found!');
-            }
-
-            // Test 4: Modal Save Button (the one that's not working)
-            const modalSaveButton = document.querySelector('#modalSaveButton');
-            if (modalSaveButton) {
-                console.log('✅ Modal Save button found!');
-                modalSaveButton.addEventListener('click', (e) => {
-                    console.log('🎯 MODAL SAVE BUTTON WAS CLICKED DIRECTLY!');
-                    console.log('Button type:', modalSaveButton.type);
-                    console.log('Form element:', modalSaveButton.form);
-                    
-                    // The issue is likely that the form isn't submitting
-                    // Let's manually trigger the form submit
-                    e.preventDefault(); // Prevent default button behavior
-                    
-                    if (modalSaveButton.form) {
-                        console.log('🚀 Manually triggering form submit...');
-                        const submitEvent = new Event('submit', { bubbles: true, cancelable: true });
-                        modalSaveButton.form.dispatchEvent(submitEvent);
-                    } else {
-                        console.log('❌ Button is not associated with a form! Calling save directly...');
-                        
-                        // Direct save as fallback
-                        try {
-                            console.log('🔧 DIRECT SAVE FALLBACK TRIGGERED!');
-                            
-                            if (!jsonData) {
-                                alert('ERROR: No JSON data loaded. Please load a JSON file first.');
-                                return;
-                            }
-                            
-                            const activeTabElement = document.querySelector('.tab-btn.active');
-                            if (!activeTabElement) {
-                                alert('ERROR: No active tab found. Please select Movie, Series, or Channel.');
-                                return;
-                            }
-                            
-                            const activeTab = activeTabElement.dataset.type;
-                            console.log('Active tab for direct save:', activeTab);
-                            
-                            // Get form data and save
-                            const id = entryIdInput.value;
-                            
-                            if (activeTab === 'movie') {
-                                if (!movieTitleInput.value.trim()) {
-                                    alert('ERROR: Movie title is required');
-                                    return;
-                                }
-                                saveMovie(id);
-                                alert('Movie saved successfully!');
-                            } else if (activeTab === 'series') {
-                                if (!seriesTitleInput.value.trim()) {
-                                    alert('ERROR: Series title is required');
-                                    return;
-                                }
-                                saveSeries(id);
-                                alert('Series saved successfully!');
-                            } else if (activeTab === 'channel') {
-                                if (!channelTitleInput.value.trim()) {
-                                    alert('ERROR: Channel name is required');
-                                    return;
-                                }
-                                if (!channelStreamUrlInput.value.trim()) {
-                                    alert('ERROR: Stream URL is required');
-                                    return;
-                                }
-                                saveChannel(id);
-                                alert('Channel saved successfully!');
-                            }
-                            
-                            // Update UI and auto-generate related content
-                            autoGenerateRelatedContent();
-                            renderEntries();
-                            // Auto-save after adding/editing entry
-                            saveToLocalStorage();
-                            closeModal();
-                            
-                        } catch (error) {
-                            console.error('Direct save error:', error);
-                            alert('Save error: ' + error.message);
-                        }
-                    }
-                });
-            } else {
-                console.log('❌ Modal Save button NOT found!');
-                alert('CRITICAL: Modal Save button not found!');
-            }
-
-            // REAL FORM SUBMIT HANDLER - This is the important one!
-            console.log('🔧 Setting up REAL form submit handler...');
-            if (testForm) {
-                testForm.addEventListener('submit', (event) => {
-                    event.preventDefault();
-                    
-                    console.log('🔥 REAL FORM SUBMIT TRIGGERED! 🔥');
-                    alert('REAL form submit working! Now processing...');
-                    
-                    try {
-                        console.log('=== FORM SUBMIT STARTED ===');
-                        console.log('Event:', event);
-                        
-                        // Prevent double submission
-                        const submitButton = event.target.querySelector('button[type="submit"]');
-                        if (submitButton.disabled) {
-                            console.log('Button already disabled - preventing double submit');
-                            alert('Please wait, saving in progress...');
-                            return;
-                        }
-                        
-                        // Disable submit button temporarily
-                        submitButton.disabled = true;
-                        submitButton.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Saving...';
-                        
-                        console.log('=== CHECKING BASIC ELEMENTS ===');
-                        
-                        if (!jsonData) {
-                            throw new Error('No JSON data loaded. Please load a JSON file first.');
-                        }
-                        
-                        const id = entryIdInput.value;
-                        console.log('Entry ID:', id);
-                        
-                        const activeTabElement = document.querySelector('.tab-btn.active');
-                        if (!activeTabElement) {
-                            throw new Error('No active tab found');
-                        }
-                        
-                        const activeTab = activeTabElement.dataset.type;
-                        console.log('Active tab:', activeTab);
-                        
-                        // Validate required fields
-                        console.log('=== VALIDATING FIELDS ===');
-                        let isValid = true;
-                        let errorMessage = '';
-                        
-                        if (activeTab === 'movie') {
-                            console.log('Movie title value:', movieTitleInput.value);
-                            if (!movieTitleInput.value.trim()) {
-                                isValid = false;
-                                errorMessage = 'Movie title is required';
-                            }
-                        } else if (activeTab === 'series') {
-                            console.log('Series title value:', seriesTitleInput.value);
-                            if (!seriesTitleInput.value.trim()) {
-                                isValid = false;
-                                errorMessage = 'Series title is required';
-                            }
-                        } else if (activeTab === 'channel') {
-                            console.log('Channel title value:', channelTitleInput.value);
-                            console.log('Channel stream URL value:', channelStreamUrlInput.value);
-                            if (!channelTitleInput.value.trim()) {
-                                isValid = false;
-                                errorMessage = 'Channel name is required';
-                            }
-                            if (!channelStreamUrlInput.value.trim()) {
-                                isValid = false;
-                                errorMessage = 'Stream URL is required';
-                            }
-                        }
-                        
-                        if (!isValid) {
-                            console.log('Validation failed:', errorMessage);
-                            alert('Validation failed: ' + errorMessage);
-                            return;
-                        }
-                        
-                        console.log('=== SAVING DATA ===');
-                        // Save the data
-                        if (activeTab === 'channel') {
-                            console.log('Calling saveChannel...');
-                            saveChannel(id);
-                        } else if (activeTab === 'series') {
-                            console.log('Calling saveSeries...');
-                            saveSeries(id);
-                        } else {
-                            console.log('Calling saveMovie...');
-                            saveMovie(id);
-                        }
-                        
-                        console.log('=== UPDATING UI ===');
-                        renderEntries();
-                        closeModal();
-                        alert(`${activeTab.charAt(0).toUpperCase() + activeTab.slice(1)} saved successfully!`);
-                        console.log('=== SAVE COMPLETED SUCCESSFULLY ===');
-                        
-                    } catch (error) {
-                        console.error('=== SAVE ERROR ===', error);
-                        console.error('Error stack:', error.stack);
-                        alert(`Error saving content: ${error.message}`);
-                    } finally {
-                        // Re-enable submit button
-                        const submitButton = event.target.querySelector('button[type="submit"]');
-                        if (submitButton) {
-                            submitButton.disabled = false;
-                            submitButton.innerHTML = '<i class="fas fa-save"></i> Save Content';
-                        }
-                    }
-                });
-                console.log('✅ Real form submit handler attached successfully!');
-            } else {
-                console.log('❌ Cannot attach form handler - form not found!');
-                alert('CRITICAL: Cannot attach form submit handler!');
-            }
-
-            // Test 5: Manual Form Submit Test
-            console.log('🧪 Adding manual form submit test...');
-            window.testFormSubmit = function() {
-                console.log('🔥 MANUAL TEST: Triggering form submit...');
-                if (testForm) {
-                    const event = new Event('submit', { bubbles: true, cancelable: true });
-                    testForm.dispatchEvent(event);
-                    console.log('✅ Manual form submit triggered');
-                } else {
-                    console.log('❌ Cannot test - form not found');
-                }
-            };
-            console.log('✅ You can now test with: testFormSubmit() in console');
-            
-            // Add manual test for auto-generation
-            window.testAutoGeneration = function() {
-                console.log('🧪 MANUAL TEST: Running auto-generation...');
-                if (jsonData) {
-                    autoGenerateRelatedContent();
-                    renderEntries();
-                    alert('Auto-generation test completed! Check console and filters.');
-                } else {
-                    alert('ERROR: No JSON data loaded. Load data first.');
-                }
-            };
-            console.log('✅ You can test auto-generation with: testAutoGeneration() in console');
             
             // --- Auto-Generation Control ---
             const autoGenToggle = document.getElementById('autoGenToggle');
@@ -1437,17 +1155,12 @@
             if (autoGenToggle) {
                 autoGenToggle.addEventListener('change', (e) => {
                     autoGenerationEnabled = e.target.checked;
-                    console.log(`Auto-generation ${autoGenerationEnabled ? 'enabled' : 'disabled'}`);
                     showNotification(`Auto-generation ${autoGenerationEnabled ? 'enabled' : 'disabled'}`, true);
-                    
-                    // Update status indicator
                     const statusElement = document.getElementById('autoGenStatus');
                     if (statusElement) {
                         statusElement.style.display = autoGenerationEnabled ? 'inline-block' : 'none';
                     }
                 });
-                
-                // Initialize status indicator
                 const statusElement = document.getElementById('autoGenStatus');
                 if (statusElement && autoGenerationEnabled) {
                     statusElement.style.display = 'inline-block';
@@ -1460,20 +1173,12 @@
                         showNotification('Please load data first before generating content', false);
                         return;
                     }
-                    
-                    console.log('🔧 Manual generation triggered...');
                     showNotification('Generating related content...', true);
-                    
-                    // Temporarily enable auto-generation for manual trigger
                     const wasEnabled = autoGenerationEnabled;
                     autoGenerationEnabled = true;
-                    
                     autoGenerateRelatedContent();
                     renderEntries();
-                    
-                    // Restore previous state
                     autoGenerationEnabled = wasEnabled;
-                    
                     showNotification('Content generation completed!', true);
                 });
             }
@@ -1483,7 +1188,6 @@
             const clearStorageButton = document.getElementById('clearStorageButton');
             let autoSaveEnabled = true;
             
-            // Load auto-save preference
             const savedAutoSavePreference = localStorage.getItem(AUTO_SAVE_ENABLED_KEY);
             if (savedAutoSavePreference !== null) {
                 autoSaveEnabled = JSON.parse(savedAutoSavePreference);
@@ -1496,22 +1200,15 @@
                 autoSaveToggle.addEventListener('change', (e) => {
                     autoSaveEnabled = e.target.checked;
                     localStorage.setItem(AUTO_SAVE_ENABLED_KEY, JSON.stringify(autoSaveEnabled));
-                    console.log(`Auto-save ${autoSaveEnabled ? 'enabled' : 'disabled'}`);
                     showNotification(`Auto-save ${autoSaveEnabled ? 'enabled' : 'disabled'}`, true);
-                    
-                    // Update status indicator
                     const statusElement = document.getElementById('autoSaveStatus');
                     if (statusElement) {
                         statusElement.style.display = autoSaveEnabled ? 'inline-block' : 'none';
                     }
-                    
-                    // If enabled, save current data immediately
                     if (autoSaveEnabled && jsonData) {
                         saveToLocalStorage();
                     }
                 });
-                
-                // Initialize status indicator
                 const statusElement = document.getElementById('autoSaveStatus');
                 if (statusElement && autoSaveEnabled) {
                     statusElement.style.display = 'inline-block';
@@ -1523,7 +1220,6 @@
                     if (confirm('Are you sure you want to clear all saved data? This action cannot be undone.')) {
                         localStorage.removeItem(STORAGE_KEY);
                         showNotification('Saved data cleared successfully!', true);
-                        console.log('🗑️ Local storage cleared');
                     }
                 });
             }
@@ -1531,7 +1227,6 @@
             // --- Auto-Save Functions ---
             function saveToLocalStorage() {
                 if (!autoSaveEnabled || !jsonData) return;
-                
                 try {
                     const now = new Date();
                     const dataToSave = {
@@ -1539,15 +1234,11 @@
                         data: jsonData
                     };
                     localStorage.setItem(STORAGE_KEY, JSON.stringify(dataToSave));
-                    console.log('💾 Data auto-saved to localStorage');
-                    
-                    // Update the last save time display
                     const lastSaveElement = document.getElementById('lastSaveTime');
                     if (lastSaveElement) {
                         lastSaveElement.textContent = `(Last saved: ${now.toLocaleTimeString()})`;
                     }
                 } catch (error) {
-                    console.warn('Failed to save to localStorage:', error);
                     if (error.name === 'QuotaExceededError') {
                         showNotification('Auto-save failed: Storage quota exceeded. Consider clearing old data.', false);
                     }
@@ -1561,29 +1252,22 @@
                         const parsed = JSON.parse(savedData);
                         if (parsed.data) {
                             jsonData = parsed.data;
-                            
-                            // Initialize the UI
                             editorDiv.style.display = 'block';
                             saveSectionDiv.style.display = 'block';
                             renderEntries();
-                            
                             const saveTime = new Date(parsed.timestamp).toLocaleString();
                             showNotification(`Data restored from auto-save (${saveTime})`, true);
-                            console.log('✅ Data loaded from localStorage');
                             return true;
                         }
                     }
                 } catch (error) {
-                    console.warn('Failed to load from localStorage:', error);
-                    localStorage.removeItem(STORAGE_KEY); // Clean up corrupted data
+                    localStorage.removeItem(STORAGE_KEY);
                 }
                 return false;
             }
 
             // --- CineMax API Structure Functions ---
             function createNewCineMaxAPI() {
-                console.log('🚀 Creating new CineMax API structure...');
-                
                 jsonData = {
                     api_info: {
                         version: "2.0",
@@ -1602,30 +1286,17 @@
                     actors: [],
                     genres: []
                 };
-                
-                // Auto-save the new structure
                 saveToLocalStorage();
-                
-                // Initialize the UI
                 editorDiv.style.display = 'block';
                 saveSectionDiv.style.display = 'block';
                 renderEntries();
-                
                 showNotification('New CineMax API structure created successfully!', true);
-                console.log('✅ CineMax API structure ready');
             }
 
             // --- Auto-Generation Functions ---
             function autoGenerateRelatedContent() {
-                if (!autoGenerationEnabled) {
-                    console.log('⏸️ Auto-generation disabled, skipping...');
-                    return;
-                }
-                
-                console.log('🔄 Auto-generating slides, featured content, actors, and genres...');
-                
+                if (!autoGenerationEnabled) return;
                 try {
-                    // Initialize structures
                     if (!jsonData.home) jsonData.home = {};
                     if (!jsonData.home.slides) jsonData.home.slides = [];
                     if (!jsonData.home.featured_movies) jsonData.home.featured_movies = [];
@@ -1639,50 +1310,29 @@
                         total_channels: 0,
                         total_actors: 0
                     };
-                    
-                    // Auto-generate slides from top-rated content
                     autoGenerateSlides();
-                    
-                    // Auto-generate featured movies (high-rated movies)
                     autoGenerateFeaturedMovies();
-                    
-                    // Auto-generate actors from movie/series data
                     autoGenerateActors();
-                    
-                    // Auto-generate genres from movie/series data
                     autoGenerateGenres();
-                    
-                    // Update API info
                     updateApiInfo();
-                    
-                    console.log('✅ Auto-generation completed successfully');
                 } catch (error) {
-                    console.error('❌ Error in auto-generation:', error);
+                    console.error('Error in auto-generation:', error);
                 }
             }
             
             function autoGenerateSlides() {
-                console.log('📸 Generating slides...');
-                
-                // Get top content for slides (movies, series, channels with images)
                 const allContent = [
                     ...(jsonData.movies || []).map(m => ({...m, contentType: 'movie', url: `movies/${m.id}`})),
                     ...(jsonData.channels || []).map(c => ({...c, contentType: 'channel', url: `channels/${c.id}`}))
                 ];
-                
-                // Filter content with images and sort by rating, then by year (newer first)
                 const slideContent = allContent
                     .filter(item => item.image && item.title)
                     .sort((a, b) => {
-                        // First sort by rating (high to low)
                         const ratingDiff = (b.rating || 0) - (a.rating || 0);
                         if (ratingDiff !== 0) return ratingDiff;
-                        // Then by year (newer first)
                         return (b.year || 0) - (a.year || 0);
                     })
-                    .slice(0, 5); // Top 5 for slides
-                
-                // Generate slides - create at least one default slide if no content
+                    .slice(0, 5);
                 if (slideContent.length === 0) {
                     jsonData.home.slides = [{
                         id: 1,
@@ -1716,14 +1366,9 @@
                         channel: item.contentType === 'channel' ? { ...item } : null
                     }));
                 }
-                
-                console.log(`✅ Generated ${jsonData.home.slides.length} slides`);
             }
             
             function autoGenerateFeaturedMovies() {
-                console.log('⭐ Generating featured movies...');
-                
-                // Get movies with rating >= 7 or recent movies (last 3 years)
                 const currentYear = new Date().getFullYear();
                 const featuredMovies = (jsonData.movies || [])
                     .filter(movie => {
@@ -1733,43 +1378,33 @@
                         return (hasGoodRating || isRecent) && hasImage;
                     })
                     .sort((a, b) => {
-                        // First sort by rating (high to low)
                         const ratingDiff = (b.rating || 0) - (a.rating || 0);
                         if (ratingDiff !== 0) return ratingDiff;
-                        // Then by year (newer first)
                         return (b.year || 0) - (a.year || 0);
                     })
-                    .slice(0, 12); // Top 12 featured
+                    .slice(0, 12);
                 
-                // If no featured movies, use all available movies
                 if (featuredMovies.length === 0 && jsonData.movies.length > 0) {
                     const fallbackMovies = jsonData.movies
-                        .filter(movie => movie.image) // Only movies with images
+                        .filter(movie => movie.image)
                         .sort((a, b) => (b.rating || 0) - (a.rating || 0))
-                        .slice(0, 8); // Top 8 as fallback
-                    
+                        .slice(0, 8);
                     jsonData.home.featured_movies = fallbackMovies.map(movie => ({
                         ...movie,
-                        views: movie.views || Math.floor(Math.random() * 10000) + 1000, // Random views
+                        views: movie.views || Math.floor(Math.random() * 10000) + 1000,
                         created_at: movie.created_at || new Date().toISOString().split('T')[0]
                     }));
                 } else {
                     jsonData.home.featured_movies = featuredMovies.map(movie => ({
                         ...movie,
-                        views: movie.views || Math.floor(Math.random() * 10000) + 1000, // Random views
+                        views: movie.views || Math.floor(Math.random() * 10000) + 1000,
                         created_at: movie.created_at || new Date().toISOString().split('T')[0]
                     }));
                 }
-                
-                console.log(`✅ Generated ${jsonData.home.featured_movies.length} featured movies`);
             }
             
             function autoGenerateActors() {
-                console.log('👥 Generating actors...');
-                
                 const actorMap = new Map();
-                
-                // Collect actors from movies and series
                 (jsonData.movies || []).forEach(movie => {
                     if (movie.actors && movie.actors.length > 0) {
                         movie.actors.forEach(actor => {
@@ -1788,8 +1423,6 @@
                                         movies: []
                                     });
                                 }
-                                
-                                // Add movie to actor's filmography
                                 const actorData = actorMap.get(key);
                                 actorData.movies.push({
                                     id: movie.id,
@@ -1801,8 +1434,6 @@
                         });
                     }
                 });
-                
-                // Add default actors if none exist
                 if (actorMap.size === 0) {
                     const defaultActors = [
                         { name: 'Unknown Actor', type: 'actor', role: 'Lead Actor' },
@@ -1822,32 +1453,24 @@
                         });
                     });
                 }
-                
                 jsonData.actors = Array.from(actorMap.values());
-                console.log(`✅ Generated ${jsonData.actors.length} actors`);
             }
             
             function autoGenerateGenres() {
-                console.log('🏷️ Generating genres...');
-                
                 const genreMap = new Map();
-                
-                // Collect genres from movies and series
                 (jsonData.movies || []).forEach(movie => {
                     if (movie.genres && movie.genres.length > 0) {
                         movie.genres.forEach(genre => {
-                            const genreName = genre.name || genre.title; // Support both name and title
+                            const genreName = genre.name || genre.title;
                             if (genreName && genreName.trim() !== '') {
                                 const key = genreName.toLowerCase();
                                 if (!genreMap.has(key)) {
                                     genreMap.set(key, {
                                         id: genreMap.size + 1,
-                                        title: genreName,  // Root-level genres use "title"
+                                        title: genreName,
                                         posters: []
                                     });
                                 }
-                                
-                                // Add complete movie data to genre
                                 const genreData = genreMap.get(key);
                                 if (movie.image && !genreData.posters.find(p => p.id === movie.id)) {
                                     genreData.posters.push({
@@ -1884,8 +1507,6 @@
                         });
                     }
                 });
-                
-                // Add default genres if none exist
                 if (genreMap.size === 0) {
                     const defaultGenres = ['Action', 'Comedy', 'Drama', 'Horror', 'Sci-Fi', 'Animation'];
                     defaultGenres.forEach((genreName, index) => {
@@ -1896,71 +1517,48 @@
                         });
                     });
                 }
-                
                 jsonData.genres = Array.from(genreMap.values());
-                console.log(`✅ Generated ${jsonData.genres.length} genres`);
             }
             
             function updateApiInfo() {
-                console.log('📊 Updating API info...');
-                
                 jsonData.api_info.total_movies = (jsonData.movies || []).length;
                 jsonData.api_info.total_channels = (jsonData.channels || []).length;
                 jsonData.api_info.total_actors = (jsonData.actors || []).length;
                 jsonData.api_info.last_updated = new Date().toISOString().split('T')[0];
-                
-                console.log(`✅ Updated API info: ${jsonData.api_info.total_movies} movies, ${jsonData.api_info.total_channels} channels, ${jsonData.api_info.total_actors} actors`);
             }
             
             // --- Utility Functions ---
             function showNotification(message, isSuccess = true) {
-                try {
-                    console.log('Showing notification:', message, 'Success:', isSuccess);
-                    
-                    const notification = document.createElement('div');
-                    notification.textContent = message;
-                    notification.style.position = 'fixed';
-                    notification.style.top = '20px';
-                    notification.style.right = '20px';
-                    notification.style.padding = '15px 25px';
-                    notification.style.background = isSuccess ? '#2ecc71' : '#e74c3c';
-                    notification.style.color = 'white';
-                    notification.style.borderRadius = '6px';
-                    notification.style.boxShadow = '0 4px 12px rgba(0,0,0,0.15)';
-                    notification.style.zIndex = '10000';
+                const notification = document.createElement('div');
+                notification.textContent = message;
+                notification.style.position = 'fixed';
+                notification.style.top = '20px';
+                notification.style.right = '20px';
+                notification.style.padding = '15px 25px';
+                notification.style.background = isSuccess ? '#2ecc71' : '#e74c3c';
+                notification.style.color = 'white';
+                notification.style.borderRadius = '6px';
+                notification.style.boxShadow = '0 4px 12px rgba(0,0,0,0.15)';
+                notification.style.zIndex = '10000';
+                notification.style.opacity = '0';
+                notification.style.transform = 'translateX(100px)';
+                notification.style.transition = 'all 0.3s ease';
+                notification.style.maxWidth = '400px';
+                notification.style.wordWrap = 'break-word';
+                document.body.appendChild(notification);
+                setTimeout(() => {
+                    notification.style.opacity = '1';
+                    notification.style.transform = 'translateX(0)';
+                }, 10);
+                setTimeout(() => {
                     notification.style.opacity = '0';
                     notification.style.transform = 'translateX(100px)';
-                    notification.style.transition = 'all 0.3s ease';
-                    notification.style.maxWidth = '400px';
-                    notification.style.wordWrap = 'break-word';
-                    
-                    document.body.appendChild(notification);
-                    
-                    // Animate in
                     setTimeout(() => {
-                        notification.style.opacity = '1';
-                        notification.style.transform = 'translateX(0)';
-                    }, 10);
-                    
-                    // Remove after delay
-                    setTimeout(() => {
-                        notification.style.opacity = '0';
-                        notification.style.transform = 'translateX(100px)';
-                        setTimeout(() => {
-                            try {
-                                if (notification.parentNode) {
-                                    document.body.removeChild(notification);
-                                }
-                            } catch (e) {
-                                console.warn('Could not remove notification:', e);
-                            }
-                        }, 300);
-                    }, 5000); // Increased to 5 seconds so you can read error messages
-                } catch (error) {
-                    console.error('Error showing notification:', error);
-                    // Fallback to alert if notification fails
-                    alert(`${isSuccess ? 'SUCCESS' : 'ERROR'}: ${message}`);
-                }
+                        if (notification.parentNode) {
+                            document.body.removeChild(notification);
+                        }
+                    }, 300);
+                }, 5000);
             }
             
             function openModal(title = 'Add New Content') {
@@ -2044,7 +1642,6 @@
                 }
             });
             
-            // New CineMax API button event listener
             const newCineMaxAPIButton = document.getElementById('newCineMaxAPI');
             if (newCineMaxAPIButton) {
                 newCineMaxAPIButton.addEventListener('click', () => {
@@ -2058,8 +1655,20 @@
                 });
             }
             
-            // Bulk import TMDB button event listener
             const bulkImportButton = document.getElementById('bulkImportTMDB');
+            const tmdbBulkTypeSelect = document.getElementById('tmdbBulkType');
+            const tmdbBulkYearGroup = document.getElementById('tmdbBulkYearGroup');
+
+            if (tmdbBulkTypeSelect) {
+                tmdbBulkTypeSelect.addEventListener('change', () => {
+                    if (tmdbBulkTypeSelect.value === 'movies-by-year') {
+                        tmdbBulkYearGroup.style.display = 'block';
+                    } else {
+                        tmdbBulkYearGroup.style.display = 'none';
+                    }
+                });
+            }
+
             if (bulkImportButton) {
                 bulkImportButton.addEventListener('click', async () => {
                     if (!jsonData) {
@@ -2069,33 +1678,19 @@
                     
                     const importType = document.getElementById('tmdbBulkType').value;
                     const pages = parseInt(document.getElementById('tmdbBulkPages').value) || 2;
+                    const year = parseInt(document.getElementById('tmdbBulkYear').value) || new Date().getFullYear();
                     
-                    await bulkImportFromTMDB(importType, pages);
+                    await bulkImportFromTMDB(importType, pages, year);
                 });
             }
             
             function loadData(jsonString) {
                 try {
-                    console.log('Loading JSON data...');
-                    console.log('JSON string length:', jsonString.length);
-                    
                     jsonData = JSON.parse(jsonString);
-                    console.log('Parsed JSON data:', jsonData);
-                    
-                    if (!jsonData.movies) {
-                        console.log('No movies array found, creating empty array');
-                        jsonData.movies = [];
-                    }
-                    if (!jsonData.channels) {
-                        console.log('No channels array found, creating empty array');
-                        jsonData.channels = [];
-                    }
-                    
-                    // CLEAN EMPTY ENTRIES IMMEDIATELY to prevent crashes
-                    console.log('🧹 Cleaning empty entries from loaded data...');
+                    if (!jsonData.movies) jsonData.movies = [];
+                    if (!jsonData.channels) jsonData.channels = [];
                     jsonData.movies = jsonData.movies.filter(m => m.title && m.title.trim() !== '');
                     jsonData.channels = jsonData.channels.filter(c => c.title && c.title.trim() !== '');
-                    
                     if (jsonData.home) {
                         if (jsonData.home.slides) {
                             jsonData.home.slides = jsonData.home.slides.filter(s => s.title && s.title.trim() !== '');
@@ -2110,26 +1705,14 @@
                     if (jsonData.genres) {
                         jsonData.genres = jsonData.genres.filter(g => g.title && g.title.trim() !== '');
                     }
-                    
-                    console.log('Movies count:', jsonData.movies.length);
-                    console.log('Channels count:', jsonData.channels.length);
-                    
-                    // AUTO-GENERATE IMMEDIATELY AFTER LOADING DATA
-                    console.log('🔄 Auto-generating related content after data load...');
                     autoGenerateRelatedContent();
-                    
                     editorDiv.style.display = 'block';
                     saveSectionDiv.style.display = 'block';
                     renderEntries();
-                    
-                    // Auto-save the loaded data
                     saveToLocalStorage();
-                    
                     const totalItems = (jsonData.movies?.length || 0) + (jsonData.channels?.length || 0);
                     showNotification(`Data loaded successfully! Found ${totalItems} items.`, true);
-                    console.log('Data loading completed successfully');
                 } catch (error) {
-                    console.error('Error loading data:', error);
                     showNotification(`Failed to load data: ${error.message}`, false);
                     throw error;
                 }
@@ -2138,25 +1721,19 @@
             // --- Render Entries ---
             function renderEntries() {
                 if (!jsonData) return;
-                
                 entryListDiv.innerHTML = '';
-                
-                // Initialize missing arrays and clean empty entries
                 if (!jsonData.home) jsonData.home = {};
                 if (!jsonData.home.slides) jsonData.home.slides = [];
                 if (!jsonData.home.featured_movies) jsonData.home.featured_movies = [];
                 if (!jsonData.actors) jsonData.actors = [];
                 if (!jsonData.genres) jsonData.genres = [];
                 
-                // CLEAN EMPTY/INVALID ENTRIES to prevent crashes
                 jsonData.movies = (jsonData.movies || []).filter(m => m.title && m.title.trim() !== '');
                 jsonData.channels = (jsonData.channels || []).filter(c => c.title && c.title.trim() !== '');
                 jsonData.home.slides = (jsonData.home.slides || []).filter(s => s.title && s.title.trim() !== '');
                 jsonData.home.featured_movies = (jsonData.home.featured_movies || []).filter(f => f.title && f.title.trim() !== '');
                 jsonData.actors = (jsonData.actors || []).filter(a => a.name && a.name.trim() !== '');
                 jsonData.genres = (jsonData.genres || []).filter(g => g.title && g.title.trim() !== '');
-                
-                console.log('🧹 Cleaned empty entries from JSON data');
                 
                 const allEntries = [
                     ...(jsonData.movies || []).map(e => ({ ...e, entryType: e.type || (e.seasons ? 'series' : 'movie') })),
@@ -2167,7 +1744,6 @@
                     ...(jsonData.genres || []).map(e => ({ ...e, entryType: 'genre' }))
                 ];
                 
-                // Apply filter
                 const filteredEntries = currentFilter === 'all' 
                     ? allEntries 
                     : allEntries.filter(entry => 
@@ -2180,7 +1756,6 @@
                         (currentFilter === 'genres' && entry.entryType === 'genre')
                     );
                 
-                // Filter out entries with empty titles and sort by title
                 const validEntries = filteredEntries.filter(entry => entry.title && entry.title.trim() !== '');
                 validEntries.sort((a, b) => a.title.localeCompare(b.title));
                 
@@ -2207,7 +1782,6 @@
                         'genre': 'Genre'
                     }[entry.entryType] || entry.entryType;
                     
-                    // Get appropriate metadata based on type
                     let metaInfo = '';
                     if (entry.entryType === 'actor') {
                         metaInfo = `${entry.type || 'Actor'} • ${entry.role || 'N/A'}`;
@@ -2258,18 +1832,12 @@
             tabButtons.forEach(button => {
                 button.addEventListener('click', () => {
                     const type = button.dataset.type;
-                    
-                    // Update tabs
                     tabButtons.forEach(btn => btn.classList.remove('active'));
                     button.classList.add('active');
-                    
-                    // Update content
                     document.querySelectorAll('.category-content').forEach(content => {
                         content.classList.remove('active');
                     });
                     document.querySelector(`.category-content[data-type="${type}"]`).classList.add('active');
-                    
-                    // Reset forms when switching
                     if (type === 'movie') resetMovieForm();
                     if (type === 'series') resetSeriesForm();
                     if (type === 'channel') resetChannelForm();
@@ -2288,16 +1856,32 @@
                 const target = event.target;
                 const button = target.closest('button');
                 if (!button) return;
-                
                 const id = button.dataset.id;
                 const type = button.dataset.type;
                 if (!id || !type) return;
-                
                 if (button.classList.contains('edit-btn')) {
                     editEntry(id, type);
                 } else if (button.classList.contains('delete-btn')) {
                     deleteEntry(id, type);
                 }
+            });
+
+            entryForm.addEventListener('submit', (event) => {
+                event.preventDefault();
+                const id = entryIdInput.value;
+                const activeTab = document.querySelector('.tab-btn.active').dataset.type;
+
+                if (activeTab === 'movie') {
+                    saveMovie(id);
+                } else if (activeTab === 'series') {
+                    saveSeries(id);
+                } else if (activeTab === 'channel') {
+                    saveChannel(id);
+                }
+                autoGenerateRelatedContent();
+                renderEntries();
+                saveToLocalStorage();
+                closeModal();
             });
             
             function editEntry(id, type) {
@@ -2312,7 +1896,6 @@
                 openModal(`Edit ${type === 'movie' ? 'Movie' : type === 'series' ? 'Series' : 'Live TV'}`);
                 entryIdInput.value = entry.id;
                 
-                // Activate appropriate tab
                 const tabType = type === 'channel' ? 'channel' : 
                               (type === 'series' ? 'series' : 'movie');
                 document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
@@ -2340,8 +1923,6 @@
                     seriesImageInput.value = entry.image || '';
                     seriesCoverInput.value = entry.cover || '';
                     seriesTrailerInput.value = entry.trailer ? entry.trailer.url : '';
-                    
-                    // Render seasons and episodes
                     if (entry.seasons && entry.seasons.length > 0) {
                         currentSeriesData = { ...entry, seasons: entry.seasons };
                         renderSeasons(entry.seasons);
@@ -2353,7 +1934,6 @@
                     movieImageInput.value = entry.image || '';
                     movieCoverInput.value = entry.cover || '';
                     movieTrailerInput.value = entry.trailer ? entry.trailer.url : '';
-                    
                     currentMovieSources = [...(entry.sources || [])];
                     renderMovieSources();
                 }
@@ -2361,7 +1941,6 @@
             
             function deleteEntry(id, type) {
                 if (!confirm(`Are you sure you want to delete this ${type}?`)) return;
-                
                 let index = -1;
                 if (type === 'channel') {
                     index = jsonData.channels.findIndex(c => c.id == id);
@@ -2370,23 +1949,20 @@
                     index = jsonData.movies.findIndex(m => m.id == id);
                     if (index > -1) jsonData.movies.splice(index, 1);
                 }
-                
                 if (index > -1) {
                     showNotification(`${type.charAt(0).toUpperCase() + type.slice(1)} deleted successfully!`, true);
                     renderEntries();
-                    // Auto-save after deletion
                     saveToLocalStorage();
                 } else {
                     showNotification(`Failed to delete ${type}. Please try again.`, false);
                 }
             }
             
-            // OLD DUPLICATE FORM HANDLER REMOVED - Using the new one above
-            
             function saveMovie(id) {
-                console.log('Saving movie with ID:', id);
-                console.log('Current movie sources:', currentMovieSources);
-                
+                if (!movieTitleInput.value.trim()) {
+                    showNotification('Movie title is required.', false);
+                    return;
+                }
                 const entryData = {
                     type: 'movie',
                     title: movieTitleInput.value.trim(),
@@ -2420,41 +1996,34 @@
                     comments: []
                 };
                 
-                console.log('Movie data to save:', entryData);
-                
                 if (id) {
                     const index = jsonData.movies.findIndex(m => m.id == id);
                     if (index > -1) {
                         jsonData.movies[index] = { ...jsonData.movies[index], ...entryData };
-                        console.log('Updated existing movie at index:', index);
                     }
                 } else {
                     const newId = generateNewId();
                     jsonData.movies.push({ id: newId, ...entryData });
-                    console.log('Added new movie with ID:', newId);
                 }
-                
-                console.log('Total movies after save:', jsonData.movies.length);
             }
             
             function saveSeries(id) {
-                // Collect season/episode data from the form
+                if (!seriesTitleInput.value.trim()) {
+                    showNotification('Series title is required.', false);
+                    return;
+                }
                 const seasons = [];
                 const seasonElements = document.querySelectorAll('.season-card');
-                
                 for (const seasonElement of seasonElements) {
                     const seasonNumber = parseInt(seasonElement.dataset.season);
                     const episodes = [];
                     const episodeElements = seasonElement.querySelectorAll('.episode-item');
-                    
                     for (const episodeElement of episodeElements) {
                         const episodeNumber = parseInt(episodeElement.dataset.episode);
                         const sourceUrl = episodeElement.querySelector('.episode-sources input').value.trim();
-                        
                         if (sourceUrl) {
                             const titleElement = episodeElement.querySelector('.episode-title');
                             const episodeTitle = titleElement ? titleElement.textContent.replace(/^Episode \d+: /, '') : `Episode ${episodeNumber}`;
-                            
                             episodes.push({
                                 id: generateNewId(),
                                 title: episodeTitle,
@@ -2474,7 +2043,6 @@
                             });
                         }
                     }
-                    
                     if (episodes.length > 0) {
                         seasons.push({
                             id: generateNewId(),
@@ -2557,9 +2125,7 @@
                         url: channelBackupUrlInput.value.trim() 
                     });
                 }
-                
                 const categoryTitle = channelCategoryInput.value.trim() || 'General';
-                
                 const entryData = {
                     title: channelTitleInput.value.trim(),
                     label: categoryTitle,
@@ -2584,7 +2150,6 @@
                     }],
                     comments: []
                 };
-                
                 if (id) {
                     const index = jsonData.channels.findIndex(c => c.id == id);
                     if (index > -1) {
@@ -2600,7 +2165,6 @@
                 const allIds = [
                     ...(jsonData.movies || []).map(m => m.id),
                     ...(jsonData.channels || []).map(c => c.id),
-                    // Also check for IDs in sources, episodes, etc.
                     ...getAllNestedIds()
                 ];
                 return allIds.length > 0 ? Math.max(...allIds) + 1 : 1;
@@ -2608,8 +2172,6 @@
             
             function getAllNestedIds() {
                 const ids = [];
-                
-                // Collect IDs from movie sources
                 if (jsonData.movies) {
                     jsonData.movies.forEach(movie => {
                         if (movie.sources) {
@@ -2634,8 +2196,6 @@
                         }
                     });
                 }
-                
-                // Collect IDs from channel sources
                 if (jsonData.channels) {
                     jsonData.channels.forEach(channel => {
                         if (channel.sources) {
@@ -2645,7 +2205,6 @@
                         }
                     });
                 }
-                
                 return ids;
             }
             
@@ -2656,7 +2215,6 @@
                     movieSourceListDiv.innerHTML = '<div class="no-sources">No sources added yet</div>';
                     return;
                 }
-                
                 currentMovieSources.forEach((source, index) => {
                     const item = document.createElement('div');
                     item.className = 'source-item';
@@ -2700,15 +2258,12 @@
             // --- Series Season/Episode Management ---
             async function renderSeasons(seasonsData) {
                 seasonContainerDiv.innerHTML = '';
-                
                 if (!seasonsData || seasonsData.length === 0) {
-                    // Add default season if none exist
                     seasonContainerDiv.innerHTML = `
                         <div class="no-seasons">
                             <p>No seasons configured. <button type="button" id="addSeasonButton" style="margin-left: 10px; padding: 5px 10px;">Add Season 1</button></p>
                         </div>
                     `;
-                    
                     document.getElementById('addSeasonButton').addEventListener('click', () => {
                         const newSeason = {
                             id: generateNewId(),
@@ -2771,14 +2326,12 @@
                     seasonContainerDiv.appendChild(seasonCard);
                 }
                 
-                // Add event listeners for adding episodes
                 document.querySelectorAll('.add-episode-btn').forEach(btn => {
                     btn.addEventListener('click', (e) => {
                         const seasonNumber = parseInt(e.target.dataset.season);
                         const seasonIndex = seasonNumber - 1;
                         const season = seasonsData[seasonIndex];
                         const newEpisodeNumber = season.episodes.length + 1;
-                        
                         season.episodes.push({
                             id: generateNewId(),
                             title: `Episode ${newEpisodeNumber}`,
@@ -2790,7 +2343,6 @@
                             sources: [],
                             subtitles: []
                         });
-                        
                         renderSeasons(seasonsData);
                     });
                 });
@@ -2800,7 +2352,6 @@
             async function fetchTMDbData(type, tmdbId) {
                 const baseUrl = 'https://api.themoviedb.org/3';
                 let endpoint = '';
-                
                 if (type === 'movie') {
                     endpoint = `movie/${tmdbId}`;
                 } else if (type === 'series') {
@@ -2808,26 +2359,20 @@
                 } else {
                     throw new Error('Invalid content type');
                 }
-                
                 const url = `${baseUrl}/${endpoint}?api_key=${tmdbApiKey}`;
                 const res = await fetch(url);
-                
                 if (!res.ok) {
                     throw new Error(`Failed to fetch ${type} data: ${res.statusText}`);
                 }
-                
                 return await res.json();
             }
             
             async function fetchSeriesDetails(tmdbId) {
                 const seriesData = await fetchTMDbData('series', tmdbId);
-                
-                // Fetch trailer
                 const videosUrl = `https://api.themoviedb.org/3/tv/${tmdbId}/videos?api_key=${tmdbApiKey}`;
                 const videosRes = await fetch(videosUrl);
                 const videosData = videosRes.ok ? await videosRes.json() : { results: [] };
                 const trailer = videosData.results.find(v => v.site === 'YouTube' && v.type === 'Trailer');
-                
                 return {
                     ...seriesData,
                     trailer: trailer ? `https://www.youtube.com/watch?v=${trailer.key}` : ''
@@ -2835,11 +2380,10 @@
             }
 
             // Bulk Import from TMDB
-            async function bulkImportFromTMDB(importType, pages) {
+            async function bulkImportFromTMDB(importType, pages, year) {
                 const progressDiv = document.getElementById('bulkImportProgress');
                 const progressBar = document.getElementById('bulkImportProgressBar');
                 const statusText = document.getElementById('bulkImportStatus');
-                
                 progressDiv.style.display = 'block';
                 progressBar.style.width = '0%';
                 statusText.textContent = 'Starting bulk import...';
@@ -2847,55 +2391,34 @@
                 try {
                     let endpoint = '';
                     let isTV = false;
-                    
+                    let extraParams = '';
+
                     switch (importType) {
-                        case 'popular-movies':
-                            endpoint = 'movie/popular';
-                            break;
-                        case 'top-rated-movies':
-                            endpoint = 'movie/top_rated';
-                            break;
-                        case 'upcoming-movies':
-                            endpoint = 'movie/upcoming';
-                            break;
-                        case 'now-playing-movies':
-                            endpoint = 'movie/now_playing';
-                            break;
-                        case 'popular-tv':
-                            endpoint = 'tv/popular';
-                            isTV = true;
-                            break;
-                        case 'top-rated-tv':
-                            endpoint = 'tv/top_rated';
-                            isTV = true;
-                            break;
+                        case 'popular-movies': endpoint = 'movie/popular'; break;
+                        case 'top-rated-movies': endpoint = 'movie/top_rated'; break;
+                        case 'upcoming-movies': endpoint = 'movie/upcoming'; break;
+                        case 'now-playing-movies': endpoint = 'movie/now_playing'; break;
+                        case 'movies-by-year': endpoint = 'discover/movie'; extraParams = `&primary_release_year=${year}`; break;
+                        case 'popular-tv': endpoint = 'tv/popular'; isTV = true; break;
+                        case 'top-rated-tv': endpoint = 'tv/top_rated'; isTV = true; break;
                     }
                     
                     let totalItems = 0;
                     let processedItems = 0;
                     let addedItems = 0;
-                    
-                    // Fetch all pages first to calculate total
                     statusText.textContent = 'Fetching data from TMDB...';
                     const allResults = [];
-                    
                     for (let page = 1; page <= pages; page++) {
-                        const url = `https://api.themoviedb.org/3/${endpoint}?api_key=${tmdbApiKey}&page=${page}`;
+                        const url = `https://api.themoviedb.org/3/${endpoint}?api_key=${tmdbApiKey}&page=${page}${extraParams}`;
                         const response = await fetch(url);
-                        
                         if (!response.ok) {
                             throw new Error(`Failed to fetch page ${page}: ${response.statusText}`);
                         }
-                        
                         const data = await response.json();
                         allResults.push(...data.results);
-                        
-                        // Update progress for fetching
-                        const fetchProgress = (page / pages) * 30; // 30% for fetching
+                        const fetchProgress = (page / pages) * 30;
                         progressBar.style.width = `${fetchProgress}%`;
                         statusText.textContent = `Fetching page ${page} of ${pages}...`;
-                        
-                        // Rate limiting - TMDB allows 40 requests per 10 seconds
                         if (page < pages) {
                             await new Promise(resolve => setTimeout(resolve, 300));
                         }
@@ -2904,54 +2427,38 @@
                     totalItems = allResults.length;
                     statusText.textContent = `Processing ${totalItems} items...`;
                     
-                    // Process each item
                     for (const item of allResults) {
                         try {
                             let movieData;
-                            
                             if (isTV) {
-                                // For TV shows, get detailed data
                                 const detailsResponse = await fetch(`https://api.themoviedb.org/3/tv/${item.id}?api_key=${tmdbApiKey}`);
                                 if (detailsResponse.ok) {
                                     const details = await detailsResponse.json();
-                                    
-                                    // Get credits
                                     const creditsResponse = await fetch(`https://api.themoviedb.org/3/tv/${item.id}/credits?api_key=${tmdbApiKey}`);
                                     const credits = creditsResponse.ok ? await creditsResponse.json() : { cast: [], crew: [] };
-                                    
-                                    // Get trailer
                                     const videosResponse = await fetch(`https://api.themoviedb.org/3/tv/${item.id}/videos?api_key=${tmdbApiKey}`);
                                     const videos = videosResponse.ok ? await videosResponse.json() : { results: [] };
                                     const trailer = videos.results.find(v => v.site === 'YouTube' && v.type === 'Trailer');
-                                    
                                     movieData = createCineMaxSeriesFromTMDB(details, credits, trailer);
                                 }
                             } else {
-                                // For movies, get detailed data
                                 const detailsResponse = await fetch(`https://api.themoviedb.org/3/movie/${item.id}?api_key=${tmdbApiKey}`);
                                 if (detailsResponse.ok) {
                                     const details = await detailsResponse.json();
-                                    
-                                    // Get credits
                                     const creditsResponse = await fetch(`https://api.themoviedb.org/3/movie/${item.id}/credits?api_key=${tmdbApiKey}`);
                                     const credits = creditsResponse.ok ? await creditsResponse.json() : { cast: [], crew: [] };
-                                    
-                                    // Get trailer
                                     const videosResponse = await fetch(`https://api.themoviedb.org/3/movie/${item.id}/videos?api_key=${tmdbApiKey}`);
                                     const videos = videosResponse.ok ? await videosResponse.json() : { results: [] };
                                     const trailer = videos.results.find(v => v.site === 'YouTube' && v.type === 'Trailer');
-                                    
                                     movieData = createCineMaxMovieFromTMDB(details, credits, trailer);
                                 }
                             }
                             
                             if (movieData) {
-                                // Check if already exists
                                 const existingMovie = jsonData.movies.find(m => 
                                     m.title.toLowerCase() === movieData.title.toLowerCase() && 
                                     m.year === movieData.year
                                 );
-                                
                                 if (!existingMovie) {
                                     jsonData.movies.push(movieData);
                                     addedItems++;
@@ -2959,48 +2466,33 @@
                             }
                             
                             processedItems++;
-                            const progress = 30 + (processedItems / totalItems) * 70; // 70% for processing
+                            const progress = 30 + (processedItems / totalItems) * 70;
                             progressBar.style.width = `${progress}%`;
                             statusText.textContent = `Processed ${processedItems}/${totalItems} items (${addedItems} added)`;
-                            
-                            // Rate limiting
                             if (processedItems % 5 === 0) {
                                 await new Promise(resolve => setTimeout(resolve, 1000));
                             }
-                            
                         } catch (error) {
                             console.warn(`Failed to process item ${item.id}:`, error);
                         }
                     }
                     
-                    // Update API info
                     if (jsonData.api_info) {
                         jsonData.api_info.total_movies = jsonData.movies.length;
                         jsonData.api_info.last_updated = new Date().toISOString().split('T')[0];
                     }
-                    
-                    // Auto-generate related content
                     if (autoGenerationEnabled) {
                         autoGenerateRelatedContent();
                     }
-                    
-                    // Update UI
                     renderEntries();
-                    
-                    // Auto-save the imported data
                     saveToLocalStorage();
-                    
                     progressBar.style.width = '100%';
                     statusText.textContent = `✅ Bulk import completed! Added ${addedItems} new items out of ${totalItems} processed.`;
                     showNotification(`Bulk import completed! Added ${addedItems} new items.`, true);
-                    
-                    // Hide progress after 3 seconds
                     setTimeout(() => {
                         progressDiv.style.display = 'none';
                     }, 3000);
-                    
                 } catch (error) {
-                    console.error('Bulk import error:', error);
                     statusText.textContent = `❌ Error: ${error.message}`;
                     showNotification(`Bulk import failed: ${error.message}`, false);
                 }
@@ -3008,8 +2500,6 @@
 
             function createCineMaxMovieFromTMDB(movieData, credits, trailer) {
                 const newId = generateNewId();
-                
-                // Get top 5 actors
                 const actors = credits.cast.slice(0, 5).map(actor => ({
                     id: generateNewId(),
                     name: actor.name,
@@ -3020,8 +2510,6 @@
                     height: '',
                     bio: ''
                 }));
-                
-                // Add director
                 const director = credits.crew.find(person => person.job === 'Director');
                 if (director) {
                     actors.push({
@@ -3050,17 +2538,30 @@
                         title: `${movieData.title} Trailer`,
                         url: `https://www.youtube.com/watch?v=${trailer.key}`
                     } : null,
-                    sources: [{
-                        id: generateNewId(),
-                        type: 'video',
-                        title: 'vidsrc.net 1080p',
-                        quality: '1080p',
-                        size: '0MB',
-                        kind: 'both',
-                        premium: 'false',
-                        external: false,
-                        url: `https://vidsrc.net/embed/movie/${movieData.id}`
-                    }],
+                    sources: [
+                        {
+                            id: generateNewId(),
+                            type: 'video',
+                            title: 'vidsrc.net 1080p',
+                            quality: '1080p',
+                            size: '0MB',
+                            kind: 'both',
+                            premium: 'false',
+                            external: false,
+                            url: `https://vidsrc.net/embed/movie/${movieData.id}`
+                        },
+                        {
+                            id: generateNewId(),
+                            type: 'video',
+                            title: 'vidjoy.pro 1080p',
+                            quality: '1080p',
+                            size: '0MB',
+                            kind: 'both',
+                            premium: 'false',
+                            external: false,
+                            url: `https://vidjoy.pro/embed/${movieData.id}`
+                        }
+                    ],
                     label: 'Movie',
                     sublabel: movieData.release_date ? movieData.release_date.split('-')[0] : 'N/A',
                     imdb: movieData.vote_average ? movieData.vote_average.toString() : '0.0',
@@ -3073,7 +2574,7 @@
                     created_at: new Date().toISOString().split('T')[0],
                     genres: (movieData.genres || []).map(g => ({
                         id: g.id,
-                        name: g.name || g.title  // Ensure "name" field for movie genres
+                        name: g.name || g.title
                     })),
                     actors: actors,
                     subtitles: [],
@@ -3083,8 +2584,6 @@
 
             function createCineMaxSeriesFromTMDB(seriesData, credits, trailer) {
                 const newId = generateNewId();
-                
-                // Get top 5 actors
                 const actors = credits.cast.slice(0, 5).map(actor => ({
                     id: generateNewId(),
                     name: actor.name,
@@ -3095,8 +2594,6 @@
                     height: '',
                     bio: ''
                 }));
-                
-                // Add creator as director
                 if (seriesData.created_by && seriesData.created_by.length > 0) {
                     const creator = seriesData.created_by[0];
                     actors.push({
@@ -3137,13 +2634,13 @@
                     created_at: new Date().toISOString().split('T')[0],
                     genres: (seriesData.genres || []).map(g => ({
                         id: g.id,
-                        name: g.name || g.title  // Ensure "name" field for series genres
+                        name: g.name || g.title
                     })),
                     actors: actors,
                     subtitles: [],
                     comments: [],
                     sources: [],
-                    seasons: [] // This would need to be populated separately if needed
+                    seasons: []
                 };
             }
             
@@ -3153,41 +2650,27 @@
                     showNotification('Please enter a TMDb Movie ID', false);
                     return;
                 }
-                
                 try {
                     const movieData = await fetchTMDbData('movie', tmdbId);
-                    
-                    // Populate form
                     movieTitleInput.value = movieData.title;
                     movieYearInput.value = movieData.release_date ? movieData.release_date.split('-')[0] : '';
                     movieDescriptionInput.value = movieData.overview || '';
-                    movieImageInput.value = movieData.poster_path ? 
-                        `https://image.tmdb.org/t/p/w500${movieData.poster_path}` : '';
-                    movieCoverInput.value = movieData.backdrop_path ? 
-                        `https://image.tmdb.org/t/p/original${movieData.backdrop_path}` : '';
-                    
-                    // Auto-add genres from TMDb (convert to CineMax format)
+                    movieImageInput.value = movieData.poster_path ? `https://image.tmdb.org/t/p/w500${movieData.poster_path}` : '';
+                    movieCoverInput.value = movieData.backdrop_path ? `https://image.tmdb.org/t/p/original${movieData.backdrop_path}` : '';
                     currentMovieGenres = (movieData.genres || []).map(genre => ({
                         id: genre.id,
-                        name: genre.name || genre.title  // Ensure "name" field for movie genres
+                        name: genre.name || genre.title
                     }));
-                    console.log('Auto-added genres:', currentMovieGenres);
-                    
-                    // Auto-add actors from TMDb credits
                     try {
                         const creditsUrl = `https://api.themoviedb.org/3/movie/${tmdbId}/credits?api_key=${tmdbApiKey}`;
                         const creditsRes = await fetch(creditsUrl);
                         const creditsData = creditsRes.ok ? await creditsRes.json() : { cast: [], crew: [] };
-                        
-                        // Add top 5 cast members as actors
                         const topActors = creditsData.cast.slice(0, 5).map(actor => ({
                             name: actor.name,
                             type: 'actor',
                             role: actor.character || 'Actor',
                             image: actor.profile_path ? `https://image.tmdb.org/t/p/w200${actor.profile_path}` : ''
                         }));
-                        
-                        // Add director from crew
                         const director = creditsData.crew.find(person => person.job === 'Director');
                         if (director) {
                             topActors.push({
@@ -3197,45 +2680,28 @@
                                 image: director.profile_path ? `https://image.tmdb.org/t/p/w200${director.profile_path}` : ''
                             });
                         }
-                        
-                        // Update current movie actors
                         currentMovieActors = topActors;
-                        console.log('Auto-added actors from TMDb:', currentMovieActors);
                     } catch (error) {
                         console.warn('Could not fetch credits:', error);
                     }
-                    
-                    // Fetch trailer
                     const videosUrl = `https://api.themoviedb.org/3/movie/${tmdbId}/videos?api_key=${tmdbApiKey}`;
                     const videosRes = await fetch(videosUrl);
                     const videosData = videosRes.ok ? await videosRes.json() : { results: [] };
                     const trailer = videosData.results.find(v => v.site === 'YouTube' && v.type === 'Trailer');
                     movieTrailerInput.value = trailer ? `https://www.youtube.com/watch?v=${trailer.key}` : '';
                     
-                    // Auto-add vidsrc source
-                    const vidsrcUrl = `https://vidsrc.net/embed/movie/${tmdbId}`;
-                    currentMovieSources = [{ 
-                        id: generateNewId(),
-                        type: 'video',
-                        title: 'vidsrc.net 1080p',
-                        quality: '1080p',
-                        size: '0MB',
-                        kind: 'both',
-                        premium: 'false',
-                        external: false,
-                        url: vidsrcUrl 
-                    }];
+                    currentMovieSources = [
+                        {
+                            id: generateNewId(), type: 'video', title: 'vidsrc.net 1080p', quality: '1080p', size: '0MB', kind: 'both', premium: 'false', external: false,
+                            url: `https://vidsrc.net/embed/movie/${tmdbId}`
+                        },
+                        {
+                            id: generateNewId(), type: 'video', title: 'vidjoy.pro 1080p', quality: '1080p', size: '0MB', kind: 'both', premium: 'false', external: false,
+                            url: `https://vidjoy.pro/embed/${tmdbId}`
+                        }
+                    ];
                     renderMovieSources();
-                    
-                    // Auto-generate related content after TMDB fetch
-                    console.log('🔄 Auto-generating related content after TMDB movie fetch...');
-                    showNotification('Fetching movie data and generating related content...', true);
-                    
-                    setTimeout(() => {
-                        autoGenerateRelatedContent();
-                        renderEntries();
-                        showNotification(`✅ Movie "${movieData.title}" added with auto-generated slides, featured, actors, and genres!`, true);
-                    }, 500);
+                    showNotification('Fetching movie data...', true);
                 } catch (error) {
                     showNotification(`Error: ${error.message}`, false);
                 }
@@ -3247,39 +2713,25 @@
                     showNotification('Please enter a TMDb Series ID', false);
                     return;
                 }
-                
                 try {
                     const seriesData = await fetchSeriesDetails(tmdbId);
-                    
-                    // Populate form
                     seriesTitleInput.value = seriesData.name;
                     seriesYearInput.value = seriesData.first_air_date ? seriesData.first_air_date.split('-')[0] : '';
                     seriesDescriptionInput.value = seriesData.overview || '';
-                    seriesImageInput.value = seriesData.poster_path ? 
-                        `https://image.tmdb.org/t/p/w500${seriesData.poster_path}` : '';
-                    seriesCoverInput.value = seriesData.backdrop_path ? 
-                        `https://image.tmdb.org/t/p/original${seriesData.backdrop_path}` : '';
+                    seriesImageInput.value = seriesData.poster_path ? `https://image.tmdb.org/t/p/w500${seriesData.poster_path}` : '';
+                    seriesCoverInput.value = seriesData.backdrop_path ? `https://image.tmdb.org/t/p/original${seriesData.backdrop_path}` : '';
                     seriesTrailerInput.value = seriesData.trailer || '';
-                    
-                    // Auto-add genres from TMDb
                     currentSeriesGenres = seriesData.genres || [];
-                    console.log('Auto-added series genres:', currentSeriesGenres);
-                    
-                    // Auto-add actors from TMDb credits
                     try {
                         const creditsUrl = `https://api.themoviedb.org/3/tv/${tmdbId}/credits?api_key=${tmdbApiKey}`;
                         const creditsRes = await fetch(creditsUrl);
                         const creditsData = creditsRes.ok ? await creditsRes.json() : { cast: [], crew: [] };
-                        
-                        // Add top 5 cast members as actors
                         const topActors = creditsData.cast.slice(0, 5).map(actor => ({
                             name: actor.name,
                             type: 'actor',
                             role: actor.character || 'Actor',
                             image: actor.profile_path ? `https://image.tmdb.org/t/p/w200${actor.profile_path}` : ''
                         }));
-                        
-                        // Add creator from crew
                         const creator = creditsData.crew.find(person => person.job === 'Creator');
                         if (creator) {
                             topActors.push({
@@ -3289,15 +2741,11 @@
                                 image: creator.profile_path ? `https://image.tmdb.org/t/p/w200${creator.profile_path}` : ''
                             });
                         }
-                        
-                        // Update current series actors
                         currentSeriesActors = topActors;
-                        console.log('Auto-added series actors from TMDb:', currentSeriesActors);
                     } catch (error) {
                         console.warn('Could not fetch series credits:', error);
                     }
                     
-                    // Prepare seasons data with auto vidsrc URLs
                     currentSeriesData = {
                         ...seriesData,
                         seasons: seriesData.seasons.filter(s => s.season_number > 0).map(season => ({
@@ -3305,7 +2753,6 @@
                             title: `Season ${season.season_number}`,
                             episodes: Array.from({length: season.episode_count || 1}, (_, i) => {
                                 const episodeNumber = i + 1;
-                                const vidsrcEpisodeUrl = `https://vidsrc.net/embed/tv/${tmdbId}/${season.season_number}/${episodeNumber}`;
                                 return {
                                     id: generateNewId(),
                                     title: `Episode ${episodeNumber}`,
@@ -3314,31 +2761,23 @@
                                     duration: '45:00',
                                     views: 0,
                                     downloads: 0,
-                                    sources: [{
-                                        id: generateNewId(),
-                                        type: 'video',
-                                        title: `Episode ${episodeNumber} 1080p`,
-                                        quality: '1080p',
-                                        url: vidsrcEpisodeUrl
-                                    }],
+                                    sources: [
+                                        {
+                                            id: generateNewId(), type: 'video', title: `vidsrc.net`, quality: '1080p',
+                                            url: `https://vidsrc.net/embed/tv/${tmdbId}/${season.season_number}/${episodeNumber}`
+                                        },
+                                        {
+                                            id: generateNewId(), type: 'video', title: `vidjoy.pro`, quality: '1080p',
+                                            url: `https://vidjoy.pro/embed/tv/${tmdbId}?s=${season.season_number}&e=${episodeNumber}`
+                                        }
+                                    ],
                                     subtitles: []
                                 };
                             })
                         }))
                     };
-                    
-                    // Render seasons
                     renderSeasons(currentSeriesData.seasons);
-                    
-                    // Auto-generate related content after TMDB fetch
-                    console.log('🔄 Auto-generating related content after TMDB series fetch...');
-                    showNotification('Fetching series data and generating related content...', true);
-                    
-                    setTimeout(() => {
-                        autoGenerateRelatedContent();
-                        renderEntries();
-                        showNotification(`✅ Series "${seriesData.name}" added with auto-generated slides, featured, actors, and genres!`, true);
-                    }, 500);
+                    showNotification('Fetching series data...', true);
                 } catch (error) {
                     showNotification(`Error: ${error.message}`, false);
                 }
@@ -3350,10 +2789,7 @@
                     showNotification('No data to save', false);
                     return;
                 }
-                
-                // Prepare final CineMax API format
                 const cineMaxAPI = prepareCineMaxAPIFormat();
-                
                 const jsonString = JSON.stringify(cineMaxAPI, null, 2);
                 const blob = new Blob([jsonString], { type: 'application/json' });
                 const url = URL.createObjectURL(blob);
@@ -3364,11 +2800,9 @@
                 a.click();
                 document.body.removeChild(a);
                 URL.revokeObjectURL(url);
-                
                 showNotification('CineMax API downloaded successfully!', true);
             });
             
-            // Add validation button event listener
             const validateButton = document.getElementById('validateButton');
             if (validateButton) {
                 validateButton.addEventListener('click', () => {
@@ -3376,13 +2810,11 @@
                         showNotification('No data to validate', false);
                         return;
                     }
-                    
                     validateCineMaxAPI();
                 });
             }
             
             function prepareCineMaxAPIFormat() {
-                // Update API info with current stats
                 const updatedApiInfo = {
                     ...jsonData.api_info,
                     total_movies: jsonData.movies?.length || 0,
@@ -3390,8 +2822,6 @@
                     total_actors: jsonData.actors?.length || 0,
                     last_updated: new Date().toISOString().split('T')[0]
                 };
-                
-                // Ensure all movies have complete CineMax structure
                 const processedMovies = (jsonData.movies || []).map(movie => ({
                     id: movie.id,
                     type: movie.type || 'movie',
@@ -3421,8 +2851,6 @@
                     shares: movie.shares || 0,
                     ...(movie.type === 'series' && { seasons: movie.seasons || [] })
                 }));
-                
-                // Ensure all channels have complete CineMax structure
                 const processedChannels = (jsonData.channels || []).map(channel => ({
                     id: channel.id,
                     title: channel.title,
@@ -3448,22 +2876,15 @@
                     }],
                     comments: channel.comments || []
                 }));
-                
-                // Build home slides from movies and channels
                 const homeSlides = [];
-                
-                // Add slides from existing slides
                 if (jsonData.home?.slides) {
                     homeSlides.push(...jsonData.home.slides);
                 }
-                
-                // Add top movies as slides if not enough slides
                 if (homeSlides.length < 5) {
                     const topMovies = processedMovies
                         .filter(m => m.rating > 7)
                         .sort((a, b) => b.rating - a.rating)
                         .slice(0, 5 - homeSlides.length);
-                    
                     topMovies.forEach(movie => {
                         homeSlides.push({
                             id: movie.id,
@@ -3475,14 +2896,11 @@
                         });
                     });
                 }
-                
-                // Add top channels as slides if still not enough
                 if (homeSlides.length < 5 && processedChannels.length > 0) {
                     const topChannels = processedChannels
                         .filter(c => c.rating > 7)
                         .sort((a, b) => b.rating - a.rating)
                         .slice(0, 5 - homeSlides.length);
-                    
                     topChannels.forEach(channel => {
                         homeSlides.push({
                             id: channel.id,
@@ -3499,59 +2917,48 @@
                     api_info: updatedApiInfo,
                     home: {
                         slides: homeSlides,
-                        featuredMovies: jsonData.home?.featured_movies || [],  // CamelCase for Java compatibility
-                        channels: processedChannels,  // Move channels to home section
-                        actors: jsonData.actors || [],  // Move actors to home section  
-                        genres: jsonData.genres || []   // Move genres to home section
+                        featuredMovies: jsonData.home?.featured_movies || [],
+                        channels: processedChannels,
+                        actors: jsonData.actors || [],
+                        genres: jsonData.genres || []
                     },
                     movies: processedMovies,
-                    channels: processedChannels,  // Keep a copy at root for backward compatibility
-                    actors: jsonData.actors || [],  // Keep a copy at root for backward compatibility
-                    genres: jsonData.genres || []   // Keep a copy at root for backward compatibility
+                    channels: processedChannels,
+                    actors: jsonData.actors || [],
+                    genres: jsonData.genres || []
                 };
             }
             
             function validateCineMaxAPI() {
                 const results = document.getElementById('validationResults');
                 results.style.display = 'block';
-                
                 const errors = [];
                 const warnings = [];
                 const info = [];
-                
-                // Check required sections
                 if (!jsonData.api_info) errors.push('Missing api_info section');
                 if (!jsonData.movies) errors.push('Missing movies array');
                 if (!jsonData.channels) errors.push('Missing channels array');
                 if (!jsonData.home) {
                     errors.push('Missing home section');
                 } else {
-                    // Check home section structure
                     if (!jsonData.home.slides) warnings.push('Missing home.slides array');
                     if (!jsonData.home.featuredMovies && !jsonData.home.featured_movies) warnings.push('Missing home.featuredMovies array');
                 }
                 if (!jsonData.actors) warnings.push('Missing actors array');
                 if (!jsonData.genres) warnings.push('Missing genres array');
-                
-                // Check API info
                 if (jsonData.api_info) {
                     if (!jsonData.api_info.version) warnings.push('Missing API version');
                     if (!jsonData.api_info.description) warnings.push('Missing API description');
                     if (!jsonData.api_info.last_updated) warnings.push('Missing last_updated date');
                 }
-                
-                // Check movies structure
                 if (jsonData.movies && jsonData.movies.length > 0) {
                     let movieCount = 0;
                     let seriesCount = 0;
-                    
                     jsonData.movies.forEach((item, index) => {
                         if (!item.id) errors.push(`Item ${index + 1}: Missing id`);
                         if (!item.title) errors.push(`Item ${index + 1}: Missing title`);
-                        
                         if (item.type === 'series') {
                             seriesCount++;
-                            // For series, check if seasons/episodes have sources
                             if (!item.seasons || item.seasons.length === 0) {
                                 warnings.push(`Series "${item.title}": No seasons defined`);
                             } else {
@@ -3570,20 +2977,16 @@
                                 }
                             }
                         } else {
-                            // For movies, check direct sources
                             movieCount++;
                             if (!item.sources || item.sources.length === 0) {
                                 warnings.push(`Movie "${item.title}": No sources defined`);
                             }
                         }
                     });
-                    
                     info.push(`${movieCount} movies and ${seriesCount} series validated`);
                 } else {
                     warnings.push('No movies/series in API');
                 }
-                
-                // Check channels structure
                 if (jsonData.channels && jsonData.channels.length > 0) {
                     jsonData.channels.forEach((channel, index) => {
                         if (!channel.id) errors.push(`Channel ${index + 1}: Missing id`);
@@ -3596,33 +2999,26 @@
                 } else {
                     info.push('No channels in API');
                 }
-                
-                // Generate report
                 let report = '';
                 let reportClass = 'success';
-                
                 if (errors.length > 0) {
                     reportClass = 'error';
                     report += `<strong>❌ ${errors.length} Error(s):</strong><br>`;
                     errors.forEach(error => report += `• ${error}<br>`);
                 }
-                
                 if (warnings.length > 0) {
                     if (reportClass !== 'error') reportClass = 'warning';
                     report += `<strong>⚠️ ${warnings.length} Warning(s):</strong><br>`;
                     warnings.forEach(warning => report += `• ${warning}<br>`);
                 }
-                
                 if (info.length > 0) {
                     report += `<strong>ℹ️ Info:</strong><br>`;
                     info.forEach(i => report += `• ${i}<br>`);
                 }
-                
                 if (errors.length === 0 && warnings.length === 0) {
                     report = '<strong>✅ API validation passed!</strong><br>Your CineMax API is ready for use.';
                     reportClass = 'success';
                 }
-                
                 results.innerHTML = report;
                 results.style.backgroundColor = reportClass === 'error' ? '#ffebee' : 
                                                 reportClass === 'warning' ? '#fff3e0' : '#e8f5e8';
@@ -3630,16 +3026,13 @@
                                      reportClass === 'warning' ? '#ef6c00' : '#2e7d32';
                 results.style.border = `1px solid ${reportClass === 'error' ? '#c62828' : 
                                                    reportClass === 'warning' ? '#ef6c00' : '#2e7d32'}`;
-                
                 showNotification(`Validation completed: ${errors.length} errors, ${warnings.length} warnings`, 
                                errors.length === 0);
             }
             
-            // --- Info Toggle Function ---
             window.toggleInfo = function() {
                 const content = document.getElementById('infoContent');
                 const chevron = document.getElementById('infoChevron');
-                
                 if (content.classList.contains('show')) {
                     content.classList.remove('show');
                     chevron.className = 'fas fa-chevron-down';
@@ -3649,7 +3042,6 @@
                 }
             };
 
-            // --- Event Listeners ---
             closeModalButton.addEventListener('click', closeModal);
             window.addEventListener('click', (event) => {
                 if (event.target === modal) {
@@ -3657,17 +3049,8 @@
                 }
             });
             
-            // --- Auto-Load on Page Start ---
-            console.log('🔄 Checking for auto-saved data...');
             if (autoSaveEnabled) {
                 const hasRestored = loadFromLocalStorage();
-                if (hasRestored) {
-                    console.log('✅ Auto-saved data restored successfully');
-                } else {
-                    console.log('ℹ️ No auto-saved data found');
-                }
-            } else {
-                console.log('⏸️ Auto-save disabled, skipping auto-load');
             }
         });
     </script>
