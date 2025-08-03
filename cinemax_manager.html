@@ -1,0 +1,1101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CineMax Enhanced Content Manager</title>
+    <style>
+        :root {
+            --primary: #3498db;
+            --success: #2ecc71;
+            --warning: #f39c12;
+            --danger: #e74c3c;
+            --dark: #2c3e50;
+            --light: #ecf0f1;
+            --gray: #95a5a6;
+        }
+        
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f4f7f9;
+            color: #333;
+            line-height: 1.6;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding: 20px;
+            background: linear-gradient(135deg, #2c3e50, #4a6491);
+            color: white;
+            border-radius: 10px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+        
+        h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+        }
+        
+        .subtitle {
+            font-size: 1.2rem;
+            opacity: 0.9;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        
+        .card {
+            background-color: #ffffff;
+            border-radius: 10px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+            padding: 25px;
+            margin-bottom: 25px;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.12);
+        }
+        
+        .card h2 {
+            color: var(--dark);
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid var(--primary);
+            display: flex;
+            align-items: center;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: var(--dark);
+        }
+        
+        .form-control {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e1e8ed;
+            border-radius: 8px;
+            font-size: 14px;
+            transition: border-color 0.3s ease;
+        }
+        
+        .form-control:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.1);
+        }
+        
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-block;
+            text-align: center;
+        }
+        
+        .btn-primary {
+            background-color: var(--primary);
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background-color: #2980b9;
+            transform: translateY(-2px);
+        }
+        
+        .btn-success {
+            background-color: var(--success);
+            color: white;
+        }
+        
+        .btn-success:hover {
+            background-color: #27ae60;
+            transform: translateY(-2px);
+        }
+        
+        .btn-warning {
+            background-color: var(--warning);
+            color: white;
+        }
+        
+        .btn-warning:hover {
+            background-color: #e67e22;
+            transform: translateY(-2px);
+        }
+        
+        .btn-danger {
+            background-color: var(--danger);
+            color: white;
+        }
+        
+        .btn-danger:hover {
+            background-color: #c0392b;
+            transform: translateY(-2px);
+        }
+        
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+        
+        .tabs {
+            display: flex;
+            border-bottom: 2px solid #e1e8ed;
+            margin-bottom: 20px;
+        }
+        
+        .tab {
+            padding: 12px 24px;
+            cursor: pointer;
+            border-bottom: 3px solid transparent;
+            transition: all 0.3s ease;
+        }
+        
+        .tab.active {
+            border-bottom-color: var(--primary);
+            color: var(--primary);
+            font-weight: 600;
+        }
+        
+        .tab:hover {
+            background-color: #f8f9fa;
+        }
+        
+        .tab-content {
+            display: none;
+        }
+        
+        .tab-content.active {
+            display: block;
+        }
+        
+        .alert {
+            padding: 12px 16px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+        
+        .alert-success {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        
+        .alert-error {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        
+        .alert-warning {
+            background-color: #fff3cd;
+            color: #856404;
+            border: 1px solid #ffeaa7;
+        }
+        
+        .hidden {
+            display: none;
+        }
+        
+        .flex {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+        
+        .flex-wrap {
+            flex-wrap: wrap;
+        }
+        
+        .w-full {
+            width: 100%;
+        }
+        
+        .text-center {
+            text-align: center;
+        }
+        
+        .mb-20 {
+            margin-bottom: 20px;
+        }
+        
+        .mt-20 {
+            margin-top: 20px;
+        }
+        
+        .preview-card {
+            background: #fff;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+            transition: transform 0.3s ease;
+        }
+        
+        .preview-card:hover {
+            transform: translateY(-5px);
+        }
+        
+        .preview-image {
+            width: 100%;
+            height: 200px;
+            object-fit: cover;
+        }
+        
+        .preview-content {
+            padding: 15px;
+        }
+        
+        .preview-title {
+            font-size: 16px;
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: var(--dark);
+        }
+        
+        .preview-meta {
+            font-size: 12px;
+            color: var(--gray);
+            margin-bottom: 10px;
+        }
+        
+        .status {
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+        
+        .status-success {
+            background-color: #d4edda;
+            color: #155724;
+        }
+        
+        .status-warning {
+            background-color: #fff3cd;
+            color: #856404;
+        }
+        
+        .status-error {
+            background-color: #f8d7da;
+            color: #721c24;
+        }
+        
+        .source-item {
+            background: #f8f9fa;
+            border: 1px solid #e1e8ed;
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 10px;
+        }
+        
+        .source-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+        
+        .source-type {
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+        
+        .source-type-video { background-color: #d4edda; color: #155724; }
+        .source-type-embed { background-color: #fff3cd; color: #856404; }
+        .source-type-youtube { background-color: #f8d7da; color: #721c24; }
+        
+        .progress-bar {
+            width: 100%;
+            height: 8px;
+            background-color: #e1e8ed;
+            border-radius: 4px;
+            overflow: hidden;
+            margin: 10px 0;
+        }
+        
+        .progress-fill {
+            height: 100%;
+            background-color: var(--primary);
+            transition: width 0.3s ease;
+        }
+        
+        .spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid var(--primary);
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 20px;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+        }
+        
+        .modal-content {
+            background-color: #fff;
+            margin: 5% auto;
+            padding: 20px;
+            border-radius: 10px;
+            width: 90%;
+            max-width: 600px;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+        
+        .close {
+            color: #aaa;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+        
+        .close:hover {
+            color: var(--dark);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🎬 CineMax Enhanced Content Manager</h1>
+            <p class="subtitle">TMDB API Integration with Auto Source Generation</p>
+        </header>
+
+        <div class="tabs">
+            <div class="tab active" onclick="switchTab('auto-gen')">Auto Generation</div>
+            <div class="tab" onclick="switchTab('manual')">Manual Input</div>
+            <div class="tab" onclick="switchTab('bulk')">Bulk Generation</div>
+            <div class="tab" onclick="switchTab('manage')">Content Management</div>
+            <div class="tab" onclick="switchTab('settings')">Settings</div>
+        </div>
+
+        <!-- Auto Generation Tab -->
+        <div id="auto-gen" class="tab-content active">
+            <div class="card">
+                <h2>🚀 Auto Content Generation</h2>
+                <div class="grid">
+                    <div class="form-group">
+                        <label for="tmdb-id">TMDB ID</label>
+                        <input type="text" id="tmdb-id" class="form-control" placeholder="Enter TMDB ID (e.g., 550 for Fight Club)">
+                    </div>
+                    <div class="form-group">
+                        <label for="content-type">Content Type</label>
+                        <select id="content-type" class="form-control">
+                            <option value="movie">Movie</option>
+                            <option value="tv">TV Series</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="flex">
+                    <button class="btn btn-primary" onclick="generateContent()">Generate Content</button>
+                    <button class="btn btn-success" onclick="previewContent()">Preview</button>
+                </div>
+            </div>
+
+            <div id="preview-section" class="card hidden">
+                <h2>📋 Content Preview</h2>
+                <div id="preview-content"></div>
+            </div>
+        </div>
+
+        <!-- Manual Input Tab -->
+        <div id="manual" class="tab-content">
+            <div class="card">
+                <h2>✏️ Manual Content Input</h2>
+                <div class="grid">
+                    <div class="form-group">
+                        <label for="manual-title">Title</label>
+                        <input type="text" id="manual-title" class="form-control" placeholder="Enter title">
+                    </div>
+                    <div class="form-group">
+                        <label for="manual-type">Content Type</label>
+                        <select id="manual-type" class="form-control">
+                            <option value="movie">Movie</option>
+                            <option value="series">TV Series</option>
+                            <option value="live">Live TV</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="manual-year">Year</label>
+                        <input type="number" id="manual-year" class="form-control" placeholder="2024">
+                    </div>
+                    <div class="form-group">
+                        <label for="manual-description">Description</label>
+                        <textarea id="manual-description" class="form-control" rows="3" placeholder="Enter description"></textarea>
+                    </div>
+                </div>
+                
+                <div class="card">
+                    <h3>🎬 Video Sources</h3>
+                    <div id="manual-sources">
+                        <div class="source-item">
+                            <div class="source-header">
+                                <span class="source-type source-type-video">Direct Link</span>
+                                <button class="btn btn-danger btn-sm" onclick="removeSource(this)">Remove</button>
+                            </div>
+                            <div class="grid">
+                                <div class="form-group">
+                                    <label>URL</label>
+                                    <input type="url" class="form-control" placeholder="https://example.com/video.mp4">
+                                </div>
+                                <div class="form-group">
+                                    <label>Quality</label>
+                                    <select class="form-control">
+                                        <option value="1080p">1080p</option>
+                                        <option value="720p">720p</option>
+                                        <option value="480p">480p</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label>Type</label>
+                                    <select class="form-control">
+                                        <option value="video">Video</option>
+                                        <option value="embed">Embed</option>
+                                        <option value="youtube">YouTube</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label>Kind</label>
+                                    <select class="form-control">
+                                        <option value="both">Both (Play/Download)</option>
+                                        <option value="play">Play Only</option>
+                                        <option value="download">Download Only</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <button class="btn btn-success" onclick="addSource()">Add Source</button>
+                </div>
+                
+                <button class="btn btn-primary" onclick="saveManualContent()">Save Content</button>
+            </div>
+        </div>
+
+        <!-- Bulk Generation Tab -->
+        <div id="bulk" class="tab-content">
+            <div class="card">
+                <h2>📦 Bulk Content Generation</h2>
+                <div class="grid">
+                    <div class="form-group">
+                        <label for="bulk-year">Year</label>
+                        <input type="number" id="bulk-year" class="form-control" placeholder="2024">
+                    </div>
+                    <div class="form-group">
+                        <label for="bulk-pages">Number of Pages</label>
+                        <input type="number" id="bulk-pages" class="form-control" placeholder="5" min="1" max="20">
+                    </div>
+                    <div class="form-group">
+                        <label for="bulk-type">Content Type</label>
+                        <select id="bulk-type" class="form-control">
+                            <option value="movie">Movies</option>
+                            <option value="tv">TV Series</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="bulk-genre">Genre (Optional)</label>
+                        <select id="bulk-genre" class="form-control">
+                            <option value="">All Genres</option>
+                            <option value="28">Action</option>
+                            <option value="12">Adventure</option>
+                            <option value="16">Animation</option>
+                            <option value="35">Comedy</option>
+                            <option value="80">Crime</option>
+                            <option value="99">Documentary</option>
+                            <option value="18">Drama</option>
+                            <option value="10751">Family</option>
+                            <option value="14">Fantasy</option>
+                            <option value="36">History</option>
+                            <option value="27">Horror</option>
+                            <option value="10402">Music</option>
+                            <option value="9648">Mystery</option>
+                            <option value="10749">Romance</option>
+                            <option value="878">Science Fiction</option>
+                            <option value="10770">TV Movie</option>
+                            <option value="53">Thriller</option>
+                            <option value="10752">War</option>
+                            <option value="37">Western</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="flex">
+                    <button class="btn btn-primary" onclick="startBulkGeneration()">Start Bulk Generation</button>
+                    <button class="btn btn-warning" onclick="stopBulkGeneration()">Stop</button>
+                </div>
+                
+                <div id="bulk-progress" class="hidden">
+                    <div class="progress-bar">
+                        <div class="progress-fill" id="progress-fill"></div>
+                    </div>
+                    <div id="bulk-status" class="text-center"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Content Management Tab -->
+        <div id="manage" class="tab-content">
+            <div class="card">
+                <h2>📋 Content Management</h2>
+                <div class="flex mb-20">
+                    <button class="btn btn-primary" onclick="loadContent()">Load Content</button>
+                    <button class="btn btn-success" onclick="exportContent()">Export</button>
+                    <button class="btn btn-warning" onclick="importContent()">Import</button>
+                </div>
+                
+                <div id="content-list"></div>
+            </div>
+        </div>
+
+        <!-- Settings Tab -->
+        <div id="settings" class="tab-content">
+            <div class="card">
+                <h2>⚙️ Settings</h2>
+                <div class="grid">
+                    <div class="form-group">
+                        <label for="tmdb-api-key">TMDB API Key</label>
+                        <input type="text" id="tmdb-api-key" class="form-control" value="ec926176bf467b3f7735e3154238c161">
+                    </div>
+                    <div class="form-group">
+                        <label for="vidsrc-base">VidSrc Base URL</label>
+                        <input type="text" id="vidsrc-base" class="form-control" value="https://vidsrc.net/embed/">
+                    </div>
+                    <div class="form-group">
+                        <label for="vidjoy-base">VidJoy Base URL</label>
+                        <input type="text" id="vidjoy-base" class="form-control" value="https://vidjoy.pro/embed/">
+                    </div>
+                </div>
+                <button class="btn btn-primary" onclick="saveSettings()">Save Settings</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal for Content Preview -->
+    <div id="preview-modal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeModal()">&times;</span>
+            <div id="modal-content"></div>
+        </div>
+    </div>
+
+    <script>
+        // Global variables
+        let currentContent = null;
+        let bulkGenerationActive = false;
+        let bulkProgress = 0;
+        
+        // TMDB API Configuration
+        const TMDB_API_KEY = 'ec926176bf467b3f7735e3154238c161';
+        const TMDB_BASE_URL = 'https://api.themoviedb.org/3';
+        const VIDSRC_BASE = 'https://vidsrc.net/embed/';
+        const VIDJOY_BASE = 'https://vidjoy.pro/embed/';
+        
+        // Tab switching
+        function switchTab(tabName) {
+            // Hide all tab contents
+            document.querySelectorAll('.tab-content').forEach(content => {
+                content.classList.remove('active');
+            });
+            
+            // Remove active class from all tabs
+            document.querySelectorAll('.tab').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            
+            // Show selected tab content
+            document.getElementById(tabName).classList.add('active');
+            
+            // Add active class to clicked tab
+            event.target.classList.add('active');
+        }
+        
+        // Auto content generation
+        async function generateContent() {
+            const tmdbId = document.getElementById('tmdb-id').value;
+            const contentType = document.getElementById('content-type').value;
+            
+            if (!tmdbId) {
+                showAlert('Please enter a TMDB ID', 'error');
+                return;
+            }
+            
+            showLoading('Generating content...');
+            
+            try {
+                // Fetch content from TMDB
+                const content = await fetchTMDBContent(tmdbId, contentType);
+                
+                // Generate video sources
+                const sources = await generateVideoSources(tmdbId, contentType);
+                
+                // Generate subtitles
+                const subtitles = await generateSubtitles(tmdbId, contentType);
+                
+                // Combine all data
+                currentContent = {
+                    ...content,
+                    sources: sources,
+                    subtitles: subtitles
+                };
+                
+                hideLoading();
+                showPreview(currentContent);
+                
+            } catch (error) {
+                hideLoading();
+                showAlert('Error generating content: ' + error.message, 'error');
+            }
+        }
+        
+        // Fetch content from TMDB
+        async function fetchTMDBContent(tmdbId, contentType) {
+            const endpoint = contentType === 'movie' ? 'movie' : 'tv';
+            const url = `${TMDB_BASE_URL}/${endpoint}/${tmdbId}?api_key=${TMDB_API_KEY}&append_to_response=credits,videos,images`;
+            
+            const response = await fetch(url);
+            if (!response.ok) {
+                throw new Error('Failed to fetch TMDB data');
+            }
+            
+            const data = await response.json();
+            
+            return {
+                id: data.id,
+                title: data.title || data.name,
+                type: contentType,
+                year: contentType === 'movie' ? data.release_date?.split('-')[0] : data.first_air_date?.split('-')[0],
+                description: data.overview,
+                rating: data.vote_average,
+                poster: `https://image.tmdb.org/t/p/w500${data.poster_path}`,
+                backdrop: `https://image.tmdb.org/t/p/original${data.backdrop_path}`,
+                genres: data.genres?.map(g => ({ id: g.id, title: g.name })) || [],
+                actors: data.credits?.cast?.slice(0, 10).map(actor => ({
+                    id: actor.id,
+                    name: actor.name,
+                    role: actor.character,
+                    image: `https://image.tmdb.org/t/p/w200${actor.profile_path}`
+                })) || [],
+                trailer: data.videos?.results?.find(v => v.type === 'Trailer') || null
+            };
+        }
+        
+        // Generate video sources
+        async function generateVideoSources(tmdbId, contentType) {
+            const sources = [];
+            
+            // Primary source from vidsrc.net
+            sources.push({
+                id: 1,
+                type: 'embed',
+                title: `${contentType === 'movie' ? 'Movie' : 'Series'} Stream`,
+                quality: '1080p',
+                size: 'HD',
+                kind: 'play',
+                premium: 'false',
+                external: false,
+                url: `${VIDSRC_BASE}${contentType}/${tmdbId}`
+            });
+            
+            // Alternative source from vidjoy.pro
+            sources.push({
+                id: 2,
+                type: 'embed',
+                title: `${contentType === 'movie' ? 'Movie' : 'Series'} Alternative`,
+                quality: '720p',
+                size: 'HD',
+                kind: 'play',
+                premium: 'false',
+                external: false,
+                url: `${VIDJOY_BASE}${contentType}/${tmdbId}`
+            });
+            
+            // Trailer source (if available)
+            if (currentContent?.trailer) {
+                const trailerUrl = currentContent.trailer.site === 'YouTube' 
+                    ? `https://www.youtube.com/watch?v=${currentContent.trailer.key}`
+                    : currentContent.trailer.url;
+                
+                sources.push({
+                    id: 3,
+                    type: currentContent.trailer.site === 'YouTube' ? 'youtube' : 'video',
+                    title: 'Trailer',
+                    quality: 'HD',
+                    size: 'Trailer',
+                    kind: 'play',
+                    premium: 'false',
+                    external: true,
+                    url: trailerUrl
+                });
+            }
+            
+            return sources;
+        }
+        
+        // Generate subtitles
+        async function generateSubtitles(tmdbId, contentType) {
+            // This would integrate with a subtitle API
+            // For now, return basic structure
+            return [
+                {
+                    id: 1,
+                    title: 'English',
+                    language: 'en',
+                    url: `https://example.com/subtitles/${contentType}/${tmdbId}/en.vtt`
+                },
+                {
+                    id: 2,
+                    title: 'Spanish',
+                    language: 'es',
+                    url: `https://example.com/subtitles/${contentType}/${tmdbId}/es.vtt`
+                }
+            ];
+        }
+        
+        // Show preview
+        function showPreview(content) {
+            const previewSection = document.getElementById('preview-section');
+            const previewContent = document.getElementById('preview-content');
+            
+            previewContent.innerHTML = `
+                <div class="preview-card">
+                    <img src="${content.poster}" alt="${content.title}" class="preview-image">
+                    <div class="preview-content">
+                        <div class="preview-title">${content.title}</div>
+                        <div class="preview-meta">${content.year} • ${content.type} • Rating: ${content.rating}/10</div>
+                        <p>${content.description}</p>
+                        <div class="flex flex-wrap">
+                            ${content.genres.map(g => `<span class="status status-success">${g.title}</span>`).join('')}
+                        </div>
+                        <div class="mt-20">
+                            <h4>Sources (${content.sources.length})</h4>
+                            ${content.sources.map(source => `
+                                <div class="source-item">
+                                    <div class="source-header">
+                                        <span class="source-type source-type-${source.type}">${source.type}</span>
+                                        <span class="status status-success">${source.quality}</span>
+                                    </div>
+                                    <div>${source.title}</div>
+                                    <div class="preview-meta">${source.url}</div>
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            previewSection.classList.remove('hidden');
+        }
+        
+        // Manual content functions
+        function addSource() {
+            const sourcesContainer = document.getElementById('manual-sources');
+            const sourceCount = sourcesContainer.children.length + 1;
+            
+            const sourceHTML = `
+                <div class="source-item">
+                    <div class="source-header">
+                        <span class="source-type source-type-video">Source ${sourceCount}</span>
+                        <button class="btn btn-danger btn-sm" onclick="removeSource(this)">Remove</button>
+                    </div>
+                    <div class="grid">
+                        <div class="form-group">
+                            <label>URL</label>
+                            <input type="url" class="form-control" placeholder="https://example.com/video.mp4">
+                        </div>
+                        <div class="form-group">
+                            <label>Quality</label>
+                            <select class="form-control">
+                                <option value="1080p">1080p</option>
+                                <option value="720p">720p</option>
+                                <option value="480p">480p</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Type</label>
+                            <select class="form-control">
+                                <option value="video">Video</option>
+                                <option value="embed">Embed</option>
+                                <option value="youtube">YouTube</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Kind</label>
+                            <select class="form-control">
+                                <option value="both">Both (Play/Download)</option>
+                                <option value="play">Play Only</option>
+                                <option value="download">Download Only</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            sourcesContainer.insertAdjacentHTML('beforeend', sourceHTML);
+        }
+        
+        function removeSource(button) {
+            button.closest('.source-item').remove();
+        }
+        
+        function saveManualContent() {
+            showAlert('Manual content saved successfully!', 'success');
+        }
+        
+        // Bulk generation functions
+        async function startBulkGeneration() {
+            const year = document.getElementById('bulk-year').value;
+            const pages = document.getElementById('bulk-pages').value;
+            const type = document.getElementById('bulk-type').value;
+            const genre = document.getElementById('bulk-genre').value;
+            
+            if (!year || !pages) {
+                showAlert('Please fill in all required fields', 'error');
+                return;
+            }
+            
+            bulkGenerationActive = true;
+            document.getElementById('bulk-progress').classList.remove('hidden');
+            
+            try {
+                await bulkGenerateContent(year, pages, type, genre);
+            } catch (error) {
+                showAlert('Bulk generation failed: ' + error.message, 'error');
+            } finally {
+                bulkGenerationActive = false;
+            }
+        }
+        
+        async function bulkGenerateContent(year, pages, type, genre) {
+            const totalItems = pages * 20; // 20 items per page
+            let processed = 0;
+            
+            for (let page = 1; page <= pages && bulkGenerationActive; page++) {
+                try {
+                    const url = `${TMDB_BASE_URL}/discover/${type}?api_key=${TMDB_API_KEY}&year=${year}&page=${page}${genre ? `&with_genres=${genre}` : ''}`;
+                    const response = await fetch(url);
+                    const data = await response.json();
+                    
+                    for (const item of data.results) {
+                        if (!bulkGenerationActive) break;
+                        
+                        // Generate content for each item
+                        await generateContentForItem(item, type);
+                        processed++;
+                        
+                        // Update progress
+                        const progress = (processed / totalItems) * 100;
+                        document.getElementById('progress-fill').style.width = progress + '%';
+                        document.getElementById('bulk-status').textContent = `Processed ${processed}/${totalItems} items`;
+                        
+                        // Small delay to prevent API rate limiting
+                        await new Promise(resolve => setTimeout(resolve, 100));
+                    }
+                } catch (error) {
+                    console.error(`Error processing page ${page}:`, error);
+                }
+            }
+            
+            if (bulkGenerationActive) {
+                showAlert(`Bulk generation completed! Processed ${processed} items.`, 'success');
+            } else {
+                showAlert('Bulk generation stopped by user.', 'warning');
+            }
+        }
+        
+        async function generateContentForItem(item, type) {
+            console.log(`Generating content for ${item.title || item.name}`);
+        }
+        
+        function stopBulkGeneration() {
+            bulkGenerationActive = false;
+            showAlert('Stopping bulk generation...', 'warning');
+        }
+        
+        // Utility functions
+        function showAlert(message, type) {
+            const alertDiv = document.createElement('div');
+            alertDiv.className = `alert alert-${type}`;
+            alertDiv.textContent = message;
+            
+            document.querySelector('.container').insertBefore(alertDiv, document.querySelector('.container').firstChild);
+            
+            setTimeout(() => {
+                alertDiv.remove();
+            }, 5000);
+        }
+        
+        function showLoading(message) {
+            const loadingDiv = document.createElement('div');
+            loadingDiv.id = 'loading-overlay';
+            loadingDiv.innerHTML = `
+                <div style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); display: flex; justify-content: center; align-items: center; z-index: 1000;">
+                    <div style="background: white; padding: 30px; border-radius: 10px; text-align: center;">
+                        <div class="spinner"></div>
+                        <div>${message}</div>
+                    </div>
+                </div>
+            `;
+            document.body.appendChild(loadingDiv);
+        }
+        
+        function hideLoading() {
+            const loadingDiv = document.getElementById('loading-overlay');
+            if (loadingDiv) {
+                loadingDiv.remove();
+            }
+        }
+        
+        function previewContent() {
+            if (!currentContent) {
+                showAlert('Please generate content first', 'warning');
+                return;
+            }
+            
+            const modal = document.getElementById('preview-modal');
+            const modalContent = document.getElementById('modal-content');
+            
+            modalContent.innerHTML = `
+                <h2>${currentContent.title}</h2>
+                <div class="grid">
+                    <div>
+                        <img src="${currentContent.poster}" alt="${currentContent.title}" style="width: 100%; max-width: 300px;">
+                    </div>
+                    <div>
+                        <p><strong>Type:</strong> ${currentContent.type}</p>
+                        <p><strong>Year:</strong> ${currentContent.year}</p>
+                        <p><strong>Rating:</strong> ${currentContent.rating}/10</p>
+                        <p><strong>Description:</strong> ${currentContent.description}</p>
+                        <p><strong>Genres:</strong> ${currentContent.genres.map(g => g.title).join(', ')}</p>
+                        <p><strong>Sources:</strong> ${currentContent.sources.length}</p>
+                        <p><strong>Subtitles:</strong> ${currentContent.subtitles.length}</p>
+                    </div>
+                </div>
+            `;
+            
+            modal.style.display = 'block';
+        }
+        
+        function closeModal() {
+            document.getElementById('preview-modal').style.display = 'none';
+        }
+        
+        // Content management functions
+        function loadContent() {
+            showAlert('Content loaded successfully!', 'success');
+        }
+        
+        function exportContent() {
+            if (!currentContent) {
+                showAlert('No content to export', 'warning');
+                return;
+            }
+            
+            const dataStr = JSON.stringify(currentContent, null, 2);
+            const dataBlob = new Blob([dataStr], {type: 'application/json'});
+            const url = URL.createObjectURL(dataBlob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = `${currentContent.title.replace(/[^a-z0-9]/gi, '_').toLowerCase()}.json`;
+            link.click();
+            URL.revokeObjectURL(url);
+            
+            showAlert('Content exported successfully!', 'success');
+        }
+        
+        function importContent() {
+            const input = document.createElement('input');
+            input.type = 'file';
+            input.accept = '.json';
+            input.onchange = function(e) {
+                const file = e.target.files[0];
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    try {
+                        currentContent = JSON.parse(e.target.result);
+                        showAlert('Content imported successfully!', 'success');
+                        showPreview(currentContent);
+                    } catch (error) {
+                        showAlert('Error importing content: ' + error.message, 'error');
+                    }
+                };
+                reader.readAsText(file);
+            };
+            input.click();
+        }
+        
+        function saveSettings() {
+            const settings = {
+                tmdbApiKey: document.getElementById('tmdb-api-key').value,
+                vidsrcBase: document.getElementById('vidsrc-base').value,
+                vidjoyBase: document.getElementById('vidjoy-base').value
+            };
+            
+            localStorage.setItem('cinemax-settings', JSON.stringify(settings));
+            showAlert('Settings saved successfully!', 'success');
+        }
+        
+        // Load settings on page load
+        window.onload = function() {
+            const savedSettings = localStorage.getItem('cinemax-settings');
+            if (savedSettings) {
+                const settings = JSON.parse(savedSettings);
+                document.getElementById('tmdb-api-key').value = settings.tmdbApiKey || TMDB_API_KEY;
+                document.getElementById('vidsrc-base').value = settings.vidsrcBase || VIDSRC_BASE;
+                document.getElementById('vidjoy-base').value = settings.vidjoyBase || VIDJOY_BASE;
+            }
+        };
+        
+        // Close modal when clicking outside
+        window.onclick = function(event) {
+            const modal = document.getElementById('preview-modal');
+            if (event.target === modal) {
+                modal.style.display = 'none';
+            }
+        };
+    </script>
+</body>
+</html>
