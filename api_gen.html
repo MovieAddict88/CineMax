@@ -725,13 +725,21 @@
                 last_updated: new Date().toISOString().split('T')[0],
                 total_movies: 0,
                 total_series: 0,
-                total_channels: 0
+                total_channels: 0,
+                total_actors: 0
             },
             home: {
                 slides: [],
                 featuredMovies: [],
-                channels: []
-            }
+                channels: [],
+                actors: [],
+                genres: []
+            },
+            // Root-level arrays required by CineMax
+            movies: [],
+            channels: [],
+            actors: [],
+            genres: []
         };
 
         let nextId = 1;
@@ -854,14 +862,14 @@
              
              console.log('✅ CineMax Enhanced API Manager loaded!');
              console.log('🎬 Auto-sources: VidSrc.net + VidJoy.pro (Multiple Quality Options)');
-             console.log('🔧 Fixed: Root-level movies array for GenreActivity & TV Series');
-             console.log('🎯 Fixed: Source kind values - "play" for embeds/live TV, "both" for direct links');
-             console.log('📺 Enhanced: Multiple quality options per server (1080p + 720p)');
+             console.log('🔧 Fixed: Root-level movies/actors/genres/channels arrays for CineMax compatibility');
+             console.log('🎯 Fixed: Embedded poster/channel objects in slides');
+             console.log('📺 Enhanced: Complete structure matching free_movie_api.json');
              console.log('🧪 Test with: testSourceGeneration()');
              
              // Show info about the fix
              setTimeout(() => {
-                 showStatus('success', 'ENHANCED: Multiple server quality options like AZ2 channel! Now 4 sources per content!');
+                 showStatus('success', 'FIXED: Complete CineMax structure with root-level arrays & embedded content!');
              }, 2000);
          });
 
@@ -1054,32 +1062,37 @@
              console.log('Additional sources:', additionalSources);
 
              const movie = {
-                 id: nextId++,
-                 title: movieData.title,
-                 type: "movie",
-                 label: movieData.genres[0]?.name || "Movie",
-                 sublabel: `Released ${movieData.release_date?.substring(0, 4) || 'Unknown'}`,
-                 imdb: movieData.vote_average?.toString() || "0",
-                 downloadas: `${movieData.title.toLowerCase().replace(/\s+/g, '-')}.mp4`,
-                 comment: true,
-                 playas: "video",
-                 description: movieData.overview || "No description available",
-                 classification: getRatingClassification(movieData.adult),
-                 year: movieData.release_date?.substring(0, 4) || "Unknown",
-                 duration: formatDuration(movieData.runtime),
-                 rating: movieData.vote_average || 0,
-                 image: movieData.poster_path ? `${TMDB_IMAGE_BASE}${movieData.poster_path}` : null,
-                 cover: movieData.backdrop_path ? `${TMDB_IMAGE_BASE}${movieData.backdrop_path}` : null,
-                 genres: movieData.genres?.map(g => ({ id: g.id, title: g.name })) || [],
-                 sources: [...autoSources, ...additionalSources],
-                 trailer: getTrailer(videos),
-                 actors: getActors(credits),
-                 subtitles: await getSubtitles(tmdbId, 'movie'),
-                 views: Math.floor(Math.random() * 10000) + 1000,
-                 created_at: new Date().toISOString().split('T')[0]
-             };
+                id: nextId++,
+                title: movieData.title,
+                type: "movie",
+                label: movieData.genres[0]?.name || "Movie",
+                sublabel: `Released ${movieData.release_date?.substring(0, 4) || 'Unknown'}`,
+                imdb: movieData.vote_average?.toString() || "0",
+                downloadas: `${movieData.title.toLowerCase().replace(/\s+/g, '-')}.mp4`,
+                comment: true,
+                playas: "video",
+                description: movieData.overview || "No description available",
+                classification: getRatingClassification(movieData.adult),
+                year: movieData.release_date?.substring(0, 4) || "Unknown",
+                duration: formatDuration(movieData.runtime),
+                rating: movieData.vote_average || 0,
+                image: movieData.poster_path ? `${TMDB_IMAGE_BASE}${movieData.poster_path}` : null,
+                cover: movieData.backdrop_path ? `${TMDB_IMAGE_BASE}${movieData.backdrop_path}` : null,
+                genres: movieData.genres?.map(g => ({ id: g.id, title: g.name })) || [],
+                sources: [...autoSources, ...additionalSources],
+                trailer: getTrailer(videos),
+                actors: getActors(credits),
+                subtitles: await getSubtitles(tmdbId, 'movie'),
+                comments: [],
+                views: Math.floor(Math.random() * 10000) + 1000,
+                downloads: Math.floor(Math.random() * 3000) + 500,
+                shares: Math.floor(Math.random() * 1000) + 200,
+                created_at: new Date().toISOString().split('T')[0],
+                contentType: "movie",
+                url: `movies/${nextId - 1}`
+            };
 
-             console.log('Generated movie with sources:', movie.sources);
+            console.log('Generated movie with sources:', movie.sources);
 
             // Add to slides and featured movies
             currentData.home.slides.push({
@@ -1088,10 +1101,13 @@
                 type: "movie",
                 image: movie.cover || movie.image,
                 url: `movies/${movie.id}`,
-                poster: movie
+                poster: movie,
+                channel: null
             });
 
             currentData.home.featuredMovies.push(movie);
+            // Add to root-level movies array (required by CineMax GenreActivity)
+            currentData.movies.push(movie);
             currentData.api_info.total_movies++;
             
             saveData();
@@ -1205,12 +1221,16 @@
                     episodes.push({
                         id: nextId++,
                         title: episodeData.name || `Episode ${episodeData.episode_number}`,
+                        episode_number: episodeData.episode_number,
                         description: episodeData.overview || "No description available",
                         downloadas: `${seriesData.name.toLowerCase().replace(/\s+/g, '-')}-s${seasonNum}e${episodeData.episode_number}.mp4`,
                         playas: "video",
                         duration: formatDuration(episodeData.runtime),
                         image: episodeData.still_path ? `${TMDB_IMAGE_BASE}${episodeData.still_path}` : null,
-                        sources: episodeSources
+                        sources: episodeSources,
+                        subtitles: [],
+                        views: Math.floor(Math.random() * 5000) + 1000,
+                        downloads: Math.floor(Math.random() * 1500) + 300
                     });
                 }
 
@@ -1243,22 +1263,30 @@
                 trailer: getTrailer(videos),
                 actors: getActors(credits),
                 subtitles: [],
+                comments: [],
                 seasons: seasons,
                 views: Math.floor(Math.random() * 10000) + 1000,
-                created_at: new Date().toISOString().split('T')[0]
+                downloads: Math.floor(Math.random() * 2000) + 300,
+                shares: Math.floor(Math.random() * 800) + 100,
+                created_at: new Date().toISOString().split('T')[0],
+                contentType: "movie",
+                url: `movies/${nextId - 1}`
             };
 
             // Add to slides and featured movies
             currentData.home.slides.push({
                 id: series.id,
                 title: series.title,
-                type: "series",
+                type: "movie", // Note: CineMax expects "movie" type in slides even for series
                 image: series.cover || series.image,
-                url: `series/${series.id}`,
-                poster: series
+                url: `movies/${series.id}`,
+                poster: series,
+                channel: null
             });
 
             currentData.home.featuredMovies.push(series);
+            // Add to root-level movies array (required by CineMax GenreActivity)
+            currentData.movies.push(series);
             currentData.api_info.total_series++;
             
             saveData();
@@ -1386,7 +1414,7 @@
                              });
                          }
                          
-                         // Add content to genre's posters
+                         // Add content to genre's posters with complete data
                          if (genreMap.has(genreTitle)) {
                              const genreData = genreMap.get(genreTitle);
                              if (!genreData.posters.some(p => p.id === content.id)) {
@@ -1414,6 +1442,9 @@
                                      sources: content.sources,
                                      trailer: content.trailer,
                                      subtitles: content.subtitles,
+                                     comments: content.comments || [],
+                                     downloads: content.downloads || Math.floor(content.views * 0.3),
+                                     shares: content.shares || Math.floor(content.views * 0.1),
                                      ...(content.type === 'series' && { seasons: content.seasons })
                                  });
                              }
@@ -1538,8 +1569,13 @@
                 trailer: null,
                 actors: [],
                 subtitles: [],
+                comments: [],
                 views: Math.floor(Math.random() * 1000) + 100,
-                created_at: new Date().toISOString().split('T')[0]
+                downloads: Math.floor(Math.random() * 300) + 50,
+                shares: Math.floor(Math.random() * 100) + 10,
+                created_at: new Date().toISOString().split('T')[0],
+                contentType: type === 'live' ? 'channel' : 'movie',
+                url: type === 'live' ? `channels/${nextId - 1}` : `movies/${nextId - 1}`
             };
 
             if (type === 'series') {
@@ -1566,22 +1602,41 @@
                     playas: "live",
                     sources: content.sources,
                     categories: [],
-                    countries: []
+                    countries: [],
+                    comments: [],
+                    contentType: "channel",
+                    url: `channels/${content.id}`
                 };
                 
+                // Add to slides with embedded channel object
+                currentData.home.slides.push({
+                    id: content.id,
+                    title: content.title,
+                    type: "channel",
+                    image: content.image,
+                    url: `channels/${content.id}`,
+                    poster: null,
+                    channel: channel
+                });
+                
                 currentData.home.channels.push(channel);
+                // Add to root-level channels array
+                currentData.channels.push(channel);
                 currentData.api_info.total_channels++;
             } else {
                 currentData.home.slides.push({
                     id: content.id,
                     title: content.title,
-                    type: content.type,
+                    type: "movie", // CineMax expects "movie" type in slides for both movies and series
                     image: content.image,
-                    url: `${content.type}s/${content.id}`,
-                    poster: content
+                    url: `movies/${content.id}`,
+                    poster: content,
+                    channel: null
                 });
                 
                 currentData.home.featuredMovies.push(content);
+                // Add to root-level movies array
+                currentData.movies.push(content);
                 
                 if (type === 'movie') {
                     currentData.api_info.total_movies++;
@@ -1777,17 +1832,17 @@
         }
 
                  function exportData() {
-             // Create the complete CineMax API structure with root-level movies array
-             const exportData = {
-                 ...currentData,
-                 // Add root-level movies array that includes both movies and series
-                 movies: currentData.home.featuredMovies || [],
-                 // Add root-level arrays for compatibility
-                 actors: generateActorsFromContent(),
-                 genres: generateGenresFromContent()
-             };
+             // Ensure all root-level arrays are up to date
+             currentData.movies = currentData.home.featuredMovies || [];
+             currentData.channels = currentData.home.channels || [];
+             currentData.actors = generateActorsFromContent();
+             currentData.genres = generateGenresFromContent();
+             currentData.home.actors = currentData.actors;
+             currentData.home.genres = currentData.genres;
+             currentData.api_info.total_actors = currentData.actors.length;
+             currentData.api_info.last_updated = new Date().toISOString().split('T')[0];
              
-             const dataStr = JSON.stringify(exportData, null, 2);
+             const dataStr = JSON.stringify(currentData, null, 2);
              const dataBlob = new Blob([dataStr], { type: 'application/json' });
              
              const link = document.createElement('a');
@@ -1795,7 +1850,7 @@
              link.download = `cinemax-data-${new Date().toISOString().split('T')[0]}.json`;
              link.click();
              
-             showStatus('success', 'Data exported successfully with root-level movies array!');
+             showStatus('success', 'Complete CineMax data exported with all root-level arrays!');
          }
 
                  function exportSample() {
@@ -1942,13 +1997,21 @@
                         last_updated: new Date().toISOString().split('T')[0],
                         total_movies: 0,
                         total_series: 0,
-                        total_channels: 0
+                        total_channels: 0,
+                        total_actors: 0
                     },
                     home: {
                         slides: [],
                         featuredMovies: [],
-                        channels: []
-                    }
+                        channels: [],
+                        actors: [],
+                        genres: []
+                    },
+                    // Root-level arrays required by CineMax
+                    movies: [],
+                    channels: [],
+                    actors: [],
+                    genres: []
                 };
                 
                 nextId = 1;
@@ -2115,9 +2178,11 @@
                 // Remove from featuredMovies or channels
                 if (type === 'live') {
                     currentData.home.channels = (currentData.home.channels || []).filter(item => item.id !== id);
+                    currentData.channels = (currentData.channels || []).filter(item => item.id !== id);
                     currentData.api_info.total_channels--;
                 } else {
                     currentData.home.featuredMovies = currentData.home.featuredMovies.filter(item => item.id !== id);
+                    currentData.movies = (currentData.movies || []).filter(item => item.id !== id);
                     if (type === 'movie') {
                         currentData.api_info.total_movies--;
                     } else {
@@ -2140,10 +2205,12 @@
             const movieCount = currentData.home.featuredMovies.filter(item => item.type === 'movie').length;
             const seriesCount = currentData.home.featuredMovies.filter(item => item.type === 'series').length;
             const channelCount = (currentData.home.channels || []).length;
+            const actorCount = (currentData.actors || []).length;
             
             currentData.api_info.total_movies = movieCount;
             currentData.api_info.total_series = seriesCount;
             currentData.api_info.total_channels = channelCount;
+            currentData.api_info.total_actors = actorCount;
             currentData.api_info.last_updated = new Date().toISOString().split('T')[0];
             
             // Update display
@@ -2188,14 +2255,20 @@
 
                  function saveData() {
              // Update root-level arrays for CineMax compatibility
-             const dataToSave = {
-                 ...currentData,
-                 movies: currentData.home.featuredMovies || [],
-                 actors: generateActorsFromContent(),
-                 genres: generateGenresFromContent()
-             };
+             currentData.movies = currentData.home.featuredMovies || [];
+             currentData.channels = currentData.home.channels || [];
+             currentData.actors = generateActorsFromContent();
+             currentData.genres = generateGenresFromContent();
              
-             localStorage.setItem('cinemax-data', JSON.stringify(dataToSave));
+             // Update home arrays as well
+             currentData.home.actors = currentData.actors;
+             currentData.home.genres = currentData.genres;
+             
+             // Update api_info
+             currentData.api_info.total_actors = currentData.actors.length;
+             currentData.api_info.last_updated = new Date().toISOString().split('T')[0];
+             
+             localStorage.setItem('cinemax-data', JSON.stringify(currentData));
          }
 
         function loadSavedData() {
