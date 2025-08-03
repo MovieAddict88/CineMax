@@ -1115,6 +1115,13 @@
                  updateDataStats();
                  updatePreview();
                  
+                 // Log the current data to verify it was added
+                 console.log('Current data after generation:', {
+                     totalMovies: currentData.home.featuredMovies.length,
+                     totalSlides: currentData.home.slides.length,
+                     lastAdded: currentData.home.featuredMovies[currentData.home.featuredMovies.length - 1]
+                 });
+                 
                  showStatus('success', `${type} generated successfully with automatic video sources!`);
                  
                  // Log for debugging
