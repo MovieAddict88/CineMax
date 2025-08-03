@@ -1660,8 +1660,21 @@
             console.log('Loading stored data:', stored); // Debug log
             if (stored) {
                 try {
-                    generatedContent = JSON.parse(stored);
-                    console.log('Parsed stored data:', generatedContent); // Debug log
+                    const parsedData = JSON.parse(stored);
+                    console.log('Parsed stored data:', parsedData); // Debug log
+                    
+                    // Check if it's a backup format with content array
+                    if (parsedData.content && Array.isArray(parsedData.content)) {
+                        generatedContent = parsedData.content;
+                        console.log('Loaded from backup format');
+                    } else if (Array.isArray(parsedData)) {
+                        generatedContent = parsedData;
+                        console.log('Loaded from direct array format');
+                    } else {
+                        console.error('Unknown data format:', parsedData);
+                        generatedContent = [];
+                        return;
+                    }
                     
                     // Update nextId to avoid conflicts
                     if (generatedContent.length > 0) {
