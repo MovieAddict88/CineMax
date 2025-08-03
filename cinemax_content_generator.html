@@ -403,6 +403,15 @@
                     <button type="button" class="btn btn-warning" onclick="addServer()">Add Server</button>
                 </div>
 
+                <div class="form-group">
+                    <label>Quick Test IDs:</label>
+                    <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+                        <button type="button" class="btn btn-warning" onclick="testMovie(550)">Test Movie (Fight Club - ID: 550)</button>
+                        <button type="button" class="btn btn-warning" onclick="testSeries(1399)">Test Series (Game of Thrones - ID: 1399)</button>
+                        <button type="button" class="btn btn-warning" onclick="testMovie(13)">Test Movie (Forrest Gump - ID: 13)</button>
+                    </div>
+                </div>
+
                 <button class="btn btn-primary" onclick="generateContent()">Generate Content</button>
 
                 <div class="loading" id="loading">
@@ -659,40 +668,111 @@
 
         // TMDB API functions
         async function fetchTMDBData(endpoint) {
-            try {
-                const response = await fetch(`${TMDB_BASE_URL}${endpoint}?api_key=${TMDB_API_KEY}&language=en-US`);
-                if (!response.ok) throw new Error('TMDB API request failed');
-                return await response.json();
-            } catch (error) {
-                console.error('TMDB API Error:', error);
-                throw error;
+            const methods = [
+                // Method 1: CORS Proxy
+                async () => {
+                    const proxyUrl = 'https://api.allorigins.win/raw?url=';
+                    const encodedUrl = encodeURIComponent(`${TMDB_BASE_URL}${endpoint}?api_key=${TMDB_API_KEY}&language=en-US`);
+                    const fullUrl = proxyUrl + encodedUrl;
+                    console.log('Trying CORS proxy:', fullUrl);
+                    
+                    const response = await fetch(fullUrl);
+                    if (!response.ok) throw new Error(`Proxy request failed: ${response.status}`);
+                    return await response.json();
+                },
+                
+                // Method 2: Alternative CORS Proxy
+                async () => {
+                    const proxyUrl = 'https://cors-anywhere.herokuapp.com/';
+                    const fullUrl = proxyUrl + `${TMDB_BASE_URL}${endpoint}?api_key=${TMDB_API_KEY}&language=en-US`;
+                    console.log('Trying alternative proxy:', fullUrl);
+                    
+                    const response = await fetch(fullUrl);
+                    if (!response.ok) throw new Error(`Alternative proxy failed: ${response.status}`);
+                    return await response.json();
+                },
+                
+                // Method 3: Direct request (might work in some environments)
+                async () => {
+                    const fullUrl = `${TMDB_BASE_URL}${endpoint}?api_key=${TMDB_API_KEY}&language=en-US`;
+                    console.log('Trying direct request:', fullUrl);
+                    
+                    const response = await fetch(fullUrl);
+                    if (!response.ok) throw new Error(`Direct request failed: ${response.status}`);
+                    return await response.json();
+                }
+            ];
+            
+            for (let i = 0; i < methods.length; i++) {
+                try {
+                    const data = await methods[i]();
+                    console.log(`Method ${i + 1} successful:`, data);
+                    return data;
+                } catch (error) {
+                    console.error(`Method ${i + 1} failed:`, error);
+                    if (i === methods.length - 1) {
+                        throw new Error(`All API methods failed. Please check your internet connection. Last error: ${error.message}`);
+                    }
+                }
             }
         }
 
         async function getMovieDetails(tmdbId) {
-            const movie = await fetchTMDBData(`/movie/${tmdbId}`);
-            const credits = await fetchTMDBData(`/movie/${tmdbId}/credits`);
-            const videos = await fetchTMDBData(`/movie/${tmdbId}/videos`);
-            
-            return {
-                ...movie,
-                credits,
-                videos
-            };
+            try {
+                console.log(`Fetching movie details for ID: ${tmdbId}`);
+                const movie = await fetchTMDBData(`/movie/${tmdbId}`);
+                console.log('Movie data:', movie);
+                
+                const credits = await fetchTMDBData(`/movie/${tmdbId}/credits`);
+                console.log('Credits data:', credits);
+                
+                const videos = await fetchTMDBData(`/movie/${tmdbId}/videos`);
+                console.log('Videos data:', videos);
+                
+                return {
+                    ...movie,
+                    credits,
+                    videos
+                };
+            } catch (error) {
+                console.error('Error fetching movie details:', error);
+                throw new Error(`Failed to fetch movie details: ${error.message}`);
+            }
         }
 
         async function getSeriesDetails(tmdbId) {
-            const series = await fetchTMDBData(`/tv/${tmdbId}`);
-            const credits = await fetchTMDBData(`/tv/${tmdbId}/credits`);
-            const videos = await fetchTMDBData(`/tv/${tmdbId}/videos`);
-            const seasons = await fetchTMDBData(`/tv/${tmdbId}/seasons/1`);
-            
-            return {
-                ...series,
-                credits,
-                videos,
-                seasons
-            };
+            try {
+                console.log(`Fetching series details for ID: ${tmdbId}`);
+                const series = await fetchTMDBData(`/tv/${tmdbId}`);
+                console.log('Series data:', series);
+                
+                const credits = await fetchTMDBData(`/tv/${tmdbId}/credits`);
+                console.log('Credits data:', credits);
+                
+                const videos = await fetchTMDBData(`/tv/${tmdbId}/videos`);
+                console.log('Videos data:', videos);
+                
+                // Only fetch seasons if the series has seasons
+                let seasons = null;
+                if (series.number_of_seasons > 0) {
+                    try {
+                        seasons = await fetchTMDBData(`/tv/${tmdbId}/seasons/1`);
+                        console.log('Seasons data:', seasons);
+                    } catch (seasonError) {
+                        console.warn('Could not fetch seasons:', seasonError);
+                    }
+                }
+                
+                return {
+                    ...series,
+                    credits,
+                    videos,
+                    seasons
+                };
+            } catch (error) {
+                console.error('Error fetching series details:', error);
+                throw new Error(`Failed to fetch series details: ${error.message}`);
+            }
         }
 
         // Video source generation
@@ -765,14 +845,30 @@
                 return;
             }
             
+            // Validate TMDB ID
+            if (!/^\d+$/.test(tmdbId)) {
+                showAlert('Please enter a valid numeric TMDB ID', 'error');
+                return;
+            }
+            
             showLoading(true);
             
             try {
+                console.log(`Generating ${contentType} content for TMDB ID: ${tmdbId}`);
+                
                 let tmdbData;
                 if (contentType === 'movie') {
+                    console.log('Fetching movie details...');
                     tmdbData = await getMovieDetails(tmdbId);
                 } else {
+                    console.log('Fetching series details...');
                     tmdbData = await getSeriesDetails(tmdbId);
+                }
+                
+                console.log('TMDB Data received:', tmdbData);
+                
+                if (!tmdbData || !tmdbData.id) {
+                    throw new Error('No data received from TMDB API. Please check the TMDB ID.');
                 }
                 
                 const content = createCineMaxContent(tmdbData, contentType, sourceType);
@@ -784,11 +880,12 @@
                     generatedContent.series.push(content);
                 }
                 
-                showAlert(`Successfully generated ${contentType} content!`, 'success');
+                showAlert(`Successfully generated ${contentType} content for "${content.title}"!`, 'success');
                 updateStats();
                 updatePreview();
                 
             } catch (error) {
+                console.error('Generation error:', error);
                 showAlert(`Error generating content: ${error.message}`, 'error');
             } finally {
                 showLoading(false);
@@ -1125,11 +1222,42 @@
             }
         }
 
+        // Test functions
+        function testMovie(tmdbId) {
+            document.getElementById('tmdbId').value = tmdbId;
+            document.getElementById('contentType').value = 'movie';
+            showAlert(`Testing with Movie ID: ${tmdbId}`, 'info');
+        }
+
+        function testSeries(tmdbId) {
+            document.getElementById('tmdbId').value = tmdbId;
+            document.getElementById('contentType').value = 'series';
+            showAlert(`Testing with Series ID: ${tmdbId}`, 'info');
+        }
+
         // Initialize
         document.addEventListener('DOMContentLoaded', function() {
             updateStats();
             updatePreview();
+            
+            // Test API connection on load
+            testAPIConnection();
         });
+
+        // Test API connection
+        async function testAPIConnection() {
+            try {
+                console.log('Testing API connection...');
+                const testData = await fetchTMDBData('/movie/550');
+                if (testData && testData.id) {
+                    console.log('API connection successful!');
+                    showAlert('TMDB API connection successful!', 'success');
+                }
+            } catch (error) {
+                console.error('API connection test failed:', error);
+                showAlert('TMDB API connection failed. Please check your internet connection.', 'error');
+            }
+        }
     </script>
 </body>
 </html>
