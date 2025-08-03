@@ -376,6 +376,11 @@
             font-size: 14px;
         }
         
+        .btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+        
         @media (max-width: 768px) {
             .container {
                 padding: 10px;
@@ -482,7 +487,7 @@
                 <div class="grid">
                     <div class="form-group">
                         <label>Search Query</label>
-                        <input type="text" id="tmdb-search" placeholder="Search for movies or TV shows...">
+                        <input type="text" id="tmdb-search" placeholder="Search for movies or TV shows..." onkeypress="if(event.key === 'Enter') searchTMDB()">
                     </div>
                     <div class="form-group">
                         <label>Content Type</label>
@@ -743,6 +748,62 @@
              updatePreview();
              
              // Add test function to window for debugging
+             window.testGenerate = function() {
+                 console.log('Test generate function called');
+                 showStatus('info', 'Test function called successfully');
+             };
+             
+             // Add simple test for generateFromTMDB
+             window.testGenerateFromTMDB = function() {
+                 console.log('Testing generateFromTMDB with sample data');
+                 generateFromTMDB('movie', 550); // Fight Club
+             };
+             
+             // Add test for One Piece
+             window.testOnePiece = function() {
+                 console.log('Testing One Piece generation');
+                 generateFromTMDB('tv', 37854); // One Piece TV series
+             };
+             
+             // Add TMDB API test
+             window.testTMDBAPI = async function() {
+                 console.log('Testing TMDB API...');
+                 const result = await fetchTMDB('/movie/550');
+                 console.log('TMDB API test result:', result);
+                 if (result && result.title) {
+                     showStatus('success', `TMDB API working! Found: ${result.title}`);
+                 } else {
+                     showStatus('error', 'TMDB API test failed');
+                 }
+             };
+             
+             // Add data check function
+             window.checkData = function() {
+                 console.log('Current data check:', {
+                     featuredMovies: currentData.home.featuredMovies.length,
+                     slides: currentData.home.slides.length,
+                     channels: (currentData.home.channels || []).length,
+                     lastItem: currentData.home.featuredMovies[currentData.home.featuredMovies.length - 1]
+                 });
+                 showStatus('info', `Data check: ${currentData.home.featuredMovies.length} movies/series, ${currentData.home.slides.length} slides`);
+             };
+             
+             // Add verification function
+             window.verifyGeneration = function() {
+                 const saved = localStorage.getItem('cinemax-data');
+                 if (saved) {
+                     const data = JSON.parse(saved);
+                     console.log('Saved data verification:', {
+                         movies: data.movies ? data.movies.length : 0,
+                         featuredMovies: data.home ? data.home.featuredMovies.length : 0
+                     });
+                     showStatus('success', `Verified: ${data.movies ? data.movies.length : 0} items saved to localStorage`);
+                 } else {
+                     showStatus('error', 'No data found in localStorage');
+                 }
+             };
+             
+             // Add test function to window for debugging
              window.testSourceGeneration = function() {
                  console.log('Testing source generation...');
                  console.log('VIDSRC_BASE:', VIDSRC_BASE);
@@ -914,7 +975,11 @@
             document.querySelectorAll('.tab').forEach(tab => tab.classList.remove('active'));
             document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
             
-            event.target.classList.add('active');
+            // Find the tab button and activate it
+            const tabButton = document.querySelector(`[onclick="switchTab('${tabName}')"]`);
+            if (tabButton) {
+                tabButton.classList.add('active');
+            }
             document.getElementById(tabName).classList.add('active');
         }
 
@@ -927,10 +992,21 @@
                 url.searchParams.append(key, value);
             });
 
+            console.log('Fetching TMDB:', url.toString());
+
             try {
                 const response = await fetch(url);
-                if (!response.ok) throw new Error(`TMDB API error: ${response.status}`);
-                return await response.json();
+                console.log('TMDB response status:', response.status);
+                
+                if (!response.ok) {
+                    const errorText = await response.text();
+                    console.error('TMDB API error response:', errorText);
+                    throw new Error(`TMDB API error: ${response.status} - ${errorText}`);
+                }
+                
+                const data = await response.json();
+                console.log('TMDB response data:', data);
+                return data;
             } catch (error) {
                 console.error('TMDB fetch error:', error);
                 showStatus('error', `TMDB API Error: ${error.message}`);
@@ -948,14 +1024,25 @@
             }
 
             showLoading('search-loading', true);
+            showStatus('info', `Searching for "${query}"...`);
             
-            const endpoint = type === 'multi' ? '/search/multi' : `/search/${type}`;
-            const results = await fetchTMDB(endpoint, { query });
-            
-            showLoading('search-loading', false);
-            
-            if (results && results.results) {
-                displaySearchResults(results.results);
+            try {
+                const endpoint = type === 'multi' ? '/search/multi' : `/search/${type}`;
+                const results = await fetchTMDB(endpoint, { query });
+                
+                showLoading('search-loading', false);
+                
+                if (results && results.results && results.results.length > 0) {
+                    displaySearchResults(results.results);
+                    showStatus('success', `Found ${results.results.length} results for "${query}"`);
+                } else {
+                    document.getElementById('search-results').innerHTML = '<p style="text-align: center; color: var(--text-secondary);">No results found. Try a different search term.</p>';
+                    showStatus('warning', 'No results found for your search');
+                }
+            } catch (error) {
+                showLoading('search-loading', false);
+                console.error('Search error:', error);
+                showStatus('error', 'Search failed. Please try again.');
             }
         }
 
@@ -971,14 +1058,43 @@
                 const title = item.title || item.name;
                 const year = (item.release_date || item.first_air_date || '').substring(0, 4);
                 const poster = item.poster_path ? `${TMDB_IMAGE_BASE}${item.poster_path}` : 'https://via.placeholder.com/300x450?text=No+Image';
+                const rating = item.vote_average ? `${item.vote_average}/10` : 'N/A';
+                const overview = item.overview ? (item.overview.length > 100 ? item.overview.substring(0, 100) + '...' : item.overview) : 'No description available';
+
+                // Check if content already exists
+                const existingContent = currentData.home.featuredMovies.find(content => 
+                    content.title === title && content.year === year
+                );
+                
+                const isGenerated = existingContent !== undefined;
+                const buttonText = isGenerated ? 'Already Generated' : 'Generate';
+                const buttonClass = isGenerated ? 'btn-secondary' : 'btn-primary';
+                const buttonDisabled = isGenerated ? 'disabled' : '';
 
                 div.innerHTML = `
                     <img src="${poster}" alt="${title}" loading="lazy">
                     <div class="info">
                         <div class="title">${title}</div>
-                        <div class="meta">${year} • ${mediaType.toUpperCase()} • ID: ${item.id}</div>
-                        <button class="btn btn-primary btn-small" onclick="generateFromTMDB('${mediaType}', ${item.id})">
-                            Generate
+                        <div class="meta">${year} • ${mediaType.toUpperCase()} • Rating: ${rating}</div>
+                        <div class="meta">TMDB ID: ${item.id}</div>
+                        <div class="description" style="font-size: 0.9em; color: var(--text-secondary); margin: 8px 0;">${overview}</div>
+                        <button class="btn ${buttonClass} btn-small" onclick="generateFromTMDB('${mediaType}', ${item.id}); console.log('Generate button clicked for ${title}'); showStatus('info', 'Starting generation...');" ${buttonDisabled}>
+                            ${buttonText}
+                        </button>
+                        <button class="btn btn-secondary btn-small" onclick="testGenerate()" style="margin-top: 5px;">
+                            Test
+                        </button>
+                        <button class="btn btn-warning btn-small" onclick="alert('Button clicked for ${title}')" style="margin-top: 5px;">
+                            Debug
+                        </button>
+                        <button class="btn btn-accent btn-small" onclick="testTMDBAPI()" style="margin-top: 5px;">
+                            Test API
+                        </button>
+                        <button class="btn btn-info btn-small" onclick="checkData()" style="margin-top: 5px;">
+                            Check Data
+                        </button>
+                        <button class="btn btn-success btn-small" onclick="verifyGeneration()" style="margin-top: 5px;">
+                            Verify
                         </button>
                     </div>
                 `;
@@ -988,6 +1104,18 @@
         }
 
                  async function generateFromTMDB(type, tmdbId = null) {
+             console.log('generateFromTMDB called with:', { type, tmdbId });
+             
+             // Show immediate feedback
+             showStatus('info', `Starting generation for ${type} with ID ${tmdbId}...`);
+             
+             // Validate parameters
+             if (!type || !tmdbId) {
+                 console.error('Invalid parameters:', { type, tmdbId });
+                 showStatus('error', 'Invalid parameters for generation');
+                 return;
+             }
+             
              const id = tmdbId || document.getElementById(`${type}-tmdb-id`).value;
              
              if (!id) {
@@ -995,32 +1123,96 @@
                  return;
              }
 
-             showLoading(`${type}-loading`, true);
+             console.log('Starting generation for:', { type, id });
+
+             // Map type to correct loading element
+             let loadingElement = `${type}-loading`;
+             if (type === 'tv') {
+                 loadingElement = 'series-loading'; // Use series loading for TV shows
+             }
+             
+             showLoading(loadingElement, true);
              showStatus('info', `Generating ${type} with automatic VidSrc & VidJoy sources...`);
              
              try {
+                 console.log('Calling generation function for type:', type);
+                 
                  if (type === 'movie') {
+                     console.log('Generating movie with ID:', id);
                      await generateMovie(id);
-                 } else if (type === 'series') {
+                 } else if (type === 'series' || type === 'tv') {
+                     console.log('Generating series with ID:', id);
+                     // Handle both series and TV shows
                      await generateSeries(id);
+                 } else {
+                     throw new Error(`Unknown type: ${type}`);
                  }
                  
+                 console.log('Generation completed, saving data...');
+                 
+                 // Force save data immediately
+                 saveData();
+                 
+                 // Update stats and preview
                  updateDataStats();
                  updatePreview();
-                 showStatus('success', `${type} generated successfully with automatic video sources!`);
+                 
+                 // Log the current data to verify it was added
+                 console.log('Current data after generation:', {
+                     totalMovies: currentData.home.featuredMovies.length,
+                     totalSlides: currentData.home.slides.length,
+                     lastAdded: currentData.home.featuredMovies[currentData.home.featuredMovies.length - 1]
+                 });
+                 
+                 showStatus('success', `${type} generated successfully with automatic video sources! Check the Data Management tab to view your content.`);
+                 
+                 // Log for debugging
+                 const lastItem = currentData.home.featuredMovies[currentData.home.featuredMovies.length - 1];
+                 console.log('Generated content:', lastItem);
+                 
+                 // Auto-switch to Data Management tab to show the generated content
+                 setTimeout(() => {
+                     switchTab('data-management');
+                     // Force update the preview after switching tabs
+                     setTimeout(() => {
+                         updatePreview();
+                         updateDataStats();
+                     }, 500);
+                 }, 2000);
+                 
+                 // Refresh search results to show updated status
+                 const searchQuery = document.getElementById('tmdb-search').value.trim();
+                 if (searchQuery) {
+                     setTimeout(() => {
+                         searchTMDB();
+                     }, 1000);
+                 }
+                 
              } catch (error) {
+                 console.error('Generation error:', error);
                  showStatus('error', `Error generating ${type}: ${error.message}`);
+             } finally {
+                 showLoading(loadingElement, false);
              }
-             
-             showLoading(`${type}-loading`, false);
          }
 
-                 async function generateMovie(tmdbId) {
-             const movieData = await fetchTMDB(`/movie/${tmdbId}`);
-             const credits = await fetchTMDB(`/movie/${tmdbId}/credits`);
-             const videos = await fetchTMDB(`/movie/${tmdbId}/videos`);
-             
-             if (!movieData) throw new Error('Failed to fetch movie data');
+                         async function generateMovie(tmdbId) {
+            console.log('generateMovie called with tmdbId:', tmdbId);
+            
+            try {
+                const movieData = await fetchTMDB(`/movie/${tmdbId}`);
+                const credits = await fetchTMDB(`/movie/${tmdbId}/credits`);
+                const videos = await fetchTMDB(`/movie/${tmdbId}/videos`);
+                
+                console.log('Movie data fetched:', movieData);
+                
+                if (!movieData) {
+                    throw new Error('Failed to fetch movie data from TMDB API');
+                }
+                
+                if (!movieData.title) {
+                    throw new Error('Movie data is incomplete - missing title');
+                }
 
              // Get additional servers
              const serverInputs = document.querySelectorAll('#movie-servers .server-item');
@@ -1168,9 +1360,13 @@
         }
 
         async function generateSeries(tmdbId) {
+            console.log('generateSeries called with tmdbId:', tmdbId);
+            
             const seriesData = await fetchTMDB(`/tv/${tmdbId}`);
             const credits = await fetchTMDB(`/tv/${tmdbId}/credits`);
             const videos = await fetchTMDB(`/tv/${tmdbId}/videos`);
+            
+            console.log('Series data fetched:', seriesData);
             
             if (!seriesData) throw new Error('Failed to fetch series data');
 
@@ -2127,7 +2323,10 @@
             const filter = document.getElementById('preview-filter')?.value || 'all';
             const container = document.getElementById('content-preview');
             
-            if (!container) return;
+            if (!container) {
+                console.error('Content preview container not found!');
+                return;
+            }
             
             container.innerHTML = '';
             
@@ -2146,9 +2345,27 @@
                 })));
             }
             
+            // Log for debugging
+            console.log('Updating preview with items:', items.length);
+            console.log('Current data:', {
+                featuredMovies: currentData.home.featuredMovies.length,
+                slides: currentData.home.slides.length,
+                channels: (currentData.home.channels || []).length
+            });
+            
+            if (items.length === 0) {
+                container.innerHTML = '<p style="text-align: center; color: var(--text-secondary);">No content found. Generate some content first!</p>';
+                return;
+            }
+            
             items.forEach(item => {
                 const div = document.createElement('div');
                 div.className = 'preview-item';
+                
+                // Handle series with seasons
+                const sourceCount = item.type === 'series' && item.seasons ? 
+                    item.seasons.reduce((total, season) => total + (season.episodes?.length || 0), 0) :
+                    (item.sources?.length || 0);
                 
                 div.innerHTML = `
                     <img src="${item.image || 'https://via.placeholder.com/300x450?text=No+Image'}" 
@@ -2156,7 +2373,7 @@
                     <div class="info">
                         <div class="title">${item.title}</div>
                         <div class="meta">${item.year || 'Unknown'} • ${item.type?.toUpperCase()} • Rating: ${item.rating || 'N/A'}</div>
-                        <div class="meta">Sources: ${item.sources?.length || 0}</div>
+                        <div class="meta">${item.type === 'series' ? 'Episodes' : 'Sources'}: ${sourceCount}</div>
                         <div style="margin-top: 10px;">
                             <button class="btn btn-secondary btn-small" onclick="editContent(${item.id})">Edit</button>
                             <button class="btn btn-danger btn-small" onclick="deleteContent(${item.id}, '${item.type}')">Delete</button>
@@ -2323,15 +2540,24 @@
         }
 
                  function saveData() {
-             // Update root-level arrays for CineMax compatibility
-             const dataToSave = {
-                 ...currentData,
-                 movies: currentData.home.featuredMovies || [],
-                 actors: generateActorsFromContent(),
-                 genres: generateGenresFromContent()
-             };
-             
-             localStorage.setItem('cinemax-data', JSON.stringify(dataToSave));
+             try {
+                 // Update root-level arrays for CineMax compatibility
+                 const dataToSave = {
+                     ...currentData,
+                     movies: currentData.home.featuredMovies || [],
+                     actors: generateActorsFromContent(),
+                     genres: generateGenresFromContent()
+                 };
+                 
+                 localStorage.setItem('cinemax-data', JSON.stringify(dataToSave));
+                 
+                 // Log for debugging
+                 console.log('Data saved successfully. Total items:', dataToSave.movies.length);
+                 
+             } catch (error) {
+                 console.error('Error saving data:', error);
+                 showStatus('error', 'Failed to save data to localStorage');
+             }
          }
 
         function loadSavedData() {
