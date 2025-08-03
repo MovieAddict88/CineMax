@@ -664,8 +664,28 @@
 
         // Initialize
         document.addEventListener('DOMContentLoaded', function() {
+            console.log('DOM loaded, initializing...'); // Debug log
             loadStoredData();
             updateStats();
+            
+            // Test display with dummy data
+            setTimeout(() => {
+                if (generatedContent.length === 0) {
+                    console.log('No stored content, testing display with dummy data');
+                    const testContent = [{
+                        id: 1,
+                        type: 'movie',
+                        title: 'Test Movie',
+                        year: '2024',
+                        description: 'This is a test movie',
+                        image: 'https://via.placeholder.com/300x450?text=Test+Movie',
+                        rating: 7.5,
+                        sources: [{ id: 1, title: 'Test Source', type: 'video', quality: '1080p', url: 'test' }],
+                        seasons: []
+                    }];
+                    displayContent(testContent);
+                }
+            }, 1000);
         });
 
         // Tab switching
@@ -1012,6 +1032,8 @@
                 
                 const content = await convertTMDBToCineMax(tmdbData, contentType);
                 
+                console.log('Generated content:', content); // Debug log
+                
                 generatedContent.push(content);
                 saveData();
                 displayContent([content]);
@@ -1320,33 +1342,31 @@
             const resultsDiv = document.getElementById('results');
             const contentDiv = document.getElementById('content');
             
+            console.log('Displaying content:', content); // Debug log
+            
             resultsDiv.style.display = 'block';
             
             if (!isPreview) {
                 contentDiv.innerHTML = '';
             }
             
-            content.forEach(item => {
-                const movieCard = document.createElement('div');
-                movieCard.className = 'movie-card';
-                movieCard.innerHTML = `
-                    <img src="${item.image || 'https://via.placeholder.com/100x150?text=No+Image'}" 
-                         alt="${item.title}" class="movie-poster" 
-                         onerror="this.src='https://via.placeholder.com/100x150?text=No+Image'">
-                    <div class="movie-info">
-                        <div class="movie-title">${item.title} ${isPreview ? '(Preview)' : ''}</div>
-                        <div class="movie-meta">
-                            ${item.year} • ${item.type.toUpperCase()} • ⭐ ${item.rating}/10
-                        </div>
-                        <div class="movie-description">
-                            ${item.description.substring(0, 200)}${item.description.length > 200 ? '...' : ''}
-                        </div>
-                        <div class="sources-list">
-                            ${item.sources.map(source => 
-                                `<span class="source-item">${source.title}</span>`
-                            ).join('')}
-                        </div>
-                        ${item.type === 'series' && item.seasons && item.seasons.length > 0 ? `
+            if (!content || content.length === 0) {
+                contentDiv.innerHTML = '<p>No content to display</p>';
+                return;
+            }
+            
+            content.forEach((item, index) => {
+                try {
+                    console.log(`Displaying item ${index}:`, item); // Debug log
+                    
+                    const movieCard = document.createElement('div');
+                    movieCard.className = 'movie-card';
+                    
+                    const sourcesHtml = (item.sources || []).map(source => 
+                        `<span class="source-item">${source.title || 'Unknown Source'}</span>`
+                    ).join('');
+                    
+                    const seasonsHtml = item.type === 'series' && item.seasons && item.seasons.length > 0 ? `
                         <div class="seasons-info" style="margin-top: 10px;">
                             <strong>Seasons:</strong> ${item.seasons.length} 
                             <strong>Episodes:</strong> ${item.seasons.reduce((total, season) => total + (season.episodes?.length || 0), 0)}
@@ -1356,15 +1376,36 @@
                                 ).join(' • ')}
                             </div>
                         </div>
-                        ` : ''}
-                        ${!isPreview ? `<button class="btn btn-danger" onclick="removeContent(${item.id})" style="margin-top: 10px;">Remove</button>` : ''}
-                    </div>
-                `;
-                
-                if (isPreview) {
-                    contentDiv.innerHTML = '';
+                    ` : '';
+                    
+                    movieCard.innerHTML = `
+                        <img src="${item.image || 'https://via.placeholder.com/100x150?text=No+Image'}" 
+                             alt="${item.title || 'Unknown Title'}" class="movie-poster" 
+                             onerror="this.src='https://via.placeholder.com/100x150?text=No+Image'">
+                        <div class="movie-info">
+                            <div class="movie-title">${item.title || 'Unknown Title'} ${isPreview ? '(Preview)' : ''}</div>
+                            <div class="movie-meta">
+                                ${item.year || '----'} • ${(item.type || 'unknown').toUpperCase()} • ⭐ ${item.rating || 0}/10
+                            </div>
+                            <div class="movie-description">
+                                ${(item.description || 'No description available').substring(0, 200)}${(item.description || '').length > 200 ? '...' : ''}
+                            </div>
+                            <div class="sources-list">
+                                ${sourcesHtml}
+                            </div>
+                            ${seasonsHtml}
+                            ${!isPreview ? `<button class="btn btn-danger" onclick="removeContent(${item.id})" style="margin-top: 10px;">Remove</button>` : ''}
+                        </div>
+                    `;
+                    
+                    if (isPreview) {
+                        contentDiv.innerHTML = '';
+                    }
+                    contentDiv.appendChild(movieCard);
+                    
+                } catch (error) {
+                    console.error(`Error displaying item ${index}:`, error, item);
                 }
-                contentDiv.appendChild(movieCard);
             });
         }
 
@@ -1593,9 +1634,11 @@
 
         function loadStoredData() {
             const stored = localStorage.getItem('cinemax_generated_content');
+            console.log('Loading stored data:', stored); // Debug log
             if (stored) {
                 try {
                     generatedContent = JSON.parse(stored);
+                    console.log('Parsed stored data:', generatedContent); // Debug log
                     if (generatedContent.length > 0) {
                         displayContent(generatedContent);
                     }
