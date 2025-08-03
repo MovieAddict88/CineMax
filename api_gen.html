@@ -487,7 +487,7 @@
                 <div class="grid">
                     <div class="form-group">
                         <label>Search Query</label>
-                        <input type="text" id="tmdb-search" placeholder="Search for movies or TV shows...">
+                        <input type="text" id="tmdb-search" placeholder="Search for movies or TV shows..." onkeypress="if(event.key === 'Enter') searchTMDB()">
                     </div>
                     <div class="form-group">
                         <label>Content Type</label>
@@ -959,14 +959,25 @@
             }
 
             showLoading('search-loading', true);
+            showStatus('info', `Searching for "${query}"...`);
             
-            const endpoint = type === 'multi' ? '/search/multi' : `/search/${type}`;
-            const results = await fetchTMDB(endpoint, { query });
-            
-            showLoading('search-loading', false);
-            
-            if (results && results.results) {
-                displaySearchResults(results.results);
+            try {
+                const endpoint = type === 'multi' ? '/search/multi' : `/search/${type}`;
+                const results = await fetchTMDB(endpoint, { query });
+                
+                showLoading('search-loading', false);
+                
+                if (results && results.results && results.results.length > 0) {
+                    displaySearchResults(results.results);
+                    showStatus('success', `Found ${results.results.length} results for "${query}"`);
+                } else {
+                    document.getElementById('search-results').innerHTML = '<p style="text-align: center; color: var(--text-secondary);">No results found. Try a different search term.</p>';
+                    showStatus('warning', 'No results found for your search');
+                }
+            } catch (error) {
+                showLoading('search-loading', false);
+                console.error('Search error:', error);
+                showStatus('error', 'Search failed. Please try again.');
             }
         }
 
@@ -982,6 +993,8 @@
                 const title = item.title || item.name;
                 const year = (item.release_date || item.first_air_date || '').substring(0, 4);
                 const poster = item.poster_path ? `${TMDB_IMAGE_BASE}${item.poster_path}` : 'https://via.placeholder.com/300x450?text=No+Image';
+                const rating = item.vote_average ? `${item.vote_average}/10` : 'N/A';
+                const overview = item.overview ? (item.overview.length > 100 ? item.overview.substring(0, 100) + '...' : item.overview) : 'No description available';
 
                 // Check if content already exists
                 const existingContent = currentData.home.featuredMovies.find(content => 
@@ -997,7 +1010,9 @@
                     <img src="${poster}" alt="${title}" loading="lazy">
                     <div class="info">
                         <div class="title">${title}</div>
-                        <div class="meta">${year} • ${mediaType.toUpperCase()} • ID: ${item.id}</div>
+                        <div class="meta">${year} • ${mediaType.toUpperCase()} • Rating: ${rating}</div>
+                        <div class="meta">TMDB ID: ${item.id}</div>
+                        <div class="description" style="font-size: 0.9em; color: var(--text-secondary); margin: 8px 0;">${overview}</div>
                         <button class="btn ${buttonClass} btn-small" onclick="generateFromTMDB('${mediaType}', ${item.id})" ${buttonDisabled}>
                             ${buttonText}
                         </button>
