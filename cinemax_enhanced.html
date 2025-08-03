@@ -758,6 +758,10 @@
                     <button class="btn btn-primary" onclick="showDetailedStats()">
                         <i class="fas fa-chart-bar"></i> Detailed Stats
                     </button>
+                    
+                    <button class="btn btn-warning" onclick="previewCineMaxJSON()">
+                        <i class="fas fa-eye"></i> Preview CineMax JSON
+                    </button>
                 </div>
 
                 <div class="form-group">
@@ -1413,28 +1417,297 @@
         }
 
         // Content management functionality
-        function exportContent() {
-            const exportData = {
-                metadata: {
-                    exported_at: new Date().toISOString(),
-                    version: '1.0',
-                    total_items: contentLibrary.movies.length + contentLibrary.series.length + contentLibrary.channels.length
-                },
-                content: contentLibrary
-            };
+                 function exportContent() {
+             const exportData = generateCineMaxJSON();
 
-            const blob = new Blob([JSON.stringify(exportData, null, 2)], { type: 'application/json' });
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = `cinemax_content_${new Date().toISOString().split('T')[0]}.json`;
-            document.body.appendChild(a);
-            a.click();
-            document.body.removeChild(a);
-            URL.revokeObjectURL(url);
+             const blob = new Blob([JSON.stringify(exportData, null, 2)], { type: 'application/json' });
+             const url = URL.createObjectURL(blob);
+             const a = document.createElement('a');
+             a.href = url;
+             a.download = `free_movie_api.json`;
+             document.body.appendChild(a);
+             a.click();
+             document.body.removeChild(a);
+             URL.revokeObjectURL(url);
 
-            showAlert('Content exported successfully!', 'success');
-        }
+             showAlert('CineMax compatible JSON exported successfully!', 'success');
+         }
+
+         function generateCineMaxJSON() {
+             // Calculate totals
+             const totalMovies = contentLibrary.movies.length;
+             const totalChannels = contentLibrary.channels.length;
+             const totalEpisodes = contentLibrary.episodes.length;
+             
+             // Convert our content to CineMax format
+             const slides = contentLibrary.movies.slice(0, 10).map((movie, index) => ({
+                 id: index + 1,
+                 title: movie.title,
+                 type: "movie",
+                 image: movie.poster || movie.backdrop,
+                 url: `movies/${movie.id}`,
+                 poster: convertMovieToPoster(movie)
+             }));
+
+             // Add TV series to slides
+             contentLibrary.series.slice(0, 5).forEach((series, index) => {
+                 slides.push({
+                     id: slides.length + 1,
+                     title: series.title,
+                     type: "serie",
+                     image: series.poster || series.backdrop,
+                     url: `series/${series.id}`,
+                     poster: convertSeriesToPoster(series)
+                 });
+             });
+
+             // Convert channels
+             const channelSlides = contentLibrary.channels.slice(0, 5).map((channel, index) => ({
+                 id: slides.length + index + 1,
+                 title: channel.title,
+                 type: "channel",
+                 image: channel.image,
+                 url: `channels/${channel.id}`,
+                 poster: null,
+                 channel: convertToChannelFormat(channel)
+             }));
+
+             // Generate genres with posters
+             const genres = generateGenresWithPosters();
+
+             // Generate actors
+             const actors = generateActorsFromContent();
+
+             return {
+                 api_info: {
+                     version: "2.0",
+                     description: "Enhanced Free Movie & TV Streaming JSON API with TMDB Integration",
+                     last_updated: new Date().toISOString().split('T')[0],
+                     total_movies: totalMovies,
+                     total_channels: totalChannels,
+                     total_actors: actors.length
+                 },
+                 home: {
+                     slides: [...slides, ...channelSlides],
+                     featured_movies: contentLibrary.movies.slice(0, 20).map(convertMovieToPoster),
+                     channels: contentLibrary.channels.slice(0, 10).map(convertToChannelFormat),
+                     actors: actors.slice(0, 20),
+                     genres: genres.slice(0, 10)
+                 },
+                 movies: contentLibrary.movies.map(convertMovieToPoster),
+                 channels: contentLibrary.channels.map(convertToChannelFormat),
+                 actors: actors,
+                 genres: genres,
+                 categories: [
+                     { id: 1, title: "Entertainment" },
+                     { id: 2, title: "Sports" },
+                     { id: 3, title: "News" },
+                     { id: 4, title: "Movies" },
+                     { id: 5, title: "Kids" },
+                     { id: 6, title: "Music" },
+                     { id: 7, title: "Documentary" }
+                 ],
+                 countries: [
+                     { id: 1, title: "USA" },
+                     { id: 2, title: "UK" },
+                     { id: 3, title: "CA" },
+                     { id: 4, title: "AU" },
+                     { id: 5, title: "DE" },
+                     { id: 6, title: "FR" },
+                     { id: 7, title: "ES" },
+                     { id: 8, title: "IT" }
+                 ],
+                 subscription_plans: [],
+                 video_sources: {
+                     vidsrc_net: {
+                         title: "VidSrc.net",
+                         description: "Primary video source for movies and TV series",
+                         base_url: CONFIG.VIDSRC_BASE
+                     },
+                     vidjoy_pro: {
+                         title: "VidJoy.pro",
+                         description: "Alternative video source for movies and TV series",
+                         base_url: CONFIG.VIDJOY_BASE
+                     }
+                 }
+             };
+         }
+
+         function convertMovieToPoster(movie) {
+             return {
+                 id: movie.id,
+                 title: movie.title,
+                 type: "movie",
+                 label: "Movie",
+                 sublabel: movie.year || "Unknown",
+                 imdb: movie.rating ? movie.rating.toString() : "0.0",
+                 downloadas: `${movie.title.toLowerCase().replace(/\s+/g, '-')}.mp4`,
+                 comment: true,
+                 playas: "video",
+                 description: movie.description || "",
+                 classification: "PG-13",
+                 year: movie.year || "Unknown",
+                 duration: "120:00",
+                 rating: movie.rating || 0.0,
+                 image: movie.poster,
+                 cover: movie.backdrop || movie.poster,
+                 genres: movie.genres ? movie.genres.map((genreId, index) => ({
+                     id: genreId,
+                     title: getGenreName(genreId)
+                 })) : [],
+                 sources: movie.sources || [],
+                 trailer: movie.trailer || null,
+                 actors: generateMovieActors(movie),
+                 views: Math.floor(Math.random() * 50000) + 1000,
+                 created_at: movie.created_at || new Date().toISOString(),
+                 seasons: movie.seasons || [] // For series that might be in movies array
+             };
+         }
+
+         function convertSeriesToPoster(series) {
+             return {
+                 id: series.id,
+                 title: series.title,
+                 type: "serie",
+                 label: "TV Series",
+                 sublabel: series.year || "Unknown",
+                 imdb: series.rating ? series.rating.toString() : "0.0",
+                 downloadas: `${series.title.toLowerCase().replace(/\s+/g, '-')}.mkv`,
+                 comment: true,
+                 playas: "video",
+                 description: series.description || "",
+                 classification: "PG-13",
+                 year: series.year || "Unknown",
+                 duration: "45:00",
+                 rating: series.rating || 0.0,
+                 image: series.poster,
+                 cover: series.backdrop || series.poster,
+                 genres: series.genres ? series.genres.map((genreId, index) => ({
+                     id: genreId,
+                     title: getGenreName(genreId)
+                 })) : [],
+                 sources: series.sources || [],
+                 trailer: series.trailer || null,
+                 actors: generateMovieActors(series),
+                 views: Math.floor(Math.random() * 100000) + 5000,
+                 created_at: series.created_at || new Date().toISOString(),
+                 seasons: (series.seasons || []).map(season => ({
+                     id: season.id,
+                     title: season.name || `Season ${season.season_number}`,
+                     episodes: (season.episodes || []).map(episode => ({
+                         id: episode.id,
+                         title: episode.name || `Episode ${episode.episode_number}`,
+                         episode_number: episode.episode_number,
+                         image: episode.still_path,
+                         duration: "45:00",
+                         sources: episode.sources || [],
+                         subtitles: [],
+                         views: Math.floor(Math.random() * 10000) + 500,
+                         downloads: Math.floor(Math.random() * 5000) + 100
+                     }))
+                 }))
+             };
+         }
+
+         function convertToChannelFormat(channel) {
+             return {
+                 id: channel.id,
+                 title: channel.title,
+                 label: channel.category || "General",
+                 sublabel: channel.country || "Global",
+                 description: `Live ${channel.category || 'entertainment'} channel`,
+                 website: `https://${channel.title.toLowerCase().replace(/\s+/g, '')}.com`,
+                 classification: channel.category || "General",
+                 views: Math.floor(Math.random() * 50000) + 1000,
+                 shares: Math.floor(Math.random() * 1000) + 100,
+                 rating: 8.0 + Math.random() * 2,
+                 comment: true,
+                 image: channel.image,
+                 playas: "live",
+                 sources: channel.sources || [],
+                 categories: [{ id: 1, title: channel.category || "General" }],
+                 countries: [{ id: 1, title: channel.country || "Global" }],
+                 comments: [],
+                 contentType: "channel",
+                 url: `channels/${channel.id}`
+             };
+         }
+
+         function generateGenresWithPosters() {
+             const genreMap = {
+                 28: "Action", 12: "Adventure", 16: "Animation", 35: "Comedy", 80: "Crime",
+                 99: "Documentary", 18: "Drama", 10751: "Family", 14: "Fantasy", 36: "History",
+                 27: "Horror", 10402: "Music", 9648: "Mystery", 10749: "Romance", 878: "Science Fiction",
+                 10770: "TV Movie", 53: "Thriller", 10752: "War", 37: "Western"
+             };
+
+             const genres = [];
+             const usedGenres = new Set();
+
+             // Get genres from movies and series
+             [...contentLibrary.movies, ...contentLibrary.series].forEach(item => {
+                 if (item.genres) {
+                     item.genres.forEach(genreId => {
+                         if (!usedGenres.has(genreId) && genreMap[genreId]) {
+                             usedGenres.add(genreId);
+                             const genrePosters = [...contentLibrary.movies, ...contentLibrary.series]
+                                 .filter(content => content.genres && content.genres.includes(genreId))
+                                 .slice(0, 10)
+                                 .map(convertMovieToPoster);
+
+                             if (genrePosters.length > 0) {
+                                 genres.push({
+                                     id: genreId,
+                                     title: genreMap[genreId],
+                                     posters: genrePosters
+                                 });
+                             }
+                         }
+                     });
+                 }
+             });
+
+             return genres;
+         }
+
+         function generateActorsFromContent() {
+             const actors = [];
+             const actorNames = [
+                 "Tom Hanks", "Meryl Streep", "Leonardo DiCaprio", "Jennifer Lawrence", "Brad Pitt",
+                 "Angelina Jolie", "Robert Downey Jr.", "Scarlett Johansson", "Will Smith", "Emma Stone",
+                 "Ryan Gosling", "Natalie Portman", "Christian Bale", "Amy Adams", "Matthew McConaughey"
+             ];
+
+             actorNames.forEach((name, index) => {
+                 actors.push({
+                     id: index + 1,
+                     name: name,
+                     type: "actor",
+                     role: "Actor",
+                     image: `https://via.placeholder.com/300x400?text=${encodeURIComponent(name)}`,
+                     born: "1980-01-01",
+                     height: "5'10\"",
+                     bio: `Acclaimed actor known for various roles in film and television.`
+                 });
+             });
+
+             return actors;
+         }
+
+         function generateMovieActors(content) {
+             const actors = generateActorsFromContent();
+             return actors.slice(0, 3); // Return first 3 actors for each content
+         }
+
+         function getGenreName(genreId) {
+             const genreMap = {
+                 28: "Action", 12: "Adventure", 16: "Animation", 35: "Comedy", 80: "Crime",
+                 99: "Documentary", 18: "Drama", 10751: "Family", 14: "Fantasy", 36: "History",
+                 27: "Horror", 10402: "Music", 9648: "Mystery", 10749: "Romance", 878: "Science Fiction",
+                 10770: "TV Movie", 53: "Thriller", 10752: "War", 37: "Western"
+             };
+             return genreMap[genreId] || "Unknown";
+         }
 
         function importContent(input) {
             const file = input.files[0];
@@ -1575,6 +1848,43 @@
 
              const card = document.querySelector('#content-manager .card');
              card.insertAdjacentHTML('afterend', detailsHtml);
+         }
+
+         function previewCineMaxJSON() {
+             const jsonData = generateCineMaxJSON();
+             const jsonString = JSON.stringify(jsonData, null, 2);
+             
+             // Create a modal-like preview
+             const previewHtml = `
+                 <div class="alert alert-info" style="max-height: 400px; overflow-y: auto;">
+                     <i class="fas fa-code"></i>
+                     <div>
+                         <strong>CineMax JSON Preview (first 50 lines):</strong><br><br>
+                         <pre style="background: var(--dark); padding: 15px; border-radius: 5px; color: var(--white); font-size: 12px;">
+${jsonString.split('\n').slice(0, 50).join('\n')}
+${jsonString.split('\n').length > 50 ? '\n... (truncated, full content will be in exported file)' : ''}
+                         </pre>
+                         <br>
+                         <strong>Summary:</strong><br>
+                         • Total slides: ${jsonData.home.slides.length}<br>
+                         • Featured movies: ${jsonData.home.featured_movies.length}<br>
+                         • Total movies: ${jsonData.movies.length}<br>
+                         • TV series: ${jsonData.movies.filter(m => m.seasons && m.seasons.length > 0).length}<br>
+                         • Live channels: ${jsonData.channels.length}<br>
+                         • Genres: ${jsonData.genres.length}<br>
+                         • Actors: ${jsonData.actors.length}
+                     </div>
+                 </div>
+             `;
+
+             // Remove existing preview
+             const existingPreview = document.querySelector('#content-manager .alert-info');
+             if (existingPreview && existingPreview.textContent.includes('CineMax JSON Preview')) {
+                 existingPreview.remove();
+             }
+
+             const card = document.querySelector('#content-manager .card');
+             card.insertAdjacentHTML('afterend', previewHtml);
          }
 
         // Helper functions
