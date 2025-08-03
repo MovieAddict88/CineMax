@@ -273,6 +273,13 @@ public class apiClient {
      * Get GitHub JSON API data with custom callback
      */
     public static void getJsonApiData(JsonApiCallback callback) {
+        // First, try to serve data from local Room cache to avoid re-downloading on every app start
+        JsonApiResponse cached = my.cinemax.app.free.db.CacheManager.getCachedJsonResponse();
+        if (cached != null) {
+            Log.d("API_CLIENT", "Serving data from local cache");
+            callback.onSuccess(cached);
+            return; // We are done
+        }
         Log.d("API_CLIENT", "Attempting to load data from: " + GITHUB_API_BASE_URL + "free_movie_api.json");
         
         getJsonApiData(new Callback<JsonApiResponse>() {
@@ -282,6 +289,8 @@ public class apiClient {
                 
                 if (response.isSuccessful() && response.body() != null) {
                     Log.d("API_CLIENT", "Successfully loaded JSON data");
+                    // Save to local cache for next launches
+                    my.cinemax.app.free.db.CacheManager.saveJsonResponse(response.body());
                     callback.onSuccess(response.body());
                 } else {
                     String errorMsg = "Failed to load data from GitHub JSON API. Response code: " + response.code();
