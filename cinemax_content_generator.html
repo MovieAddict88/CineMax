@@ -411,6 +411,7 @@
                         <button type="button" class="btn btn-warning" onclick="testMovie(13)">Test Movie (Forrest Gump - ID: 13)</button>
                         <button type="button" class="btn btn-warning" onclick="testSeries(90802)">Test Series (The Sandman - ID: 90802)</button>
                         <button type="button" class="btn btn-danger" onclick="testSandman()">Debug Sandman</button>
+                        <button type="button" class="btn btn-success" onclick="testSeriesGeneration()">Test Series Generation</button>
                     </div>
                 </div>
 
@@ -887,9 +888,11 @@
                 if (contentType === 'movie') {
                     console.log('Fetching movie details...');
                     tmdbData = await getMovieDetails(tmdbId);
-                } else {
+                } else if (contentType === 'series') {
                     console.log('Fetching series details...');
                     tmdbData = await getSeriesDetails(tmdbId);
+                } else {
+                    throw new Error('Invalid content type');
                 }
                 
                 console.log('TMDB Data received:', tmdbData);
@@ -898,14 +901,31 @@
                     throw new Error('No data received from TMDB API. Please check the TMDB ID.');
                 }
                 
+                // Verify content type matches
+                if (contentType === 'series' && !tmdbData.name) {
+                    throw new Error('This ID does not correspond to a TV series. Please check the TMDB ID.');
+                }
+                
+                if (contentType === 'movie' && !tmdbData.title) {
+                    throw new Error('This ID does not correspond to a movie. Please check the TMDB ID.');
+                }
+                
                 const content = createCineMaxContent(tmdbData, contentType, sourceType);
                 
                 // Add to storage
                 if (contentType === 'movie') {
                     generatedContent.movies.push(content);
-                } else {
+                    console.log('Added to movies array');
+                } else if (contentType === 'series') {
                     generatedContent.series.push(content);
+                    console.log('Added to series array');
                 }
+                
+                console.log('Current content arrays:', {
+                    movies: generatedContent.movies.length,
+                    series: generatedContent.series.length,
+                    live: generatedContent.live.length
+                });
                 
                 showAlert(`Successfully generated ${contentType} content for "${content.title}"!`, 'success');
                 updateStats();
@@ -1183,11 +1203,22 @@
         }
 
         function updateStats() {
-            document.getElementById('totalMovies').textContent = generatedContent.movies.length;
-            document.getElementById('totalSeries').textContent = generatedContent.series.length;
-            document.getElementById('totalLive').textContent = generatedContent.live.length;
-            document.getElementById('totalContent').textContent = 
-                generatedContent.movies.length + generatedContent.series.length + generatedContent.live.length;
+            const moviesCount = generatedContent.movies.length;
+            const seriesCount = generatedContent.series.length;
+            const liveCount = generatedContent.live.length;
+            const totalCount = moviesCount + seriesCount + liveCount;
+            
+            console.log('Updating stats:', {
+                movies: moviesCount,
+                series: seriesCount,
+                live: liveCount,
+                total: totalCount
+            });
+            
+            document.getElementById('totalMovies').textContent = moviesCount;
+            document.getElementById('totalSeries').textContent = seriesCount;
+            document.getElementById('totalLive').textContent = liveCount;
+            document.getElementById('totalContent').textContent = totalCount;
         }
 
         function updatePreview() {
@@ -1200,7 +1231,11 @@
                 ...generatedContent.live
             ];
             
-            allContent.forEach(content => {
+            console.log('Updating preview with content:', allContent);
+            
+            allContent.forEach((content, index) => {
+                console.log(`Creating preview card ${index + 1}:`, content);
+                
                 const card = document.createElement('div');
                 card.className = 'preview-card';
                 
@@ -1331,6 +1366,30 @@
                         console.log(`ID ${altId} failed:`, altError.message);
                     }
                 }
+            }
+        }
+
+        // Test series generation specifically
+        async function testSeriesGeneration() {
+            console.log('=== TESTING SERIES GENERATION ===');
+            
+            try {
+                // Test with a known working series ID
+                const testSeriesId = 1399; // Game of Thrones
+                console.log(`Testing series generation with ID: ${testSeriesId}`);
+                
+                // Set up the form
+                document.getElementById('tmdbId').value = testSeriesId;
+                document.getElementById('contentType').value = 'series';
+                
+                // Generate the content
+                await generateContent();
+                
+                console.log('=== SERIES GENERATION TEST COMPLETED ===');
+                
+            } catch (error) {
+                console.error('Series generation test failed:', error);
+                showAlert(`Series generation test failed: ${error.message}`, 'error');
             }
         }
 
