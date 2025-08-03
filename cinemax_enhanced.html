@@ -754,6 +754,10 @@
                     <button class="btn btn-warning" onclick="validateContent()">
                         <i class="fas fa-check-circle"></i> Validate Content
                     </button>
+                    
+                    <button class="btn btn-primary" onclick="showDetailedStats()">
+                        <i class="fas fa-chart-bar"></i> Detailed Stats
+                    </button>
                 </div>
 
                 <div class="form-group">
@@ -858,25 +862,35 @@
             }
         }
 
-        // Auto generation functionality
-        async function startAutoGeneration() {
-            if (!validateSources()) return;
+                 // Auto generation functionality
+         async function startAutoGeneration() {
+             if (!validateSources()) return;
 
-            showLoading();
-            const settings = getGenerationSettings();
+             showLoading();
+             const settings = getGenerationSettings();
 
-            try {
-                const content = await fetchTMDBContent(settings);
-                await generateVideoSources(content);
-                hideLoading();
-                showAlert(`Successfully generated ${content.length} items!`, 'success');
-                updateStats();
-                displayGeneratedContent();
-            } catch (error) {
-                hideLoading();
-                showAlert('Error during auto generation: ' + error.message, 'danger');
-            }
-        }
+             try {
+                 showAlert('Fetching content from TMDB...', 'info');
+                 const content = await fetchTMDBContent(settings);
+                 
+                 showAlert(`Found ${content.length} items. Generating video sources...`, 'info');
+                 await generateVideoSources(content);
+                 
+                 hideLoading();
+                 
+                 // Calculate actual episode count
+                 const totalEpisodes = contentLibrary.episodes.length;
+                 const tvSeries = content.filter(item => !item.title).length;
+                 
+                 showAlert(`Successfully generated ${content.length} items! (${tvSeries} TV series with ${totalEpisodes} total episodes)`, 'success');
+                 updateStats();
+                 displayGeneratedContent();
+             } catch (error) {
+                 hideLoading();
+                 showAlert('Error during auto generation: ' + error.message, 'danger');
+                 console.error('Generation error:', error);
+             }
+         }
 
         // Preview functionality
         async function previewGeneration() {
@@ -1057,12 +1071,24 @@
                         const seasons = await fetchSeasons(item.id);
                         contentItem.seasons = seasons;
                         
-                        // Count episodes for stats
-                        const episodeCount = seasons.reduce((total, season) => 
-                            total + (season.episodes ? season.episodes.length : 0), 0);
-                        contentLibrary.episodes.push(...Array(episodeCount).fill({}));
+                        // Count and add episodes to stats properly
+                        seasons.forEach(season => {
+                            if (season.episodes) {
+                                season.episodes.forEach(episode => {
+                                    contentLibrary.episodes.push({
+                                        id: episode.id,
+                                        series_id: contentItem.id,
+                                        season_number: season.season_number,
+                                        episode_number: episode.episode_number,
+                                        title: episode.name,
+                                        sources: episode.sources
+                                    });
+                                });
+                            }
+                        });
                     } catch (error) {
                         console.warn('Failed to fetch seasons for', contentItem.title);
+                        contentItem.seasons = [];
                     }
                 }
 
@@ -1093,87 +1119,109 @@
             }
         }
 
-        // Fetch seasons and episodes for TV series
-        async function fetchSeasons(seriesId) {
-            try {
-                const response = await fetch(`${CONFIG.TMDB_BASE_URL}/tv/${seriesId}?api_key=${CONFIG.TMDB_API_KEY}`);
-                const data = await response.json();
-                
-                const seasons = [];
-                const selectedSources = getSelectedSources();
+                 // Fetch seasons and episodes for TV series
+         async function fetchSeasons(seriesId) {
+             try {
+                 console.log(`Fetching seasons for TV series ID: ${seriesId}`);
+                 const response = await fetch(`${CONFIG.TMDB_BASE_URL}/tv/${seriesId}?api_key=${CONFIG.TMDB_API_KEY}`);
+                 
+                 if (!response.ok) {
+                     throw new Error(`Failed to fetch series details: ${response.status}`);
+                 }
+                 
+                 const data = await response.json();
+                 console.log(`Found ${data.seasons?.length || 0} seasons for "${data.name}"`);
+                 
+                 const seasons = [];
+                 const selectedSources = getSelectedSources();
 
-                for (const season of data.seasons || []) {
-                    if (season.season_number === 0) continue; // Skip specials
-                    
-                    const seasonData = {
-                        id: generateId(),
-                        season_number: season.season_number,
-                        name: season.name,
-                        poster: season.poster_path ? `${CONFIG.TMDB_IMAGE_BASE}${season.poster_path}` : null,
-                        episodes: []
-                    };
+                 for (const season of data.seasons || []) {
+                     if (season.season_number === 0) continue; // Skip specials
+                     
+                     console.log(`Processing Season ${season.season_number}: ${season.name}`);
+                     
+                     const seasonData = {
+                         id: generateId(),
+                         season_number: season.season_number,
+                         name: season.name,
+                         poster: season.poster_path ? `${CONFIG.TMDB_IMAGE_BASE}${season.poster_path}` : null,
+                         episodes: []
+                     };
 
-                    // Fetch episodes for this season
-                    try {
-                        const episodeResponse = await fetch(
-                            `${CONFIG.TMDB_BASE_URL}/tv/${seriesId}/season/${season.season_number}?api_key=${CONFIG.TMDB_API_KEY}`
-                        );
-                        const episodeData = await episodeResponse.json();
+                     // Fetch episodes for this season
+                     try {
+                         const episodeResponse = await fetch(
+                             `${CONFIG.TMDB_BASE_URL}/tv/${seriesId}/season/${season.season_number}?api_key=${CONFIG.TMDB_API_KEY}`
+                         );
+                         
+                         if (!episodeResponse.ok) {
+                             throw new Error(`Failed to fetch episodes: ${episodeResponse.status}`);
+                         }
+                         
+                         const episodeData = await episodeResponse.json();
+                         console.log(`Season ${season.season_number} has ${episodeData.episodes?.length || 0} episodes`);
 
-                        for (const episode of episodeData.episodes || []) {
-                            const episodeItem = {
-                                id: generateId(),
-                                episode_number: episode.episode_number,
-                                name: episode.name,
-                                overview: episode.overview,
-                                air_date: episode.air_date,
-                                still_path: episode.still_path ? `${CONFIG.TMDB_IMAGE_BASE}${episode.still_path}` : null,
-                                sources: []
-                            };
+                         for (const episode of episodeData.episodes || []) {
+                             const episodeItem = {
+                                 id: generateId(),
+                                 episode_number: episode.episode_number,
+                                 name: episode.name || `Episode ${episode.episode_number}`,
+                                 overview: episode.overview,
+                                 air_date: episode.air_date,
+                                 still_path: episode.still_path ? `${CONFIG.TMDB_IMAGE_BASE}${episode.still_path}` : null,
+                                 sources: []
+                             };
 
-                            // Generate episode sources
-                            if (selectedSources.vidsrc) {
-                                episodeItem.sources.push({
-                                    id: generateId(),
-                                    type: 'embed',
-                                    title: 'VidSrc',
-                                    quality: 'Auto',
-                                    url: `${CONFIG.VIDSRC_BASE}/tv/${seriesId}/${season.season_number}/${episode.episode_number}`,
-                                    external: true,
-                                    kind: 'episode'
-                                });
-                            }
+                             // Generate episode sources
+                             if (selectedSources.vidsrc) {
+                                 episodeItem.sources.push({
+                                     id: generateId(),
+                                     type: 'embed',
+                                     title: 'VidSrc',
+                                     quality: 'Auto',
+                                     url: `${CONFIG.VIDSRC_BASE}/tv/${seriesId}/${season.season_number}/${episode.episode_number}`,
+                                     external: true,
+                                     kind: 'episode'
+                                 });
+                             }
 
-                            if (selectedSources.vidjoy) {
-                                episodeItem.sources.push({
-                                    id: generateId(),
-                                    type: 'embed',
-                                    title: 'VidJoy',
-                                    quality: 'HD',
-                                    url: `${CONFIG.VIDJOY_BASE}/tv/${seriesId}/${season.season_number}/${episode.episode_number}`,
-                                    external: true,
-                                    kind: 'episode'
-                                });
-                            }
+                             if (selectedSources.vidjoy) {
+                                 episodeItem.sources.push({
+                                     id: generateId(),
+                                     type: 'embed',
+                                     title: 'VidJoy',
+                                     quality: 'HD',
+                                     url: `${CONFIG.VIDJOY_BASE}/tv/${seriesId}/${season.season_number}/${episode.episode_number}`,
+                                     external: true,
+                                     kind: 'episode'
+                                 });
+                             }
 
-                            seasonData.episodes.push(episodeItem);
-                        }
-                    } catch (error) {
-                        console.warn(`Failed to fetch episodes for season ${season.season_number}`);
-                    }
+                             seasonData.episodes.push(episodeItem);
+                         }
+                         
+                         console.log(`Added ${seasonData.episodes.length} episodes to season ${season.season_number}`);
+                         
+                     } catch (error) {
+                         console.error(`Failed to fetch episodes for season ${season.season_number}:`, error);
+                     }
 
-                    seasons.push(seasonData);
-                    
-                    // Rate limiting
-                    await new Promise(resolve => setTimeout(resolve, 1000));
-                }
+                     if (seasonData.episodes.length > 0) {
+                         seasons.push(seasonData);
+                     }
+                     
+                     // Rate limiting between season requests
+                     await new Promise(resolve => setTimeout(resolve, 1000));
+                 }
 
-                return seasons;
-            } catch (error) {
-                console.error('Error fetching seasons:', error);
-                return [];
-            }
-        }
+                 console.log(`Total seasons with episodes: ${seasons.length}`);
+                 return seasons;
+                 
+             } catch (error) {
+                 console.error('Error fetching seasons:', error);
+                 return [];
+             }
+         }
 
         // Manual input functionality
         async function fetchManualContent() {
@@ -1425,58 +1473,109 @@
             }
         }
 
-        function validateContent() {
-            let issues = [];
-            let totalItems = 0;
+                 function validateContent() {
+             let issues = [];
+             let totalItems = 0;
 
-            // Validate movies
-            contentLibrary.movies.forEach((movie, index) => {
-                totalItems++;
-                if (!movie.title) issues.push(`Movie ${index + 1}: Missing title`);
-                if (!movie.sources || movie.sources.length === 0) {
-                    issues.push(`Movie "${movie.title}": No video sources`);
-                }
-            });
+             // Validate movies
+             contentLibrary.movies.forEach((movie, index) => {
+                 totalItems++;
+                 if (!movie.title) issues.push(`Movie ${index + 1}: Missing title`);
+                 if (!movie.sources || movie.sources.length === 0) {
+                     issues.push(`Movie "${movie.title}": No video sources`);
+                 }
+             });
 
-            // Validate series
-            contentLibrary.series.forEach((series, index) => {
-                totalItems++;
-                if (!series.title) issues.push(`Series ${index + 1}: Missing title`);
-                if (!series.seasons || series.seasons.length === 0) {
-                    issues.push(`Series "${series.title}": No seasons`);
-                }
-            });
+             // Validate series
+             contentLibrary.series.forEach((series, index) => {
+                 totalItems++;
+                 if (!series.title) issues.push(`Series ${index + 1}: Missing title`);
+                 if (!series.seasons || series.seasons.length === 0) {
+                     issues.push(`Series "${series.title}": No seasons`);
+                 }
+             });
 
-            // Validate channels
-            contentLibrary.channels.forEach((channel, index) => {
-                totalItems++;
-                if (!channel.title) issues.push(`Channel ${index + 1}: Missing title`);
-                if (!channel.sources || channel.sources.length === 0) {
-                    issues.push(`Channel "${channel.title}": No stream sources`);
-                }
-            });
+             // Validate channels
+             contentLibrary.channels.forEach((channel, index) => {
+                 totalItems++;
+                 if (!channel.title) issues.push(`Channel ${index + 1}: Missing title`);
+                 if (!channel.sources || channel.sources.length === 0) {
+                     issues.push(`Channel "${channel.title}": No stream sources`);
+                 }
+             });
 
-            const resultHtml = `
-                <div class="alert ${issues.length === 0 ? 'alert-success' : 'alert-warning'}">
-                    <i class="fas ${issues.length === 0 ? 'fa-check-circle' : 'fa-exclamation-triangle'}"></i>
-                    <div>
-                        <strong>Validation Results:</strong><br>
-                        Total items validated: ${totalItems}<br>
-                        Issues found: ${issues.length}
-                        ${issues.length > 0 ? '<br><br><strong>Issues:</strong><ul>' + issues.map(issue => `<li>${issue}</li>`).join('') + '</ul>' : ''}
-                    </div>
-                </div>
-            `;
+             const resultHtml = `
+                 <div class="alert ${issues.length === 0 ? 'alert-success' : 'alert-warning'}">
+                     <i class="fas ${issues.length === 0 ? 'fa-check-circle' : 'fa-exclamation-triangle'}"></i>
+                     <div>
+                         <strong>Validation Results:</strong><br>
+                         Total items validated: ${totalItems}<br>
+                         Issues found: ${issues.length}
+                         ${issues.length > 0 ? '<br><br><strong>Issues:</strong><ul>' + issues.map(issue => `<li>${issue}</li>`).join('') + '</ul>' : ''}
+                     </div>
+                 </div>
+             `;
 
-            // Show results in content manager
-            const existingAlert = document.querySelector('#content-manager .alert');
-            if (existingAlert && existingAlert.textContent.includes('Validation Results')) {
-                existingAlert.remove();
-            }
+             // Show results in content manager
+             const existingAlert = document.querySelector('#content-manager .alert');
+             if (existingAlert && existingAlert.textContent.includes('Validation Results')) {
+                 existingAlert.remove();
+             }
 
-            const card = document.querySelector('#content-manager .card');
-            card.insertAdjacentHTML('afterend', resultHtml);
-        }
+             const card = document.querySelector('#content-manager .card');
+             card.insertAdjacentHTML('afterend', resultHtml);
+         }
+
+         function showDetailedStats() {
+             let totalSeasons = 0;
+             let totalEpisodes = 0;
+             let seriesBreakdown = [];
+
+             // Calculate detailed series stats
+             contentLibrary.series.forEach(series => {
+                 const seasons = series.seasons || [];
+                 const episodeCount = seasons.reduce((total, season) => 
+                     total + (season.episodes ? season.episodes.length : 0), 0);
+                 
+                 totalSeasons += seasons.length;
+                 totalEpisodes += episodeCount;
+                 
+                 seriesBreakdown.push({
+                     title: series.title,
+                     seasons: seasons.length,
+                     episodes: episodeCount
+                 });
+             });
+
+             const detailsHtml = `
+                 <div class="alert alert-info">
+                     <i class="fas fa-chart-bar"></i>
+                     <div>
+                         <strong>Detailed Content Statistics:</strong><br>
+                         <strong>Movies:</strong> ${contentLibrary.movies.length}<br>
+                         <strong>TV Series:</strong> ${contentLibrary.series.length}<br>
+                         <strong>Total Seasons:</strong> ${totalSeasons}<br>
+                         <strong>Total Episodes:</strong> ${totalEpisodes}<br>
+                         <strong>Live Channels:</strong> ${contentLibrary.channels.length}<br><br>
+                         
+                         ${seriesBreakdown.length > 0 ? '<strong>Series Breakdown:</strong><br>' + 
+                         seriesBreakdown.slice(0, 10).map(s => 
+                             `• ${s.title}: ${s.seasons} seasons, ${s.episodes} episodes`
+                         ).join('<br>') + 
+                         (seriesBreakdown.length > 10 ? `<br>... and ${seriesBreakdown.length - 10} more series` : '') : ''}
+                     </div>
+                 </div>
+             `;
+
+             // Remove existing detailed stats
+             const existingStats = document.querySelector('#content-manager .alert-info');
+             if (existingStats && existingStats.textContent.includes('Detailed Content Statistics')) {
+                 existingStats.remove();
+             }
+
+             const card = document.querySelector('#content-manager .card');
+             card.insertAdjacentHTML('afterend', detailsHtml);
+         }
 
         // Helper functions
         function getGenerationSettings() {
