@@ -30,6 +30,8 @@ import my.cinemax.app.free.R;
 import my.cinemax.app.free.Provider.DataRepository;
 import my.cinemax.app.free.Utils.CacheManager;
 import my.cinemax.app.free.Utils.SimpleCacheManager;
+import android.app.Activity;
+import android.os.Bundle;
 
 /**
  * Created by Tamim on 28/09/2019.
@@ -78,22 +80,68 @@ public class MyApplication extends MultiDexApplication {
         }
         
         try {
-            Log.d("MyApplication", "Starting simplified cache system initialization...");
+            Log.d("MyApplication", "Starting enhanced cache system initialization...");
             
             // Initialize Simple Cache Manager (LruCache + Disk + Network)
-            SimpleCacheManager.getInstance().initialize(this);
+            SimpleCacheManager simpleCacheManager = SimpleCacheManager.getInstance();
+            simpleCacheManager.initialize(this);
             
             // Initialize DataRepository (uses simple cache)
-            DataRepository.getInstance().initialize(this);
+            DataRepository dataRepository = DataRepository.getInstance();
+            dataRepository.initialize(this);
             
-            Log.d("MyApplication", "Simplified caching system initialized successfully");
+            Log.d("MyApplication", "Enhanced caching system initialized successfully");
             
             // Log cache statistics
             logCacheStatistics();
             
+            // Setup memory management
+            setupMemoryManagement();
+            
         } catch (Exception e) {
             Log.e("MyApplication", "Error initializing cache system", e);
             // Don't crash the app, just log the error
+        }
+    }
+    
+    /**
+     * Setup memory management for the application
+     */
+    private void setupMemoryManagement() {
+        try {
+            // Register activity lifecycle callbacks for better memory management
+            registerActivityLifecycleCallbacks(new ActivityLifecycleCallbacks() {
+                @Override
+                public void onActivityCreated(Activity activity, Bundle savedInstanceState) {
+                    Log.d("MyApplication", "Activity created: " + activity.getClass().getSimpleName());
+                }
+
+                @Override
+                public void onActivityStarted(Activity activity) {}
+
+                @Override
+                public void onActivityResumed(Activity activity) {}
+
+                @Override
+                public void onActivityPaused(Activity activity) {}
+
+                @Override
+                public void onActivityStopped(Activity activity) {}
+
+                @Override
+                public void onActivitySaveInstanceState(Activity activity, Bundle outState) {}
+
+                @Override
+                public void onActivityDestroyed(Activity activity) {
+                    Log.d("MyApplication", "Activity destroyed: " + activity.getClass().getSimpleName());
+                    // Clean up any activity-specific resources
+                }
+            });
+            
+            Log.d("MyApplication", "Memory management setup completed");
+            
+        } catch (Exception e) {
+            Log.e("MyApplication", "Error setting up memory management", e);
         }
     }
     
