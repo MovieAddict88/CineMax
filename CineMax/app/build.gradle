@@ -52,8 +52,8 @@ android {
         exclude "lib/mips/libRSSupport.so"
         exclude "lib/mips/librsjni.so"
     }
-    dataBinding {
-        enabled = true
+    buildFeatures {
+        dataBinding true
     }
     compileOptions {
         coreLibraryDesugaringEnabled true
