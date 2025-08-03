@@ -736,12 +736,82 @@
 
         let nextId = 1;
 
-        // Initialize
-        document.addEventListener('DOMContentLoaded', function() {
-            loadSavedData();
-            updateDataStats();
-            updatePreview();
-        });
+                 // Initialize
+         document.addEventListener('DOMContentLoaded', function() {
+             loadSavedData();
+             updateDataStats();
+             updatePreview();
+             
+             // Add test function to window for debugging
+             window.testSourceGeneration = function() {
+                 console.log('Testing source generation...');
+                 console.log('VIDSRC_BASE:', VIDSRC_BASE);
+                 console.log('VIDJOY_BASE:', VIDJOY_BASE);
+                 
+                 // Test movie source generation
+                 const testMovieId = 550; // Fight Club
+                 const movieSources = [
+                     {
+                         id: 1,
+                         type: "embed",
+                         title: "VidSrc Server 1080p",
+                         quality: "1080p",
+                         size: "Auto",
+                         kind: "embed",
+                         premium: "false",
+                         external: false,
+                         url: `${VIDSRC_BASE}/movie/${testMovieId}`
+                     },
+                     {
+                         id: 2,
+                         type: "embed", 
+                         title: "VidJoy Server 1080p",
+                         quality: "1080p",
+                         size: "Auto",
+                         kind: "embed",
+                         premium: "false",
+                         external: false,
+                         url: `${VIDJOY_BASE}/movie/${testMovieId}`
+                     }
+                 ];
+                 
+                 console.log('Test movie sources:', movieSources);
+                 
+                 // Test series source generation
+                 const testSeriesId = 1399; // Game of Thrones
+                 const seriesSources = [
+                     {
+                         id: 3,
+                         type: "embed",
+                         title: "VidSrc Server 1080p",
+                         quality: "1080p",
+                         size: "Auto",
+                         kind: "embed",
+                         premium: "false",
+                         external: false,
+                         url: `${VIDSRC_BASE}/tv/${testSeriesId}/1/1`
+                     },
+                     {
+                         id: 4,
+                         type: "embed", 
+                         title: "VidJoy Server 1080p",
+                         quality: "1080p",
+                         size: "Auto",
+                         kind: "embed",
+                         premium: "false",
+                         external: false,
+                         url: `${VIDJOY_BASE}/tv/${testSeriesId}/1/1`
+                     }
+                 ];
+                 
+                 console.log('Test series sources:', seriesSources);
+                 return { movieSources, seriesSources };
+             };
+             
+             console.log('✅ CineMax Enhanced API Manager loaded!');
+             console.log('🎬 Auto-sources: VidSrc.net + VidJoy.pro');
+             console.log('🧪 Test with: testSourceGeneration()');
+         });
 
         // Tab switching
         function switchTab(tabName) {
@@ -821,111 +891,119 @@
             });
         }
 
-        async function generateFromTMDB(type, tmdbId = null) {
-            const id = tmdbId || document.getElementById(`${type}-tmdb-id`).value;
-            
-            if (!id) {
-                showStatus('warning', 'Please enter a TMDB ID');
-                return;
-            }
+                 async function generateFromTMDB(type, tmdbId = null) {
+             const id = tmdbId || document.getElementById(`${type}-tmdb-id`).value;
+             
+             if (!id) {
+                 showStatus('warning', 'Please enter a TMDB ID');
+                 return;
+             }
 
-            showLoading(`${type}-loading`, true);
-            
-            try {
-                if (type === 'movie') {
-                    await generateMovie(id);
-                } else if (type === 'series') {
-                    await generateSeries(id);
-                }
-                
-                updateDataStats();
-                updatePreview();
-                showStatus('success', `${type} generated successfully!`);
-            } catch (error) {
-                showStatus('error', `Error generating ${type}: ${error.message}`);
-            }
-            
-            showLoading(`${type}-loading`, false);
-        }
+             showLoading(`${type}-loading`, true);
+             showStatus('info', `Generating ${type} with automatic VidSrc & VidJoy sources...`);
+             
+             try {
+                 if (type === 'movie') {
+                     await generateMovie(id);
+                 } else if (type === 'series') {
+                     await generateSeries(id);
+                 }
+                 
+                 updateDataStats();
+                 updatePreview();
+                 showStatus('success', `${type} generated successfully with automatic video sources!`);
+             } catch (error) {
+                 showStatus('error', `Error generating ${type}: ${error.message}`);
+             }
+             
+             showLoading(`${type}-loading`, false);
+         }
 
-        async function generateMovie(tmdbId) {
-            const movieData = await fetchTMDB(`/movie/${tmdbId}`);
-            const credits = await fetchTMDB(`/movie/${tmdbId}/credits`);
-            const videos = await fetchTMDB(`/movie/${tmdbId}/videos`);
-            
-            if (!movieData) throw new Error('Failed to fetch movie data');
+                 async function generateMovie(tmdbId) {
+             const movieData = await fetchTMDB(`/movie/${tmdbId}`);
+             const credits = await fetchTMDB(`/movie/${tmdbId}/credits`);
+             const videos = await fetchTMDB(`/movie/${tmdbId}/videos`);
+             
+             if (!movieData) throw new Error('Failed to fetch movie data');
 
-            // Get additional servers
-            const serverInputs = document.querySelectorAll('#movie-servers .server-item');
-            const additionalSources = [];
-            
-            serverInputs.forEach(item => {
-                const name = item.querySelector('.server-name').value.trim();
-                const url = item.querySelector('.server-url').value.trim();
-                if (name && url) {
-                    additionalSources.push({
-                        id: nextId++,
-                        type: getSourceType(url),
-                        title: name,
-                        quality: "Auto",
-                        size: "Unknown",
-                        kind: getSourceKind(url),
-                        premium: "false",
-                        external: false,
-                        url: url
-                    });
-                }
-            });
+             // Get additional servers
+             const serverInputs = document.querySelectorAll('#movie-servers .server-item');
+             const additionalSources = [];
+             
+             serverInputs.forEach(item => {
+                 const name = item.querySelector('.server-name').value.trim();
+                 const url = item.querySelector('.server-url').value.trim();
+                 if (name && url) {
+                     additionalSources.push({
+                         id: nextId++,
+                         type: getSourceType(url),
+                         title: name,
+                         quality: "Auto",
+                         size: "Unknown",
+                         kind: getSourceKind(url),
+                         premium: "false",
+                         external: false,
+                         url: url
+                     });
+                 }
+             });
 
-            const movie = {
-                id: nextId++,
-                title: movieData.title,
-                type: "movie",
-                label: movieData.genres[0]?.name || "Movie",
-                sublabel: `Released ${movieData.release_date?.substring(0, 4) || 'Unknown'}`,
-                imdb: movieData.vote_average?.toString() || "0",
-                downloadas: `${movieData.title.toLowerCase().replace(/\s+/g, '-')}.mp4`,
-                comment: true,
-                playas: "video",
-                description: movieData.overview || "No description available",
-                classification: getRatingClassification(movieData.adult),
-                year: movieData.release_date?.substring(0, 4) || "Unknown",
-                duration: formatDuration(movieData.runtime),
-                rating: movieData.vote_average || 0,
-                image: movieData.poster_path ? `${TMDB_IMAGE_BASE}${movieData.poster_path}` : null,
-                cover: movieData.backdrop_path ? `${TMDB_IMAGE_BASE}${movieData.backdrop_path}` : null,
-                genres: movieData.genres?.map(g => ({ id: g.id, title: g.name })) || [],
-                sources: [
-                    {
-                        id: nextId++,
-                        type: "embed",
-                        title: "VidSrc 1080p",
-                        quality: "1080p",
-                        size: "Auto",
-                        kind: "embed",
-                        premium: "false",
-                        external: false,
-                        url: `${VIDSRC_BASE}/movie/${tmdbId}`
-                    },
-                    {
-                        id: nextId++,
-                        type: "embed", 
-                        title: "VidJoy 1080p",
-                        quality: "1080p",
-                        size: "Auto",
-                        kind: "embed",
-                        premium: "false",
-                        external: false,
-                        url: `${VIDJOY_BASE}/movie/${tmdbId}`
-                    },
-                    ...additionalSources
-                ],
-                trailer: getTrailer(videos),
-                actors: getActors(credits),
-                subtitles: await getSubtitles(tmdbId, 'movie'),
-                views: Math.floor(Math.random() * 10000) + 1000,
-                created_at: new Date().toISOString().split('T')[0]
-            };
+             // Auto-generate VidSrc and VidJoy sources
+             const autoSources = [
+                 {
+                     id: nextId++,
+                     type: "embed",
+                     title: "VidSrc Server 1080p",
+                     quality: "1080p",
+                     size: "Auto",
+                     kind: "embed",
+                     premium: "false",
+                     external: false,
+                     url: `${VIDSRC_BASE}/movie/${tmdbId}`
+                 },
+                 {
+                     id: nextId++,
+                     type: "embed", 
+                     title: "VidJoy Server 1080p",
+                     quality: "1080p",
+                     size: "Auto",
+                     kind: "embed",
+                     premium: "false",
+                     external: false,
+                     url: `${VIDJOY_BASE}/movie/${tmdbId}`
+                 }
+             ];
+
+             console.log('Auto-generated movie sources:', autoSources);
+             console.log('Additional sources:', additionalSources);
+
+             const movie = {
+                 id: nextId++,
+                 title: movieData.title,
+                 type: "movie",
+                 label: movieData.genres[0]?.name || "Movie",
+                 sublabel: `Released ${movieData.release_date?.substring(0, 4) || 'Unknown'}`,
+                 imdb: movieData.vote_average?.toString() || "0",
+                 downloadas: `${movieData.title.toLowerCase().replace(/\s+/g, '-')}.mp4`,
+                 comment: true,
+                 playas: "video",
+                 description: movieData.overview || "No description available",
+                 classification: getRatingClassification(movieData.adult),
+                 year: movieData.release_date?.substring(0, 4) || "Unknown",
+                 duration: formatDuration(movieData.runtime),
+                 rating: movieData.vote_average || 0,
+                 image: movieData.poster_path ? `${TMDB_IMAGE_BASE}${movieData.poster_path}` : null,
+                 cover: movieData.backdrop_path ? `${TMDB_IMAGE_BASE}${movieData.backdrop_path}` : null,
+                 genres: movieData.genres?.map(g => ({ id: g.id, title: g.name })) || [],
+                 sources: [...autoSources, ...additionalSources],
+                 trailer: getTrailer(videos),
+                 actors: getActors(credits),
+                 subtitles: await getSubtitles(tmdbId, 'movie'),
+                 views: Math.floor(Math.random() * 10000) + 1000,
+                 created_at: new Date().toISOString().split('T')[0]
+             };
+
+             console.log('Generated movie with sources:', movie.sources);
 
             // Add to slides and featured movies
             currentData.home.slides.push({
@@ -976,31 +1054,34 @@
 
                 const episodes = [];
                 
-                for (const episodeData of seasonData.episodes || []) {
-                    const episodeSources = [
-                        {
-                            id: nextId++,
-                            type: "embed",
-                            title: "VidSrc 1080p",
-                            quality: "1080p",
-                            size: "Auto",
-                            kind: "embed",
-                            premium: "false",
-                            external: false,
-                            url: `${VIDSRC_BASE}/tv/${tmdbId}/${seasonNum}/${episodeData.episode_number}`
-                        },
-                        {
-                            id: nextId++,
-                            type: "embed",
-                            title: "VidJoy 1080p", 
-                            quality: "1080p",
-                            size: "Auto",
-                            kind: "embed",
-                            premium: "false",
-                            external: false,
-                            url: `${VIDJOY_BASE}/tv/${tmdbId}/${seasonNum}/${episodeData.episode_number}`
-                        }
-                    ];
+                                 for (const episodeData of seasonData.episodes || []) {
+                     // Auto-generate VidSrc and VidJoy sources for each episode
+                     const episodeSources = [
+                         {
+                             id: nextId++,
+                             type: "embed",
+                             title: "VidSrc Server 1080p",
+                             quality: "1080p",
+                             size: "Auto",
+                             kind: "embed",
+                             premium: "false",
+                             external: false,
+                             url: `${VIDSRC_BASE}/tv/${tmdbId}/${seasonNum}/${episodeData.episode_number}`
+                         },
+                         {
+                             id: nextId++,
+                             type: "embed",
+                             title: "VidJoy Server 1080p", 
+                             quality: "1080p",
+                             size: "Auto",
+                             kind: "embed",
+                             premium: "false",
+                             external: false,
+                             url: `${VIDJOY_BASE}/tv/${tmdbId}/${seasonNum}/${episodeData.episode_number}`
+                         }
+                     ];
+
+                     console.log(`Auto-generated sources for S${seasonNum}E${episodeData.episode_number}:`, episodeSources);
 
                     // Add additional sources
                     additionalServerTemplates.forEach(server => {
@@ -1402,10 +1483,10 @@
                 await new Promise(resolve => setTimeout(resolve, 100));
             }
             
-            showLoading('bulk-loading', false);
-            updateDataStats();
-            updatePreview();
-            showStatus('success', `Bulk generation complete! Generated: ${generated}, Skipped: ${skipped}`);
+                         showLoading('bulk-loading', false);
+             updateDataStats();
+             updatePreview();
+             showStatus('success', `Bulk generation complete! Generated: ${generated} items with automatic VidSrc & VidJoy sources, Skipped: ${skipped}`);
         }
 
         async function generateByGenre() {
