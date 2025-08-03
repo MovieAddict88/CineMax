@@ -1806,8 +1806,21 @@
 
                  function exportData() {
              // Create the complete CineMax API structure with root-level movies array
+             // Limit slides to top-rated content (highest rating first)
+             const limitedSlides = (currentData.home.slides || [])
+                 .sort((a, b) => {
+                     const ratingA = a.poster?.rating || a.rating || 0;
+                     const ratingB = b.poster?.rating || b.rating || 0;
+                     return ratingB - ratingA; // Sort by highest rating first
+                 })
+                 .slice(0, 10); // Limit to top 10 highest rated items
+             
              const exportData = {
                  ...currentData,
+                 home: {
+                     ...currentData.home,
+                     slides: limitedSlides // Use limited slides instead of all slides
+                 },
                  // Add root-level movies array that includes both movies and series
                  movies: currentData.home.featuredMovies || [],
                  // Add root-level arrays for compatibility - ensure they're always present
