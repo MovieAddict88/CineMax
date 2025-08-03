@@ -3,6 +3,7 @@ package my.cinemax.app.free;
 import android.content.Context;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
+import android.os.Handler;
 import android.util.Log;
 
 import androidx.appcompat.app.AppCompatDelegate;
@@ -70,24 +71,40 @@ public class MyApplication extends MultiDexApplication {
      * Initialize the advanced caching system for large datasets
      */
     private void initCacheSystem() {
-        try {
-            // Initialize Unified Cache Manager (coordinates all layers)
-            UnifiedCacheManager.getInstance().initialize(this);
-            
-            // Initialize DataRepository (uses unified cache)
-            DataRepository.getInstance().initialize(this);
-            
-            Log.d("MyApplication", "Advanced multi-layer caching system initialized successfully");
-            
-            // Preload essential data in background
-            DataRepository.getInstance().preloadEssentialData();
-            
-            // Log cache statistics after initialization
-            logCacheStatistics();
-            
-        } catch (Exception e) {
-            Log.e("MyApplication", "Error initializing cache system", e);
+        // Check if cache system should be enabled (can be disabled for debugging)
+        if (BuildConfig.DEBUG && false) { // Set to true to disable cache system
+            Log.d("MyApplication", "Cache system disabled for debugging");
+            return;
         }
+        
+        // Initialize cache system in background to prevent blocking main thread
+        new Thread(() -> {
+            try {
+                Log.d("MyApplication", "Starting cache system initialization...");
+                
+                // Initialize Unified Cache Manager (coordinates all layers)
+                UnifiedCacheManager.getInstance().initialize(this);
+                
+                // Initialize DataRepository (uses unified cache)
+                DataRepository.getInstance().initialize(this);
+                
+                Log.d("MyApplication", "Advanced multi-layer caching system initialized successfully");
+                
+                // Preload essential data in background (with delay to let app stabilize)
+                new Handler().postDelayed(() -> {
+                    try {
+                        DataRepository.getInstance().preloadEssentialData();
+                        logCacheStatistics();
+                    } catch (Exception e) {
+                        Log.e("MyApplication", "Error in background preload", e);
+                    }
+                }, 3000); // 3 second delay
+                
+            } catch (Exception e) {
+                Log.e("MyApplication", "Error initializing cache system", e);
+                // Don't crash the app, just log the error
+            }
+        }).start();
     }
     
     /**

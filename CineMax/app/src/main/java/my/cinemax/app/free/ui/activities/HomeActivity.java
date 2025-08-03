@@ -1191,6 +1191,14 @@ public class HomeActivity extends AppCompatActivity implements NavigationView.On
     private void loadAllDataWithCaching() {
         Log.d("CACHE_API", "Loading data with advanced caching system...");
         
+        // Add timeout mechanism to prevent hanging
+        new Handler().postDelayed(() -> {
+            if (!dataLoaded) {
+                Log.w("CACHE_API", "Cache system timeout, falling back to legacy method");
+                loadAllDataFromJson();
+            }
+        }, 10000); // 10 second timeout
+        
         // Show cache statistics
         CacheManager.CacheStats stats = dataRepository.getCacheStats();
         Log.d("CACHE_API", "Cache stats: " + stats.toString());
@@ -1213,6 +1221,10 @@ public class HomeActivity extends AppCompatActivity implements NavigationView.On
                 Log.e("CACHE_API", "Error loading data: " + error);
                 runOnUiThread(() -> {
                     Toasty.error(HomeActivity.this, "Failed to load content: " + error, Toast.LENGTH_SHORT).show();
+                    
+                    // Fallback to legacy method if cache system fails
+                    Log.d("CACHE_API", "Falling back to legacy data loading method");
+                    loadAllDataFromJson();
                 });
             }
             

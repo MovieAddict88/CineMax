@@ -84,13 +84,24 @@ public class DataRepository {
             callback.onLoading();
         }
         
+        // Check if cache system is ready
+        if (!unifiedCacheManager.isReady()) {
+            Log.w(TAG, "Cache system not ready, loading from API directly");
+            loadFromApi(callback);
+            return;
+        }
+        
         // Check unified cache first (memory + disk)
         JsonApiResponse cachedResponse = cacheManager.getCachedApiResponse();
         if (cachedResponse != null && cacheManager.isCacheValid()) {
             Log.d(TAG, "Returning cached data from unified cache");
             
             // Cache data in memory for faster future access
-            unifiedCacheManager.cacheAllData(cachedResponse);
+            try {
+                unifiedCacheManager.cacheAllData(cachedResponse);
+            } catch (Exception e) {
+                Log.e(TAG, "Error caching data in memory", e);
+            }
             
             if (callback != null) {
                 callback.onFromCache(cachedResponse);

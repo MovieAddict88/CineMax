@@ -76,27 +76,53 @@ public class UnifiedCacheManager {
             return;
         }
         
+        if (context == null) {
+            Log.e(TAG, "Context is null, cannot initialize UnifiedCacheManager");
+            return;
+        }
+        
         try {
+            Log.d(TAG, "Starting UnifiedCacheManager initialization...");
+            
             // Initialize disk cache manager
-            diskCacheManager.initialize(context);
+            try {
+                diskCacheManager.initialize(context);
+                Log.d(TAG, "Disk cache manager initialized successfully");
+            } catch (Exception e) {
+                Log.e(TAG, "Error initializing disk cache manager", e);
+                // Continue with other initializations
+            }
             
             // Initialize image cache manager
-            imageCacheManager = ImageCacheManager.getInstance(context);
+            try {
+                imageCacheManager = ImageCacheManager.getInstance(context);
+                Log.d(TAG, "Image cache manager initialized successfully");
+            } catch (Exception e) {
+                Log.e(TAG, "Error initializing image cache manager", e);
+                // Continue with other initializations
+            }
             
             // Initialize network cache manager
-            networkCacheManager = NetworkCacheManager.getInstance(context);
+            try {
+                networkCacheManager = NetworkCacheManager.getInstance(context);
+                Log.d(TAG, "Network cache manager initialized successfully");
+            } catch (Exception e) {
+                Log.e(TAG, "Error initializing network cache manager", e);
+                // Continue with other initializations
+            }
             
             isInitialized = true;
             
-            Log.d(TAG, "UnifiedCacheManager initialized successfully");
+            Log.d(TAG, "UnifiedCacheManager initialization completed");
             
-            // Start background optimization
-            if (backgroundPrefetchEnabled) {
+            // Start background optimization only if everything initialized successfully
+            if (backgroundPrefetchEnabled && imageCacheManager != null && networkCacheManager != null) {
                 startBackgroundOptimization();
             }
             
         } catch (Exception e) {
-            Log.e(TAG, "Error initializing UnifiedCacheManager", e);
+            Log.e(TAG, "Critical error initializing UnifiedCacheManager", e);
+            // Don't set isInitialized to true if there's a critical error
         }
     }
     
@@ -275,8 +301,19 @@ public class UnifiedCacheManager {
      * Load image with multi-layer caching
      */
     public Future<Bitmap> loadImage(String url, ImageCacheManager.ImageLoadCallback callback) {
+        if (!isInitialized) {
+            Log.w(TAG, "UnifiedCacheManager not initialized, cannot load image");
+            if (callback != null) {
+                callback.onImageLoadFailed("Cache manager not initialized");
+            }
+            return null;
+        }
+        
         if (imageCacheManager == null) {
             Log.e(TAG, "ImageCacheManager not initialized");
+            if (callback != null) {
+                callback.onImageLoadFailed("Image cache not available");
+            }
             return null;
         }
         
@@ -373,6 +410,11 @@ public class UnifiedCacheManager {
      * Preload essential data in background
      */
     public void preloadEssentialData() {
+        if (!isInitialized) {
+            Log.w(TAG, "UnifiedCacheManager not initialized, skipping preload");
+            return;
+        }
+        
         if (!backgroundPrefetchEnabled) return;
         
         executorService.submit(() -> {
@@ -380,31 +422,43 @@ public class UnifiedCacheManager {
                 Log.d(TAG, "Starting essential data preload");
                 
                 // Preload popular movies
-                List<Poster> popularMovies = diskCacheManager.getAllMovies();
-                if (popularMovies != null && !popularMovies.isEmpty()) {
-                    // Cache first 100 movies in memory
-                    int count = Math.min(100, popularMovies.size());
-                    List<Poster> toCache = popularMovies.subList(0, count);
-                    memoryCacheManager.cacheMovies(toCache);
-                    Log.d(TAG, "Preloaded " + count + " popular movies");
+                try {
+                    List<Poster> popularMovies = diskCacheManager.getAllMovies();
+                    if (popularMovies != null && !popularMovies.isEmpty()) {
+                        // Cache first 100 movies in memory
+                        int count = Math.min(100, popularMovies.size());
+                        List<Poster> toCache = popularMovies.subList(0, count);
+                        memoryCacheManager.cacheMovies(toCache);
+                        Log.d(TAG, "Preloaded " + count + " popular movies");
+                    }
+                } catch (Exception e) {
+                    Log.e(TAG, "Error preloading movies", e);
                 }
                 
                 // Preload popular TV series
-                List<Poster> popularSeries = diskCacheManager.getAllTvSeries();
-                if (popularSeries != null && !popularSeries.isEmpty()) {
-                    int count = Math.min(50, popularSeries.size());
-                    List<Poster> toCache = popularSeries.subList(0, count);
-                    memoryCacheManager.cacheTvSeries(toCache);
-                    Log.d(TAG, "Preloaded " + count + " popular TV series");
+                try {
+                    List<Poster> popularSeries = diskCacheManager.getAllTvSeries();
+                    if (popularSeries != null && !popularSeries.isEmpty()) {
+                        int count = Math.min(50, popularSeries.size());
+                        List<Poster> toCache = popularSeries.subList(0, count);
+                        memoryCacheManager.cacheTvSeries(toCache);
+                        Log.d(TAG, "Preloaded " + count + " popular TV series");
+                    }
+                } catch (Exception e) {
+                    Log.e(TAG, "Error preloading TV series", e);
                 }
                 
                 // Preload channels
-                List<Channel> channels = diskCacheManager.getAllChannels();
-                if (channels != null && !channels.isEmpty()) {
-                    int count = Math.min(50, channels.size());
-                    List<Channel> toCache = channels.subList(0, count);
-                    memoryCacheManager.cacheChannels(toCache);
-                    Log.d(TAG, "Preloaded " + count + " channels");
+                try {
+                    List<Channel> channels = diskCacheManager.getAllChannels();
+                    if (channels != null && !channels.isEmpty()) {
+                        int count = Math.min(50, channels.size());
+                        List<Channel> toCache = channels.subList(0, count);
+                        memoryCacheManager.cacheChannels(toCache);
+                        Log.d(TAG, "Preloaded " + count + " channels");
+                    }
+                } catch (Exception e) {
+                    Log.e(TAG, "Error preloading channels", e);
                 }
                 
                 Log.d(TAG, "Essential data preload completed");
@@ -636,6 +690,13 @@ public class UnifiedCacheManager {
     public void setBackgroundPrefetchEnabled(boolean enabled) {
         this.backgroundPrefetchEnabled = enabled;
         Log.d(TAG, "Background prefetch " + (enabled ? "enabled" : "disabled"));
+    }
+    
+    /**
+     * Check if the cache system is ready for use
+     */
+    public boolean isReady() {
+        return isInitialized && diskCacheManager != null;
     }
     
     /**
