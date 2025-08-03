@@ -26,7 +26,7 @@ android {
     defaultConfig {
         applicationId "my.cinemax.app.free"
         minSdkVersion 19
-        targetSdkVersion 30
+        targetSdkVersion 31
         versionCode 1
         versionName "1.0"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
@@ -133,6 +133,10 @@ dependencies {
     implementation 'com.unity3d.ads:unity-ads:3.7.5'
     implementation 'com.google.ads.mediation:unity:3.7.5.0'
 
+    // Room Database for local caching
+    implementation 'androidx.room:room-runtime:2.4.3'
+    implementation 'androidx.room:room-ktx:2.4.3'
+    annotationProcessor 'androidx.room:room-compiler:2.4.3'
 
     implementation files('libs/YouTubeAndroidPlayerApi.jar')
     implementation 'com.github.congle7997:GoogleIAP:1.0.8'
