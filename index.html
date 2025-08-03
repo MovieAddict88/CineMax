@@ -810,7 +810,13 @@
              
              console.log('✅ CineMax Enhanced API Manager loaded!');
              console.log('🎬 Auto-sources: VidSrc.net + VidJoy.pro');
+             console.log('🔧 Fixed: Root-level movies array for GenreActivity & TV Series');
              console.log('🧪 Test with: testSourceGeneration()');
+             
+             // Show info about the fix
+             setTimeout(() => {
+                 showStatus('info', 'Fixed: TV Series and movies now appear in Genre categories and Series fragments!');
+             }, 2000);
          });
 
         // Tab switching
@@ -1224,11 +1230,105 @@
             }));
         }
 
-        async function getSubtitles(tmdbId, type) {
-            // This would integrate with a subtitle API
-            // For now, return empty array
-            return [];
-        }
+                 async function getSubtitles(tmdbId, type) {
+             // This would integrate with a subtitle API
+             // For now, return empty array
+             return [];
+         }
+
+         // Helper functions for generating root-level arrays
+         function generateActorsFromContent() {
+             const actorMap = new Map();
+             
+             (currentData.home.featuredMovies || []).forEach(content => {
+                 if (content.actors) {
+                     content.actors.forEach(actor => {
+                         if (actor.name && !actorMap.has(actor.name)) {
+                             actorMap.set(actor.name, {
+                                 id: actor.id || nextId++,
+                                 name: actor.name,
+                                 type: actor.type || 'actor',
+                                 role: actor.role || 'Actor',
+                                 image: actor.image || '',
+                                 born: actor.born || '',
+                                 height: actor.height || '',
+                                 bio: actor.bio || 'Actor information from TMDB',
+                                 movies: []
+                             });
+                         }
+                         
+                         // Add movie to actor's filmography
+                         if (actorMap.has(actor.name)) {
+                             const actorData = actorMap.get(actor.name);
+                             if (!actorData.movies.some(m => m.id === content.id)) {
+                                 actorData.movies.push({
+                                     id: content.id,
+                                     title: content.title,
+                                     image: content.image,
+                                     year: content.year
+                                 });
+                             }
+                         }
+                     });
+                 }
+             });
+             
+             return Array.from(actorMap.values());
+         }
+
+         function generateGenresFromContent() {
+             const genreMap = new Map();
+             
+             (currentData.home.featuredMovies || []).forEach(content => {
+                 if (content.genres) {
+                     content.genres.forEach(genre => {
+                         const genreTitle = genre.title || genre.name;
+                         if (genreTitle && !genreMap.has(genreTitle)) {
+                             genreMap.set(genreTitle, {
+                                 id: genre.id || nextId++,
+                                 title: genreTitle,
+                                 posters: []
+                             });
+                         }
+                         
+                         // Add content to genre's posters
+                         if (genreMap.has(genreTitle)) {
+                             const genreData = genreMap.get(genreTitle);
+                             if (!genreData.posters.some(p => p.id === content.id)) {
+                                 genreData.posters.push({
+                                     id: content.id,
+                                     title: content.title,
+                                     type: content.type,
+                                     label: content.label,
+                                     sublabel: content.sublabel,
+                                     imdb: content.imdb,
+                                     downloadas: content.downloadas,
+                                     comment: content.comment,
+                                     playas: content.playas,
+                                     description: content.description,
+                                     classification: content.classification,
+                                     year: content.year,
+                                     duration: content.duration,
+                                     rating: content.rating,
+                                     image: content.image,
+                                     cover: content.cover,
+                                     genres: content.genres,
+                                     actors: content.actors,
+                                     views: content.views,
+                                     created_at: content.created_at,
+                                     sources: content.sources,
+                                     trailer: content.trailer,
+                                     subtitles: content.subtitles,
+                                     ...(content.type === 'series' && { seasons: content.seasons })
+                                 });
+                             }
+                         }
+                     });
+                 }
+             });
+             
+             return Array.from(genreMap.values());
+         }
 
         // Manual input functions
         function toggleManualFields() {
@@ -1581,60 +1681,151 @@
             reader.readAsText(file);
         }
 
-        function exportData() {
-            const dataStr = JSON.stringify(currentData, null, 2);
-            const dataBlob = new Blob([dataStr], { type: 'application/json' });
-            
-            const link = document.createElement('a');
-            link.href = URL.createObjectURL(dataBlob);
-            link.download = `cinemax-data-${new Date().toISOString().split('T')[0]}.json`;
-            link.click();
-            
-            showStatus('success', 'Data exported successfully!');
-        }
+                 function exportData() {
+             // Create the complete CineMax API structure with root-level movies array
+             const exportData = {
+                 ...currentData,
+                 // Add root-level movies array that includes both movies and series
+                 movies: currentData.home.featuredMovies || [],
+                 // Add root-level arrays for compatibility
+                 actors: generateActorsFromContent(),
+                 genres: generateGenresFromContent()
+             };
+             
+             const dataStr = JSON.stringify(exportData, null, 2);
+             const dataBlob = new Blob([dataStr], { type: 'application/json' });
+             
+             const link = document.createElement('a');
+             link.href = URL.createObjectURL(dataBlob);
+             link.download = `cinemax-data-${new Date().toISOString().split('T')[0]}.json`;
+             link.click();
+             
+             showStatus('success', 'Data exported successfully with root-level movies array!');
+         }
 
-        function exportSample() {
-            const sampleData = {
-                api_info: {
-                    version: "2.0",
-                    description: "Sample CineMax API Format",
-                    last_updated: new Date().toISOString().split('T')[0],
-                    total_movies: 1,
-                    total_series: 0,
-                    total_channels: 0
-                },
-                home: {
-                    slides: [
-                        {
-                            id: 1,
-                            title: "Sample Movie",
-                            type: "movie",
-                            image: "https://example.com/poster.jpg",
-                            url: "movies/1",
-                            poster: {
-                                id: 1,
-                                title: "Sample Movie",
-                                type: "movie",
-                                description: "This is a sample movie entry",
-                                year: "2023",
-                                rating: 8.5,
-                                sources: [
-                                    {
-                                        id: 1,
-                                        type: "embed",
-                                        title: "VidSrc 1080p",
-                                        quality: "1080p",
-                                        kind: "embed",
-                                        url: "https://vidsrc.net/embed/movie/123"
-                                    }
-                                ]
-                            }
-                        }
-                    ],
-                    featuredMovies: [],
-                    channels: []
-                }
-            };
+                 function exportSample() {
+             const sampleMovie = {
+                 id: 1,
+                 title: "Sample Movie",
+                 type: "movie",
+                 label: "Action",
+                 sublabel: "Released 2023",
+                 imdb: "8.5",
+                 downloadas: "sample-movie.mp4",
+                 comment: true,
+                 playas: "video",
+                 description: "This is a sample movie entry showing the correct CineMax structure",
+                 classification: "PG-13",
+                 year: "2023",
+                 duration: "2:30",
+                 rating: 8.5,
+                 image: "https://example.com/poster.jpg",
+                 cover: "https://example.com/cover.jpg",
+                 genres: [
+                     {
+                         id: 28,
+                         title: "Action"
+                     }
+                 ],
+                 sources: [
+                     {
+                         id: 1,
+                         type: "embed",
+                         title: "VidSrc Server 1080p",
+                         quality: "1080p",
+                         size: "Auto",
+                         kind: "embed",
+                         premium: "false",
+                         external: false,
+                         url: "https://vidsrc.net/embed/movie/123"
+                     },
+                     {
+                         id: 2,
+                         type: "embed",
+                         title: "VidJoy Server 1080p",
+                         quality: "1080p", 
+                         size: "Auto",
+                         kind: "embed",
+                         premium: "false",
+                         external: false,
+                         url: "https://vidjoy.pro/embed/movie/123"
+                     }
+                 ],
+                 trailer: {
+                     id: 3,
+                     type: "youtube",
+                     title: "Sample Movie Trailer",
+                     url: "https://www.youtube.com/watch?v=dQw4w9WgXcQ"
+                 },
+                 actors: [
+                     {
+                         id: 1,
+                         name: "John Doe",
+                         type: "actor",
+                         role: "Lead Actor",
+                         image: "https://example.com/actor.jpg",
+                         bio: "Sample actor"
+                     }
+                 ],
+                 subtitles: [],
+                 views: 5000,
+                 created_at: new Date().toISOString().split('T')[0]
+             };
+
+             const sampleData = {
+                 api_info: {
+                     version: "2.0",
+                     description: "Sample CineMax API Format with Complete Structure",
+                     last_updated: new Date().toISOString().split('T')[0],
+                     total_movies: 1,
+                     total_series: 0,
+                     total_channels: 0
+                 },
+                 home: {
+                     slides: [
+                         {
+                             id: 1,
+                             title: "Sample Movie",
+                             type: "movie",
+                             image: "https://example.com/poster.jpg",
+                             url: "movies/1",
+                             poster: sampleMovie
+                         }
+                     ],
+                     featuredMovies: [sampleMovie],
+                     channels: []
+                 },
+                 // Root-level movies array for GenreActivity and other fragments
+                 movies: [sampleMovie],
+                 actors: [
+                     {
+                         id: 1,
+                         name: "John Doe",
+                         type: "actor",
+                         role: "Lead Actor",
+                         image: "https://example.com/actor.jpg",
+                         born: "1980-01-01",
+                         height: "6'0\"",
+                         bio: "Sample actor biography",
+                         movies: [
+                             {
+                                 id: 1,
+                                 title: "Sample Movie",
+                                 image: "https://example.com/poster.jpg",
+                                 year: "2023"
+                             }
+                         ]
+                     }
+                 ],
+                 genres: [
+                     {
+                         id: 28,
+                         title: "Action",
+                         posters: [sampleMovie]
+                     }
+                 ],
+                 channels: []
+             };
             
             const dataStr = JSON.stringify(sampleData, null, 2);
             const dataBlob = new Blob([dataStr], { type: 'application/json' });
@@ -1900,9 +2091,17 @@
             }
         }
 
-        function saveData() {
-            localStorage.setItem('cinemax-data', JSON.stringify(currentData));
-        }
+                 function saveData() {
+             // Update root-level arrays for CineMax compatibility
+             const dataToSave = {
+                 ...currentData,
+                 movies: currentData.home.featuredMovies || [],
+                 actors: generateActorsFromContent(),
+                 genres: generateGenresFromContent()
+             };
+             
+             localStorage.setItem('cinemax-data', JSON.stringify(dataToSave));
+         }
 
         function loadSavedData() {
             const saved = localStorage.getItem('cinemax-data');
