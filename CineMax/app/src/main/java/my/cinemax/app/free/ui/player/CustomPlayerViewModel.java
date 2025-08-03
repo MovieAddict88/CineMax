@@ -1,9 +1,7 @@
 package my.cinemax.app.free.ui.player;
 
 import android.app.Activity;
-import androidx.databinding.BaseObservable;
-import androidx.databinding.Bindable;
-import androidx.databinding.ObservableBoolean;
+// Removed data binding imports to fix compilation issues
 
 import android.media.MediaFormat;
 import android.net.Uri;
@@ -56,7 +54,7 @@ import com.google.android.gms.cast.framework.CastSession;
 import com.google.android.gms.cast.framework.SessionManager;
 import com.google.android.gms.cast.framework.media.RemoteMediaClient;
 import com.google.android.gms.common.images.WebImage;
-import my.cinemax.app.free.BR;
+// Removed BR import to fix compilation issues
 import my.cinemax.app.free.R;
 import my.cinemax.app.free.entity.Subtitle;
 import my.cinemax.app.free.ui.activities.PlayerActivity;
@@ -70,14 +68,14 @@ import java.util.List;
 
  */
 
-public class CustomPlayerViewModel extends BaseObservable implements ExoPlayer.EventListener {
+public class CustomPlayerViewModel implements ExoPlayer.EventListener {
     private ArrayList<Subtitle> subtitlesForCast= new ArrayList<>();
 
     private Activity mActivity;
     private String mUrl;
     private boolean loadingComplete = false;
     private static final boolean SHOULD_AUTO_PLAY = true;
-    private ObservableBoolean controlsVisible = new ObservableBoolean(true);
+    private boolean controlsVisible = true;
     private boolean mPausable = true;
     private boolean isInProgress = false;
     private boolean isLoadingNow = false;
@@ -258,10 +256,9 @@ public class CustomPlayerViewModel extends BaseObservable implements ExoPlayer.E
     }
 
     public void onPlayerClicked(final View view) {
-        controlsVisible.set(true);
+        controlsVisible = true;
     }
 
-    @Bindable
     public int getPlaybackImageRes() {
         if (!isPlaying()) {
             return R.drawable.ic_media_play;
@@ -476,11 +473,10 @@ public class CustomPlayerViewModel extends BaseObservable implements ExoPlayer.E
         this.isInProgress = isInProgress;
     }
 
-    @Bindable
     public boolean getLoadingComplete() {
         return loadingComplete;
     }
-    @Bindable
+    
     public boolean isLoaidingNow() {
         Log.i("TEST", "ExoPlayer Changed ");
         if (isLoadingNow)
@@ -492,12 +488,11 @@ public class CustomPlayerViewModel extends BaseObservable implements ExoPlayer.E
     }
     private void setLoadingComplete(boolean complete) {
         loadingComplete = complete;
-        notifyPropertyChanged(BR.loadingComplete);
+        // Removed data binding notification
     }
 
-    @Bindable
     public boolean getControlsVisible() {
-        return controlsVisible.get();
+        return controlsVisible;
     }
 
 

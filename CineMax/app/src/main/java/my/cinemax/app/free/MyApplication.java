@@ -25,6 +25,7 @@ import com.unity3d.ads.UnityAds;
 
 import my.cinemax.app.free.BuildConfig;
 import my.cinemax.app.free.R;
+import my.cinemax.app.free.database.CacheManager;
 
 /**
  * Created by Tamim on 28/09/2019.
@@ -35,6 +36,7 @@ public class MyApplication extends MultiDexApplication {
     private static MyApplication instance;
 
     protected String mUserAgent;
+    private CacheManager cacheManager;
 
     @Override
     public void onCreate() {
@@ -51,6 +53,9 @@ public class MyApplication extends MultiDexApplication {
         UnityAds.initialize (this, getResources().getString(R.string.unity_ads_app_id));
 //        initCast();
         mUserAgent = Util.getUserAgent(this, "MyApplication");
+        
+        // Initialize cache manager and clean expired cache
+        initCacheManager();
     }
 
     private void initLogger() {
@@ -100,6 +105,35 @@ public class MyApplication extends MultiDexApplication {
     public static boolean hasNetwork ()
     {
         return instance.checkIfHasNetwork();
+    }
+
+    private void initCacheManager() {
+        try {
+            cacheManager = CacheManager.getInstance(this);
+            // Clear expired cache on app start
+            cacheManager.clearExpiredCache();
+            if (BuildConfig.DEBUG) {
+                android.util.Log.d("MyApplication", "Cache initialized. Stats: " + cacheManager.getCacheStats());
+            }
+        } catch (Exception e) {
+            if (BuildConfig.DEBUG) {
+                android.util.Log.e("MyApplication", "Failed to initialize cache manager", e);
+            }
+        }
+    }
+
+    public CacheManager getCacheManager() {
+        if (cacheManager == null) {
+            cacheManager = CacheManager.getInstance(this);
+        }
+        return cacheManager;
+    }
+
+    public static CacheManager getCache() {
+        if (instance != null) {
+            return instance.getCacheManager();
+        }
+        return null;
     }
 
 }
