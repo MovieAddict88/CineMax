@@ -19,6 +19,7 @@ import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.Toast;
 import android.util.Log;
+import android.os.Handler;
 
 import my.cinemax.app.free.Provider.PrefManager;
 import my.cinemax.app.free.R;
