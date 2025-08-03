@@ -827,8 +827,9 @@
             // Generate seasons with episodes for TV series
             const seasons = isMovie ? [] : await generateSeasons(tmdbData);
             
+            const contentId = generateId();
             const content = {
-                id: generateId(),
+                id: contentId,
                 type: isMovie ? 'movie' : 'series',
                 title: title,
                 year: year,
@@ -857,6 +858,8 @@
                 views: Math.floor(Math.random() * 10000) + 1000,
                 downloads: 0,
                 shares: 0,
+                contentType: isMovie ? 'movie' : 'series',
+                url: `${isMovie ? 'movies' : 'series'}/${contentId}`,
                 seasons: seasons
             };
             
