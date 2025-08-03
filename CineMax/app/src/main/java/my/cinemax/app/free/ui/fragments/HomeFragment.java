@@ -108,15 +108,19 @@ public class HomeFragment extends Fragment {
     public void onResume() {
         super.onResume();
         
-        // Ensure loading state is shown when fragment becomes visible
-        if (!isDataLoaded && !isLoadingInProgress) {
-            Log.d("HomeFragment", "Fragment resumed without data, showing shimmer");
-            showShimmerLoading();
-            
-            // Notify HomeActivity that fragment is ready for data
-            if (getActivity() instanceof HomeActivity) {
-                ((HomeActivity) getActivity()).onHomeFragmentReady();
+        try {
+            // Ensure loading state is shown when fragment becomes visible
+            if (!isDataLoaded && !isLoadingInProgress && getActivity() != null && isAdded()) {
+                Log.d("HomeFragment", "Fragment resumed without data, showing shimmer");
+                showShimmerLoading();
+                
+                // Notify HomeActivity that fragment is ready for data
+                if (getActivity() instanceof HomeActivity) {
+                    ((HomeActivity) getActivity()).onHomeFragmentReady();
+                }
             }
+        } catch (Exception e) {
+            Log.e("HomeFragment", "Error in onResume", e);
         }
     }
 
@@ -243,38 +247,50 @@ public class HomeFragment extends Fragment {
         }
     }
    
-   /**
-    * Show shimmer loading effect
-    */
-   private void showShimmerLoading(){
-       if (getActivity() == null || !isAdded()) return;
-       
-       try {
-           if (shimmer_layout != null) {
-               shimmer_layout.startShimmer();
-           }
-           
-           linear_layout_load_home_fragment.setVisibility(View.VISIBLE);
-           linear_layout_page_error_home_fragment.setVisibility(View.GONE);
-           recycler_view_home_fragment.setVisibility(View.GONE);
-           
-           Log.d("HomeFragment", "Shimmer loading displayed");
-       } catch (Exception e) {
-           Log.e("HomeFragment", "Error showing shimmer loading", e);
-       }
-   }
+       /**
+     * Show shimmer loading effect
+     */
+    private void showShimmerLoading(){
+        if (getActivity() == null || !isAdded() || getView() == null) return;
+        
+        try {
+            if (shimmer_layout != null) {
+                shimmer_layout.startShimmer();
+            }
+            
+            if (linear_layout_load_home_fragment != null) {
+                linear_layout_load_home_fragment.setVisibility(View.VISIBLE);
+            }
+            if (linear_layout_page_error_home_fragment != null) {
+                linear_layout_page_error_home_fragment.setVisibility(View.GONE);
+            }
+            if (recycler_view_home_fragment != null) {
+                recycler_view_home_fragment.setVisibility(View.GONE);
+            }
+            
+            Log.d("HomeFragment", "Shimmer loading displayed");
+        } catch (Exception e) {
+            Log.e("HomeFragment", "Error showing shimmer loading", e);
+        }
+    }
    
     private void showListView(){
-        if (getActivity() == null || !isAdded()) return;
+        if (getActivity() == null || !isAdded() || getView() == null) return;
         
         try {
             if (shimmer_layout != null) {
                 shimmer_layout.stopShimmer();
             }
             
-            linear_layout_load_home_fragment.setVisibility(View.GONE);
-            linear_layout_page_error_home_fragment.setVisibility(View.GONE);
-            recycler_view_home_fragment.setVisibility(View.VISIBLE);
+            if (linear_layout_load_home_fragment != null) {
+                linear_layout_load_home_fragment.setVisibility(View.GONE);
+            }
+            if (linear_layout_page_error_home_fragment != null) {
+                linear_layout_page_error_home_fragment.setVisibility(View.GONE);
+            }
+            if (recycler_view_home_fragment != null) {
+                recycler_view_home_fragment.setVisibility(View.VISIBLE);
+            }
             
             Log.d("HomeFragment", "List view displayed");
         } catch (Exception e) {
@@ -283,16 +299,22 @@ public class HomeFragment extends Fragment {
     }
     
     private void showErrorView(){
-        if (getActivity() == null || !isAdded()) return;
+        if (getActivity() == null || !isAdded() || getView() == null) return;
         
         try {
             if (shimmer_layout != null) {
                 shimmer_layout.stopShimmer();
             }
             
-            linear_layout_load_home_fragment.setVisibility(View.GONE);
-            linear_layout_page_error_home_fragment.setVisibility(View.VISIBLE);
-            recycler_view_home_fragment.setVisibility(View.GONE);
+            if (linear_layout_load_home_fragment != null) {
+                linear_layout_load_home_fragment.setVisibility(View.GONE);
+            }
+            if (linear_layout_page_error_home_fragment != null) {
+                linear_layout_page_error_home_fragment.setVisibility(View.VISIBLE);
+            }
+            if (recycler_view_home_fragment != null) {
+                recycler_view_home_fragment.setVisibility(View.GONE);
+            }
             
             Log.d("HomeFragment", "Error view displayed");
         } catch (Exception e) {
@@ -358,22 +380,38 @@ public class HomeFragment extends Fragment {
         // Initialize shimmer layout
         this.shimmer_layout = view.findViewById(R.id.shimmer_layout);
 
-        this.gridLayoutManager=  new GridLayoutManager(getActivity().getApplicationContext(),1,RecyclerView.VERTICAL,false);
-
-
-        this.homeAdapter =new HomeAdapter(dataList,getActivity());
-        recycler_view_home_fragment.setHasFixedSize(true);
-        recycler_view_home_fragment.setAdapter(homeAdapter);
-        recycler_view_home_fragment.setLayoutManager(gridLayoutManager);
+        // Safely initialize GridLayoutManager
+        if (getActivity() != null && getContext() != null) {
+            this.gridLayoutManager = new GridLayoutManager(getContext(), 1, RecyclerView.VERTICAL, false);
+            this.homeAdapter = new HomeAdapter(dataList, getActivity());
+            
+            if (recycler_view_home_fragment != null) {
+                recycler_view_home_fragment.setHasFixedSize(true);
+                recycler_view_home_fragment.setAdapter(homeAdapter);
+                recycler_view_home_fragment.setLayoutManager(gridLayoutManager);
+            }
+        }
         
         Log.d("HomeFragment", "Views initialized successfully");
     }
     
     // Method to update fragment with JSON data
     public void updateWithJsonData(my.cinemax.app.free.entity.JsonApiResponse jsonResponse) {
-        if (jsonResponse != null) {
-            Log.d("HomeFragment", "Updating fragment with JSON data");
-            
+        if (jsonResponse == null) {
+            Log.w("HomeFragment", "Received null JSON response");
+            showErrorView();
+            return;
+        }
+        
+        // Check if fragment is still alive and attached
+        if (getActivity() == null || !isAdded() || getView() == null) {
+            Log.w("HomeFragment", "Fragment not attached, skipping data update");
+            return;
+        }
+        
+        Log.d("HomeFragment", "Updating fragment with JSON data");
+        
+        try {
             // Don't show shimmer again if we're updating with cached data
             // Only show loading if we don't have data yet
             if (!isDataLoaded) {
@@ -381,12 +419,23 @@ public class HomeFragment extends Fragment {
                 showShimmerLoading();
             }
             
-            // Process data in background thread to prevent UI blocking
-            new Thread(() -> {
-                try {
-                    // Clear existing data
-                    dataList.clear();
-                    dataList.add(new Data().setViewType(0));
+            // Process data on main thread to avoid threading issues
+            processJsonData(jsonResponse);
+            
+        } catch (Exception e) {
+            Log.e("HomeFragment", "Error updating fragment with JSON data", e);
+            showErrorView();
+        }
+    }
+    
+    /**
+     * Process JSON data safely on main thread
+     */
+    private void processJsonData(JsonApiResponse jsonResponse) {
+        try {
+            // Clear existing data
+            dataList.clear();
+            dataList.add(new Data().setViewType(0));
             
             // Get home data
             JsonApiResponse.HomeData homeData = jsonResponse.getHome();
@@ -445,36 +494,23 @@ public class HomeFragment extends Fragment {
                             }
                         }
                     }
-                    }
                 }
-                
-                // Update UI on main thread
-                if (getActivity() != null) {
-                    getActivity().runOnUiThread(() -> {
-                        try {
-                            isDataLoaded = true;
-                            isLoadingInProgress = false;
-                            showListView();
-                            homeAdapter.notifyDataSetChanged();
-                            
-                            Log.d("HomeFragment", "Fragment updated with JSON data successfully - Total items: " + dataList.size());
-                        } catch (Exception e) {
-                            Log.e("HomeFragment", "Error updating UI", e);
-                            showErrorView();
-                        }
-                    });
-                }
-                
-                } catch (Exception e) {
-                    Log.e("HomeFragment", "Error processing JSON data", e);
-                    if (getActivity() != null) {
-                        getActivity().runOnUiThread(() -> showErrorView());
-                    }
-                }
-            }).start();
+            }
             
-        } else {
-            Log.w("HomeFragment", "Received null JSON response");
+            // Update UI immediately since we're on main thread
+            isDataLoaded = true;
+            isLoadingInProgress = false;
+            showListView();
+            
+            // Safely notify adapter
+            if (homeAdapter != null) {
+                homeAdapter.notifyDataSetChanged();
+            }
+            
+            Log.d("HomeFragment", "Fragment updated with JSON data successfully - Total items: " + dataList.size());
+            
+        } catch (Exception e) {
+            Log.e("HomeFragment", "Error processing JSON data", e);
             showErrorView();
         }
     }
