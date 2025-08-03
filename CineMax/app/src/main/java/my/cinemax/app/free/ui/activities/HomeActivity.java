@@ -149,8 +149,11 @@ public class HomeActivity extends AppCompatActivity implements NavigationView.On
         initBuy();
         
         // ===== LOAD DATA WITH ADVANCED CACHING =====
-        // Load data using the new cache-first strategy
-        loadAllDataWithCaching();
+        // Try to load cached data immediately first
+        loadCachedDataImmediately();
+        
+        // Preload data in background for future launches
+        preloadDataInBackground();
     }
 
     BillingSubs billingSubs;
@@ -282,6 +285,9 @@ public class HomeActivity extends AppCompatActivity implements NavigationView.On
             @Override
             public void onPageSelected(int i) {
                 bubbleNavigationLinearView.setCurrentActiveItem(i);
+                
+                // Ensure data is loaded for this page
+                ensureDataLoadedForPage(i);
                 
                 // Update fragments with cached data when switching pages
                 if (dataLoaded && cachedJsonResponse != null) {
@@ -760,6 +766,11 @@ public class HomeActivity extends AppCompatActivity implements NavigationView.On
     protected void onResume() {
         super.onResume();
 
+        // Check if data is already loaded, if not load from cache immediately
+        if (!dataLoaded) {
+            Log.d("CACHE_API", "Data not loaded, checking cache in onResume");
+            loadCachedDataImmediately();
+        }
 
         PrefManager prf= new PrefManager(getApplicationContext());
         Menu nav_Menu = navigationView.getMenu();
@@ -1183,6 +1194,96 @@ public class HomeActivity extends AppCompatActivity implements NavigationView.On
     public interface LiveStreamCallback {
         void onSuccess(String streamUrl);
         void onError(String error);
+    }
+    
+    /**
+     * Load cached data immediately without waiting for API
+     */
+    private void loadCachedDataImmediately() {
+        Log.d("CACHE_API", "Loading cached data immediately...");
+        
+        // Try to get data from simple cache first
+        JsonApiResponse cachedResponse = dataRepository.getSimpleCacheManager().getApiResponse();
+        if (cachedResponse != null && dataRepository.getSimpleCacheManager().isCacheValid("api_response")) {
+            Log.d("CACHE_API", "Found valid cached data, displaying immediately");
+            handleJsonResponse(cachedResponse, "Cache");
+            return;
+        }
+        
+        // Try to get data from legacy cache
+        JsonApiResponse legacyCachedResponse = dataRepository.getCacheManager().getCachedApiResponse();
+        if (legacyCachedResponse != null && dataRepository.getCacheManager().isCacheValid()) {
+            Log.d("CACHE_API", "Found valid legacy cached data, displaying immediately");
+            handleJsonResponse(legacyCachedResponse, "Cache");
+            return;
+        }
+        
+        // If no cached data, load from API
+        Log.d("CACHE_API", "No cached data found, loading from API");
+        loadAllDataWithCaching();
+    }
+    
+    /**
+     * Preload data in background for future launches
+     */
+    private void preloadDataInBackground() {
+        new Thread(() -> {
+            try {
+                Log.d("CACHE_API", "Preloading data in background...");
+                
+                // Check if we need to refresh data
+                if (!dataRepository.getSimpleCacheManager().isCacheValid("api_response")) {
+                    Log.d("CACHE_API", "Cache expired, refreshing in background");
+                    dataRepository.refreshData(new DataRepository.ApiResponseCallback() {
+                        @Override
+                        public void onSuccess(JsonApiResponse response) {
+                            Log.d("CACHE_API", "Background refresh completed successfully");
+                        }
+                        
+                        @Override
+                        public void onFromCache(JsonApiResponse response) {
+                            Log.d("CACHE_API", "Background refresh returned cached data");
+                        }
+                        
+                        @Override
+                        public void onError(String error) {
+                            Log.e("CACHE_API", "Background refresh failed: " + error);
+                        }
+                        
+                        @Override
+                        public void onLoading() {
+                            Log.d("CACHE_API", "Background refresh loading...");
+                        }
+                    });
+                } else {
+                    Log.d("CACHE_API", "Cache is still valid, no background refresh needed");
+                }
+                
+            } catch (Exception e) {
+                Log.e("CACHE_API", "Error in background preload", e);
+            }
+        }).start();
+    }
+    
+    /**
+     * Ensure data is loaded for a specific page
+     */
+    private void ensureDataLoadedForPage(int pageIndex) {
+        if (!dataLoaded) {
+            Log.d("CACHE_API", "Data not loaded for page " + pageIndex + ", loading cached data");
+            loadCachedDataImmediately();
+        } else {
+            Log.d("CACHE_API", "Data already loaded for page " + pageIndex);
+        }
+    }
+    
+    /**
+     * Refresh data from API (called by fragments)
+     */
+    public void refreshDataFromApi() {
+        Log.d("CACHE_API", "Refreshing data from API...");
+        dataLoaded = false; // Reset data loaded flag
+        loadAllDataWithCaching();
     }
     
     /**

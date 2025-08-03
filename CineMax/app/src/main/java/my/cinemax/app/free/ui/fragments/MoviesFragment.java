@@ -29,6 +29,7 @@ import my.cinemax.app.free.Provider.PrefManager;
 import my.cinemax.app.free.R;
 import my.cinemax.app.free.api.apiClient;
 import my.cinemax.app.free.api.apiRest;
+import my.cinemax.app.free.ui.activities.HomeActivity;
 import my.cinemax.app.free.entity.Genre;
 import my.cinemax.app.free.entity.Poster;
 import my.cinemax.app.free.ui.Adapters.PosterAdapter;
@@ -250,25 +251,20 @@ public class MoviesFragment extends Fragment {
         swipe_refresh_layout_movies_fragment.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
             @Override
             public void onRefresh() {
-                item = 0;
-                page = 0;
-                loading = true;
-                movieList.clear();
-                movieList.add(new Poster().setTypeView(2));
-                adapter.notifyDataSetChanged();
-                loadMovies();
+                // Call HomeActivity to refresh data
+                if (getActivity() instanceof HomeActivity) {
+                    ((HomeActivity) getActivity()).refreshDataFromApi();
+                }
+                swipe_refresh_layout_movies_fragment.setRefreshing(false);
             }
         });
         button_try_again.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                item = 0;
-                page = 0;
-                loading = true;
-                movieList.clear();
-                movieList.add(new Poster().setTypeView(2));
-                adapter.notifyDataSetChanged();
-                loadMovies();
+                // Call HomeActivity to refresh data
+                if (getActivity() instanceof HomeActivity) {
+                    ((HomeActivity) getActivity()).refreshDataFromApi();
+                }
             }
         });
         recycler_view_movies_fragment.addOnScrollListener(new RecyclerView.OnScrollListener()

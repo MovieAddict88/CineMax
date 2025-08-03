@@ -555,6 +555,20 @@ public class DataRepository {
     }
     
     /**
+     * Get SimpleCacheManager instance
+     */
+    public SimpleCacheManager getSimpleCacheManager() {
+        return simpleCacheManager;
+    }
+    
+    /**
+     * Get CacheManager instance
+     */
+    public CacheManager getCacheManager() {
+        return cacheManager;
+    }
+    
+    /**
      * Check if cache is valid
      */
     public boolean isCacheValid() {
