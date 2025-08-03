@@ -83,6 +83,7 @@ import android.os.Handler;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.content.Context;
+import android.content.ComponentCallbacks2;
 
 import androidx.appcompat.widget.Toolbar;
 
@@ -992,17 +993,17 @@ public class HomeActivity extends AppCompatActivity implements NavigationView.On
         
         try {
             switch (level) {
-                case TRIM_MEMORY_UI_HIDDEN:
-                case TRIM_MEMORY_BACKGROUND:
-                case TRIM_MEMORY_MODERATE:
+                case ComponentCallbacks2.TRIM_MEMORY_UI_HIDDEN:
+                case ComponentCallbacks2.TRIM_MEMORY_BACKGROUND:
+                case ComponentCallbacks2.TRIM_MEMORY_MODERATE:
                     // App is in background, trim some memory
                     if (dataRepository != null && dataRepository.getSimpleCacheManager() != null) {
                         dataRepository.getSimpleCacheManager().trimMemory();
                     }
                     break;
                     
-                case TRIM_MEMORY_COMPLETE:
-                case TRIM_MEMORY_CRITICAL:
+                case ComponentCallbacks2.TRIM_MEMORY_COMPLETE:
+                case ComponentCallbacks2.TRIM_MEMORY_CRITICAL:
                     // Critical memory situation, clear as much as possible
                     if (dataRepository != null && dataRepository.getSimpleCacheManager() != null) {
                         dataRepository.getSimpleCacheManager().clearMemoryCache();
