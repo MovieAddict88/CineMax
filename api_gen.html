@@ -376,6 +376,11 @@
             font-size: 14px;
         }
         
+        .btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+        
         @media (max-width: 768px) {
             .container {
                 padding: 10px;
@@ -972,13 +977,23 @@
                 const year = (item.release_date || item.first_air_date || '').substring(0, 4);
                 const poster = item.poster_path ? `${TMDB_IMAGE_BASE}${item.poster_path}` : 'https://via.placeholder.com/300x450?text=No+Image';
 
+                // Check if content already exists
+                const existingContent = currentData.home.featuredMovies.find(content => 
+                    content.title === title && content.year === year
+                );
+                
+                const isGenerated = existingContent !== undefined;
+                const buttonText = isGenerated ? 'Already Generated' : 'Generate';
+                const buttonClass = isGenerated ? 'btn-secondary' : 'btn-primary';
+                const buttonDisabled = isGenerated ? 'disabled' : '';
+
                 div.innerHTML = `
                     <img src="${poster}" alt="${title}" loading="lazy">
                     <div class="info">
                         <div class="title">${title}</div>
                         <div class="meta">${year} • ${mediaType.toUpperCase()} • ID: ${item.id}</div>
-                        <button class="btn btn-primary btn-small" onclick="generateFromTMDB('${mediaType}', ${item.id})">
-                            Generate
+                        <button class="btn ${buttonClass} btn-small" onclick="generateFromTMDB('${mediaType}', ${item.id})" ${buttonDisabled}>
+                            ${buttonText}
                         </button>
                     </div>
                 `;
@@ -1003,12 +1018,33 @@
                      await generateMovie(id);
                  } else if (type === 'series') {
                      await generateSeries(id);
+                 } else if (type === 'tv') {
+                     // Handle TV series from search results
+                     await generateSeries(id);
                  }
                  
+                 // Force save data immediately
+                 saveData();
+                 
+                 // Update stats and preview
                  updateDataStats();
                  updatePreview();
+                 
                  showStatus('success', `${type} generated successfully with automatic video sources!`);
+                 
+                 // Log for debugging
+                 console.log('Generated content:', currentData.home.featuredMovies[currentData.home.featuredMovies.length - 1]);
+                 
+                 // Refresh search results to show updated status
+                 const searchQuery = document.getElementById('tmdb-search').value.trim();
+                 if (searchQuery) {
+                     setTimeout(() => {
+                         searchTMDB();
+                     }, 1000);
+                 }
+                 
              } catch (error) {
+                 console.error('Generation error:', error);
                  showStatus('error', `Error generating ${type}: ${error.message}`);
              }
              
@@ -2146,9 +2182,17 @@
                 })));
             }
             
+            // Log for debugging
+            console.log('Updating preview with items:', items.length);
+            
             items.forEach(item => {
                 const div = document.createElement('div');
                 div.className = 'preview-item';
+                
+                // Handle series with seasons
+                const sourceCount = item.type === 'series' && item.seasons ? 
+                    item.seasons.reduce((total, season) => total + (season.episodes?.length || 0), 0) :
+                    (item.sources?.length || 0);
                 
                 div.innerHTML = `
                     <img src="${item.image || 'https://via.placeholder.com/300x450?text=No+Image'}" 
@@ -2156,7 +2200,7 @@
                     <div class="info">
                         <div class="title">${item.title}</div>
                         <div class="meta">${item.year || 'Unknown'} • ${item.type?.toUpperCase()} • Rating: ${item.rating || 'N/A'}</div>
-                        <div class="meta">Sources: ${item.sources?.length || 0}</div>
+                        <div class="meta">${item.type === 'series' ? 'Episodes' : 'Sources'}: ${sourceCount}</div>
                         <div style="margin-top: 10px;">
                             <button class="btn btn-secondary btn-small" onclick="editContent(${item.id})">Edit</button>
                             <button class="btn btn-danger btn-small" onclick="deleteContent(${item.id}, '${item.type}')">Delete</button>
@@ -2323,15 +2367,24 @@
         }
 
                  function saveData() {
-             // Update root-level arrays for CineMax compatibility
-             const dataToSave = {
-                 ...currentData,
-                 movies: currentData.home.featuredMovies || [],
-                 actors: generateActorsFromContent(),
-                 genres: generateGenresFromContent()
-             };
-             
-             localStorage.setItem('cinemax-data', JSON.stringify(dataToSave));
+             try {
+                 // Update root-level arrays for CineMax compatibility
+                 const dataToSave = {
+                     ...currentData,
+                     movies: currentData.home.featuredMovies || [],
+                     actors: generateActorsFromContent(),
+                     genres: generateGenresFromContent()
+                 };
+                 
+                 localStorage.setItem('cinemax-data', JSON.stringify(dataToSave));
+                 
+                 // Log for debugging
+                 console.log('Data saved successfully. Total items:', dataToSave.movies.length);
+                 
+             } catch (error) {
+                 console.error('Error saving data:', error);
+                 showStatus('error', 'Failed to save data to localStorage');
+             }
          }
 
         function loadSavedData() {
