@@ -3,6 +3,7 @@ package my.cinemax.app.free;
 import android.content.Context;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
+import android.util.Log;
 
 import androidx.appcompat.app.AppCompatDelegate;
 import androidx.multidex.MultiDex;
@@ -25,10 +26,12 @@ import com.unity3d.ads.UnityAds;
 
 import my.cinemax.app.free.BuildConfig;
 import my.cinemax.app.free.R;
+import my.cinemax.app.free.Provider.DataRepository;
+import my.cinemax.app.free.Utils.CacheManager;
 
 /**
  * Created by Tamim on 28/09/2019.
-
+ * Updated to include advanced caching system for large datasets
  */
 
 public class MyApplication extends MultiDexApplication {
@@ -51,11 +54,35 @@ public class MyApplication extends MultiDexApplication {
         UnityAds.initialize (this, getResources().getString(R.string.unity_ads_app_id));
 //        initCast();
         mUserAgent = Util.getUserAgent(this, "MyApplication");
+        
+        // Initialize advanced caching system for large datasets
+        initCacheSystem();
     }
 
     private void initLogger() {
         if (BuildConfig.DEBUG) {
 
+        }
+    }
+    
+    /**
+     * Initialize the advanced caching system for large datasets
+     */
+    private void initCacheSystem() {
+        try {
+            // Initialize CacheManager
+            CacheManager.getInstance().initialize(this);
+            
+            // Initialize DataRepository
+            DataRepository.getInstance().initialize(this);
+            
+            Log.d("MyApplication", "Advanced caching system initialized successfully");
+            
+            // Preload essential data in background
+            DataRepository.getInstance().preloadEssentialData();
+            
+        } catch (Exception e) {
+            Log.e("MyApplication", "Error initializing cache system", e);
         }
     }
     public static MyApplication getInstance ()
