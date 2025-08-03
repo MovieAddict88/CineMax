@@ -1870,18 +1870,22 @@
                 event.preventDefault();
                 const id = entryIdInput.value;
                 const activeTab = document.querySelector('.tab-btn.active').dataset.type;
+                let success = false;
 
                 if (activeTab === 'movie') {
-                    saveMovie(id);
+                    success = saveMovie(id);
                 } else if (activeTab === 'series') {
-                    saveSeries(id);
+                    success = saveSeries(id);
                 } else if (activeTab === 'channel') {
-                    saveChannel(id);
+                    success = saveChannel(id);
                 }
-                autoGenerateRelatedContent();
-                renderEntries();
-                saveToLocalStorage();
-                closeModal();
+
+                if (success) {
+                    autoGenerateRelatedContent();
+                    renderEntries();
+                    saveToLocalStorage();
+                    closeModal();
+                }
             });
             
             function editEntry(id, type) {
@@ -1961,7 +1965,7 @@
             function saveMovie(id) {
                 if (!movieTitleInput.value.trim()) {
                     showNotification('Movie title is required.', false);
-                    return;
+                    return false;
                 }
                 const entryData = {
                     type: 'movie',
@@ -2005,12 +2009,13 @@
                     const newId = generateNewId();
                     jsonData.movies.push({ id: newId, ...entryData });
                 }
+                return true;
             }
             
             function saveSeries(id) {
                 if (!seriesTitleInput.value.trim()) {
                     showNotification('Series title is required.', false);
-                    return;
+                    return false;
                 }
                 const seasons = [];
                 const seasonElements = document.querySelectorAll('.season-card');
@@ -2095,9 +2100,18 @@
                     const newId = generateNewId();
                     jsonData.movies.push({ id: newId, ...entryData });
                 }
+                return true;
             }
             
             function saveChannel(id) {
+                if (!channelTitleInput.value.trim()) {
+                    showNotification('Channel name is required.', false);
+                    return false;
+                }
+                if (!channelStreamUrlInput.value.trim()) {
+                    showNotification('Stream URL is required.', false);
+                    return false;
+                }
                 const sources = [];
                 if (channelStreamUrlInput.value.trim()) {
                     sources.push({ 
@@ -2159,6 +2173,7 @@
                     const newId = generateNewId();
                     jsonData.channels.push({ id: newId, ...entryData });
                 }
+                return true;
             }
             
             function generateNewId() {
