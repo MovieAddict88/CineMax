@@ -171,22 +171,31 @@ public class HomeActivity extends AppCompatActivity implements NavigationView.On
         try {
             Log.d("HomeActivity", "Initializing data loading...");
             
-            // First check if we have valid cached data
-            JsonApiResponse cachedResponse = dataRepository.getSimpleCacheManager().getApiResponse();
-            if (cachedResponse != null && dataRepository.getSimpleCacheManager().isCacheValid("api_response")) {
-                Log.d("HomeActivity", "Found valid cache, displaying immediately");
-                handleJsonResponse(cachedResponse, "Cache");
-                
-                // Schedule background refresh for later
-                scheduleBackgroundRefresh();
-            } else {
-                Log.d("HomeActivity", "No valid cache found, loading from API");
-                // Show loading state on all fragments
-                showLoadingOnAllFragments();
-                
-                // Load fresh data from API
-                loadAllDataWithCaching();
-            }
+            // Always show loading state first to prevent infinite loading
+            showLoadingOnAllFragments();
+            
+            // Add delay to ensure fragments are properly initialized
+            new Handler().postDelayed(() -> {
+                try {
+                    // Check if we have valid cached data
+                    JsonApiResponse cachedResponse = dataRepository.getSimpleCacheManager().getApiResponse();
+                    if (cachedResponse != null && dataRepository.getSimpleCacheManager().isCacheValid("api_response")) {
+                        Log.d("HomeActivity", "Found valid cache, displaying immediately");
+                        handleJsonResponse(cachedResponse, "Cache");
+                        
+                        // Schedule background refresh for later
+                        scheduleBackgroundRefresh();
+                    } else {
+                        Log.d("HomeActivity", "No valid cache found, loading from API");
+                        // Load fresh data from API
+                        loadAllDataWithCaching();
+                    }
+                } catch (Exception e) {
+                    Log.e("HomeActivity", "Error in delayed data loading", e);
+                    // Fallback to legacy loading
+                    loadAllDataFromJson();
+                }
+            }, 100); // 100ms delay to ensure fragments are ready
             
         } catch (Exception e) {
             Log.e("HomeActivity", "Error initializing data loading", e);
