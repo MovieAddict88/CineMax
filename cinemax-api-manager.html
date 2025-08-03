@@ -896,7 +896,7 @@
                             allContent.push({
                                 id: show.id,
                                 title: show.name,
-                                type: 'tv',
+                                type: 'series', // Changed from 'tv' to 'series' to match CineMax
                                 label: "Latest Series",
                                 sublabel: `${show.number_of_seasons || 1} Season(s)`,
                                 imdb: show.vote_average.toString(),
@@ -941,8 +941,11 @@
                                         id: season.id * 100 + i + 1,
                                         title: `Episode ${i + 1}`,
                                         episode_number: i + 1,
-                                        image: `https://image.tmdb.org/t/p/w500${season.poster_path}`,
+                                        description: `Episode ${i + 1} of ${show.name}`,
+                                        downloadas: `episode-${i + 1}`,
+                                        playas: "video",
                                         duration: "45:00",
+                                        image: `https://image.tmdb.org/t/p/w500${season.poster_path}`,
                                         sources: sources,
                                         subtitles: generateSubtitles(show.id, 'tv'),
                                         views: Math.floor(Math.random() * 10000) + 1000,
@@ -1264,7 +1267,7 @@
                     content = {
                         id: series.id,
                         title: series.name,
-                        type: 'tv',
+                        type: 'series', // Changed from 'tv' to 'series' to match CineMax
                         label: "Latest Series",
                         sublabel: `${series.number_of_seasons || 1} Season(s)`,
                         imdb: series.vote_average.toString(),
@@ -1305,17 +1308,20 @@
                         seasons: series.seasons?.map(season => ({
                             id: season.id,
                             title: `Season ${season.season_number}`,
-                            episodes: season.episode_count ? Array.from({ length: Math.min(season.episode_count, 5) }, (_, i) => ({
-                                id: season.id * 100 + i + 1,
-                                title: `Episode ${i + 1}`,
-                                episode_number: i + 1,
-                                image: `https://image.tmdb.org/t/p/w500${season.poster_path}`,
-                                duration: "45:00",
-                                sources: sources,
-                                subtitles: includeSubtitles ? generateSubtitles(series.id, 'tv') : [],
-                                views: Math.floor(Math.random() * 10000) + 1000,
-                                downloads: Math.floor(Math.random() * 5000) + 500
-                            })) : []
+                                                                episodes: season.episode_count ? Array.from({ length: Math.min(season.episode_count, 5) }, (_, i) => ({
+                                        id: season.id * 100 + i + 1,
+                                        title: `Episode ${i + 1}`,
+                                        episode_number: i + 1,
+                                        description: `Episode ${i + 1} of ${series.name}`,
+                                        downloadas: `episode-${i + 1}`,
+                                        playas: "video",
+                                        duration: "45:00",
+                                        image: `https://image.tmdb.org/t/p/w500${season.poster_path}`,
+                                        sources: sources,
+                                        subtitles: includeSubtitles ? generateSubtitles(series.id, 'tv') : [],
+                                        views: Math.floor(Math.random() * 10000) + 1000,
+                                        downloads: Math.floor(Math.random() * 5000) + 500
+                                    })) : []
                         })) || [],
                         subtitles: includeSubtitles ? await generateSubtitles(series.id, 'tv') : []
                     };
@@ -1508,18 +1514,18 @@
                     version: "2.0",
                     description: "Enhanced Free Movie & TV Streaming JSON API with Full Actor Support",
                     last_updated: new Date().toISOString().split('T')[0],
-                    total_movies: generatedContent.filter(c => c.type === 'movie').length,
+                    total_movies: generatedContent.length, // All content goes in movies array
                     total_channels: 0,
                     total_actors: generatedContent.reduce((sum, c) => sum + (c.actors?.length || 0), 0)
                 },
                 home: {
                     slides: generateSlides(),
-                    featuredMovies: generatedContent.filter(c => c.type === 'movie').slice(0, 5),
+                    featuredMovies: generatedContent.slice(0, 5), // Include both movies and series
                     channels: [],
                     actors: generateActorsList(),
                     genres: generateGenresList()
                 },
-                movies: generatedContent.filter(c => c.type === 'movie'),
+                movies: generatedContent, // ALL content (movies and series) goes here
                 channels: [],
                 actors: generateActorsList(),
                 genres: generateGenresList(),
@@ -1605,31 +1611,33 @@
         // Generate slides for home page
         function generateSlides() {
             const slides = [];
-            const movies = generatedContent.filter(c => c.type === 'movie').slice(0, 3);
+            const content = generatedContent.slice(0, 3); // Take first 3 items (movies or series)
             
-            movies.forEach((movie, index) => {
+            content.forEach((item, index) => {
                 slides.push({
                     id: index + 1,
-                    title: movie.title,
-                    type: "movie",
-                    image: movie.image,
-                    url: `movies/${movie.id}`,
+                    title: item.title,
+                    type: "movie", // Always "movie" for slides, regardless of content type
+                    image: item.image,
+                    url: `movies/${item.id}`,
                     poster: {
-                        ...movie,
-                        label: "Latest Movie",
-                        sublabel: `Released ${movie.year}`,
-                        imdb: movie.rating.toString(),
-                        downloadas: `${movie.title.toLowerCase().replace(/\s+/g, '-')}.mp4`,
+                        ...item,
+                        label: item.type === 'movie' ? "Latest Movie" : "Latest Series",
+                        sublabel: item.type === 'movie' ? `Released ${item.year}` : `${item.seasons?.length || 1} Season(s)`,
+                        imdb: item.rating.toString(),
+                        downloadas: item.type === 'movie' ? 
+                            `${item.title.toLowerCase().replace(/\s+/g, '-')}.mp4` : 
+                            item.title.toLowerCase().replace(/\s+/g, '-'),
                         comment: true,
                         playas: "video",
-                        classification: "PG-13",
+                        classification: item.type === 'movie' ? "PG-13" : "TV-14",
                         views: Math.floor(Math.random() * 50000) + 10000,
                         downloads: Math.floor(Math.random() * 10000) + 1000,
                         shares: Math.floor(Math.random() * 5000) + 500,
-                        contentType: "movie",
-                        url: `movies/${movie.id}`,
-                        comments: generateComments(movie.id),
-                        subtitles: generateSubtitles(movie.id, 'movie')
+                        contentType: item.type === 'movie' ? "movie" : "series",
+                        url: `movies/${item.id}`,
+                        comments: generateComments(item.id),
+                        subtitles: generateSubtitles(item.id, item.type === 'movie' ? 'movie' : 'tv')
                     },
                     channel: null
                 });
