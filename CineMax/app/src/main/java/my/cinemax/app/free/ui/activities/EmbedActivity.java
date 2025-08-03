@@ -11,8 +11,11 @@ import android.webkit.WebChromeClient;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 import android.widget.FrameLayout;
+import android.widget.Toast;
+import android.util.Log;
 
 import my.cinemax.app.free.R;
+import my.cinemax.app.free.Utils.VideoServerUtils;
 
 import androidx.appcompat.app.AppCompatActivity;
 
@@ -24,6 +27,7 @@ public class EmbedActivity extends AppCompatActivity {
     private myWebChromeClient mWebChromeClient;
     private myWebViewClient mWebViewClient;
     private String url;
+    private static final String TAG = "EmbedActivity";
 
     /**
      * Called when the activity is first created.
@@ -60,7 +64,24 @@ public class EmbedActivity extends AppCompatActivity {
         webView.getSettings().setAppCacheEnabled(true);
         webView.getSettings().setBuiltInZoomControls(false);
         webView.getSettings().setSaveFormData(true);
-        webView.loadUrl(url);
+        
+        // Enhanced settings for better video playback
+        webView.getSettings().setDomStorageEnabled(true);
+        webView.getSettings().setAllowFileAccess(true);
+        webView.getSettings().setAllowContentAccess(true);
+        webView.getSettings().setMediaPlaybackRequiresUserGesture(false);
+        
+        // Load the enhanced URL
+        String enhancedUrl = VideoServerUtils.enhanceVideoUrl(url);
+        Log.d(TAG, "Loading enhanced URL: " + enhancedUrl);
+        webView.loadUrl(enhancedUrl);
+    }
+
+    /**
+     * Enhance video URL with fallback servers and better parameters
+     */
+    private String enhanceVideoUrl(String originalUrl) {
+        return VideoServerUtils.enhanceVideoUrl(originalUrl);
     }
 
     public boolean inCustomView() {
@@ -163,9 +184,55 @@ public class EmbedActivity extends AppCompatActivity {
     }
 
     class myWebViewClient extends WebViewClient {
+        private int loadAttempts = 0;
+        private static final int MAX_ATTEMPTS = 3;
+        
         @Override
         public boolean shouldOverrideUrlLoading(WebView view, String url) {
-            return super.shouldOverrideUrlLoading(view, url);    //To change body of overridden methods use File | Settings | File Templates.
+            Log.d(TAG, "Loading URL: " + url);
+            return super.shouldOverrideUrlLoading(view, url);
+        }
+        
+        @Override
+        public void onPageStarted(WebView view, String url, Bitmap favicon) {
+            Log.d(TAG, "Page started loading: " + url);
+            super.onPageStarted(view, url, favicon);
+        }
+        
+        @Override
+        public void onPageFinished(WebView view, String url) {
+            Log.d(TAG, "Page finished loading: " + url);
+            super.onPageFinished(view, url);
+        }
+        
+        @Override
+        public void onReceivedError(WebView view, int errorCode, String description, String failingUrl) {
+            Log.e(TAG, "WebView error: " + errorCode + " - " + description + " for URL: " + failingUrl);
+            
+            loadAttempts++;
+            if (loadAttempts < MAX_ATTEMPTS) {
+                // Try fallback server
+                String fallbackUrl = getFallbackUrl(failingUrl);
+                if (fallbackUrl != null && !fallbackUrl.equals(failingUrl)) {
+                    Log.d(TAG, "Trying fallback URL: " + fallbackUrl);
+                    view.loadUrl(fallbackUrl);
+                    return;
+                }
+            }
+            
+            // Show error message to user
+            Toast.makeText(EmbedActivity.this, 
+                "Video server unavailable. Please try again later.", 
+                Toast.LENGTH_LONG).show();
+            
+            super.onReceivedError(view, errorCode, description, failingUrl);
+        }
+        
+        /**
+         * Get fallback URL when primary server fails
+         */
+        private String getFallbackUrl(String failingUrl) {
+            return VideoServerUtils.getFallbackUrl(failingUrl, loadAttempts - 1);
         }
     }
 }
