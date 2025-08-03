@@ -766,6 +766,10 @@
                     <button class="btn btn-info" onclick="debugSeasons()">
                         <i class="fas fa-bug"></i> Debug Seasons
                     </button>
+                    
+                    <button class="btn btn-danger" onclick="testSandmanAPI()">
+                        <i class="fas fa-test-tube"></i> Test Sandman API
+                    </button>
                 </div>
 
                 <div class="form-group">
@@ -1149,109 +1153,135 @@
             }
         }
 
-                 // Fetch seasons and episodes for TV series
-         async function fetchSeasons(seriesId) {
-             try {
-                 console.log(`Fetching seasons for TV series ID: ${seriesId}`);
-                 const response = await fetch(`${CONFIG.TMDB_BASE_URL}/tv/${seriesId}?api_key=${CONFIG.TMDB_API_KEY}`);
-                 
-                 if (!response.ok) {
-                     throw new Error(`Failed to fetch series details: ${response.status}`);
-                 }
-                 
-                 const data = await response.json();
-                 console.log(`Found ${data.seasons?.length || 0} seasons for "${data.name}"`);
-                 
-                 const seasons = [];
-                 const selectedSources = getSelectedSources();
+                           // Fetch seasons and episodes for TV series
+          async function fetchSeasons(seriesId) {
+              try {
+                  console.log(`🔍 Fetching seasons for TV series ID: ${seriesId}`);
+                  const response = await fetch(`${CONFIG.TMDB_BASE_URL}/tv/${seriesId}?api_key=${CONFIG.TMDB_API_KEY}`);
+                  
+                  if (!response.ok) {
+                      console.error(`❌ TMDB API Error: ${response.status} - ${response.statusText}`);
+                      throw new Error(`Failed to fetch series details: ${response.status}`);
+                  }
+                  
+                  const data = await response.json();
+                  console.log(`📺 Series Details:`, data);
+                  console.log(`📊 Found ${data.seasons?.length || 0} seasons for "${data.name}"`);
+                  
+                  if (!data.seasons || data.seasons.length === 0) {
+                      console.warn(`⚠️ No seasons found in TMDB for series: ${data.name}`);
+                      return [];
+                  }
+                  
+                  const seasons = [];
+                  const selectedSources = getSelectedSources();
+                  console.log(`🎬 Selected sources:`, selectedSources);
 
-                 for (const season of data.seasons || []) {
-                     if (season.season_number === 0) continue; // Skip specials
-                     
-                     console.log(`Processing Season ${season.season_number}: ${season.name}`);
-                     
-                     const seasonData = {
-                         id: generateId(),
-                         season_number: season.season_number,
-                         name: season.name,
-                         poster: season.poster_path ? `${CONFIG.TMDB_IMAGE_BASE}${season.poster_path}` : null,
-                         episodes: []
-                     };
+                  for (const season of data.seasons || []) {
+                      if (season.season_number === 0) {
+                          console.log(`⏭️ Skipping Season 0 (specials): ${season.name}`);
+                          continue; // Skip specials
+                      }
+                      
+                      console.log(`🎯 Processing Season ${season.season_number}: ${season.name}`);
+                      
+                      const seasonData = {
+                          id: generateId(),
+                          season_number: season.season_number,
+                          name: season.name,
+                          poster: season.poster_path ? `${CONFIG.TMDB_IMAGE_BASE}${season.poster_path}` : null,
+                          episodes: []
+                      };
 
-                     // Fetch episodes for this season
-                     try {
-                         const episodeResponse = await fetch(
-                             `${CONFIG.TMDB_BASE_URL}/tv/${seriesId}/season/${season.season_number}?api_key=${CONFIG.TMDB_API_KEY}`
-                         );
-                         
-                         if (!episodeResponse.ok) {
-                             throw new Error(`Failed to fetch episodes: ${episodeResponse.status}`);
-                         }
-                         
-                         const episodeData = await episodeResponse.json();
-                         console.log(`Season ${season.season_number} has ${episodeData.episodes?.length || 0} episodes`);
+                      // Fetch episodes for this season
+                      try {
+                          console.log(`📖 Fetching episodes for Season ${season.season_number}...`);
+                          const episodeResponse = await fetch(
+                              `${CONFIG.TMDB_BASE_URL}/tv/${seriesId}/season/${season.season_number}?api_key=${CONFIG.TMDB_API_KEY}`
+                          );
+                          
+                          if (!episodeResponse.ok) {
+                              console.error(`❌ Episode fetch failed: ${episodeResponse.status} - ${episodeResponse.statusText}`);
+                              throw new Error(`Failed to fetch episodes: ${episodeResponse.status}`);
+                          }
+                          
+                          const episodeData = await episodeResponse.json();
+                          console.log(`📋 Episode data:`, episodeData);
+                          console.log(`📺 Season ${season.season_number} has ${episodeData.episodes?.length || 0} episodes`);
 
-                         for (const episode of episodeData.episodes || []) {
-                             const episodeItem = {
-                                 id: generateId(),
-                                 episode_number: episode.episode_number,
-                                 name: episode.name || `Episode ${episode.episode_number}`,
-                                 overview: episode.overview,
-                                 air_date: episode.air_date,
-                                 still_path: episode.still_path ? `${CONFIG.TMDB_IMAGE_BASE}${episode.still_path}` : null,
-                                 sources: []
-                             };
+                          if (!episodeData.episodes || episodeData.episodes.length === 0) {
+                              console.warn(`⚠️ No episodes found for Season ${season.season_number}`);
+                          } else {
+                              for (const episode of episodeData.episodes || []) {
+                                  const episodeItem = {
+                                      id: generateId(),
+                                      episode_number: episode.episode_number,
+                                      name: episode.name || `Episode ${episode.episode_number}`,
+                                      overview: episode.overview,
+                                      air_date: episode.air_date,
+                                      still_path: episode.still_path ? `${CONFIG.TMDB_IMAGE_BASE}${episode.still_path}` : null,
+                                      sources: []
+                                  };
 
-                             // Generate episode sources
-                             if (selectedSources.vidsrc) {
-                                 episodeItem.sources.push({
-                                     id: generateId(),
-                                     type: 'embed',
-                                     title: 'VidSrc',
-                                     quality: 'Auto',
-                                     url: `${CONFIG.VIDSRC_BASE}/tv/${seriesId}/${season.season_number}/${episode.episode_number}`,
-                                     external: true,
-                                     kind: 'episode'
-                                 });
-                             }
+                                  // Generate episode sources
+                                  if (selectedSources.vidsrc) {
+                                      episodeItem.sources.push({
+                                          id: generateId(),
+                                          type: 'embed',
+                                          title: 'VidSrc',
+                                          quality: 'Auto',
+                                          url: `${CONFIG.VIDSRC_BASE}/tv/${seriesId}/${season.season_number}/${episode.episode_number}`,
+                                          external: true,
+                                          kind: 'episode'
+                                      });
+                                  }
 
-                             if (selectedSources.vidjoy) {
-                                 episodeItem.sources.push({
-                                     id: generateId(),
-                                     type: 'embed',
-                                     title: 'VidJoy',
-                                     quality: 'HD',
-                                     url: `${CONFIG.VIDJOY_BASE}/tv/${seriesId}/${season.season_number}/${episode.episode_number}`,
-                                     external: true,
-                                     kind: 'episode'
-                                 });
-                             }
+                                  if (selectedSources.vidjoy) {
+                                      episodeItem.sources.push({
+                                          id: generateId(),
+                                          type: 'embed',
+                                          title: 'VidJoy',
+                                          quality: 'HD',
+                                          url: `${CONFIG.VIDJOY_BASE}/tv/${seriesId}/${season.season_number}/${episode.episode_number}`,
+                                          external: true,
+                                          kind: 'episode'
+                                      });
+                                  }
 
-                             seasonData.episodes.push(episodeItem);
-                         }
-                         
-                         console.log(`Added ${seasonData.episodes.length} episodes to season ${season.season_number}`);
-                         
-                     } catch (error) {
-                         console.error(`Failed to fetch episodes for season ${season.season_number}:`, error);
-                     }
+                                  seasonData.episodes.push(episodeItem);
+                                  console.log(`✅ Added episode ${episode.episode_number}: ${episodeItem.name}`);
+                              }
+                          }
+                          
+                          console.log(`📊 Season ${season.season_number} final episode count: ${seasonData.episodes.length}`);
+                          
+                      } catch (error) {
+                          console.error(`❌ Failed to fetch episodes for season ${season.season_number}:`, error);
+                      }
 
-                     if (seasonData.episodes.length > 0) {
-                         seasons.push(seasonData);
-                     }
-                     
-                     // Rate limiting between season requests
-                     await new Promise(resolve => setTimeout(resolve, 1000));
-                 }
+                      // Add season even if it has no episodes (for debugging)
+                      seasons.push(seasonData);
+                      console.log(`➕ Added season ${season.season_number} with ${seasonData.episodes.length} episodes`);
+                      
+                      // Rate limiting between season requests
+                      console.log(`⏱️ Waiting 1 second before next season...`);
+                      await new Promise(resolve => setTimeout(resolve, 1000));
+                  }
 
-                 console.log(`Total seasons with episodes: ${seasons.length}`);
-                 return seasons;
-                 
-             } catch (error) {
-                 console.error('Error fetching seasons:', error);
-                 return [];
-             }
-         }
+                  console.log(`🎯 FINAL RESULT: ${seasons.length} seasons processed for series ID ${seriesId}`);
+                  console.log(`📊 Seasons summary:`, seasons.map(s => ({ 
+                      season: s.season_number, 
+                      episodes: s.episodes.length 
+                  })));
+                  
+                  return seasons;
+                  
+              } catch (error) {
+                  console.error('💥 MAJOR ERROR in fetchSeasons:', error);
+                  console.error('Stack trace:', error.stack);
+                  return [];
+              }
+          }
 
         // Manual input functionality
         async function fetchManualContent() {
@@ -1997,6 +2027,59 @@ ${jsonString.split('\n').length > 50 ? '\n... (truncated, full content will be i
                  console.log('Seasons from TMDB:', data.seasons);
              } catch (error) {
                  console.error('Error testing season fetch:', error);
+             }
+         }
+
+         async function testSandmanAPI() {
+             console.log('🧪 TESTING THE SANDMAN API DIRECTLY');
+             
+             // First, let's find The Sandman's TMDB ID
+             try {
+                 const searchResponse = await fetch(`${CONFIG.TMDB_BASE_URL}/search/tv?api_key=${CONFIG.TMDB_API_KEY}&query=The%20Sandman`);
+                 const searchData = await searchResponse.json();
+                 console.log('🔍 Search results for "The Sandman":', searchData);
+                 
+                 if (searchData.results && searchData.results.length > 0) {
+                     const sandman = searchData.results[0]; // Get the first result
+                     console.log(`📺 Found The Sandman - ID: ${sandman.id}, Name: ${sandman.name}`);
+                     
+                     // Now test fetching seasons for this specific ID
+                     console.log(`🎬 Testing season fetch for The Sandman (ID: ${sandman.id})`);
+                     const seasons = await fetchSeasons(sandman.id);
+                     console.log(`🎯 Season fetch result:`, seasons);
+                     
+                     const resultHtml = `
+                         <div class="alert alert-info">
+                             <i class="fas fa-test-tube"></i>
+                             <div>
+                                 <strong>The Sandman API Test Results:</strong><br>
+                                 • TMDB ID: ${sandman.id}<br>
+                                 • Series Name: ${sandman.name}<br>
+                                 • Seasons Returned: ${seasons.length}<br>
+                                 • First Air Date: ${sandman.first_air_date}<br>
+                                 • Overview: ${sandman.overview.substring(0, 100)}...<br><br>
+                                 <strong>Season Details:</strong><br>
+                                 ${seasons.map(s => `• Season ${s.season_number}: ${s.episodes.length} episodes`).join('<br>')}
+                                 ${seasons.length === 0 ? '<span style="color: var(--danger);">❌ NO SEASONS RETURNED!</span>' : ''}
+                             </div>
+                         </div>
+                     `;
+                     
+                     // Remove existing test results
+                     const existingTest = document.querySelector('#content-manager .alert-info');
+                     if (existingTest && existingTest.textContent.includes('Sandman API Test')) {
+                         existingTest.remove();
+                     }
+
+                     const card = document.querySelector('#content-manager .card');
+                     card.insertAdjacentHTML('afterend', resultHtml);
+                     
+                 } else {
+                     console.error('❌ No search results found for The Sandman');
+                 }
+                 
+             } catch (error) {
+                 console.error('💥 Error testing Sandman API:', error);
              }
          }
 
