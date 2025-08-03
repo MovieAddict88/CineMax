@@ -1923,7 +1923,7 @@
                  channels: currentData.channels || []
              };
              
-             const dataStr = JSON.stringify(exportData, null, 2);
+             const dataStr = JSON.stringify(exportData);
              const dataBlob = new Blob([dataStr], { type: 'application/json' });
              
              const link = document.createElement('a');
@@ -2058,7 +2058,7 @@
                  channels: []
              };
             
-            const dataStr = JSON.stringify(sampleData, null, 2);
+            const dataStr = JSON.stringify(sampleData);
             const dataBlob = new Blob([dataStr], { type: 'application/json' });
             
             const link = document.createElement('a');
