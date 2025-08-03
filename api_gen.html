@@ -748,6 +748,12 @@
              updatePreview();
              
              // Add test function to window for debugging
+             window.testGenerate = function() {
+                 console.log('Test generate function called');
+                 showStatus('info', 'Test function called successfully');
+             };
+             
+             // Add test function to window for debugging
              window.testSourceGeneration = function() {
                  console.log('Testing source generation...');
                  console.log('VIDSRC_BASE:', VIDSRC_BASE);
@@ -995,6 +1001,9 @@
                         <button class="btn ${buttonClass} btn-small" onclick="generateFromTMDB('${mediaType}', ${item.id})" ${buttonDisabled}>
                             ${buttonText}
                         </button>
+                        <button class="btn btn-secondary btn-small" onclick="testGenerate()" style="margin-top: 5px;">
+                            Test
+                        </button>
                     </div>
                 `;
                 
@@ -1003,6 +1012,8 @@
         }
 
                  async function generateFromTMDB(type, tmdbId = null) {
+             console.log('generateFromTMDB called with:', { type, tmdbId });
+             
              const id = tmdbId || document.getElementById(`${type}-tmdb-id`).value;
              
              if (!id) {
@@ -1010,16 +1021,20 @@
                  return;
              }
 
-             showLoading(`${type}-loading`, true);
+             // Map type to correct loading element
+             let loadingElement = `${type}-loading`;
+             if (type === 'tv') {
+                 loadingElement = 'series-loading'; // Use series loading for TV shows
+             }
+             
+             showLoading(loadingElement, true);
              showStatus('info', `Generating ${type} with automatic VidSrc & VidJoy sources...`);
              
              try {
                  if (type === 'movie') {
                      await generateMovie(id);
-                 } else if (type === 'series') {
-                     await generateSeries(id);
-                 } else if (type === 'tv') {
-                     // Handle TV series from search results
+                 } else if (type === 'series' || type === 'tv') {
+                     // Handle both series and TV shows
                      await generateSeries(id);
                  }
                  
@@ -1048,13 +1063,17 @@
                  showStatus('error', `Error generating ${type}: ${error.message}`);
              }
              
-             showLoading(`${type}-loading`, false);
+             showLoading(loadingElement, false);
          }
 
                  async function generateMovie(tmdbId) {
+             console.log('generateMovie called with tmdbId:', tmdbId);
+             
              const movieData = await fetchTMDB(`/movie/${tmdbId}`);
              const credits = await fetchTMDB(`/movie/${tmdbId}/credits`);
              const videos = await fetchTMDB(`/movie/${tmdbId}/videos`);
+             
+             console.log('Movie data fetched:', movieData);
              
              if (!movieData) throw new Error('Failed to fetch movie data');
 
@@ -1204,9 +1223,13 @@
         }
 
         async function generateSeries(tmdbId) {
+            console.log('generateSeries called with tmdbId:', tmdbId);
+            
             const seriesData = await fetchTMDB(`/tv/${tmdbId}`);
             const credits = await fetchTMDB(`/tv/${tmdbId}/credits`);
             const videos = await fetchTMDB(`/tv/${tmdbId}/videos`);
+            
+            console.log('Series data fetched:', seriesData);
             
             if (!seriesData) throw new Error('Failed to fetch series data');
 
