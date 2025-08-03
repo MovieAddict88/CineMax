@@ -1003,7 +1003,7 @@ public class HomeActivity extends AppCompatActivity implements NavigationView.On
                     break;
                     
                 case ComponentCallbacks2.TRIM_MEMORY_COMPLETE:
-                case ComponentCallbacks2.TRIM_MEMORY_CRITICAL:
+                case ComponentCallbacks2.TRIM_MEMORY_RUNNING_CRITICAL:
                     // Critical memory situation, clear as much as possible
                     if (dataRepository != null && dataRepository.getSimpleCacheManager() != null) {
                         dataRepository.getSimpleCacheManager().clearMemoryCache();
