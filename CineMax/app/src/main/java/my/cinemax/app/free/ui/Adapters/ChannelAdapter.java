@@ -151,7 +151,12 @@ public class ChannelAdapter  extends  RecyclerView.Adapter<RecyclerView.ViewHold
                     notifyDataSetChanged();
 
                 });
-                Picasso.with(activity).load(channelList.get(position).getImage()).placeholder(R.drawable.place_holder_channel).into(holder.image_view_item_channel);
+                Picasso.with(activity)
+                        .load(channelList.get(position).getImage())
+                        .placeholder(R.drawable.place_holder_channel)
+                        .fit()
+                        .centerCrop()
+                        .into(holder.image_view_item_channel);
                 holder.image_view_item_channel.setOnClickListener(v -> {
                     PrefManager prefManager= new PrefManager(activity);
 
