@@ -97,6 +97,8 @@ import retrofit2.Callback;
 import retrofit2.Response;
 import retrofit2.Retrofit;
 import my.cinemax.app.free.entity.Actress;
+import my.cinemax.app.free.Provider.DataRepository;
+import my.cinemax.app.free.Utils.CacheManager;
 
 public class HomeActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener {
     private final List<Fragment> mFragmentList = new ArrayList<>();
@@ -104,6 +106,7 @@ public class HomeActivity extends AppCompatActivity implements NavigationView.On
     private ViewPagerAdapter adapter;
     private JsonApiResponse cachedJsonResponse = null;
     private boolean dataLoaded = false;
+    private DataRepository dataRepository;
     private NavigationView navigationView;
     private TextView text_view_name_nave_header;
     private CircleImageView circle_image_view_profile_nav_header;
@@ -132,6 +135,11 @@ public class HomeActivity extends AppCompatActivity implements NavigationView.On
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_home);
+        
+        // Initialize DataRepository
+        dataRepository = DataRepository.getInstance();
+        dataRepository.initialize(this);
+        
         // Don't call old API - getGenreList();
         initViews();
         initActions();
@@ -139,9 +147,9 @@ public class HomeActivity extends AppCompatActivity implements NavigationView.On
         initGDPR();
         initBuy();
         
-        // ===== LOAD DATA FROM JSON API =====
-        // Load data from your GitHub JSON
-        loadAllDataFromJson();
+        // ===== LOAD DATA WITH ADVANCED CACHING =====
+        // Load data using the new cache-first strategy
+        loadAllDataWithCaching();
     }
 
     BillingSubs billingSubs;
@@ -1177,7 +1185,100 @@ public class HomeActivity extends AppCompatActivity implements NavigationView.On
     }
     
     /**
-     * Load all data from JSON API when app starts
+     * Load all data using new caching system for optimal performance
+     */
+    private void loadAllDataWithCaching() {
+        Log.d("CACHE_API", "Loading data with advanced caching system...");
+        
+        // Show cache statistics
+        CacheManager.CacheStats stats = dataRepository.getCacheStats();
+        Log.d("CACHE_API", "Cache stats: " + stats.toString());
+        
+        dataRepository.loadAllData(new DataRepository.ApiResponseCallback() {
+            @Override
+            public void onSuccess(JsonApiResponse response) {
+                Log.d("CACHE_API", "Successfully loaded fresh data from API");
+                handleJsonResponse(response, "API");
+            }
+            
+            @Override
+            public void onFromCache(JsonApiResponse response) {
+                Log.d("CACHE_API", "Successfully loaded data from cache");
+                handleJsonResponse(response, "Cache");
+            }
+            
+            @Override
+            public void onError(String error) {
+                Log.e("CACHE_API", "Error loading data: " + error);
+                runOnUiThread(() -> {
+                    Toasty.error(HomeActivity.this, "Failed to load content: " + error, Toast.LENGTH_SHORT).show();
+                });
+            }
+        });
+    }
+    
+    /**
+     * Handle JSON response from either API or cache
+     */
+    private void handleJsonResponse(JsonApiResponse jsonResponse, String source) {
+        if (jsonResponse == null) {
+            Log.e("CACHE_API", "Received null response from " + source);
+            return;
+        }
+        
+        runOnUiThread(() -> {
+            try {
+                // Cache the response for backward compatibility
+                cachedJsonResponse = jsonResponse;
+                dataLoaded = true;
+                
+                Log.d("CACHE_API", "Processing " + source + " data...");
+                
+                // Update all fragments with error handling
+                if (jsonResponse.getHome() != null) {
+                    updateHomeFragmentWithJsonData(jsonResponse);
+                }
+                
+                if (jsonResponse.getMovies() != null && !jsonResponse.getMovies().isEmpty()) {
+                    updateMoviesFragmentWithJsonData(jsonResponse.getMovies());
+                    
+                    // Filter series from movies array
+                    List<Poster> series = new ArrayList<>();
+                    for (Poster poster : jsonResponse.getMovies()) {
+                        if ("series".equals(poster.getType()) || "serie".equals(poster.getType())) {
+                            series.add(poster);
+                        }
+                    }
+                    if (!series.isEmpty()) {
+                        updateSeriesFragmentWithJsonData(series);
+                    }
+                }
+                
+                // Use channels data for Live TV
+                if (jsonResponse.getChannels() != null && !jsonResponse.getChannels().isEmpty()) {
+                    updateTvFragmentWithJsonData(jsonResponse.getChannels());
+                } else if (jsonResponse.getHome() != null && jsonResponse.getHome().getChannels() != null) {
+                    updateTvFragmentWithJsonData(jsonResponse.getHome().getChannels());
+                }
+                
+                Log.d("CACHE_API", "All fragments updated successfully from " + source);
+                
+                // Show cache info to user (optional)
+                if ("Cache".equals(source)) {
+                    CacheManager.CacheStats stats = dataRepository.getCacheStats();
+                    if (BuildConfig.DEBUG) {
+                        Toasty.info(HomeActivity.this, "Loaded from cache: " + stats.getTotalItems() + " items", Toast.LENGTH_SHORT).show();
+                    }
+                }
+                
+            } catch (Exception e) {
+                Log.e("CACHE_API", "Error processing " + source + " data", e);
+            }
+        });
+    }
+    
+    /**
+     * Load all data from JSON API when app starts (Legacy method)
      */
     private void loadAllDataFromJson() {
         Log.d("JSON_API", "Loading all data from JSON API...");
