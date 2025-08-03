@@ -811,7 +811,7 @@
              console.log('✅ CineMax Enhanced API Manager loaded!');
              console.log('🎬 Auto-sources: VidSrc.net + VidJoy.pro');
              console.log('🔧 Fixed: Root-level movies array for GenreActivity & TV Series');
-             console.log('🎯 Fixed: Source kind values - now uses "play" instead of "embed"');
+             console.log('🎯 Fixed: Source kind values - "play" for embeds/live TV, "both" for direct links');
              console.log('🧪 Test with: testSourceGeneration()');
              
              // Show info about the fix
@@ -1183,9 +1183,10 @@
         function getSourceKind(url) {
             const type = getSourceType(url);
             if (type === 'youtube') return 'youtube';
-            if (type === 'embed') return 'play';  // Changed from 'embed' to 'play'
-            if (type === 'm3u8' || type === 'dash') return 'play';
-            return 'both';
+            if (type === 'embed') return 'play';     // Embed sources = play only
+            if (type === 'm3u8' || type === 'dash') return 'play';  // Live TV/streams = play only
+            if (type === 'video') return 'both';     // Direct video files = both downloadable & playable
+            return 'both';  // Default for direct links
         }
 
         function getRatingClassification(adult) {
