@@ -83,6 +83,7 @@ import android.os.Handler;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.content.Context;
+import android.content.ComponentCallbacks2;
 
 import androidx.appcompat.widget.Toolbar;
 
@@ -135,25 +136,122 @@ public class HomeActivity extends AppCompatActivity implements NavigationView.On
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_home);
         
-        // Initialize DataRepository
-        dataRepository = DataRepository.getInstance();
-        dataRepository.initialize(this);
-        
-        // Don't call old API - getGenreList();
-        initViews();
-        initActions();
-        firebaseSubscribe();
-        initGDPR();
-        initBuy();
-        
-        // ===== LOAD DATA WITH ADVANCED CACHING =====
-        // Try to load cached data immediately first
-        loadCachedDataImmediately();
-        
-        // Preload data in background for future launches
-        preloadDataInBackground();
+        // Add crash protection
+        try {
+            setContentView(R.layout.activity_home);
+            
+            // Initialize DataRepository first
+            dataRepository = DataRepository.getInstance();
+            dataRepository.initialize(this);
+            
+            // Initialize views and actions
+            initViews();
+            initActions();
+            firebaseSubscribe();
+            initGDPR();
+            initBuy();
+            
+            // Enhanced loading strategy
+            initializeDataLoading();
+            
+            Log.d("HomeActivity", "Activity created successfully");
+            
+        } catch (Exception e) {
+            Log.e("HomeActivity", "Error in onCreate", e);
+            // Prevent crash by showing error and finishing activity gracefully
+            finish();
+        }
+    }
+    
+    /**
+     * Initialize data loading with proper cache handling
+     */
+    private void initializeDataLoading() {
+        try {
+            Log.d("HomeActivity", "Initializing data loading...");
+            
+            // Always show loading state first to prevent infinite loading
+            showLoadingOnAllFragments();
+            
+            // Add delay to ensure fragments are properly initialized
+            new Handler().postDelayed(() -> {
+                try {
+                    // Check if we have valid cached data
+                    JsonApiResponse cachedResponse = dataRepository.getSimpleCacheManager().getApiResponse();
+                    if (cachedResponse != null && dataRepository.getSimpleCacheManager().isCacheValid("api_response")) {
+                        Log.d("HomeActivity", "Found valid cache, displaying immediately");
+                        handleJsonResponse(cachedResponse, "Cache");
+                        
+                        // Schedule background refresh for later
+                        scheduleBackgroundRefresh();
+                    } else {
+                        Log.d("HomeActivity", "No valid cache found, loading from API");
+                        // Load fresh data from API
+                        loadAllDataWithCaching();
+                    }
+                } catch (Exception e) {
+                    Log.e("HomeActivity", "Error in delayed data loading", e);
+                    // Fallback to legacy loading
+                    loadAllDataFromJson();
+                }
+            }, 100); // 100ms delay to ensure fragments are ready
+            
+        } catch (Exception e) {
+            Log.e("HomeActivity", "Error initializing data loading", e);
+            // Fallback to legacy loading
+            loadAllDataFromJson();
+        }
+    }
+    
+    /**
+     * Show loading state on all fragments to prevent black screens
+     */
+    private void showLoadingOnAllFragments() {
+        try {
+            // Ensure all fragments show loading state
+            for (Fragment fragment : mFragmentList) {
+                if (fragment instanceof HomeFragment) {
+                    ((HomeFragment) fragment).resetLoadingState();
+                }
+            }
+            Log.d("HomeActivity", "Loading state applied to all fragments");
+        } catch (Exception e) {
+            Log.e("HomeActivity", "Error showing loading on fragments", e);
+        }
+    }
+    
+    /**
+     * Schedule background refresh for better performance
+     */
+    private void scheduleBackgroundRefresh() {
+        new Handler().postDelayed(() -> {
+            if (!isFinishing() && !isDestroyed()) {
+                Log.d("HomeActivity", "Performing scheduled background refresh");
+                dataRepository.refreshData(new DataRepository.ApiResponseCallback() {
+                    @Override
+                    public void onSuccess(JsonApiResponse response) {
+                        Log.d("HomeActivity", "Background refresh successful");
+                        // Optionally update UI with fresh data
+                    }
+                    
+                    @Override
+                    public void onFromCache(JsonApiResponse response) {
+                        Log.d("HomeActivity", "Background refresh returned cache");
+                    }
+                    
+                    @Override
+                    public void onError(String error) {
+                        Log.e("HomeActivity", "Background refresh failed: " + error);
+                    }
+                    
+                    @Override
+                    public void onLoading() {
+                        Log.d("HomeActivity", "Background refresh loading");
+                    }
+                });
+            }
+        }, 2000); // 2 second delay
     }
 
     BillingSubs billingSubs;
@@ -766,13 +864,24 @@ public class HomeActivity extends AppCompatActivity implements NavigationView.On
     protected void onResume() {
         super.onResume();
 
-        // Check if data is already loaded, if not load from cache immediately
-        if (!dataLoaded) {
-            Log.d("CACHE_API", "Data not loaded, checking cache in onResume");
-            loadCachedDataImmediately();
-        }
+        // Enhanced resume logic with crash protection
+        try {
+            Log.d("HomeActivity", "Activity resumed, checking data state");
+            
+            // Check if data is already loaded, if not load from cache immediately
+            if (!dataLoaded) {
+                Log.d("HomeActivity", "Data not loaded, initializing data loading in onResume");
+                initializeDataLoading();
+            } else {
+                Log.d("HomeActivity", "Data already loaded, checking cache validity");
+                // Check if cache is still valid, refresh if needed
+                if (!dataRepository.getSimpleCacheManager().isCacheValid("api_response")) {
+                    Log.d("HomeActivity", "Cache expired, refreshing data");
+                    scheduleBackgroundRefresh();
+                }
+            }
 
-        PrefManager prf= new PrefManager(getApplicationContext());
+            PrefManager prf= new PrefManager(getApplicationContext());
         Menu nav_Menu = navigationView.getMenu();
 
 
@@ -817,11 +926,119 @@ public class HomeActivity extends AppCompatActivity implements NavigationView.On
             text_view_name_nave_header.setText(getResources().getString(R.string.please_login));
             Picasso.with(getApplicationContext()).load(R.drawable.placeholder_profile).placeholder(R.drawable.placeholder_profile).error(R.drawable.placeholder_profile).resize(200,200).centerCrop().into(circle_image_view_profile_nav_header);
         }
-        if (FromLogin){
-            FromLogin = false;
+            if (FromLogin){
+                FromLogin = false;
+            }
+            
+        } catch (Exception e) {
+            Log.e("HomeActivity", "Error in onResume", e);
+            // Prevent crash by handling gracefully
+            if (!dataLoaded) {
+                // Fallback to basic loading
+                try {
+                    loadAllDataFromJson();
+                } catch (Exception ex) {
+                    Log.e("HomeActivity", "Fallback loading also failed", ex);
+                }
+            }
         }
-
     }
+    @Override
+    protected void onPause() {
+        super.onPause();
+        Log.d("HomeActivity", "Activity paused");
+    }
+    
+    @Override
+    protected void onStop() {
+        super.onStop();
+        Log.d("HomeActivity", "Activity stopped");
+    }
+    
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        Log.d("HomeActivity", "Activity destroyed, cleaning up resources");
+        
+        try {
+            // Clean up resources to prevent memory leaks
+            if (cachedJsonResponse != null) {
+                cachedJsonResponse = null;
+            }
+            
+            // Cancel any pending operations
+            if (dataRepository != null) {
+                // Stop any background operations
+            }
+            
+        } catch (Exception e) {
+            Log.e("HomeActivity", "Error in onDestroy cleanup", e);
+        }
+    }
+    
+    @Override
+    public void onLowMemory() {
+        super.onLowMemory();
+        Log.w("HomeActivity", "Low memory warning, clearing caches");
+        
+        try {
+            // Clear memory caches when system is low on memory
+            if (dataRepository != null && dataRepository.getSimpleCacheManager() != null) {
+                dataRepository.getSimpleCacheManager().clearMemoryCache();
+            }
+            
+            // Force garbage collection
+            System.gc();
+            
+        } catch (Exception e) {
+            Log.e("HomeActivity", "Error handling low memory", e);
+        }
+    }
+    
+    @Override
+    public void onTrimMemory(int level) {
+        super.onTrimMemory(level);
+        Log.d("HomeActivity", "Memory trim requested, level: " + level);
+        
+        try {
+            switch (level) {
+                case ComponentCallbacks2.TRIM_MEMORY_UI_HIDDEN:
+                case ComponentCallbacks2.TRIM_MEMORY_BACKGROUND:
+                case ComponentCallbacks2.TRIM_MEMORY_MODERATE:
+                    // App is in background, trim some memory
+                    if (dataRepository != null && dataRepository.getSimpleCacheManager() != null) {
+                        dataRepository.getSimpleCacheManager().trimMemory();
+                    }
+                    break;
+                    
+                case ComponentCallbacks2.TRIM_MEMORY_COMPLETE:
+                case ComponentCallbacks2.TRIM_MEMORY_RUNNING_CRITICAL:
+                    // Critical memory situation, clear as much as possible
+                    if (dataRepository != null && dataRepository.getSimpleCacheManager() != null) {
+                        dataRepository.getSimpleCacheManager().clearMemoryCache();
+                    }
+                    System.gc();
+                    break;
+            }
+        } catch (Exception e) {
+            Log.e("HomeActivity", "Error trimming memory", e);
+        }
+    }
+
+    /**
+     * Called when HomeFragment is ready to receive data
+     */
+    public void onHomeFragmentReady() {
+        Log.d("HomeActivity", "HomeFragment is ready, checking for cached data");
+        
+        // If we have cached data but fragment wasn't ready before, update it now
+        if (dataLoaded && cachedJsonResponse != null) {
+            new Handler().postDelayed(() -> {
+                updateHomeFragmentWithJsonData(cachedJsonResponse);
+            }, 100);
+        }
+    }
+
     public void goToTV() {
         viewPager.setCurrentItem(3);
     }
@@ -1088,11 +1305,33 @@ public class HomeActivity extends AppCompatActivity implements NavigationView.On
         // Update HomeFragment with the JSON data
         Log.d("JSON_API", "Updating HomeFragment with JSON data");
         
-        // Get the HomeFragment and update it
-        if (mFragmentList.size() > 0 && mFragmentList.get(0) instanceof HomeFragment) {
-            HomeFragment homeFragment = (HomeFragment) mFragmentList.get(0);
-            // Pass the JSON data to the fragment
-            homeFragment.updateWithJsonData(jsonResponse);
+        try {
+            // First check if fragments are initialized
+            if (mFragmentList == null || mFragmentList.isEmpty()) {
+                Log.w("JSON_API", "Fragment list not initialized, waiting...");
+                // Retry after a short delay
+                new Handler().postDelayed(() -> updateHomeFragmentWithJsonData(jsonResponse), 200);
+                return;
+            }
+            
+            // Get the HomeFragment and update it
+            if (mFragmentList.size() > 0 && mFragmentList.get(0) instanceof HomeFragment) {
+                HomeFragment homeFragment = (HomeFragment) mFragmentList.get(0);
+                
+                // Check if fragment is added and has a view
+                if (homeFragment.isAdded() && homeFragment.getView() != null) {
+                    Log.d("JSON_API", "HomeFragment is ready, updating with data");
+                    homeFragment.updateWithJsonData(jsonResponse);
+                } else {
+                    Log.w("JSON_API", "HomeFragment not ready, retrying...");
+                    // Retry after fragment is ready
+                    new Handler().postDelayed(() -> updateHomeFragmentWithJsonData(jsonResponse), 300);
+                }
+            } else {
+                Log.e("JSON_API", "HomeFragment not found in fragment list");
+            }
+        } catch (Exception e) {
+            Log.e("JSON_API", "Error updating HomeFragment", e);
         }
     }
     

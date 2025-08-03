@@ -32,6 +32,7 @@ import my.cinemax.app.free.api.apiRest;
 import my.cinemax.app.free.entity.Category;
 import my.cinemax.app.free.entity.Channel;
 import my.cinemax.app.free.entity.Country;
+import my.cinemax.app.free.entity.JsonApiResponse;
 import my.cinemax.app.free.ui.Adapters.ChannelAdapter;
 
 import java.util.ArrayList;
@@ -96,14 +97,105 @@ public class TvFragment extends Fragment {
 
         if (isVisibleToUser){
             if (!loaded) {
+                Log.d("TvFragment", "Fragment became visible, loading data");
                 loaded=true;
                 page = 0;
                 loading = true;
-                // Load data when fragment becomes visible
+                
+                // Show loading state immediately
+                showLoadingView();
+                
+                // Load data with caching integration
                 getCountiesList();
                 getCategoriesList();
-                loadChannels();
+                loadChannelsWithCaching();
+            } else {
+                Log.d("TvFragment", "Fragment visible but data already loaded");
             }
+        }
+    }
+    
+    /**
+     * Load channels with caching integration
+     */
+    private void loadChannelsWithCaching() {
+        try {
+            Log.d("TvFragment", "Loading channels with caching integration");
+            
+            // Try to get cached data first
+            my.cinemax.app.free.Provider.DataRepository dataRepository = 
+                my.cinemax.app.free.Provider.DataRepository.getInstance();
+            
+            if (dataRepository != null) {
+                JsonApiResponse cachedResponse = dataRepository.getSimpleCacheManager().getApiResponse();
+                if (cachedResponse != null && cachedResponse.getChannels() != null && 
+                    !cachedResponse.getChannels().isEmpty() && 
+                    dataRepository.getSimpleCacheManager().isCacheValid("api_response")) {
+                    
+                    Log.d("TvFragment", "Found cached channels, displaying immediately");
+                    updateChannelsFromCache(cachedResponse.getChannels());
+                    return;
+                }
+            }
+            
+            // If no cached data, load from API
+            Log.d("TvFragment", "No cached channels found, loading from API");
+            loadChannels();
+            
+        } catch (Exception e) {
+            Log.e("TvFragment", "Error in loadChannelsWithCaching", e);
+            // Fallback to regular loading
+            loadChannels();
+        }
+    }
+    
+    /**
+     * Update channels from cached data
+     */
+    private void updateChannelsFromCache(List<my.cinemax.app.free.entity.Channel> cachedChannels) {
+        try {
+            if (getActivity() == null || !isAdded()) {
+                Log.w("TvFragment", "Fragment not attached, skipping cache update");
+                return;
+            }
+            
+            channelList.clear();
+            channelList.add(new Channel().setTypeView(2)); // Header
+            
+            // Add cached channels
+            for (my.cinemax.app.free.entity.Channel channel : cachedChannels) {
+                channelList.add(channel);
+                
+                // Add ads if enabled
+                if (native_ads_enabled) {
+                    item++;
+                    if (item == lines_beetween_ads) {
+                        item = 0;
+                        if (prefManager.getString("ADMIN_NATIVE_TYPE").equals("FACEBOOK")) {
+                            channelList.add(new Channel().setTypeView(3));
+                        } else if (prefManager.getString("ADMIN_NATIVE_TYPE").equals("ADMOB")) {
+                            channelList.add(new Channel().setTypeView(4));
+                        } else if (prefManager.getString("ADMIN_NATIVE_TYPE").equals("BOTH")) {
+                            if (type_ads == 0) {
+                                channelList.add(new Channel().setTypeView(3));
+                                type_ads = 1;
+                            } else if (type_ads == 1) {
+                                channelList.add(new Channel().setTypeView(4));
+                                type_ads = 0;
+                            }
+                        }
+                    }
+                }
+            }
+            
+            showListView();
+            adapter.notifyDataSetChanged();
+            
+            Log.d("TvFragment", "Updated UI with " + cachedChannels.size() + " cached channels");
+            
+        } catch (Exception e) {
+            Log.e("TvFragment", "Error updating channels from cache", e);
+            showErrorView();
         }
     }
 
@@ -620,6 +712,60 @@ public class TvFragment extends Fragment {
             linear_layout_load_channel_fragment.setVisibility(View.GONE);
             
             adapter.notifyDataSetChanged();
+        }
+    }
+    
+    /**
+     * Show loading view
+     */
+    private void showLoadingView() {
+        if (getActivity() == null || !isAdded()) return;
+        
+        try {
+            linear_layout_load_channel_fragment.setVisibility(View.VISIBLE);
+            linear_layout_page_error_channel_fragment.setVisibility(View.GONE);
+            recycler_view_channel_fragment.setVisibility(View.GONE);
+            image_view_empty_list.setVisibility(View.GONE);
+            
+            Log.d("TvFragment", "Loading view displayed");
+        } catch (Exception e) {
+            Log.e("TvFragment", "Error showing loading view", e);
+        }
+    }
+    
+    /**
+     * Show list view
+     */
+    private void showListView() {
+        if (getActivity() == null || !isAdded()) return;
+        
+        try {
+            linear_layout_load_channel_fragment.setVisibility(View.GONE);
+            linear_layout_page_error_channel_fragment.setVisibility(View.GONE);
+            recycler_view_channel_fragment.setVisibility(View.VISIBLE);
+            image_view_empty_list.setVisibility(View.GONE);
+            
+            Log.d("TvFragment", "List view displayed");
+        } catch (Exception e) {
+            Log.e("TvFragment", "Error showing list view", e);
+        }
+    }
+    
+    /**
+     * Show error view
+     */
+    private void showErrorView() {
+        if (getActivity() == null || !isAdded()) return;
+        
+        try {
+            linear_layout_load_channel_fragment.setVisibility(View.GONE);
+            linear_layout_page_error_channel_fragment.setVisibility(View.VISIBLE);
+            recycler_view_channel_fragment.setVisibility(View.GONE);
+            image_view_empty_list.setVisibility(View.GONE);
+            
+            Log.d("TvFragment", "Error view displayed");
+        } catch (Exception e) {
+            Log.e("TvFragment", "Error showing error view", e);
         }
     }
 }

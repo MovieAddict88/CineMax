@@ -498,4 +498,44 @@ public class SimpleCacheManager {
         }
         return false;
     }
+    
+    /**
+     * Clear memory cache to free up memory
+     */
+    public void clearMemoryCache() {
+        synchronized (cacheLock) {
+            Log.d(TAG, "Clearing memory cache due to memory pressure");
+            memoryCache.evictAll();
+            
+            // Clear weak references in image cache
+            imageCache.clear();
+            
+            Log.d(TAG, "Memory cache cleared");
+        }
+    }
+    
+    /**
+     * Trim memory cache
+     */
+    public void trimMemory() {
+        synchronized (cacheLock) {
+            Log.d(TAG, "Trimming memory cache");
+            
+            // Remove half of the items from memory cache
+            int currentSize = memoryCache.size();
+            int targetSize = currentSize / 2;
+            
+            // LruCache doesn't have a direct way to trim to specific size
+            // So we'll clear some items by temporarily reducing max size
+            int originalMaxSize = memoryCache.maxSize();
+            memoryCache.resize(targetSize);
+            memoryCache.resize(originalMaxSize);
+            
+            // Clear expired image references
+            imageCache.entrySet().removeIf(entry -> 
+                entry.getValue().get() == null);
+                
+            Log.d(TAG, "Memory cache trimmed from " + currentSize + " to " + memoryCache.size() + " items");
+        }
+    }
 }

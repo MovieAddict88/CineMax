@@ -46,6 +46,7 @@ import static okhttp3.logging.HttpLoggingInterceptor.Level.NONE;
 public class apiClient {
     private static Retrofit retrofit = null;
     private static Retrofit githubRetrofit = null;
+    private static boolean isPicassoInitialized = false;
     private static final String CACHE_CONTROL = "Cache-Control";
     
     // GitHub API base URL - all data comes from GitHub now
@@ -70,11 +71,25 @@ public class apiClient {
                     .writeTimeout(60, TimeUnit.SECONDS)
                     .build();
 
-            OkHttp3Downloader okHttp3Downloader = new OkHttp3Downloader(okHttpClient);
-            Picasso picasso = new Picasso.Builder(MyApplication.getInstance())
-                    .downloader(okHttp3Downloader)
-                    .build();
-            Picasso.setSingletonInstance(picasso);
+            // Only set Picasso singleton if not already set to prevent crash
+            if (!isPicassoInitialized) {
+                try {
+                    OkHttp3Downloader okHttp3Downloader = new OkHttp3Downloader(okHttpClient);
+                    Picasso picasso = new Picasso.Builder(MyApplication.getInstance())
+                            .downloader(okHttp3Downloader)
+                            .build();
+                    
+                    Picasso.setSingletonInstance(picasso);
+                    isPicassoInitialized = true;
+                    Log.d("apiClient", "Picasso singleton initialized successfully");
+                } catch (IllegalStateException e) {
+                    // Singleton already exists, ignore
+                    isPicassoInitialized = true;
+                    Log.d("apiClient", "Picasso singleton already initialized, reusing existing instance");
+                } catch (Exception e) {
+                    Log.e("apiClient", "Error initializing Picasso", e);
+                }
+            }
 
             retrofit = new Retrofit.Builder()
                     .baseUrl(GITHUB_API_BASE_URL)

@@ -18,6 +18,8 @@ import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.Toast;
+import android.util.Log;
+import android.os.Handler;
 
 import my.cinemax.app.free.Provider.PrefManager;
 import my.cinemax.app.free.R;
@@ -28,6 +30,7 @@ import my.cinemax.app.free.entity.Data;
 import my.cinemax.app.free.entity.Genre;
 import my.cinemax.app.free.entity.JsonApiResponse;
 import my.cinemax.app.free.ui.Adapters.HomeAdapter;
+import com.facebook.shimmer.ShimmerFrameLayout;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -37,6 +40,7 @@ import es.dmoral.toasty.Toasty;
 
 /**
  * A simple {@link Fragment} subclass.
+ * Enhanced with proper loading indicators and cache integration
  */
 public class HomeFragment extends Fragment {
 
@@ -48,7 +52,7 @@ public class HomeFragment extends Fragment {
     private RecyclerView recycler_view_home_fragment;
     private RelativeLayout relative_layout_load_more_home_fragment;
     private HomeAdapter homeAdapter;
-
+    private ShimmerFrameLayout shimmer_layout;
 
 
     private Genre my_genre_list;
@@ -63,10 +67,15 @@ public class HomeFragment extends Fragment {
     private int type_ads = 0;
     private PrefManager prefManager;
     private Integer item = 0 ;
+    
+    // Loading state management
+    private boolean isDataLoaded = false;
+    private boolean isLoadingInProgress = false;
 
     public HomeFragment() {
         // Required empty public constructor
     }
+    
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
 
@@ -75,113 +84,252 @@ public class HomeFragment extends Fragment {
 
         initViews();
         initActions();
-        // Don't load data here - it will be loaded by HomeActivity
-        // loadData();
+        
+        // Show loading immediately when fragment is created
+        showShimmerLoading();
+        
+        // Add timeout to prevent infinite loading (10 seconds)
+        new Handler().postDelayed(() -> {
+            if (!isDataLoaded && isLoadingInProgress) {
+                Log.w("HomeFragment", "Loading timeout, stopping shimmer and showing error");
+                isLoadingInProgress = false;
+                if (getActivity() != null && isAdded()) {
+                    showErrorView();
+                }
+            }
+        }, 10000); // 10 second timeout
+        
+        Log.d("HomeFragment", "Fragment created, showing shimmer loading");
+        
         return view;
+    }
+    
+    @Override
+    public void onResume() {
+        super.onResume();
+        
+        try {
+            // Ensure loading state is shown when fragment becomes visible
+            if (!isDataLoaded && !isLoadingInProgress && getActivity() != null && isAdded()) {
+                Log.d("HomeFragment", "Fragment resumed without data, showing shimmer");
+                showShimmerLoading();
+                
+                // Notify HomeActivity that fragment is ready for data
+                if (getActivity() instanceof HomeActivity) {
+                    ((HomeActivity) getActivity()).onHomeFragmentReady();
+                }
+            }
+        } catch (Exception e) {
+            Log.e("HomeFragment", "Error in onResume", e);
+        }
     }
 
     private void loadData() {
-        showLoadingView();
+        if (isLoadingInProgress) {
+            Log.d("HomeFragment", "Data loading already in progress, skipping");
+            return;
+        }
+        
+        isLoadingInProgress = true;
+        showShimmerLoading();
+        
+        Log.d("HomeFragment", "Starting data loading from API");
+        
         // Use GitHub JSON API instead of old API
         apiClient.getJsonApiData(new Callback<JsonApiResponse>() {
             @Override
             public void onResponse(Call<JsonApiResponse> call, Response<JsonApiResponse> response) {
+                isLoadingInProgress = false;
+                
                 apiClient.FormatData(getActivity(), null); // Initialize format data
                 if (response.isSuccessful() && response.body() != null) {
-                    dataList.clear();
-                    dataList.add(new Data().setViewType(0));
-                    
-                    JsonApiResponse apiResponse = response.body();
-                    
-                    // Load slides from GitHub JSON
-                    if (apiResponse.getHome() != null && apiResponse.getHome().getSlides() != null && 
-                        apiResponse.getHome().getSlides().size() > 0) {
-                        Data slideData = new Data();
-                        slideData.setSlides(apiResponse.getHome().getSlides());
-                        dataList.add(slideData);
-                    }
-                    
-                    // Load channels from GitHub JSON
-                    if (apiResponse.getHome() != null && apiResponse.getHome().getChannels() != null && 
-                        apiResponse.getHome().getChannels().size() > 0) {
-                        Data channelData = new Data();
-                        channelData.setChannels(apiResponse.getHome().getChannels());
-                        dataList.add(channelData);
-                    }
-                    
-                    // Load actors from GitHub JSON
-                    if (apiResponse.getHome() != null && apiResponse.getHome().getActors() != null && 
-                        apiResponse.getHome().getActors().size() > 0) {
-                        Data actorsData = new Data();
-                        actorsData.setActors(apiResponse.getHome().getActors());
-                        dataList.add(actorsData);
-                    }
-                    
-                    // Load genres from GitHub JSON
-                    if (apiResponse.getHome() != null && apiResponse.getHome().getGenres() != null && 
-                        apiResponse.getHome().getGenres().size() > 0) {
-                        if (my_genre_list != null) {
-                            Data genreDataMyList = new Data();
-                            genreDataMyList.setGenre(my_genre_list);
-                            dataList.add(genreDataMyList);
-                        }
-                        for (int i = 0; i < apiResponse.getHome().getGenres().size(); i++) {
-                            Data genreData = new Data();
-                            genreData.setGenre(apiResponse.getHome().getGenres().get(i));
-                            dataList.add(genreData);
-                            if (native_ads_enabled){
-                                item++;
-                                if (item == lines_beetween_ads ){
-                                    item= 0;
-                                    if (prefManager.getString("ADMIN_NATIVE_TYPE").equals("FACEBOOK")) {
-                                        dataList.add(new Data().setViewType(5));
-                                    }else if (prefManager.getString("ADMIN_NATIVE_TYPE").equals("ADMOB")){
-                                        dataList.add(new Data().setViewType(6));
-                                    } else if (prefManager.getString("ADMIN_NATIVE_TYPE").equals("BOTH")){
-                                        if (type_ads == 0) {
-                                            dataList.add(new Data().setViewType(5));
-                                            type_ads = 1;
-                                        }else if (type_ads == 1){
-                                            dataList.add(new Data().setViewType(6));
-                                            type_ads = 0;
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    }
-                    showListView();
-                    homeAdapter.notifyDataSetChanged();
+                    Log.d("HomeFragment", "API response successful, processing data");
+                    processApiResponse(response.body());
                 } else {
+                    Log.e("HomeFragment", "API response unsuccessful");
                     showErrorView();
                 }
             }
 
             @Override
             public void onFailure(Call<JsonApiResponse> call, Throwable t) {
+                isLoadingInProgress = false;
+                Log.e("HomeFragment", "API call failed: " + t.getMessage());
                 showErrorView();
             }
         });
     }
-   private void showLoadingView(){
-       linear_layout_load_home_fragment.setVisibility(View.VISIBLE);
-       linear_layout_page_error_home_fragment.setVisibility(View.GONE);
-       recycler_view_home_fragment.setVisibility(View.GONE);
-   }
+    
+    /**
+     * Process API response and update UI
+     */
+    private void processApiResponse(JsonApiResponse apiResponse) {
+        if (getActivity() == null || !isAdded()) {
+            Log.w("HomeFragment", "Fragment not attached, skipping data processing");
+            return;
+        }
+        
+        try {
+            dataList.clear();
+            dataList.add(new Data().setViewType(0));
+            
+            // Load slides from GitHub JSON
+            if (apiResponse.getHome() != null && apiResponse.getHome().getSlides() != null && 
+                apiResponse.getHome().getSlides().size() > 0) {
+                Data slideData = new Data();
+                slideData.setSlides(apiResponse.getHome().getSlides());
+                dataList.add(slideData);
+                Log.d("HomeFragment", "Added " + apiResponse.getHome().getSlides().size() + " slides");
+            }
+            
+            // Load channels from GitHub JSON
+            if (apiResponse.getHome() != null && apiResponse.getHome().getChannels() != null && 
+                apiResponse.getHome().getChannels().size() > 0) {
+                Data channelData = new Data();
+                channelData.setChannels(apiResponse.getHome().getChannels());
+                dataList.add(channelData);
+                Log.d("HomeFragment", "Added " + apiResponse.getHome().getChannels().size() + " channels");
+            }
+            
+            // Load actors from GitHub JSON
+            if (apiResponse.getHome() != null && apiResponse.getHome().getActors() != null && 
+                apiResponse.getHome().getActors().size() > 0) {
+                Data actorsData = new Data();
+                actorsData.setActors(apiResponse.getHome().getActors());
+                dataList.add(actorsData);
+                Log.d("HomeFragment", "Added " + apiResponse.getHome().getActors().size() + " actors");
+            }
+            
+            // Load genres from GitHub JSON
+            if (apiResponse.getHome() != null && apiResponse.getHome().getGenres() != null && 
+                apiResponse.getHome().getGenres().size() > 0) {
+                if (my_genre_list != null) {
+                    Data genreDataMyList = new Data();
+                    genreDataMyList.setGenre(my_genre_list);
+                    dataList.add(genreDataMyList);
+                }
+                for (int i = 0; i < apiResponse.getHome().getGenres().size(); i++) {
+                    Data genreData = new Data();
+                    genreData.setGenre(apiResponse.getHome().getGenres().get(i));
+                    dataList.add(genreData);
+                    if (native_ads_enabled){
+                        item++;
+                        if (item == lines_beetween_ads ){
+                            item= 0;
+                            if (prefManager.getString("ADMIN_NATIVE_TYPE").equals("FACEBOOK")) {
+                                dataList.add(new Data().setViewType(5));
+                            }else if (prefManager.getString("ADMIN_NATIVE_TYPE").equals("ADMOB")){
+                                dataList.add(new Data().setViewType(6));
+                            } else if (prefManager.getString("ADMIN_NATIVE_TYPE").equals("BOTH")){
+                                if (type_ads == 0) {
+                                    dataList.add(new Data().setViewType(5));
+                                    type_ads = 1;
+                                }else if (type_ads == 1){
+                                    dataList.add(new Data().setViewType(6));
+                                    type_ads = 0;
+                                }
+                            }
+                        }
+                    }
+                }
+                Log.d("HomeFragment", "Added " + apiResponse.getHome().getGenres().size() + " genres");
+            }
+            
+            isDataLoaded = true;
+            showListView();
+            homeAdapter.notifyDataSetChanged();
+            
+            Log.d("HomeFragment", "Data processing completed successfully");
+            
+        } catch (Exception e) {
+            Log.e("HomeFragment", "Error processing API response", e);
+            showErrorView();
+        }
+    }
+   
+       /**
+     * Show shimmer loading effect
+     */
+    private void showShimmerLoading(){
+        if (getActivity() == null || !isAdded() || getView() == null) return;
+        
+        try {
+            if (shimmer_layout != null) {
+                shimmer_layout.startShimmer();
+            }
+            
+            if (linear_layout_load_home_fragment != null) {
+                linear_layout_load_home_fragment.setVisibility(View.VISIBLE);
+            }
+            if (linear_layout_page_error_home_fragment != null) {
+                linear_layout_page_error_home_fragment.setVisibility(View.GONE);
+            }
+            if (recycler_view_home_fragment != null) {
+                recycler_view_home_fragment.setVisibility(View.GONE);
+            }
+            
+            Log.d("HomeFragment", "Shimmer loading displayed");
+        } catch (Exception e) {
+            Log.e("HomeFragment", "Error showing shimmer loading", e);
+        }
+    }
+   
     private void showListView(){
-        linear_layout_load_home_fragment.setVisibility(View.GONE);
-        linear_layout_page_error_home_fragment.setVisibility(View.GONE);
-        recycler_view_home_fragment.setVisibility(View.VISIBLE);
+        if (getActivity() == null || !isAdded() || getView() == null) return;
+        
+        try {
+            if (shimmer_layout != null) {
+                shimmer_layout.stopShimmer();
+            }
+            
+            if (linear_layout_load_home_fragment != null) {
+                linear_layout_load_home_fragment.setVisibility(View.GONE);
+            }
+            if (linear_layout_page_error_home_fragment != null) {
+                linear_layout_page_error_home_fragment.setVisibility(View.GONE);
+            }
+            if (recycler_view_home_fragment != null) {
+                recycler_view_home_fragment.setVisibility(View.VISIBLE);
+            }
+            
+            Log.d("HomeFragment", "List view displayed");
+        } catch (Exception e) {
+            Log.e("HomeFragment", "Error showing list view", e);
+        }
     }
+    
     private void showErrorView(){
-        linear_layout_load_home_fragment.setVisibility(View.GONE);
-        linear_layout_page_error_home_fragment.setVisibility(View.VISIBLE);
-        recycler_view_home_fragment.setVisibility(View.GONE);
+        if (getActivity() == null || !isAdded() || getView() == null) return;
+        
+        try {
+            if (shimmer_layout != null) {
+                shimmer_layout.stopShimmer();
+            }
+            
+            if (linear_layout_load_home_fragment != null) {
+                linear_layout_load_home_fragment.setVisibility(View.GONE);
+            }
+            if (linear_layout_page_error_home_fragment != null) {
+                linear_layout_page_error_home_fragment.setVisibility(View.VISIBLE);
+            }
+            if (recycler_view_home_fragment != null) {
+                recycler_view_home_fragment.setVisibility(View.GONE);
+            }
+            
+            Log.d("HomeFragment", "Error view displayed");
+        } catch (Exception e) {
+            Log.e("HomeFragment", "Error showing error view", e);
+        }
     }
+    
     private void initActions() {
         swipe_refresh_layout_home_fragment.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
             @Override
             public void onRefresh() {
+                Log.d("HomeFragment", "Pull to refresh triggered");
+                // Reset loading state
+                isDataLoaded = false;
+                
                 // Call HomeActivity to refresh data
                 if (getActivity() instanceof HomeActivity) {
                     ((HomeActivity) getActivity()).refreshDataFromApi();
@@ -190,18 +338,24 @@ public class HomeFragment extends Fragment {
             }
         });
         button_try_again.setOnClickListener(v->{
+            Log.d("HomeFragment", "Try again button clicked");
+            // Reset loading state
+            isDataLoaded = false;
+            
             // Call HomeActivity to refresh data
             if (getActivity() instanceof HomeActivity) {
                 ((HomeActivity) getActivity()).refreshDataFromApi();
             }
         });
     }
+    
     public boolean checkSUBSCRIBED(){
         if (!prefManager.getString("SUBSCRIBED").equals("TRUE") && !prefManager.getString("NEW_SUBSCRIBE_ENABLED").equals("TRUE")) {
             return false;
         }
         return true;
     }
+    
     private void initViews() {
 
         boolean tabletSize = getResources().getBoolean(R.bool.isTablet);
@@ -222,21 +376,63 @@ public class HomeFragment extends Fragment {
         this.recycler_view_home_fragment = (RecyclerView) view.findViewById(R.id.recycler_view_home_fragment);
         this.relative_layout_load_more_home_fragment = (RelativeLayout) view.findViewById(R.id.relative_layout_load_more_home_fragment);
         this.button_try_again = (Button) view.findViewById(R.id.button_try_again);
+        
+        // Initialize shimmer layout
+        this.shimmer_layout = view.findViewById(R.id.shimmer_layout);
 
-        this.gridLayoutManager=  new GridLayoutManager(getActivity().getApplicationContext(),1,RecyclerView.VERTICAL,false);
-
-
-        this.homeAdapter =new HomeAdapter(dataList,getActivity());
-        recycler_view_home_fragment.setHasFixedSize(true);
-        recycler_view_home_fragment.setAdapter(homeAdapter);
-        recycler_view_home_fragment.setLayoutManager(gridLayoutManager);
+        // Safely initialize GridLayoutManager
+        if (getActivity() != null && getContext() != null) {
+            this.gridLayoutManager = new GridLayoutManager(getContext(), 1, RecyclerView.VERTICAL, false);
+            this.homeAdapter = new HomeAdapter(dataList, getActivity());
+            
+            if (recycler_view_home_fragment != null) {
+                recycler_view_home_fragment.setHasFixedSize(true);
+                recycler_view_home_fragment.setAdapter(homeAdapter);
+                recycler_view_home_fragment.setLayoutManager(gridLayoutManager);
+            }
+        }
+        
+        Log.d("HomeFragment", "Views initialized successfully");
     }
     
     // Method to update fragment with JSON data
     public void updateWithJsonData(my.cinemax.app.free.entity.JsonApiResponse jsonResponse) {
-        if (jsonResponse != null) {
-            showLoadingView();
+        if (jsonResponse == null) {
+            Log.w("HomeFragment", "Received null JSON response");
+            showErrorView();
+            return;
+        }
+        
+        // Check if fragment is still alive and attached
+        if (getActivity() == null || !isAdded() || getView() == null) {
+            Log.w("HomeFragment", "Fragment not attached, skipping data update");
+            return;
+        }
+        
+        Log.d("HomeFragment", "Updating fragment with JSON data");
+        
+        try {
+            // Don't show shimmer again if we're updating with cached data
+            // Only show loading if we don't have data yet
+            if (!isDataLoaded) {
+                isLoadingInProgress = true;
+                showShimmerLoading();
+            }
             
+            // Process data on main thread to avoid threading issues
+            processJsonData(jsonResponse);
+            
+        } catch (Exception e) {
+            Log.e("HomeFragment", "Error updating fragment with JSON data", e);
+            showErrorView();
+        }
+    }
+    
+    /**
+     * Process JSON data safely on main thread
+     */
+    private void processJsonData(JsonApiResponse jsonResponse) {
+        try {
             // Clear existing data
             dataList.clear();
             dataList.add(new Data().setViewType(0));
@@ -301,9 +497,38 @@ public class HomeFragment extends Fragment {
                 }
             }
             
+            // Update UI immediately since we're on main thread
+            isDataLoaded = true;
+            isLoadingInProgress = false;
             showListView();
-            homeAdapter.notifyDataSetChanged();
+            
+            // Safely notify adapter
+            if (homeAdapter != null) {
+                homeAdapter.notifyDataSetChanged();
+            }
+            
+            Log.d("HomeFragment", "Fragment updated with JSON data successfully - Total items: " + dataList.size());
+            
+        } catch (Exception e) {
+            Log.e("HomeFragment", "Error processing JSON data", e);
+            showErrorView();
         }
+    }
+    
+    /**
+     * Check if data is loaded
+     */
+    public boolean isDataLoaded() {
+        return isDataLoaded;
+    }
+    
+    /**
+     * Reset loading state (called when refreshing)
+     */
+    public void resetLoadingState() {
+        isDataLoaded = false;
+        isLoadingInProgress = false;
+        Log.d("HomeFragment", "Loading state reset");
     }
 
 }
