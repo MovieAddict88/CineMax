@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.util.Log;
 
 import com.jakewharton.picasso.OkHttp3Downloader;
+import com.google.gson.Gson;
 import my.cinemax.app.free.BuildConfig;
 import my.cinemax.app.free.MyApplication;
 import my.cinemax.app.free.Provider.PrefManager;
@@ -12,6 +13,8 @@ import my.cinemax.app.free.entity.ApiResponse;
 import my.cinemax.app.free.entity.JsonApiResponse;
 import my.cinemax.app.free.entity.Poster;
 import com.squareup.picasso.Picasso;
+import my.cinemax.app.free.data.AppDatabase;
+import my.cinemax.app.free.data.CachedResponse;
 
 import java.io.File;
 import java.io.IOException;
@@ -53,6 +56,9 @@ public class apiClient {
     
     // Fallback URL in case the main one doesn't work
     private static final String FALLBACK_API_BASE_URL = "https://api.github.com/repos/your-username/movie-api/contents/";
+    // --- Local cache constants ---
+    private static final String CACHE_KEY_JSON_API = "json_api";
+    private static final long CACHE_TTL = 60 * 60 * 1000; // 1 hour
 
     /**
      * Get the main GitHub API client for all movie data
@@ -273,35 +279,40 @@ public class apiClient {
      * Get GitHub JSON API data with custom callback
      */
     public static void getJsonApiData(JsonApiCallback callback) {
-        Log.d("API_CLIENT", "Attempting to load data from: " + GITHUB_API_BASE_URL + "free_movie_api.json");
-        
+        // 1. Try to return cached data first
+        AppDatabase db = AppDatabase.getInstance(MyApplication.getInstance());
+        CachedResponse cached = db.cachedResponseDao().getResponse(CACHE_KEY_JSON_API);
+
+        if (cached != null && (System.currentTimeMillis() - cached.getTimestamp()) < CACHE_TTL) {
+            try {
+                JsonApiResponse cachedObject = new Gson().fromJson(cached.getJson(), JsonApiResponse.class);
+                if (cachedObject != null) {
+                    Log.d("API_CLIENT", "Serving data from local cache");
+                    callback.onSuccess(cachedObject);
+                    return; // Skip network call if cache is fresh
+                }
+            } catch (Exception e) {
+                Log.e("API_CLIENT", "Failed to parse cached JSON, falling back to network", e);
+            }
+        }
+
+        // 2. No (valid) cache, fetch from network
         getJsonApiData(new Callback<JsonApiResponse>() {
             @Override
             public void onResponse(Call<JsonApiResponse> call, retrofit2.Response<JsonApiResponse> response) {
-                Log.d("API_CLIENT", "Response received - Success: " + response.isSuccessful() + ", Code: " + response.code());
-                
                 if (response.isSuccessful() && response.body() != null) {
-                    Log.d("API_CLIENT", "Successfully loaded JSON data");
+                    // Save fresh copy to DB
+                    String jsonString = new Gson().toJson(response.body());
+                    db.cachedResponseDao().insert(new CachedResponse(CACHE_KEY_JSON_API, jsonString, System.currentTimeMillis()));
                     callback.onSuccess(response.body());
                 } else {
-                    String errorMsg = "Failed to load data from GitHub JSON API. Response code: " + response.code();
-                    if (response.errorBody() != null) {
-                        try {
-                            errorMsg += ", Error: " + response.errorBody().string();
-                        } catch (IOException e) {
-                            errorMsg += ", Error body could not be read";
-                        }
-                    }
-                    Log.e("API_CLIENT", errorMsg);
-                    callback.onError(errorMsg);
+                    callback.onError("Failed to load data: " + response.code());
                 }
             }
-            
+
             @Override
             public void onFailure(Call<JsonApiResponse> call, Throwable t) {
-                String errorMsg = "Network error: " + t.getMessage();
-                Log.e("API_CLIENT", errorMsg, t);
-                callback.onError(errorMsg);
+                callback.onError("Network error: " + t.getMessage());
             }
         });
     }
