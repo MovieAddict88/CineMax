@@ -12,7 +12,7 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 import com.squareup.picasso.Picasso;
 import my.cinemax.app.free.R;
-import my.cinemax.app.free.Utils.UnifiedCacheManager;
+import my.cinemax.app.free.Utils.SimpleCacheManager;
 import my.cinemax.app.free.entity.Poster;
 import my.cinemax.app.free.entity.Genre;
 import java.util.ArrayList;
@@ -61,7 +61,7 @@ public class LazyPosterAdapter extends RecyclerView.Adapter<LazyPosterAdapter.Po
     
     // Dependencies
     private final Context context;
-    private final UnifiedCacheManager cacheManager;
+    private final SimpleCacheManager cacheManager;
     private final ExecutorService executorService;
     
     // Callbacks
@@ -76,7 +76,7 @@ public class LazyPosterAdapter extends RecyclerView.Adapter<LazyPosterAdapter.Po
     
     public LazyPosterAdapter(Activity activity, String contentType) {
         this.context = activity;
-        this.cacheManager = UnifiedCacheManager.getInstance();
+        this.cacheManager = SimpleCacheManager.getInstance();
         this.executorService = Executors.newFixedThreadPool(2);
         
         this.allItems = new ArrayList<>();

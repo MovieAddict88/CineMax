@@ -293,11 +293,11 @@ public class DataRepository {
     }
     
     /**
-     * Get movie by ID with unified caching
+     * Get movie by ID with caching
      */
     public void getMovieById(int movieId, DataCallback<Poster> callback) {
         executorService.execute(() -> {
-            Poster movie = unifiedCacheManager.getMovie(movieId);
+            Poster movie = cacheManager.getMovieById(movieId);
             if (movie != null) {
                 callback.onSuccess(movie);
             } else {

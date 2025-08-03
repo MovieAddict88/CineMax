@@ -29,7 +29,7 @@ import my.cinemax.app.free.BuildConfig;
 import my.cinemax.app.free.R;
 import my.cinemax.app.free.Provider.DataRepository;
 import my.cinemax.app.free.Utils.CacheManager;
-import my.cinemax.app.free.Utils.UnifiedCacheManager;
+import my.cinemax.app.free.Utils.SimpleCacheManager;
 
 /**
  * Created by Tamim on 28/09/2019.
