@@ -811,11 +811,12 @@
              console.log('✅ CineMax Enhanced API Manager loaded!');
              console.log('🎬 Auto-sources: VidSrc.net + VidJoy.pro');
              console.log('🔧 Fixed: Root-level movies array for GenreActivity & TV Series');
+             console.log('🎯 Fixed: Source kind values - now uses "play" instead of "embed"');
              console.log('🧪 Test with: testSourceGeneration()');
              
              // Show info about the fix
              setTimeout(() => {
-                 showStatus('info', 'Fixed: TV Series and movies now appear in Genre categories and Series fragments!');
+                 showStatus('success', 'FIXED: "No sources" issue! Sources now have kind="play" for proper playback!');
              }, 2000);
          });
 
@@ -1069,7 +1070,7 @@
                              title: "VidSrc Server 1080p",
                              quality: "1080p",
                              size: "Auto",
-                             kind: "embed",
+                             kind: "play",
                              premium: "false",
                              external: false,
                              url: `${VIDSRC_BASE}/tv/${tmdbId}/${seasonNum}/${episodeData.episode_number}`
@@ -1080,7 +1081,7 @@
                              title: "VidJoy Server 1080p", 
                              quality: "1080p",
                              size: "Auto",
-                             kind: "embed",
+                             kind: "play",
                              premium: "false",
                              external: false,
                              url: `${VIDJOY_BASE}/tv/${tmdbId}/${seasonNum}/${episodeData.episode_number}`
@@ -1182,7 +1183,7 @@
         function getSourceKind(url) {
             const type = getSourceType(url);
             if (type === 'youtube') return 'youtube';
-            if (type === 'embed') return 'embed';
+            if (type === 'embed') return 'play';  // Changed from 'embed' to 'play'
             if (type === 'm3u8' || type === 'dash') return 'play';
             return 'both';
         }
@@ -1734,7 +1735,7 @@
                          title: "VidSrc Server 1080p",
                          quality: "1080p",
                          size: "Auto",
-                         kind: "embed",
+                         kind: "play",
                          premium: "false",
                          external: false,
                          url: "https://vidsrc.net/embed/movie/123"
@@ -1745,7 +1746,7 @@
                          title: "VidJoy Server 1080p",
                          quality: "1080p", 
                          size: "Auto",
-                         kind: "embed",
+                         kind: "play",
                          premium: "false",
                          external: false,
                          url: "https://vidjoy.pro/embed/movie/123"
