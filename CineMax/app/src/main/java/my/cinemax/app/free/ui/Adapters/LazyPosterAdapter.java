@@ -366,30 +366,35 @@ public class LazyPosterAdapter extends RecyclerView.Adapter<LazyPosterAdapter.Po
         // Start with search results
         performSearch();
         
-        // Apply genre filter
-        if (currentGenreFilter != null) {
-            List<Poster> genreFiltered = new ArrayList<>();
-            for (Poster item : filteredItems) {
-                if (item.getGenreId() != null && item.getGenreId().equals(currentGenreFilter)) {
-                    genreFiltered.add(item);
+                    // Apply genre filter
+            if (currentGenreFilter != null) {
+                List<Poster> genreFiltered = new ArrayList<>();
+                for (Poster item : filteredItems) {
+                    if (item.getGenres() != null) {
+                        for (Genre genre : item.getGenres()) {
+                            if (genre.getId() != null && genre.getId().equals(currentGenreFilter)) {
+                                genreFiltered.add(item);
+                                break;
+                            }
+                        }
+                    }
                 }
+                filteredItems.clear();
+                filteredItems.addAll(genreFiltered);
             }
-            filteredItems.clear();
-            filteredItems.addAll(genreFiltered);
-        }
-        
-        // Apply category filter
-        if (currentCategoryFilter != null) {
-            List<Poster> categoryFiltered = new ArrayList<>();
-            for (Poster item : filteredItems) {
-                if (item.getCategory() != null && 
-                    item.getCategory().equals(currentCategoryFilter)) {
-                    categoryFiltered.add(item);
+            
+            // Apply category filter (using classification as category)
+            if (currentCategoryFilter != null) {
+                List<Poster> categoryFiltered = new ArrayList<>();
+                for (Poster item : filteredItems) {
+                    if (item.getClassification() != null && 
+                        item.getClassification().equals(currentCategoryFilter)) {
+                        categoryFiltered.add(item);
+                    }
                 }
+                filteredItems.clear();
+                filteredItems.addAll(categoryFiltered);
             }
-            filteredItems.clear();
-            filteredItems.addAll(categoryFiltered);
-        }
         
         Log.d(TAG, "Filters applied: " + filteredItems.size() + " items remaining");
     }
@@ -482,7 +487,7 @@ public class LazyPosterAdapter extends RecyclerView.Adapter<LazyPosterAdapter.Po
             
             // Load image with caching
             if (imageView != null && poster.getImage() != null) {
-                Picasso.get()
+                Picasso.with(context)
                     .load(poster.getImage())
                     .placeholder(R.drawable.poster_placeholder)
                     .error(R.drawable.poster_placeholder)

@@ -50,6 +50,7 @@ public class DataRepository {
         void onSuccess(JsonApiResponse response);
         void onError(String error);
         void onFromCache(JsonApiResponse response);
+        void onLoading();
     }
     
     private DataRepository() {

@@ -98,6 +98,7 @@ import retrofit2.Response;
 import retrofit2.Retrofit;
 import my.cinemax.app.free.entity.Actress;
 import my.cinemax.app.free.Provider.DataRepository;
+import my.cinemax.app.free.BuildConfig;
 import my.cinemax.app.free.Utils.CacheManager;
 
 public class HomeActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener {

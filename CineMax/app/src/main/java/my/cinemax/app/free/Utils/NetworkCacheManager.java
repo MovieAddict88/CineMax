@@ -357,7 +357,7 @@ public class NetworkCacheManager {
             getHitRate(),
             cache.size(),
             cache.hitCount(),
-            cache.missCount(),
+            0, // OkHttp Cache doesn't have missCount()
             cache.requestCount()
         );
     }

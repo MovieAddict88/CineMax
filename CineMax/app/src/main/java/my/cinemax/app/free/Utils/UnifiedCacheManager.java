@@ -33,8 +33,8 @@ public class UnifiedCacheManager {
     // Cache layer managers
     private final MemoryCacheManager memoryCacheManager;
     private final CacheManager diskCacheManager;
-    private final ImageCacheManager imageCacheManager;
-    private final NetworkCacheManager networkCacheManager;
+    private ImageCacheManager imageCacheManager; // Initialized in initialize()
+    private NetworkCacheManager networkCacheManager; // Initialized in initialize()
     
     // Background processing
     private final ExecutorService executorService;
