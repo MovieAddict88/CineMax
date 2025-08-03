@@ -62,6 +62,7 @@ import my.cinemax.app.free.R;
 import my.cinemax.app.free.api.apiClient;
 import my.cinemax.app.free.api.apiRest;
 import my.cinemax.app.free.config.Global;
+import my.cinemax.app.free.database.DatabaseManager;
 import my.cinemax.app.free.entity.ApiResponse;
 import my.cinemax.app.free.entity.Genre;
 import my.cinemax.app.free.entity.JsonApiResponse;
@@ -104,6 +105,7 @@ public class HomeActivity extends AppCompatActivity implements NavigationView.On
     private ViewPagerAdapter adapter;
     private JsonApiResponse cachedJsonResponse = null;
     private boolean dataLoaded = false;
+    private DatabaseManager databaseManager;
     private NavigationView navigationView;
     private TextView text_view_name_nave_header;
     private CircleImageView circle_image_view_profile_nav_header;
@@ -139,9 +141,12 @@ public class HomeActivity extends AppCompatActivity implements NavigationView.On
         initGDPR();
         initBuy();
         
+        // Initialize database manager for persistent caching
+        databaseManager = new DatabaseManager(this);
+        
         // ===== LOAD DATA FROM JSON API =====
-        // Load data from your GitHub JSON
-        loadAllDataFromJson();
+        // Load data from your GitHub JSON with database caching
+        loadAllDataFromJsonWithCache();
     }
 
     BillingSubs billingSubs;
@@ -1165,6 +1170,31 @@ public class HomeActivity extends AppCompatActivity implements NavigationView.On
         }
     }
     
+    /**
+     * Clear cache and reload data from network
+     */
+    public void refreshDataFromNetwork() {
+        Log.d("JSON_API", "Refreshing data from network...");
+        databaseManager.clearCache(new DatabaseManager.SaveCallback() {
+            @Override
+            public void onSuccess() {
+                Log.d("JSON_API", "Cache cleared, loading fresh data");
+                dataLoaded = false;
+                cachedJsonResponse = null;
+                loadAllDataFromJson();
+            }
+            
+            @Override
+            public void onError(String error) {
+                Log.e("JSON_API", "Failed to clear cache: " + error);
+                // Still try to load fresh data
+                dataLoaded = false;
+                cachedJsonResponse = null;
+                loadAllDataFromJson();
+            }
+        });
+    }
+    
     // Callback interfaces for video sources
     public interface VideoSourcesCallback {
         void onSuccess(String videoUrl);
@@ -1177,7 +1207,40 @@ public class HomeActivity extends AppCompatActivity implements NavigationView.On
     }
     
     /**
-     * Load all data from JSON API when app starts
+     * Load all data from JSON API with database caching
+     */
+    private void loadAllDataFromJsonWithCache() {
+        Log.d("JSON_API", "Loading data with database caching...");
+        
+        // First try to load from database cache
+        databaseManager.getCachedData(new DatabaseManager.CacheCallback() {
+            @Override
+            public void onSuccess(JsonApiResponse cachedData) {
+                Log.d("JSON_API", "Loaded data from database cache");
+                cachedJsonResponse = cachedData;
+                dataLoaded = true;
+                updateAllFragmentsWithCachedData();
+                Toasty.success(HomeActivity.this, "Content loaded from cache", Toast.LENGTH_SHORT).show();
+            }
+            
+            @Override
+            public void onError(String error) {
+                Log.e("JSON_API", "Database cache error: " + error);
+                // Fallback to network loading
+                loadAllDataFromJson();
+            }
+            
+            @Override
+            public void onEmpty() {
+                Log.d("JSON_API", "No cached data found, loading from network");
+                // No cached data, load from network
+                loadAllDataFromJson();
+            }
+        });
+    }
+    
+    /**
+     * Load all data from JSON API when app starts (original method)
      */
     private void loadAllDataFromJson() {
         Log.d("JSON_API", "Loading all data from JSON API...");
@@ -1238,6 +1301,19 @@ public class HomeActivity extends AppCompatActivity implements NavigationView.On
                         
                         // Show success message
                         Toasty.success(HomeActivity.this, "Content loaded successfully", Toast.LENGTH_SHORT).show();
+                        
+                        // Save data to database for future use
+                        databaseManager.saveCachedData(jsonResponse, new DatabaseManager.SaveCallback() {
+                            @Override
+                            public void onSuccess() {
+                                Log.d("JSON_API", "Data saved to database cache");
+                            }
+                            
+                            @Override
+                            public void onError(String error) {
+                                Log.e("JSON_API", "Failed to save data to cache: " + error);
+                            }
+                        });
                         
                     } catch (Exception e) {
                         Log.e("JSON_API", "Error updating fragments: " + e.getMessage());
