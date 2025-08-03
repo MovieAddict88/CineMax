@@ -23,6 +23,7 @@ import my.cinemax.app.free.Provider.PrefManager;
 import my.cinemax.app.free.R;
 import my.cinemax.app.free.api.apiClient;
 import my.cinemax.app.free.api.apiRest;
+import my.cinemax.app.free.ui.activities.HomeActivity;
 import my.cinemax.app.free.entity.Data;
 import my.cinemax.app.free.entity.Genre;
 import my.cinemax.app.free.entity.JsonApiResponse;
@@ -181,15 +182,18 @@ public class HomeFragment extends Fragment {
         swipe_refresh_layout_home_fragment.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
             @Override
             public void onRefresh() {
-                // Don't load data here - it will be loaded by HomeActivity
-                // loadData();
+                // Call HomeActivity to refresh data
+                if (getActivity() instanceof HomeActivity) {
+                    ((HomeActivity) getActivity()).refreshDataFromApi();
+                }
                 swipe_refresh_layout_home_fragment.setRefreshing(false);
             }
         });
         button_try_again.setOnClickListener(v->{
-            // Don't call old API - data should be loaded by HomeActivity
-            // loadData();
-            Toasty.info(getActivity(), "Please restart the app to reload data", Toast.LENGTH_SHORT).show();
+            // Call HomeActivity to refresh data
+            if (getActivity() instanceof HomeActivity) {
+                ((HomeActivity) getActivity()).refreshDataFromApi();
+            }
         });
     }
     public boolean checkSUBSCRIBED(){

@@ -3,6 +3,7 @@ package my.cinemax.app.free;
 import android.content.Context;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
+import android.os.Handler;
 import android.util.Log;
 
 import androidx.appcompat.app.AppCompatDelegate;
@@ -28,6 +29,7 @@ import my.cinemax.app.free.BuildConfig;
 import my.cinemax.app.free.R;
 import my.cinemax.app.free.Provider.DataRepository;
 import my.cinemax.app.free.Utils.CacheManager;
+import my.cinemax.app.free.Utils.SimpleCacheManager;
 
 /**
  * Created by Tamim on 28/09/2019.
@@ -66,23 +68,44 @@ public class MyApplication extends MultiDexApplication {
     }
     
     /**
-     * Initialize the advanced caching system for large datasets
+     * Initialize the simplified caching system for large datasets
      */
     private void initCacheSystem() {
+        // Check if cache system should be enabled (can be disabled for debugging)
+        if (BuildConfig.DEBUG && false) { // Set to true to disable cache system
+            Log.d("MyApplication", "Cache system disabled for debugging");
+            return;
+        }
+        
         try {
-            // Initialize CacheManager
-            CacheManager.getInstance().initialize(this);
+            Log.d("MyApplication", "Starting simplified cache system initialization...");
             
-            // Initialize DataRepository
+            // Initialize Simple Cache Manager (LruCache + Disk + Network)
+            SimpleCacheManager.getInstance().initialize(this);
+            
+            // Initialize DataRepository (uses simple cache)
             DataRepository.getInstance().initialize(this);
             
-            Log.d("MyApplication", "Advanced caching system initialized successfully");
+            Log.d("MyApplication", "Simplified caching system initialized successfully");
             
-            // Preload essential data in background
-            DataRepository.getInstance().preloadEssentialData();
+            // Log cache statistics
+            logCacheStatistics();
             
         } catch (Exception e) {
             Log.e("MyApplication", "Error initializing cache system", e);
+            // Don't crash the app, just log the error
+        }
+    }
+    
+    /**
+     * Log cache statistics for monitoring
+     */
+    private void logCacheStatistics() {
+        try {
+            String stats = SimpleCacheManager.getInstance().getCacheStats();
+            Log.d("MyApplication", "Cache Statistics: " + stats);
+        } catch (Exception e) {
+            Log.e("MyApplication", "Error getting cache statistics", e);
         }
     }
     public static MyApplication getInstance ()

@@ -4,6 +4,7 @@ import android.content.Context;
 import android.os.AsyncTask;
 import android.util.Log;
 import my.cinemax.app.free.Utils.CacheManager;
+import my.cinemax.app.free.Utils.SimpleCacheManager;
 import my.cinemax.app.free.api.apiClient;
 import my.cinemax.app.free.entity.*;
 import retrofit2.Call;
@@ -33,6 +34,7 @@ public class DataRepository {
     private static DataRepository instance;
     
     private CacheManager cacheManager;
+    private SimpleCacheManager simpleCacheManager;
     private Context context;
     private ExecutorService executorService;
     private boolean isLoading = false;
@@ -48,11 +50,13 @@ public class DataRepository {
         void onSuccess(JsonApiResponse response);
         void onError(String error);
         void onFromCache(JsonApiResponse response);
+        void onLoading();
     }
     
     private DataRepository() {
         this.executorService = Executors.newCachedThreadPool();
         this.cacheManager = CacheManager.getInstance();
+        this.simpleCacheManager = SimpleCacheManager.getInstance();
     }
     
     public static synchronized DataRepository getInstance() {
@@ -68,21 +72,30 @@ public class DataRepository {
     public void initialize(Context context) {
         this.context = context.getApplicationContext();
         cacheManager.initialize(this.context);
-        Log.d(TAG, "DataRepository initialized");
+        simpleCacheManager.initialize(this.context);
+        Log.d(TAG, "DataRepository initialized with simple caching system");
     }
     
     /**
-     * Load all data with cache-first strategy
+     * Load all data with enhanced cache-first strategy
      */
     public void loadAllData(ApiResponseCallback callback) {
         if (callback != null) {
             callback.onLoading();
         }
         
-        // Check cache first
-        JsonApiResponse cachedResponse = cacheManager.getCachedApiResponse();
-        if (cachedResponse != null && cacheManager.isCacheValid()) {
-            Log.d(TAG, "Returning cached data");
+        // Check simple cache first (memory + disk)
+        JsonApiResponse cachedResponse = simpleCacheManager.getApiResponse();
+        if (cachedResponse != null && simpleCacheManager.isCacheValid("api_response")) {
+            Log.d(TAG, "Returning cached data from simple cache");
+            
+            // Cache data in memory for faster future access
+            try {
+                simpleCacheManager.cacheApiResponse(cachedResponse);
+            } catch (Exception e) {
+                Log.e(TAG, "Error caching data in memory", e);
+            }
+            
             if (callback != null) {
                 callback.onFromCache(cachedResponse);
             }
@@ -127,11 +140,12 @@ public class DataRepository {
                 if (response.isSuccessful() && response.body() != null) {
                     JsonApiResponse apiResponse = response.body();
                     
-                    // Cache the response in background
+                    // Cache the response in all layers in background
                     executorService.execute(() -> {
-                        Log.d(TAG, "Caching API response in background");
+                        Log.d(TAG, "Caching API response in all layers in background");
                         cacheManager.storeApiResponse(apiResponse);
-                        Log.d(TAG, "API response cached successfully");
+                        simpleCacheManager.cacheApiResponse(apiResponse);
+                        Log.d(TAG, "API response cached successfully in all layers");
                     });
                     
                     if (callback != null) {
@@ -187,7 +201,8 @@ public class DataRepository {
                 public void onResponse(Call<JsonApiResponse> call, Response<JsonApiResponse> response) {
                     if (response.isSuccessful() && response.body() != null) {
                         cacheManager.storeApiResponse(response.body());
-                        Log.d(TAG, "Background refresh completed successfully");
+                        simpleCacheManager.cacheApiResponse(response.body());
+                        Log.d(TAG, "Background refresh completed successfully and cached in all layers");
                     } else {
                         Log.w(TAG, "Background refresh failed: " + response.code());
                     }
@@ -278,7 +293,7 @@ public class DataRepository {
     }
     
     /**
-     * Get movie by ID
+     * Get movie by ID with caching
      */
     public void getMovieById(int movieId, DataCallback<Poster> callback) {
         executorService.execute(() -> {
@@ -525,6 +540,32 @@ public class DataRepository {
      */
     public CacheManager.CacheStats getCacheStats() {
         return cacheManager.getCacheStats();
+    }
+    
+    /**
+     * Get simple cache statistics
+     */
+    public String getSimpleCacheStats() {
+        try {
+            return simpleCacheManager.getCacheStats();
+        } catch (Exception e) {
+            Log.e(TAG, "Error getting simple cache stats", e);
+            return "Error getting cache stats";
+        }
+    }
+    
+    /**
+     * Get SimpleCacheManager instance
+     */
+    public SimpleCacheManager getSimpleCacheManager() {
+        return simpleCacheManager;
+    }
+    
+    /**
+     * Get CacheManager instance
+     */
+    public CacheManager getCacheManager() {
+        return cacheManager;
     }
     
     /**
