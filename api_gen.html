@@ -788,6 +788,21 @@
                  showStatus('info', `Data check: ${currentData.home.featuredMovies.length} movies/series, ${currentData.home.slides.length} slides`);
              };
              
+             // Add verification function
+             window.verifyGeneration = function() {
+                 const saved = localStorage.getItem('cinemax-data');
+                 if (saved) {
+                     const data = JSON.parse(saved);
+                     console.log('Saved data verification:', {
+                         movies: data.movies ? data.movies.length : 0,
+                         featuredMovies: data.home ? data.home.featuredMovies.length : 0
+                     });
+                     showStatus('success', `Verified: ${data.movies ? data.movies.length : 0} items saved to localStorage`);
+                 } else {
+                     showStatus('error', 'No data found in localStorage');
+                 }
+             };
+             
              // Add test function to window for debugging
              window.testSourceGeneration = function() {
                  console.log('Testing source generation...');
@@ -1078,6 +1093,9 @@
                         <button class="btn btn-info btn-small" onclick="checkData()" style="margin-top: 5px;">
                             Check Data
                         </button>
+                        <button class="btn btn-success btn-small" onclick="verifyGeneration()" style="margin-top: 5px;">
+                            Verify
+                        </button>
                     </div>
                 `;
                 
@@ -1155,6 +1173,11 @@
                  // Auto-switch to Data Management tab to show the generated content
                  setTimeout(() => {
                      switchTab('data-management');
+                     // Force update the preview after switching tabs
+                     setTimeout(() => {
+                         updatePreview();
+                         updateDataStats();
+                     }, 500);
                  }, 2000);
                  
                  // Refresh search results to show updated status
