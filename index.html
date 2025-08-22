@@ -1552,6 +1552,240 @@
             box-shadow: 0 25px 50px rgba(0, 0, 0, 0.6);
         }
 
+        /* Inline Server Buttons Styling */
+        #inline-server-buttons {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-top: 15px;
+            padding: 15px 0;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            animation: fadeInUp 0.5s ease-out;
+            background: rgba(255, 255, 255, 0.02);
+            border-radius: 8px;
+            padding: 15px;
+            margin: 15px 0;
+        }
+
+        #inline-server-buttons:empty {
+            display: none;
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .server-group-btn {
+            background: linear-gradient(135deg, #3B82F6, #1D4ED8);
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 12px;
+            font-weight: 600;
+            margin: 4px;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+            min-width: 80px;
+            justify-content: center;
+            position: relative;
+            overflow: hidden;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        /* Custom colors for different server types */
+        .server-group-btn[data-server-type="VidSrc"] {
+            background: linear-gradient(135deg, #3B82F6, #1D4ED8);
+        }
+
+        .server-group-btn[data-server-type="VidJoy"] {
+            background: linear-gradient(135deg, #10B981, #059669);
+        }
+
+        .server-group-btn[data-server-type="2Embed"] {
+            background: linear-gradient(135deg, #F59E0B, #D97706);
+        }
+
+        .server-group-btn[data-server-type="Embed.su"] {
+            background: linear-gradient(135deg, #8B5CF6, #7C3AED);
+        }
+
+        .server-group-btn[data-server-type="AutoEmbed"] {
+            background: linear-gradient(135deg, #EF4444, #DC2626);
+        }
+
+        .server-group-btn[data-server-type="GoDrivePlayer"] {
+            background: linear-gradient(135deg, #06B6D4, #0891B2);
+        }
+
+        .server-group-btn[data-server-type="VidLink.pro"] {
+            background: linear-gradient(135deg, #84CC16, #65A30D);
+        }
+
+        .server-group-btn[data-server-type="Google Drive"] {
+            background: linear-gradient(135deg, #F97316, #EA580C);
+        }
+
+        .server-group-btn[data-server-type="Mega.nz"] {
+            background: linear-gradient(135deg, #EC4899, #DB2777);
+        }
+
+        .server-group-btn[data-server-type="HLS Streams"] {
+            background: linear-gradient(135deg, #14B8A6, #0D9488);
+        }
+
+        .server-group-btn[data-server-type="MPD Streams"] {
+            background: linear-gradient(135deg, #6366F1, #4F46E5);
+        }
+
+        .server-group-btn[data-server-type="MP4 Files"] {
+            background: linear-gradient(135deg, #22C55E, #16A34A);
+        }
+
+        .server-group-btn[data-server-type="MKV Files"] {
+            background: linear-gradient(135deg, #A855F7, #9333EA);
+        }
+
+        .server-group-btn[data-server-type="AVI Files"] {
+            background: linear-gradient(135deg, #F43F5E, #E11D48);
+        }
+
+        .server-group-btn[data-server-type="MOV Files"] {
+            background: linear-gradient(135deg, #0EA5E9, #0284C7);
+        }
+
+        .server-group-btn[data-server-type="WebM Files"] {
+            background: linear-gradient(135deg, #84CC16, #65A30D);
+        }
+
+        .server-group-btn[data-server-type="FLV Files"] {
+            background: linear-gradient(135deg, #F59E0B, #D97706);
+        }
+
+        .server-group-btn[data-server-type="Other"] {
+            background: linear-gradient(135deg, #6B7280, #4B5563);
+        }
+
+        .server-group-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            transition: left 0.5s ease;
+        }
+
+        .server-group-btn:hover::before {
+            left: 100%;
+        }
+
+        .server-group-btn:hover {
+            transform: translateY(-2px) scale(1.05);
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
+        }
+
+        .server-group-btn:active {
+            transform: translateY(0) scale(0.98);
+        }
+
+        .server-group-name {
+            font-weight: 600;
+            letter-spacing: 0.5px;
+        }
+
+        .server-count {
+            background: rgba(255, 255, 255, 0.2);
+            padding: 2px 6px;
+            border-radius: 10px;
+            font-size: 10px;
+            font-weight: 700;
+            min-width: 20px;
+            text-align: center;
+        }
+
+        /* Server Selector Modal Styling */
+        #group-servers-selector,
+        #enhanced-direct-link-server-selector {
+            animation: modalSlideIn 0.3s ease-out;
+        }
+
+        @keyframes modalSlideIn {
+            from {
+                opacity: 0;
+                transform: translate(-50%, -50%) scale(0.9);
+            }
+            to {
+                opacity: 1;
+                transform: translate(-50%, -50%) scale(1);
+            }
+        }
+
+        /* Responsive adjustments for inline server buttons */
+        @media (max-width: 768px) {
+            #inline-server-buttons {
+                gap: 6px;
+                margin-top: 12px;
+            }
+
+            .server-group-btn {
+                padding: 6px 12px;
+                font-size: 11px;
+                min-width: 70px;
+            }
+
+            .server-count {
+                font-size: 9px;
+                padding: 1px 5px;
+            }
+        }
+
+        /* Loading spinner animation */
+        .fa-spinner {
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        /* Enhanced server button states */
+        .server-group-btn:focus {
+            outline: 2px solid rgba(59, 130, 246, 0.8);
+            outline-offset: 2px;
+        }
+
+        .server-group-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none !important;
+        }
+
+        /* Server selector backdrop */
+        .server-selector-backdrop {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 999;
+            backdrop-filter: blur(5px);
+        }
+
         /* Player Loading Optimizations */
         .player-loading {
             background: linear-gradient(45deg, #1a1a1a, #2a2a2a, #1a1a1a);
@@ -6158,6 +6392,315 @@
             }
         }
 
+        // Enhanced direct link server selector for Plyr settings integration
+        function showEnhancedDirectLinkServerSelector(servers) {
+            if (!servers || servers.length <= 1) {
+                console.log('🔍 No servers available for enhanced direct link server selector');
+                return;
+            }
+
+            // Remove existing enhanced direct link server selector
+            if (typeof hideEnhancedDirectLinkServerSelector === 'function') {
+                hideEnhancedDirectLinkServerSelector();
+            }
+
+            // Remove existing backdrop
+            const existingBackdrop = document.querySelector('.server-selector-backdrop');
+            if (existingBackdrop) {
+                existingBackdrop.remove();
+            }
+
+            console.log('🎯 Creating enhanced direct link server selector with', servers.length, 'servers');
+
+            // Create backdrop
+            const backdrop = document.createElement('div');
+            backdrop.className = 'server-selector-backdrop';
+            backdrop.addEventListener('click', () => {
+                backdrop.remove();
+                selectorContainer.remove();
+            });
+
+            // Create server selector container
+            const selectorContainer = document.createElement('div');
+            selectorContainer.id = 'enhanced-direct-link-server-selector';
+            selectorContainer.style.cssText = `
+                position: absolute;
+                top: 50%;
+                left: 50%;
+                transform: translate(-50%, -50%);
+                z-index: 1000;
+                background: rgba(0, 0, 0, 0.95);
+                border-radius: 16px;
+                padding: 25px;
+                min-width: 350px;
+                max-width: 500px;
+                backdrop-filter: blur(25px);
+                border: 3px solid rgba(59, 130, 246, 0.5);
+                transition: all 0.3s ease;
+                box-shadow: 0 25px 50px rgba(0, 0, 0, 0.7);
+                max-height: 80vh;
+                overflow: hidden;
+            `;
+
+            // Create title with icon
+            const title = document.createElement('div');
+            title.style.cssText = `
+                color: white;
+                font-size: 20px;
+                font-weight: bold;
+                margin-bottom: 20px;
+                text-align: center;
+                padding-bottom: 15px;
+                border-bottom: 2px solid rgba(59, 130, 246, 0.3);
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                gap: 10px;
+            `;
+            title.innerHTML = '<i class="fas fa-server"></i> Direct Link Servers';
+            selectorContainer.appendChild(title);
+
+            // Group servers by type for better organization
+            const serverGroups = {};
+            servers.forEach(server => {
+                let group = 'Other';
+                if (server.url.includes('.m3u8')) group = 'HLS Streams';
+                else if (server.url.includes('.mpd')) group = 'MPD Streams';
+                else if (server.url.includes('.mp4')) group = 'MP4 Files';
+                else if (server.url.includes('.mkv')) group = 'MKV Files';
+                else if (server.url.includes('.avi')) group = 'AVI Files';
+                else if (server.url.includes('.mov')) group = 'MOV Files';
+                else if (server.url.includes('.webm')) group = 'WebM Files';
+                else if (server.url.includes('.flv')) group = 'FLV Files';
+                
+                if (!serverGroups[group]) serverGroups[group] = [];
+                serverGroups[group].push(server);
+            });
+
+            // Create server list
+            const serverList = document.createElement('div');
+            serverList.style.cssText = `
+                max-height: 450px;
+                overflow-y: auto;
+                overflow-x: hidden;
+                padding-right: 8px;
+            `;
+
+            // Add servers grouped by type
+            Object.entries(serverGroups).forEach(([groupName, groupServers]) => {
+                // Add group header
+                const groupHeader = document.createElement('div');
+                groupHeader.style.cssText = `
+                    color: rgba(255, 255, 255, 0.9);
+                    font-size: 14px;
+                    font-weight: bold;
+                    padding: 12px 16px 8px 16px;
+                    margin-top: 15px;
+                    border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+                    background: rgba(59, 130, 246, 0.1);
+                    border-radius: 8px 8px 0 0;
+                    display: flex;
+                    align-items: center;
+                    gap: 8px;
+                `;
+                groupHeader.innerHTML = `<i class="fas fa-folder"></i> ${groupName} (${groupServers.length})`;
+                serverList.appendChild(groupHeader);
+
+                groupServers.forEach((server, index) => {
+                    const serverItem = document.createElement('div');
+                    serverItem.style.cssText = `
+                        padding: 14px 18px;
+                        margin: 6px 0;
+                        background: rgba(255, 255, 255, 0.08);
+                        border-radius: 10px;
+                        cursor: pointer;
+                        transition: all 0.2s ease;
+                        color: white;
+                        font-size: 14px;
+                        display: flex;
+                        justify-content: space-between;
+                        align-items: center;
+                        border: 1px solid rgba(255, 255, 255, 0.1);
+                        position: relative;
+                    `;
+
+                    // Highlight current server
+                    if (playerInstance && playerInstance.source && playerInstance.source.sources && 
+                        playerInstance.source.sources.some(s => s.src === server.url)) {
+                        serverItem.style.background = 'rgba(59, 130, 246, 0.3)';
+                        serverItem.style.border = '2px solid rgba(59, 130, 246, 0.8)';
+                    }
+
+                    // Server name with quality indicator
+                    const serverName = document.createElement('span');
+                    const displayName = server.name || `${groupName} Server ${index + 1}`;
+                    serverName.textContent = displayName;
+                    serverName.style.cssText = `
+                        flex: 1;
+                        overflow: hidden;
+                        text-overflow: ellipsis;
+                        white-space: nowrap;
+                        margin-right: 10px;
+                    `;
+                    serverItem.appendChild(serverName);
+
+                    // Quality indicator
+                    const qualityIndicator = document.createElement('span');
+                    qualityIndicator.style.cssText = `
+                        background: rgba(59, 130, 246, 0.8);
+                        color: white;
+                        padding: 4px 8px;
+                        border-radius: 12px;
+                        font-size: 11px;
+                        font-weight: 600;
+                        margin-left: 8px;
+                        flex-shrink: 0;
+                    `;
+                    
+                    // Determine quality based on URL or name
+                    let quality = 'HD';
+                    if (server.name) {
+                        if (server.name.includes('4K') || server.name.includes('2160p')) quality = '4K';
+                        else if (server.name.includes('1080p') || server.name.includes('FHD')) quality = '1080p';
+                        else if (server.name.includes('720p') || server.name.includes('HD')) quality = '720p';
+                        else if (server.name.includes('480p') || server.name.includes('SD')) quality = '480p';
+                    }
+                    qualityIndicator.textContent = quality;
+                    serverItem.appendChild(qualityIndicator);
+
+                    // Hover effects
+                    serverItem.addEventListener('mouseenter', () => {
+                        serverItem.style.background = 'rgba(255, 255, 255, 0.15)';
+                        serverItem.style.transform = 'translateX(3px) scale(1.02)';
+                        serverItem.style.boxShadow = '0 4px 12px rgba(0, 0, 0, 0.3)';
+                    });
+
+                    serverItem.addEventListener('mouseleave', () => {
+                        if (playerInstance && playerInstance.source && playerInstance.source.sources && 
+                            playerInstance.source.sources.some(s => s.src === server.url)) {
+                            serverItem.style.background = 'rgba(59, 130, 246, 0.3)';
+                        } else {
+                            serverItem.style.background = 'rgba(255, 255, 255, 0.08)';
+                        }
+                        serverItem.style.transform = 'translateX(0) scale(1)';
+                        serverItem.style.boxShadow = 'none';
+                    });
+
+                    // Click handler to switch servers
+                    serverItem.addEventListener('click', () => {
+                        if (playerInstance && playerInstance.source) {
+                            // Update Plyr source with the selected server
+                            const sources = [{
+                                src: server.url,
+                                size: parseInt(server.name?.replace(/\D/g, '') || '0'),
+                                type: server.url.includes('m3u8') ? 'application/x-mpegURL' : 
+                                      server.url.includes('mpd') ? 'application/dash+xml' : 'video/mp4'
+                            }];
+                            
+                            playerInstance.source = {
+                                type: 'video',
+                                sources: sources,
+                            };
+
+                            // Play the video
+                            playerInstance.play();
+
+                            // Show success feedback
+                            if (typeof showServerSwitchFeedback === 'function') {
+                                showServerSwitchFeedback(`Switched to ${displayName} (${quality})`);
+                            }
+
+                            // Update highlighting
+                            document.querySelectorAll('#enhanced-direct-link-server-selector .server-item').forEach(item => {
+                                item.style.background = 'rgba(255, 255, 255, 0.08)';
+                                item.style.border = '1px solid rgba(255, 255, 255, 0.1)';
+                            });
+                            serverItem.style.background = 'rgba(59, 130, 246, 0.3)';
+                            serverItem.style.border = '2px solid rgba(59, 130, 246, 0.8)';
+                        }
+                    });
+
+                    serverList.appendChild(serverItem);
+                });
+            });
+
+            selectorContainer.appendChild(serverList);
+
+            // Add close button
+            const closeButton = document.createElement('button');
+            closeButton.innerHTML = '×';
+            closeButton.style.cssText = `
+                position: absolute;
+                top: 15px;
+                right: 20px;
+                background: rgba(255, 255, 255, 0.1);
+                border: none;
+                color: white;
+                font-size: 24px;
+                cursor: pointer;
+                padding: 0;
+                width: 35px;
+                height: 35px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                border-radius: 50%;
+                transition: all 0.2s ease;
+            `;
+
+            closeButton.addEventListener('mouseenter', () => {
+                closeButton.style.background = 'rgba(255, 255, 255, 0.2)';
+                closeButton.style.transform = 'scale(1.1)';
+            });
+
+            closeButton.addEventListener('mouseleave', () => {
+                closeButton.style.background = 'rgba(255, 255, 255, 0.1)';
+                closeButton.style.transform = 'scale(1)';
+            });
+
+            closeButton.addEventListener('click', () => {
+                backdrop.remove();
+                selectorContainer.remove();
+            });
+
+            selectorContainer.appendChild(closeButton);
+
+            // Add to page
+            document.body.appendChild(backdrop);
+            document.body.appendChild(selectorContainer);
+
+            // Auto-hide after 8 seconds of inactivity
+            let hideTimeout;
+            const resetHideTimeout = () => {
+                clearTimeout(hideTimeout);
+                hideTimeout = setTimeout(() => {
+                    if (selectorContainer.parentNode) {
+                        selectorContainer.remove();
+                    }
+                    if (backdrop.parentNode) {
+                        backdrop.remove();
+                    }
+                }, 8000);
+            };
+
+            selectorContainer.addEventListener('mouseenter', () => clearTimeout(hideTimeout));
+            selectorContainer.addEventListener('mouseleave', resetHideTimeout);
+            resetHideTimeout();
+        }
+
+        // Hide enhanced direct link server selector
+        function hideEnhancedDirectLinkServerSelector() {
+            const existingSelector = document.getElementById('enhanced-direct-link-server-selector');
+            if (existingSelector) {
+                existingSelector.remove();
+            }
+            // Also remove backdrop
+            const existingBackdrop = document.querySelector('.server-selector-backdrop');
+            if (existingBackdrop) {
+                existingBackdrop.remove();
+            }
+        }
+
         // Extract YouTube ID
         function extractYouTubeId(url) {
             const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|&v=)([^#&?]*).*/;
@@ -6779,7 +7322,7 @@
             item.setAttribute('role', 'menuitemradio');
             item.setAttribute('data-cinecraze', 'servers-item');
             item.className = 'plyr__control';
-            item.textContent = 'Servers';
+            item.innerHTML = '<i class="fas fa-server"></i> Servers';
 
             item.addEventListener('click', (e) => {
                 e.preventDefault();
@@ -6789,9 +7332,11 @@
                     const playerContainer = document.querySelector('.player-container');
                     const iframe = playerContainer && playerContainer.querySelector('iframe.external-content-iframe');
                     if (iframe && iframe.style.display !== 'none') {
+                        // For embedded links, show the main server selector
                         createAllServersSelector(servers);
                     } else {
-                        showDirectLinkServerSelector();
+                        // For direct links, show the enhanced direct link server selector
+                        showEnhancedDirectLinkServerSelector(servers);
                     }
                 }
             });
@@ -7513,6 +8058,387 @@ playerInstance.on('ready', event => {
                     }, 100);
                 });
             });
+        }
+
+        // Render inline server buttons for embedded links
+        function renderInlineServerButtons(servers) {
+            if (!servers || servers.length <= 1) {
+                elements.inlineServerButtons.style.display = 'none';
+                return;
+            }
+
+            console.log('🎯 Rendering inline server buttons for', servers.length, 'servers');
+            
+            // Clear existing buttons
+            elements.inlineServerButtons.innerHTML = '';
+            elements.inlineServerButtons.style.display = 'flex';
+
+            // Add loading indicator
+            const loadingIndicator = document.createElement('div');
+            loadingIndicator.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Loading servers...';
+            loadingIndicator.style.cssText = `
+                color: rgba(255, 255, 255, 0.7);
+                font-size: 14px;
+                text-align: center;
+                padding: 10px;
+                width: 100%;
+            `;
+            elements.inlineServerButtons.appendChild(loadingIndicator);
+            
+            // Group servers by type
+            const serverGroups = {};
+            servers.forEach(server => {
+                let group = 'Other';
+                if (isVidsrcUrl(server.url)) group = 'VidSrc';
+                else if (isVidjoyUrl(server.url)) group = 'VidJoy';
+                else if (is2EmbedUrl(server.url)) group = '2Embed';
+                else if (isEmbedSuUrl(server.url)) group = 'Embed.su';
+                else if (isAutoEmbedUrl(server.url)) group = 'AutoEmbed';
+                else if (isGoDrivePlayerUrl(server.url)) group = 'GoDrivePlayer';
+                else if (isVidLinkProUrl(server.url)) group = 'VidLink.pro';
+                else if (isGoogleDriveUrl(server.url)) group = 'Google Drive';
+                else if (isMegaNzUrl(server.url)) group = 'Mega.nz';
+                else if (server.url.includes('.m3u8')) group = 'HLS Streams';
+                else if (server.url.includes('.mpd')) group = 'MPD Streams';
+                else if (server.url.includes('.mp4')) group = 'MP4 Files';
+                else if (server.url.includes('.mkv')) group = 'MKV Files';
+                else if (server.url.includes('.avi')) group = 'AVI Files';
+                else if (server.url.includes('.mov')) group = 'MOV Files';
+                else if (server.url.includes('.webm')) group = 'WebM Files';
+                else if (server.url.includes('.flv')) group = 'FLV Files';
+                
+                if (!serverGroups[group]) serverGroups[group] = [];
+                serverGroups[group].push(server);
+            });
+
+            // Create server selector buttons for each group
+            Object.entries(serverGroups).forEach(([groupName, groupServers]) => {
+                if (groupServers.length === 0) return;
+
+                const groupButton = document.createElement('button');
+                groupButton.className = 'server-group-btn';
+                groupButton.setAttribute('data-server-type', groupName);
+                groupButton.innerHTML = `
+                    <span class="server-group-name">${groupName}</span>
+                    <span class="server-count">${groupServers.length}</span>
+                `;
+                
+                // Set different colors for different server types
+                const colors = {
+                    'VidSrc': '#3B82F6',      // Blue
+                    'VidJoy': '#10B981',      // Green
+                    '2Embed': '#F59E0B',      // Amber
+                    'Embed.su': '#8B5CF6',    // Purple
+                    'AutoEmbed': '#EF4444',   // Red
+                    'GoDrivePlayer': '#06B6D4', // Cyan
+                    'VidLink.pro': '#84CC16',  // Lime
+                    'Google Drive': '#F97316', // Orange
+                    'Mega.nz': '#EC4899',     // Pink
+                    'HLS Streams': '#14B8A6', // Teal
+                    'MPD Streams': '#6366F1', // Indigo
+                    'MP4 Files': '#22C55E',   // Green
+                    'MKV Files': '#A855F7',   // Purple
+                    'AVI Files': '#F43F5E',   // Rose
+                    'MOV Files': '#0EA5E9',   // Sky
+                    'WebM Files': '#84CC16',  // Lime
+                    'FLV Files': '#F59E0B',   // Amber
+                    'Other': '#6B7280'        // Gray
+                };
+
+                const primaryColor = colors[groupName] || colors['Other'];
+                const secondaryColor = colors[groupName] || colors['Other'];
+
+                groupButton.style.cssText = `
+                    background: linear-gradient(135deg, ${primaryColor}, ${secondaryColor});
+                    color: white;
+                    border: none;
+                    padding: 8px 16px;
+                    border-radius: 20px;
+                    cursor: pointer;
+                    font-size: 12px;
+                    font-weight: 600;
+                    margin: 4px;
+                    transition: all 0.3s ease;
+                    display: flex;
+                    align-items: center;
+                    gap: 6px;
+                    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+                    min-width: 80px;
+                    justify-content: center;
+                `;
+
+                // Hover effects
+                groupButton.addEventListener('mouseenter', () => {
+                    groupButton.style.transform = 'translateY(-2px) scale(1.05)';
+                    groupButton.style.boxShadow = '0 4px 16px rgba(0, 0, 0, 0.3)';
+                });
+
+                groupButton.addEventListener('mouseleave', () => {
+                    groupButton.style.transform = 'translateY(0) scale(1)';
+                    groupButton.style.boxShadow = '0 2px 8px rgba(0, 0, 0, 0.2)';
+                });
+
+                // Click handler to show server selector
+                groupButton.addEventListener('click', () => {
+                    // Hide any existing server selector
+                    if (typeof hideAllServersSelector === 'function') {
+                        hideAllServersSelector();
+                    }
+                    
+                    // Create and show server selector for this group
+                    createGroupServerSelector(groupServers, groupName);
+                });
+
+                elements.inlineServerButtons.appendChild(groupButton);
+            });
+
+            // Remove loading indicator
+            const loadingIndicator = elements.inlineServerButtons.querySelector('div');
+            if (loadingIndicator) {
+                loadingIndicator.remove();
+            }
+        }
+
+        // Create server selector for a specific group
+        function createGroupServerSelector(servers, groupName) {
+            // Remove existing server selector if it exists
+            const existingSelector = document.getElementById('group-servers-selector');
+            if (existingSelector) {
+                existingSelector.remove();
+            }
+
+            // Remove existing backdrop
+            const existingBackdrop = document.querySelector('.server-selector-backdrop');
+            if (existingBackdrop) {
+                existingBackdrop.remove();
+            }
+
+            // Create backdrop
+            const backdrop = document.createElement('div');
+            backdrop.className = 'server-selector-backdrop';
+            backdrop.addEventListener('click', () => {
+                backdrop.remove();
+                selectorContainer.remove();
+            });
+
+            // Create server selector container
+            const selectorContainer = document.createElement('div');
+            selectorContainer.id = 'group-servers-selector';
+            selectorContainer.style.cssText = `
+                position: absolute;
+                top: 50%;
+                left: 50%;
+                transform: translate(-50%, -50%);
+                z-index: 1000;
+                background: rgba(0, 0, 0, 0.95);
+                border-radius: 12px;
+                padding: 20px;
+                min-width: 300px;
+                max-width: 400px;
+                backdrop-filter: blur(20px);
+                border: 2px solid rgba(255, 255, 255, 0.3);
+                transition: all 0.3s ease;
+                box-shadow: 0 20px 40px rgba(0, 0, 0, 0.6);
+                max-height: 80vh;
+                overflow: hidden;
+            `;
+
+            // Create title
+            const title = document.createElement('div');
+            title.style.cssText = `
+                color: white;
+                font-size: 18px;
+                font-weight: bold;
+                margin-bottom: 15px;
+                text-align: center;
+                padding-bottom: 10px;
+                border-bottom: 2px solid rgba(255, 255, 255, 0.2);
+            `;
+            title.textContent = `🌐 ${groupName} Servers (${servers.length})`;
+            selectorContainer.appendChild(title);
+
+            // Create server list
+            const serverList = document.createElement('div');
+            serverList.style.cssText = `
+                max-height: 400px;
+                overflow-y: auto;
+                overflow-x: hidden;
+                padding-right: 5px;
+            `;
+
+            servers.forEach((server, index) => {
+                const serverItem = document.createElement('div');
+                serverItem.style.cssText = `
+                    padding: 12px 16px;
+                    margin: 8px 0;
+                    background: rgba(255, 255, 255, 0.1);
+                    border-radius: 10px;
+                    cursor: pointer;
+                    transition: all 0.2s ease;
+                    color: white;
+                    font-size: 14px;
+                    display: flex;
+                    justify-content: space-between;
+                    align-items: center;
+                    border: 1px solid rgba(255, 255, 255, 0.1);
+                `;
+
+                // Highlight current server
+                if (iframe && server.url === iframe.src) {
+                    serverItem.style.background = 'rgba(59, 130, 246, 0.4)';
+                    serverItem.style.border = '2px solid rgba(59, 130, 246, 0.8)';
+                }
+
+                // Server name
+                const serverName = document.createElement('span');
+                const displayName = server.name || `${groupName} Server ${index + 1}`;
+                serverName.textContent = displayName;
+                serverName.style.cssText = `
+                    flex: 1;
+                    overflow: hidden;
+                    text-overflow: ellipsis;
+                    white-space: nowrap;
+                    margin-right: 10px;
+                `;
+                serverItem.appendChild(serverName);
+
+                // Server status indicator
+                const statusIndicator = document.createElement('span');
+                statusIndicator.style.cssText = `
+                    width: 10px;
+                    height: 10px;
+                    border-radius: 50%;
+                    background: #10b981;
+                    margin-left: 8px;
+                    flex-shrink: 0;
+                `;
+                serverItem.appendChild(statusIndicator);
+
+                // Hover effects
+                serverItem.addEventListener('mouseenter', () => {
+                    serverItem.style.background = 'rgba(255, 255, 255, 0.2)';
+                    serverItem.style.transform = 'translateX(3px)';
+                });
+
+                serverItem.addEventListener('mouseleave', () => {
+                    if (iframe && server.url === iframe.src) {
+                        serverItem.style.background = 'rgba(59, 130, 246, 0.4)';
+                    } else {
+                        serverItem.style.background = 'rgba(255, 255, 255, 0.1)';
+                    }
+                    serverItem.style.transform = 'translateX(0)';
+                });
+
+                // Click handler to switch servers
+                serverItem.addEventListener('click', () => {
+                    if (server.url !== iframe?.src) {
+                        // Update iframe source
+                        if (iframe) {
+                            iframe.src = typeof filterEmbeddedUrl === 'function' ? filterEmbeddedUrl(server.url) : server.url;
+                            if (typeof showServerSwitchFeedback === 'function') {
+                                showServerSwitchFeedback(`Switched to ${displayName}`);
+                            }
+                        }
+                        
+                        // Update highlighting
+                        document.querySelectorAll('#group-servers-selector .server-item').forEach(item => {
+                            item.style.background = 'rgba(255, 255, 255, 0.1)';
+                            item.style.border = '1px solid rgba(255, 255, 255, 0.1)';
+                        });
+                        serverItem.style.background = 'rgba(59, 130, 246, 0.4)';
+                        serverItem.style.border = '2px solid rgba(59, 130, 246, 0.8)';
+                    }
+                });
+
+                serverList.appendChild(serverItem);
+            });
+
+            selectorContainer.appendChild(serverList);
+
+            // Add close button
+            const closeButton = document.createElement('button');
+            closeButton.innerHTML = '×';
+            closeButton.style.cssText = `
+                position: absolute;
+                top: 10px;
+                right: 15px;
+                background: none;
+                border: none;
+                color: white;
+                font-size: 24px;
+                cursor: pointer;
+                padding: 0;
+                width: 30px;
+                height: 30px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                border-radius: 50%;
+                transition: all 0.2s ease;
+            `;
+
+            closeButton.addEventListener('mouseenter', () => {
+                closeButton.style.background = 'rgba(255, 255, 255, 0.2)';
+                closeButton.style.borderRadius = '50%';
+            });
+
+            closeButton.addEventListener('mouseleave', () => {
+                closeButton.style.background = 'none';
+            });
+
+            closeButton.addEventListener('click', () => {
+                selectorContainer.remove();
+            });
+
+            selectorContainer.appendChild(closeButton);
+
+            // Add to page
+            document.body.appendChild(backdrop);
+            document.body.appendChild(selectorContainer);
+
+            // Auto-hide after 5 seconds of inactivity
+            let hideTimeout;
+            const resetHideTimeout = () => {
+                clearTimeout(hideTimeout);
+                hideTimeout = setTimeout(() => {
+                    if (selectorContainer.parentNode) {
+                        selectorContainer.remove();
+                    }
+                }, 5000);
+            };
+
+            selectorContainer.addEventListener('mouseenter', () => clearTimeout(hideTimeout));
+            selectorContainer.addEventListener('mouseleave', resetHideTimeout);
+            resetHideTimeout();
+        }
+
+        // Hide group server selector
+        function hideGroupServerSelector() {
+            const existingSelector = document.getElementById('group-servers-selector');
+            if (existingSelector) {
+                existingSelector.remove();
+            }
+            // Also remove backdrop
+            const existingBackdrop = document.querySelector('.server-selector-backdrop');
+            if (existingBackdrop) {
+                existingBackdrop.remove();
+            }
+        }
+
+        // Global function to hide all server selectors
+        function hideAllServerSelectors() {
+            hideGroupServerSelector();
+            if (typeof hideAllServersSelector === 'function') {
+                hideAllServersSelector();
+            }
+            if (typeof hideDirectLinkServerSelector === 'function') {
+                hideDirectLinkServerSelector();
+            }
+            hideEnhancedDirectLinkServerSelector();
+            
+            // Remove any remaining backdrops
+            const existingBackdrops = document.querySelectorAll('.server-selector-backdrop');
+            existingBackdrops.forEach(backdrop => backdrop.remove());
         }
         
         // --- End Enhanced Ad Blocking Functions ---
