@@ -8031,9 +8031,9 @@ playerInstance.on('ready', event => {
         // Run ad cleanup periodically
         setInterval(performAdCleanup, 5000); // Every 5 seconds
         
-        // Monitor iframes when they're created
+                // Monitor iframes when they're created
         setInterval(monitorIframeContent, 3000); // Every 3 seconds
-        
+
         // Enhanced iframe creation for server selector
         function enhanceServerSelectorIframes() {
             const serverItems = document.querySelectorAll('.server-item');
@@ -8074,16 +8074,16 @@ playerInstance.on('ready', event => {
             elements.inlineServerButtons.style.display = 'flex';
 
             // Add loading indicator
-            const loadingIndicator = document.createElement('div');
-            loadingIndicator.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Loading servers...';
-            loadingIndicator.style.cssText = `
+            const serverLoadingIndicator = document.createElement('div');
+            serverLoadingIndicator.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Loading servers...';
+            serverLoadingIndicator.style.cssText = `
                 color: rgba(255, 255, 255, 0.7);
                 font-size: 14px;
                 text-align: center;
                 padding: 10px;
                 width: 100%;
             `;
-            elements.inlineServerButtons.appendChild(loadingIndicator);
+            elements.inlineServerButtons.appendChild(serverLoadingIndicator);
             
             // Group servers by type
             const serverGroups = {};
@@ -8193,9 +8193,9 @@ playerInstance.on('ready', event => {
             });
 
             // Remove loading indicator
-            const loadingIndicator = elements.inlineServerButtons.querySelector('div');
-            if (loadingIndicator) {
-                loadingIndicator.remove();
+            const serverLoadingIndicator = elements.inlineServerButtons.querySelector('div');
+            if (serverLoadingIndicator) {
+                serverLoadingIndicator.remove();
             }
         }
 
@@ -8387,6 +8387,7 @@ playerInstance.on('ready', event => {
             });
 
             closeButton.addEventListener('click', () => {
+                backdrop.remove();
                 selectorContainer.remove();
             });
 
@@ -8403,6 +8404,9 @@ playerInstance.on('ready', event => {
                 hideTimeout = setTimeout(() => {
                     if (selectorContainer.parentNode) {
                         selectorContainer.remove();
+                    }
+                    if (backdrop.parentNode) {
+                        backdrop.remove();
                     }
                 }, 5000);
             };
