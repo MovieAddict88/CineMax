@@ -3899,6 +3899,10 @@
                         default: 720,
                         options: [1080, 720, 480, 360, 240],
                     },
+                    speed: {
+                        selected: 1,
+                        options: [0.5, 0.75, 1, 1.25, 1.5, 1.75, 2]
+                    },
                     autoplay: false, // Start with autoplay disabled for better mobile compatibility
                     muted: false, // Allow sound by default
 
@@ -3908,6 +3912,7 @@
                 playerInstance.once('ready', event => {
                     setupViewerAndPlay();
                     addStretchButtonToPlayer();
+                    addPipButtonToPlayer();
                     addServerSelectorToSettingsButton();
                     
                     // Event listeners for fullscreen etc. should be attached here too, only once
@@ -6633,37 +6638,10 @@
 
         // Function to add server selector functionality to Plyr settings button
         function addServerSelectorToSettingsButton() {
-            if (!playerInstance || !playerInstance.elements || !playerInstance.elements.controls) {
-                return;
-            }
-
-            const controlsContainer = playerInstance.elements.controls;
-            const settingsButton = controlsContainer.querySelector('button[data-plyr="settings"]');
-
-            if (!settingsButton) return;
-
-            // Remove existing click handlers to avoid duplicates
-            const newSettingsButton = settingsButton.cloneNode(true);
-            settingsButton.parentNode.replaceChild(newSettingsButton, settingsButton);
-
-            // Add server selector functionality to settings button
-            newSettingsButton.addEventListener('click', (event) => {
-                // Check if we have servers available
-                if (currentContentInfo && currentContentInfo.servers && currentContentInfo.servers.length > 1) {
-                    // Show server selector instead of default settings
-                    event.preventDefault();
-                    event.stopPropagation();
-                    showDirectLinkServerSelector();
-                } else {
-                    // Fall back to default settings behavior
-                    // This will be handled by Plyr's default settings functionality
-                }
-            });
-
-            // Add tooltip to indicate server selection capability
-            if (currentContentInfo && currentContentInfo.servers && currentContentInfo.servers.length > 1) {
-                newSettingsButton.title = `Server Selection (${currentContentInfo.servers.length} servers available) - Click for server options`;
-            }
+            // DO NOT OVERRIDE THE SETTINGS BUTTON - this breaks Plyr's default settings functionality
+            // The settings button should work normally for playback speed, quality, etc.
+            // Server selection is now handled by the embedded server selector below the video actions
+            console.log('Settings button left intact for normal Plyr functionality');
         }
         
         // Toggle theme
@@ -7230,10 +7208,7 @@ function addPipButtonToPlayer() {
     }
 }
 
-// Call this function after the player is initialized
-playerInstance.on('ready', event => {
-    addPipButtonToPlayer();
-});
+// PiP button is now called in the main player initialization above
         // --- End Stretch Functionality ---
         
         // --- Enhanced Ad Blocking Functions ---
