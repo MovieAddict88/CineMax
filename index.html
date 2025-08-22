@@ -1,4 +1,4 @@
- <!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -1519,6 +1519,53 @@
             display: flex;
             justify-content: center;
             margin-top: 30px;
+        }
+
+        /* Enhanced Loading States */
+        .enhanced-loading {
+            position: relative;
+            overflow: hidden;
+        }
+
+        .enhanced-loading::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.1), transparent);
+            animation: loadingShimmer 1.5s infinite;
+        }
+
+        @keyframes loadingShimmer {
+            0% { left: -100%; }
+            100% { left: 100%; }
+        }
+
+        /* Server Selector Enhancements */
+        .server-selector-enhanced {
+            backdrop-filter: blur(15px);
+            -webkit-backdrop-filter: blur(15px);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .server-selector-enhanced:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.6);
+        }
+
+        /* Player Loading Optimizations */
+        .player-loading {
+            background: linear-gradient(45deg, #1a1a1a, #2a2a2a, #1a1a1a);
+            background-size: 200% 200%;
+            animation: gradientShift 2s ease infinite;
+        }
+
+        @keyframes gradientShift {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
         }
 
         .load-more-btn {
@@ -3127,10 +3174,13 @@
             });
         }
         
-        // Enhanced data fetching with multiple fallback sources
+        // Enhanced data fetching with multiple fallback sources and performance optimizations
         async function fetchData() {
             try {
                 elements.loadingSpinner.style.display = 'block';
+                
+                // Show enhanced loading indicator
+                showLoadingIndicator('Loading content data...');
                 
                 // Primary source
                 const primaryUrl = "https://github.com/MovieAddict88/Movie-Source/raw/main/playlist.json";
@@ -3152,6 +3202,7 @@
                         localStorage.setItem('cineCrazeDataCache', JSON.stringify(cineData));
                         localStorage.setItem('cineCrazeDataTimestamp', Date.now().toString());
                         console.log("✅ Loaded data from primary source");
+                        hideLoadingIndicator();
                         return;
                     }
                 } catch (err) {
@@ -3166,6 +3217,7 @@
                         if (response.ok) {
                             cineData = await response.json();
                             console.log(`✅ Loaded data from fallback: ${fallbackUrl}`);
+                            hideLoadingIndicator();
                             return;
                         }
                     } catch (err) {
@@ -3180,6 +3232,7 @@
                     try {
                         cineData = JSON.parse(cachedData);
                         console.log("✅ Loaded data from cache");
+                        hideLoadingIndicator();
                         return;
                     } catch (err) {
                         console.warn("⚠️ Cache parsing failed:", err);
@@ -3222,6 +3275,7 @@
                 document.body.appendChild(errorMessage);
             } finally {
                 elements.loadingSpinner.style.display = 'none';
+                hideLoadingIndicator();
             }
         }
         
@@ -3799,11 +3853,15 @@
                     },
                     autoplay: false, // Start with autoplay disabled for better mobile compatibility
                     muted: false, // Allow sound by default
+
                 });
 
+                // Add custom controls and server selector functionality to Plyr
                 playerInstance.once('ready', event => {
                     setupViewerAndPlay();
                     addStretchButtonToPlayer();
+                    addServerSelectorToSettingsButton();
+                    
                     // Event listeners for fullscreen etc. should be attached here too, only once
                     playerInstance.on('enterfullscreen', () => {
                         if (screen.orientation && screen.orientation.lock) {
@@ -3811,6 +3869,8 @@
                                 console.log('Orientation lock failed: ', error);
                             });
                         }
+                        // Ensure server selector is visible in fullscreen
+                        showDirectLinkServerSelectorInFullscreen();
                     });
                     playerInstance.on('exitfullscreen', () => {
                         if (screen.orientation && screen.orientation.unlock) {
@@ -3819,6 +3879,8 @@
                         if (elements.searchContainer) {
                             elements.searchContainer.classList.remove('show');
                         }
+                        // Hide fullscreen server selector
+                        hideDirectLinkServerSelectorInFullscreen();
                     });
                 });
 
@@ -3834,6 +3896,11 @@
             } else {
                 // Player already exists, it should be ready.
                 setupViewerAndPlay();
+                
+                // Ensure server selector functionality is available for existing player
+                setTimeout(() => {
+                    addServerSelectorToSettingsButton();
+                }, 500);
             }
 
             elements.viewerPage.style.display = 'block';
@@ -3911,6 +3978,139 @@
                 iframe.onload = () => {
                     // Store the onload handler for reuse when switching servers
                     iframe._onloadHandler = iframe.onload;
+                    
+                    // Auto-play embedded content after load
+                    console.log('✅ Embedded content loaded, attempting autoplay');
+                    
+                    // Enhanced autoplay for embedded content - covering ALL embedded link types
+                    const attemptEmbeddedAutoplay = () => {
+                        try {
+                            // Method 1: Standard postMessage autoplay (universal)
+                            iframe.contentWindow.postMessage('{"event":"command","func":"play","args":""}', '*');
+                            iframe.contentWindow.postMessage('{"method":"play"}', '*');
+                            iframe.contentWindow.postMessage('{"action":"play"}', '*');
+                            iframe.contentWindow.postMessage('{"type":"play"}', '*');
+                            iframe.contentWindow.postMessage('{"command":"play"}', '*');
+                            iframe.contentWindow.postMessage('{"key":"play"}', '*');
+                            
+                            // Method 2: YouTube-specific autoplay
+                            if (iframe.src.includes('youtube.com') || iframe.src.includes('youtu.be')) {
+                                iframe.contentWindow.postMessage('{"event":"command","func":"playVideo","args":""}', '*');
+                                iframe.contentWindow.postMessage('{"event":"command","func":"play","args":""}', '*');
+                            }
+                            
+                            // Method 3: VidSrc family autoplay (vidsrc.net, vidsrc.me, vidsrc.to, vidsrc.xyz)
+                            if (iframe.src.includes('vidsrc.net') || iframe.src.includes('vidsrc.me') || 
+                                iframe.src.includes('vidsrc.to') || iframe.src.includes('vidsrc.xyz') || 
+                                iframe.src.includes('vidsrc.pro')) {
+                                iframe.contentWindow.postMessage('{"action":"play"}', '*');
+                                iframe.contentWindow.postMessage('{"type":"play"}', '*');
+                                iframe.contentWindow.postMessage('{"command":"play"}', '*');
+                                iframe.contentWindow.postMessage('{"method":"play"}', '*');
+                            }
+                            
+                            // Method 4: VidJoy autoplay
+                            if (iframe.src.includes('vidjoy.pro')) {
+                                iframe.contentWindow.postMessage('{"action":"play"}', '*');
+                                iframe.contentWindow.postMessage('{"type":"play"}', '*');
+                                iframe.contentWindow.postMessage('{"command":"play"}', '*');
+                            }
+                            
+                            // Method 5: GoDrivePlayer autoplay
+                            if (iframe.src.includes('godriveplayer')) {
+                                iframe.contentWindow.postMessage('{"action":"play"}', '*');
+                                iframe.contentWindow.postMessage('{"type":"play"}', '*');
+                                iframe.contentWindow.postMessage('{"command":"play"}', '*');
+                            }
+                            
+                            // Method 6: VidLink.pro autoplay
+                            if (iframe.src.includes('vidlink.pro')) {
+                                iframe.contentWindow.postMessage('{"action":"play"}', '*');
+                                iframe.contentWindow.postMessage('{"type":"play"}', '*');
+                                iframe.contentWindow.postMessage('{"command":"play"}', '*');
+                            }
+                            
+                            // Method 7: 2Embed.cc autoplay
+                            if (iframe.src.includes('2embed.cc')) {
+                                iframe.contentWindow.postMessage('{"action":"play"}', '*');
+                                iframe.contentWindow.postMessage('{"type":"play"}', '*');
+                                iframe.contentWindow.postMessage('{"command":"play"}', '*');
+                            }
+                            
+                            // Method 8: Embed.su autoplay
+                            if (iframe.src.includes('embed.su')) {
+                                iframe.contentWindow.postMessage('{"action":"play"}', '*');
+                                iframe.contentWindow.postMessage('{"type":"play"}', '*');
+                                iframe.contentWindow.postMessage('{"command":"play"}', '*');
+                            }
+                            
+                            // Method 9: AutoEmbed.cc autoplay
+                            if (iframe.src.includes('autoembed.cc')) {
+                                iframe.contentWindow.postMessage('{"action":"play"}', '*');
+                                iframe.contentWindow.postMessage('{"type":"play"}', '*');
+                                iframe.contentWindow.postMessage('{"command":"play"}', '*');
+                            }
+                            
+                            // Method 10: Google Drive autoplay
+                            if (iframe.src.includes('drive.google.com')) {
+                                iframe.contentWindow.postMessage('{"method":"play"}', '*');
+                                iframe.contentWindow.postMessage('{"action":"play"}', '*');
+                                iframe.contentWindow.postMessage('{"command":"play"}', '*');
+                            }
+                            
+                            // Method 11: Mega.nz autoplay
+                            if (iframe.src.includes('mega.nz')) {
+                                iframe.contentWindow.postMessage('{"action":"play"}', '*');
+                                iframe.contentWindow.postMessage('{"type":"play"}', '*');
+                                iframe.contentWindow.postMessage('{"command":"play"}', '*');
+                            }
+                            
+                            // Method 12: Universal autoplay attempts
+                            iframe.focus();
+                            iframe.contentWindow.postMessage('{"play":true}', '*');
+                            iframe.contentWindow.postMessage('{"autoplay":true}', '*');
+                            iframe.contentWindow.postMessage('{"start":true}', '*');
+                            
+                            // Method 13: Additional universal methods for newer players
+                            iframe.contentWindow.postMessage('{"function":"play"}', '*');
+                            iframe.contentWindow.postMessage('{"event":"play"}', '*');
+                            iframe.contentWindow.postMessage('{"trigger":"play"}', '*');
+                            iframe.contentWindow.postMessage('{"execute":"play"}', '*');
+                            
+                            // Method 14: Try to simulate user interaction
+                            try {
+                                iframe.contentWindow.document.querySelector('video')?.play();
+                                iframe.contentWindow.document.querySelector('audio')?.play();
+                            } catch (e) {
+                                // Ignore errors for cross-origin restrictions
+                            }
+                            
+                            // Method 15: Additional postMessage formats for various players
+                            iframe.contentWindow.postMessage('{"type":"command","action":"play"}', '*');
+                            iframe.contentWindow.postMessage('{"type":"action","command":"play"}', '*');
+                            iframe.contentWindow.postMessage('{"type":"function","name":"play"}', '*');
+                            iframe.contentWindow.postMessage('{"type":"event","name":"play"}', '*');
+                            
+                            // Method 16: Try different message formats
+                            iframe.contentWindow.postMessage('play', '*');
+                            iframe.contentWindow.postMessage('{"play":1}', '*');
+                            iframe.contentWindow.postMessage('{"play":"true"}', '*');
+                            iframe.contentWindow.postMessage('{"play":true,"autoplay":true}', '*');
+                            
+                            console.log('✅ Comprehensive embedded autoplay commands sent for all link types');
+                        } catch (error) {
+                            console.log('⚠️ Embedded autoplay attempt failed:', error);
+                        }
+                    };
+                    
+                    // Multiple autoplay attempts with different delays
+                    const autoplayDelays = [500, 1000, 2000, 3000];
+                    autoplayDelays.forEach((delay, index) => {
+                        setTimeout(() => {
+                            console.log(`🔄 Embedded autoplay attempt ${index + 1} after ${delay}ms`);
+                            attemptEmbeddedAutoplay();
+                        }, delay);
+                    });
                 };
                 
                 iframe.onerror = () => {
@@ -4004,12 +4204,82 @@
                 }]
             };
             
-            // Autoplay regular video content
-            setTimeout(() => {
-                if (playerInstance && typeof playerInstance.play === 'function') {
-                    enhancedAutoplay(elements.player, playerInstance);
-                }
-            }, 500);
+            // Enhanced autoplay for direct links with better loading
+            showLoadingIndicator('Loading video content...');
+            
+            // Preload video data for better performance
+            if (playerInstance && playerInstance.media) {
+                playerInstance.media.preload = 'auto';
+                
+                // Multiple autoplay attempts for better success rate
+                const attemptAutoplay = () => {
+                    if (playerInstance && typeof playerInstance.play === 'function') {
+                        console.log('🎬 Attempting direct link autoplay...');
+                        
+                        // Try multiple autoplay methods
+                        Promise.resolve().then(() => {
+                            // Method 1: Direct play
+                            return playerInstance.play();
+                        }).then(() => {
+                            console.log('✅ Direct link autoplay successful');
+                            hideLoadingIndicator();
+                        }).catch((error1) => {
+                            console.log('⚠️ Method 1 failed, trying method 2:', error1);
+                            
+                            // Method 2: Enhanced autoplay
+                            return enhancedAutoplay(elements.player, playerInstance);
+                        }).catch((error2) => {
+                            console.log('⚠️ Method 2 failed, trying method 3:', error2);
+                            
+                            // Method 3: Force play with timeout
+                            setTimeout(() => {
+                                if (playerInstance && typeof playerInstance.play === 'function') {
+                                    playerInstance.play().catch(e => console.log('Final autoplay attempt failed:', e));
+                                }
+                            }, 1000);
+                        });
+                    }
+                };
+                
+                // Listen for loaded data events
+                playerInstance.media.addEventListener('loadeddata', () => {
+                    console.log('✅ Video data loaded successfully');
+                    hideLoadingIndicator();
+                    attemptAutoplay();
+                });
+                
+                // Listen for canplay event as fallback
+                playerInstance.media.addEventListener('canplay', () => {
+                    console.log('✅ Video can start playing');
+                    hideLoadingIndicator();
+                    attemptAutoplay();
+                });
+                
+                // Listen for loadedmetadata event
+                playerInstance.media.addEventListener('loadedmetadata', () => {
+                    console.log('✅ Video metadata loaded');
+                    attemptAutoplay();
+                });
+                
+                // Multiple fallback attempts for slow connections
+                const fallbackAttempts = [1000, 2000, 4000, 6000];
+                fallbackAttempts.forEach((delay, index) => {
+                    setTimeout(() => {
+                        if (playerInstance && !playerInstance.playing) {
+                            console.log(`🔄 Fallback autoplay attempt ${index + 1} after ${delay}ms`);
+                            attemptAutoplay();
+                        }
+                    }, delay);
+                });
+            } else {
+                // Fallback for older player instances
+                setTimeout(() => {
+                    hideLoadingIndicator();
+                    if (playerInstance && typeof playerInstance.play === 'function') {
+                        enhancedAutoplay(elements.player, playerInstance);
+                    }
+                }, 500);
+            }
         }
 
         // Enhanced MPD handling with Shaka Player only (universal channel compatibility)
@@ -4353,33 +4623,160 @@
             }
         }
 
-        // Enhanced autoplay with mobile detection
+        // Enhanced autoplay with mobile detection and improved loading
         function enhancedAutoplay(videoElement, playerInstance = null) {
             // Check if it's a mobile device
             const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
             
-            if (isMobile) {
-                // On mobile, try muted autoplay first (more likely to work)
-                videoElement.muted = true;
-                videoElement.play().then(() => {
-                    console.log('✅ Mobile muted autoplay successful');
-                    // Unmute after successful autoplay
-                    setTimeout(() => {
-                        videoElement.muted = false;
-                    }, 100);
-                }).catch(error => {
-                    console.log('Mobile muted autoplay failed:', error);
-                    // Show play button for manual start
-                    showPlayButton();
-                });
-            } else {
-                // On desktop, try normal autoplay
-                videoElement.play().then(() => {
-                    console.log('✅ Desktop autoplay successful');
-                }).catch(error => {
-                    console.log('Desktop autoplay failed:', error);
-                    showPlayButton();
-                });
+            // Show loading indicator
+            showLoadingIndicator('Preparing video playback...');
+            
+            // Preload video for better performance
+            if (videoElement.preload !== 'auto') {
+                videoElement.preload = 'auto';
+            }
+            
+            // Enhanced loading with progress tracking
+            const loadProgress = () => {
+                if (videoElement.readyState >= 3) { // HAVE_FUTURE_DATA
+                    hideLoadingIndicator();
+                    
+                    if (isMobile) {
+                        // On mobile, try muted autoplay first (more likely to work)
+                        videoElement.muted = true;
+                        videoElement.play().then(() => {
+                            console.log('✅ Mobile muted autoplay successful');
+                            // Unmute after successful autoplay
+                            setTimeout(() => {
+                                videoElement.muted = false;
+                            }, 100);
+                        }).catch(error => {
+                            console.log('Mobile muted autoplay failed:', error);
+                            // Show play button for manual start
+                            showPlayButton();
+                        });
+                    } else {
+                        // On desktop, try normal autoplay
+                        videoElement.play().then(() => {
+                            console.log('✅ Desktop autoplay successful');
+                        }).catch(error => {
+                            console.log('Desktop autoplay failed:', error);
+                            showPlayButton();
+                        });
+                    }
+                } else {
+                    // Continue waiting for data
+                    setTimeout(loadProgress, 100);
+                }
+            };
+            
+            // Start loading progress
+            loadProgress();
+            
+            // Fallback timeout for slow connections
+            setTimeout(() => {
+                if (videoElement.readyState < 3) {
+                    console.log('⚠️ Video loading taking longer than expected, attempting autoplay anyway');
+                    hideLoadingIndicator();
+                    
+                    if (isMobile) {
+                        videoElement.muted = true;
+                        videoElement.play().catch(error => {
+                            console.log('Fallback mobile autoplay failed:', error);
+                            showPlayButton();
+                        });
+                    } else {
+                        videoElement.play().catch(error => {
+                            console.log('Fallback desktop autoplay failed:', error);
+                            showPlayButton();
+                        });
+                    }
+                }
+            }, 5000);
+        }
+
+        // Loading indicator functions for better user experience
+        function showLoadingIndicator(message = 'Loading...') {
+            // Remove existing loading indicator
+            hideLoadingIndicator();
+            
+            const loadingIndicator = document.createElement('div');
+            loadingIndicator.id = 'enhanced-loading-indicator';
+            loadingIndicator.style.cssText = `
+                position: fixed;
+                top: 50%;
+                left: 50%;
+                transform: translate(-50%, -50%);
+                z-index: 10000;
+                background: rgba(0, 0, 0, 0.9);
+                color: white;
+                padding: 20px 30px;
+                border-radius: 12px;
+                backdrop-filter: blur(15px);
+                border: 2px solid rgba(255, 255, 255, 0.2);
+                text-align: center;
+                font-size: 16px;
+                font-weight: 500;
+                box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5);
+                animation: fadeInScale 0.3s ease;
+            `;
+            
+            // Add loading spinner
+            const spinner = document.createElement('div');
+            spinner.style.cssText = `
+                width: 40px;
+                height: 40px;
+                border: 4px solid rgba(255, 255, 255, 0.3);
+                border-radius: 50%;
+                border-top-color: #3b82f6;
+                animation: spin 1s linear infinite;
+                margin: 0 auto 15px auto;
+            `;
+            
+            loadingIndicator.appendChild(spinner);
+            
+            // Add message
+            const messageDiv = document.createElement('div');
+            messageDiv.textContent = message;
+            loadingIndicator.appendChild(messageDiv);
+            
+            // Add CSS animations if not already present
+            if (!document.getElementById('enhanced-loading-animations')) {
+                const style = document.createElement('style');
+                style.id = 'enhanced-loading-animations';
+                style.textContent = `
+                    @keyframes fadeInScale {
+                        from { opacity: 0; transform: translate(-50%, -50%) scale(0.8); }
+                        to { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+                    }
+                    @keyframes spin {
+                        to { transform: rotate(360deg); }
+                    }
+                `;
+                document.head.appendChild(style);
+            }
+            
+            document.body.appendChild(loadingIndicator);
+        }
+
+        function hideLoadingIndicator() {
+            const existingIndicator = document.getElementById('enhanced-loading-indicator');
+            if (existingIndicator) {
+                existingIndicator.style.animation = 'fadeOutScale 0.3s ease';
+                setTimeout(() => existingIndicator.remove(), 300);
+                
+                // Add fade out animation if not present
+                if (!document.getElementById('enhanced-loading-animations')) {
+                    const style = document.createElement('style');
+                    style.id = 'enhanced-loading-animations';
+                    style.textContent = `
+                        @keyframes fadeOutScale {
+                            from { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+                            to { opacity: 0; transform: translate(-50%, -50%) scale(0.8); }
+                        }
+                    `;
+                    document.head.appendChild(style);
+                }
             }
         }
 
@@ -4818,7 +5215,7 @@
             }
         }
         
-        // Update loading status with proper indicators
+        // Update loading status with proper indicators and enhanced loading states
         function updateLoadingStatus(message, isError = false) {
             if (elements.playerMessageArea) {
                 elements.playerMessageArea.textContent = message;
@@ -4830,6 +5227,30 @@
                 } else {
                     elements.playerMessageArea.style.color = '#ffffff';
                     elements.playerMessageArea.style.backgroundColor = 'rgba(255, 255, 255, 0.1)';
+                }
+                
+                // Add loading animation for non-error messages
+                if (!isError) {
+                    elements.playerMessageArea.style.backgroundImage = 'linear-gradient(90deg, transparent, rgba(255,255,255,0.1), transparent)';
+                    elements.playerMessageArea.style.backgroundSize = '200% 100%';
+                    elements.playerMessageArea.style.animation = 'loadingShimmer 2s infinite';
+                    
+                    // Add CSS animation if not present
+                    if (!document.getElementById('loading-shimmer-animation')) {
+                        const style = document.createElement('style');
+                        style.id = 'loading-shimmer-animation';
+                        style.textContent = `
+                            @keyframes loadingShimmer {
+                                0% { background-position: -200% 0; }
+                                100% { background-position: 200% 0; }
+                            }
+                        `;
+                        document.head.appendChild(style);
+                    }
+                } else {
+                    // Remove loading animation for error messages
+                    elements.playerMessageArea.style.backgroundImage = 'none';
+                    elements.playerMessageArea.style.animation = 'none';
                 }
             }
         }
@@ -4981,12 +5402,17 @@
                 top: 10px;
                 right: 10px;
                 z-index: 1000;
-                background: rgba(0, 0, 0, 0.8);
-                border-radius: 8px;
-                padding: 10px;
-                min-width: 200px;
-                backdrop-filter: blur(10px);
-                border: 1px solid rgba(255, 255, 255, 0.1);
+                background: rgba(0, 0, 0, 0.9);
+                border-radius: 12px;
+                padding: 15px;
+                min-width: 250px;
+                max-width: 350px;
+                backdrop-filter: blur(15px);
+                border: 2px solid rgba(255, 255, 255, 0.2);
+                transition: all 0.3s ease;
+                box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+                max-height: 80vh;
+                overflow: hidden;
             `;
             
             // Create title
@@ -5062,7 +5488,9 @@
             
             // Group servers by type for better organization
             const serverGroups = {};
-            servers.forEach(server => {
+            console.log('🔍 Processing servers for grouping:', servers.length, 'total servers');
+            
+            servers.forEach((server, index) => {
                 let group = 'Other';
                 if (isVidsrcUrl(server.url)) group = 'VidSrc';
                 else if (isVidjoyUrl(server.url)) group = 'VidJoy';
@@ -5076,28 +5504,40 @@
                 
                 if (!serverGroups[group]) serverGroups[group] = [];
                 serverGroups[group].push(server);
+                
+                console.log(`🔍 Server ${index + 1}: ${server.name || 'Unknown'} (${server.url?.substring(0, 50)}...) -> Group: ${group}`);
             });
+            
+            console.log('📊 Server groups created:', Object.entries(serverGroups).map(([group, servers]) => `${group}: ${servers.length}`));
             
             // Create server list
             const serverList = document.createElement('div');
             serverList.style.cssText = `
-                max-height: 300px;
+                max-height: 400px;
                 overflow-y: auto;
+                overflow-x: hidden;
+                padding-right: 5px;
             `;
             
             // Add servers grouped by type
             let globalIndex = 0;
+            console.log('🎯 Creating server list items...');
+            
             Object.entries(serverGroups).forEach(([groupName, groupServers]) => {
+                console.log(`📋 Processing group: ${groupName} with ${groupServers.length} servers`);
+                
                 // Add group header if there are multiple groups
                 if (Object.keys(serverGroups).length > 1) {
                     const groupHeader = document.createElement('div');
                     groupHeader.style.cssText = `
-                        color: rgba(255, 255, 255, 0.7);
-                        font-size: 11px;
+                        color: rgba(255, 255, 255, 0.8);
+                        font-size: 12px;
                         font-weight: bold;
-                        padding: 8px 12px 4px 12px;
-                        margin-top: 8px;
-                        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+                        padding: 10px 15px 6px 15px;
+                        margin-top: 10px;
+                        border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+                        background: rgba(255, 255, 255, 0.05);
+                        border-radius: 6px 6px 0 0;
                     `;
                     groupHeader.textContent = `${groupName} (${groupServers.length})`;
                     serverList.appendChild(groupHeader);
@@ -5105,19 +5545,25 @@
                 
                 groupServers.forEach((server, index) => {
                     globalIndex++;
+                    console.log(`✅ Creating server item ${globalIndex}: ${server.name || 'Unknown'} for group ${groupName}`);
                 const serverItem = document.createElement('div');
                 serverItem.style.cssText = `
-                    padding: 8px 12px;
-                    margin: 4px 0;
+                    padding: 10px 15px;
+                    margin: 6px 0;
                     background: rgba(255, 255, 255, 0.1);
-                    border-radius: 6px;
+                    border-radius: 8px;
                     cursor: pointer;
                     transition: all 0.2s ease;
                     color: white;
-                    font-size: 13px;
+                    font-size: 14px;
                     display: flex;
                     justify-content: space-between;
                     align-items: center;
+                    min-height: 20px;
+                    word-wrap: break-word;
+                    white-space: nowrap;
+                    overflow: hidden;
+                    text-overflow: ellipsis;
                 `;
                 
                 // Highlight current server
@@ -5130,6 +5576,13 @@
                 const serverName = document.createElement('span');
                 const displayName = server.name || `${groupName} Server ${index + 1}`;
                 serverName.textContent = displayName;
+                serverName.style.cssText = `
+                    flex: 1;
+                    overflow: hidden;
+                    text-overflow: ellipsis;
+                    white-space: nowrap;
+                    margin-right: 10px;
+                `;
                 serverItem.appendChild(serverName);
                 
                 // Server status indicator
@@ -5167,7 +5620,20 @@
                             if (iframe._onloadHandler) {
                                 iframe.onload = iframe._onloadHandler;
                             }
+                            
+                            // Show loading indicator for server switch
+                            showLoadingIndicator(`Switching to ${displayName}...`);
+                            
                             iframe.src = filterEmbeddedUrl(server.url);
+                            
+                            // Auto-hide server selector after selection
+                            setTimeout(() => {
+                                const selector = document.getElementById('embedded-server-selector');
+                                if (selector) {
+                                    selector.style.opacity = '0.3';
+                                    selector.style.transform = 'scale(0.95)';
+                                }
+                            }, 1000);
                         }
                         
                         // Update visual selection
@@ -5189,6 +5655,7 @@
                 });
             });
             
+            console.log(`🎉 Server selector created with ${globalIndex} total server items`);
             selectorContainer.appendChild(serverList);
             
             // Add close button
@@ -5262,6 +5729,23 @@
                 });
                 
                 playerContainer.appendChild(indicatorButton);
+                
+                // Add fullscreen support for embedded server selector
+                document.addEventListener('fullscreenchange', () => {
+                    if (document.fullscreenElement) {
+                        // Make selector visible in fullscreen
+                        selectorContainer.style.zIndex = '10001';
+                        selectorContainer.style.position = 'fixed';
+                        indicatorButton.style.zIndex = '10000';
+                        indicatorButton.style.position = 'fixed';
+                    } else {
+                        // Restore normal positioning
+                        selectorContainer.style.zIndex = '1000';
+                        selectorContainer.style.position = 'absolute';
+                        indicatorButton.style.zIndex = '999';
+                        indicatorButton.style.position = 'absolute';
+                    }
+                });
             }
             
             // Auto-hide after 5 seconds of inactivity
@@ -5376,6 +5860,251 @@
         function isGoogleDriveUrl(url) {
             if (!url) return false;
             return url.includes('drive.google.com') || url.includes('drive.usercontent.google.com');
+        }
+
+        // Direct Link Server Selector Functions
+        function showDirectLinkServerSelector() {
+            if (!currentContentInfo || !currentContentInfo.servers || currentContentInfo.servers.length <= 1) {
+                console.log('🔍 No servers available for direct link server selector');
+                return;
+            }
+
+            // Remove existing direct link server selector
+            hideDirectLinkServerSelector();
+
+            const servers = currentContentInfo.servers;
+            console.log('🎯 Creating direct link server selector with', servers.length, 'servers');
+
+            // Create server selector container
+            const selectorContainer = document.createElement('div');
+            selectorContainer.id = 'direct-link-server-selector';
+            selectorContainer.style.cssText = `
+                position: absolute;
+                top: 50%;
+                left: 50%;
+                transform: translate(-50%, -50%);
+                z-index: 10000;
+                background: rgba(0, 0, 0, 0.95);
+                border-radius: 12px;
+                padding: 20px;
+                min-width: 300px;
+                max-width: 500px;
+                backdrop-filter: blur(15px);
+                border: 2px solid rgba(255, 255, 255, 0.2);
+                box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5);
+            `;
+
+            // Create title
+            const title = document.createElement('div');
+            title.style.cssText = `
+                color: white;
+                font-size: 18px;
+                font-weight: bold;
+                margin-bottom: 20px;
+                text-align: center;
+                border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+                padding-bottom: 15px;
+            `;
+            title.textContent = '🌐 Direct Link Server Selection';
+            selectorContainer.appendChild(title);
+
+            // Create server list
+            const serverList = document.createElement('div');
+            serverList.style.cssText = `
+                max-height: 400px;
+                overflow-y: auto;
+                margin-bottom: 20px;
+            `;
+
+            // Group servers by type
+            const serverGroups = {};
+            servers.forEach(server => {
+                let group = 'Other';
+                if (server.url.includes('.mp4')) group = 'MP4';
+                else if (server.url.includes('.m3u8')) group = 'HLS';
+                else if (server.url.includes('.mkv')) group = 'MKV';
+                else if (server.url.includes('.webm')) group = 'WebM';
+                else if (server.url.includes('.avi')) group = 'AVI';
+                else if (server.url.includes('.mpd')) group = 'MPD';
+                
+                if (!serverGroups[group]) serverGroups[group] = [];
+                serverGroups[group].push(server);
+            });
+
+            // Add servers grouped by type
+            Object.entries(serverGroups).forEach(([groupName, groupServers]) => {
+                // Add group header
+                const groupHeader = document.createElement('div');
+                groupHeader.style.cssText = `
+                    color: rgba(255, 255, 255, 0.8);
+                    font-size: 14px;
+                    font-weight: bold;
+                    padding: 10px 15px 5px 15px;
+                    margin-top: 10px;
+                    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+                `;
+                groupHeader.textContent = `${groupName} (${groupServers.length})`;
+                serverList.appendChild(groupHeader);
+
+                groupServers.forEach((server, index) => {
+                    const serverItem = document.createElement('div');
+                    serverItem.style.cssText = `
+                        padding: 12px 15px;
+                        margin: 5px 0;
+                        background: rgba(255, 255, 255, 0.1);
+                        border-radius: 8px;
+                        cursor: pointer;
+                        transition: all 0.2s ease;
+                        color: white;
+                        font-size: 14px;
+                        display: flex;
+                        justify-content: space-between;
+                        align-items: center;
+                    `;
+
+                    // Highlight current server
+                    if (server.url === playerInstance?.source?.sources?.[0]?.src) {
+                        serverItem.style.background = 'rgba(59, 130, 246, 0.6)';
+                        serverItem.style.border = '1px solid rgba(59, 130, 246, 0.8)';
+                    }
+
+                    // Server name with quality info
+                    const serverName = document.createElement('span');
+                    const displayName = server.name || `${groupName} Server ${index + 1}`;
+                    serverName.textContent = displayName;
+                    serverItem.appendChild(serverName);
+
+                    // Server status indicator
+                    const statusIndicator = document.createElement('span');
+                    statusIndicator.style.cssText = `
+                        width: 10px;
+                        height: 10px;
+                        border-radius: 50%;
+                        background: #10b981;
+                        margin-left: 10px;
+                    `;
+                    serverItem.appendChild(statusIndicator);
+
+                    // Add hover effects
+                    serverItem.addEventListener('mouseenter', () => {
+                        serverItem.style.background = 'rgba(255, 255, 255, 0.2)';
+                        serverItem.style.transform = 'translateX(3px)';
+                    });
+
+                    serverItem.addEventListener('mouseleave', () => {
+                        if (server.url === playerInstance?.source?.sources?.[0]?.src) {
+                            serverItem.style.background = 'rgba(59, 130, 246, 0.6)';
+                        } else {
+                            serverItem.style.background = 'rgba(255, 255, 255, 0.1)';
+                        }
+                        serverItem.style.transform = 'translateX(0)';
+                    });
+
+                    // Add click handler to switch servers
+                    serverItem.addEventListener('click', () => {
+                        if (server.url !== playerInstance?.source?.sources?.[0]?.src) {
+                            // Show loading indicator for server switch
+                            showLoadingIndicator(`Switching to ${displayName}...`);
+                            
+                            // Switch to new server
+                            playUrl(server.url, servers);
+                            
+                            // Update visual selection
+                            document.querySelectorAll('#direct-link-server-selector .server-item').forEach(item => {
+                                item.style.background = 'rgba(255, 255, 255, 0.1)';
+                                item.style.border = 'none';
+                            });
+                            serverItem.style.background = 'rgba(59, 130, 246, 0.6)';
+                            serverItem.style.border = '1px solid rgba(59, 130, 246, 0.8)';
+                            
+                            // Show feedback
+                            showServerSwitchFeedback(displayName);
+                            
+                            // Hide selector after selection
+                            setTimeout(() => hideDirectLinkServerSelector(), 1000);
+                        }
+                    });
+
+                    // Add class for easy selection
+                    serverItem.className = 'server-item';
+                    serverList.appendChild(serverItem);
+                });
+            });
+
+            selectorContainer.appendChild(serverList);
+
+            // Add close button
+            const closeButton = document.createElement('button');
+            closeButton.style.cssText = `
+                position: absolute;
+                top: 10px;
+                right: 10px;
+                background: none;
+                border: none;
+                color: white;
+                font-size: 20px;
+                cursor: pointer;
+                padding: 5px;
+                border-radius: 6px;
+                transition: background 0.2s ease;
+            `;
+            closeButton.innerHTML = '×';
+            closeButton.addEventListener('click', () => {
+                hideDirectLinkServerSelector();
+            });
+            closeButton.addEventListener('mouseenter', () => {
+                closeButton.style.background = 'rgba(255, 255, 255, 0.2)';
+            });
+            closeButton.addEventListener('mouseleave', () => {
+                closeButton.style.background = 'none';
+            });
+            selectorContainer.appendChild(closeButton);
+
+            // Add to player container
+            const playerContainer = document.querySelector('.player-container') || document.getElementById('player-container');
+            if (playerContainer) {
+                playerContainer.appendChild(selectorContainer);
+                
+                // Add keyboard shortcut (Ctrl+S) to toggle server selector
+                const handleKeyPress = (event) => {
+                    if (event.key.toLowerCase() === 's' && event.ctrlKey) {
+                        event.preventDefault();
+                        hideDirectLinkServerSelector();
+                    }
+                };
+                
+                document.addEventListener('keydown', handleKeyPress);
+                selectorContainer._keyPressHandler = handleKeyPress;
+            }
+        }
+
+        function hideDirectLinkServerSelector() {
+            const existingSelector = document.getElementById('direct-link-server-selector');
+            if (existingSelector) {
+                // Remove keyboard event listener before removing element
+                if (existingSelector._keyPressHandler) {
+                    document.removeEventListener('keydown', existingSelector._keyPressHandler);
+                }
+                existingSelector.remove();
+            }
+        }
+
+        function showDirectLinkServerSelectorInFullscreen() {
+            // Ensure server selector is visible in fullscreen mode
+            const existingSelector = document.getElementById('direct-link-server-selector');
+            if (existingSelector) {
+                existingSelector.style.zIndex = '10001';
+                existingSelector.style.position = 'fixed';
+            }
+        }
+
+        function hideDirectLinkServerSelectorInFullscreen() {
+            // Restore normal positioning when exiting fullscreen
+            const existingSelector = document.getElementById('direct-link-server-selector');
+            if (existingSelector) {
+                existingSelector.style.zIndex = '10000';
+                existingSelector.style.position = 'absolute';
+            }
         }
 
         // Extract YouTube ID
@@ -5979,6 +6708,41 @@
                 settingsButton.parentNode.insertBefore(stretchButton, settingsButton);
             } else {
                 controlsContainer.appendChild(stretchButton);
+            }
+        }
+
+        // Function to add server selector functionality to Plyr settings button
+        function addServerSelectorToSettingsButton() {
+            if (!playerInstance || !playerInstance.elements || !playerInstance.elements.controls) {
+                return;
+            }
+
+            const controlsContainer = playerInstance.elements.controls;
+            const settingsButton = controlsContainer.querySelector('button[data-plyr="settings"]');
+
+            if (!settingsButton) return;
+
+            // Remove existing click handlers to avoid duplicates
+            const newSettingsButton = settingsButton.cloneNode(true);
+            settingsButton.parentNode.replaceChild(newSettingsButton, settingsButton);
+
+            // Add server selector functionality to settings button
+            newSettingsButton.addEventListener('click', (event) => {
+                // Check if we have servers available
+                if (currentContentInfo && currentContentInfo.servers && currentContentInfo.servers.length > 1) {
+                    // Show server selector instead of default settings
+                    event.preventDefault();
+                    event.stopPropagation();
+                    showDirectLinkServerSelector();
+                } else {
+                    // Fall back to default settings behavior
+                    // This will be handled by Plyr's default settings functionality
+                }
+            });
+
+            // Add tooltip to indicate server selection capability
+            if (currentContentInfo && currentContentInfo.servers && currentContentInfo.servers.length > 1) {
+                newSettingsButton.title = `Server Selection (${currentContentInfo.servers.length} servers available) - Click for server options`;
             }
         }
         
