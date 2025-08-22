@@ -3982,42 +3982,122 @@
                     // Auto-play embedded content after load
                     console.log('✅ Embedded content loaded, attempting autoplay');
                     
-                    // Enhanced autoplay for embedded content
+                    // Enhanced autoplay for embedded content - covering ALL embedded link types
                     const attemptEmbeddedAutoplay = () => {
                         try {
-                            // Method 1: Standard postMessage autoplay
+                            // Method 1: Standard postMessage autoplay (universal)
                             iframe.contentWindow.postMessage('{"event":"command","func":"play","args":""}', '*');
-                            
-                            // Method 2: Alternative autoplay method
                             iframe.contentWindow.postMessage('{"method":"play"}', '*');
+                            iframe.contentWindow.postMessage('{"action":"play"}', '*');
+                            iframe.contentWindow.postMessage('{"type":"play"}', '*');
+                            iframe.contentWindow.postMessage('{"command":"play"}', '*');
+                            iframe.contentWindow.postMessage('{"key":"play"}', '*');
                             
-                            // Method 3: For YouTube embeds
+                            // Method 2: YouTube-specific autoplay
                             if (iframe.src.includes('youtube.com') || iframe.src.includes('youtu.be')) {
                                 iframe.contentWindow.postMessage('{"event":"command","func":"playVideo","args":""}', '*');
+                                iframe.contentWindow.postMessage('{"event":"command","func":"play","args":""}', '*');
                             }
                             
-                            // Method 4: For Vidsrc and similar players
-                            if (iframe.src.includes('vidsrc') || iframe.src.includes('vidjoy') || iframe.src.includes('2embed')) {
+                            // Method 3: VidSrc family autoplay (vidsrc.net, vidsrc.me, vidsrc.to, vidsrc.xyz)
+                            if (iframe.src.includes('vidsrc.net') || iframe.src.includes('vidsrc.me') || 
+                                iframe.src.includes('vidsrc.to') || iframe.src.includes('vidsrc.xyz') || 
+                                iframe.src.includes('vidsrc.pro')) {
+                                iframe.contentWindow.postMessage('{"action":"play"}', '*');
+                                iframe.contentWindow.postMessage('{"type":"play"}', '*');
+                                iframe.contentWindow.postMessage('{"command":"play"}', '*');
+                                iframe.contentWindow.postMessage('{"method":"play"}', '*');
+                            }
+                            
+                            // Method 4: VidJoy autoplay
+                            if (iframe.src.includes('vidjoy.pro')) {
                                 iframe.contentWindow.postMessage('{"action":"play"}', '*');
                                 iframe.contentWindow.postMessage('{"type":"play"}', '*');
                                 iframe.contentWindow.postMessage('{"command":"play"}', '*');
                             }
                             
-                            // Method 5: Try to focus and send play key
-                            iframe.focus();
-                            iframe.contentWindow.postMessage('{"key":"play"}', '*');
+                            // Method 5: GoDrivePlayer autoplay
+                            if (iframe.src.includes('godriveplayer')) {
+                                iframe.contentWindow.postMessage('{"action":"play"}', '*');
+                                iframe.contentWindow.postMessage('{"type":"play"}', '*');
+                                iframe.contentWindow.postMessage('{"command":"play"}', '*');
+                            }
                             
-                            // Method 6: For Google Drive
+                            // Method 6: VidLink.pro autoplay
+                            if (iframe.src.includes('vidlink.pro')) {
+                                iframe.contentWindow.postMessage('{"action":"play"}', '*');
+                                iframe.contentWindow.postMessage('{"type":"play"}', '*');
+                                iframe.contentWindow.postMessage('{"command":"play"}', '*');
+                            }
+                            
+                            // Method 7: 2Embed.cc autoplay
+                            if (iframe.src.includes('2embed.cc')) {
+                                iframe.contentWindow.postMessage('{"action":"play"}', '*');
+                                iframe.contentWindow.postMessage('{"type":"play"}', '*');
+                                iframe.contentWindow.postMessage('{"command":"play"}', '*');
+                            }
+                            
+                            // Method 8: Embed.su autoplay
+                            if (iframe.src.includes('embed.su')) {
+                                iframe.contentWindow.postMessage('{"action":"play"}', '*');
+                                iframe.contentWindow.postMessage('{"type":"play"}', '*');
+                                iframe.contentWindow.postMessage('{"command":"play"}', '*');
+                            }
+                            
+                            // Method 9: AutoEmbed.cc autoplay
+                            if (iframe.src.includes('autoembed.cc')) {
+                                iframe.contentWindow.postMessage('{"action":"play"}', '*');
+                                iframe.contentWindow.postMessage('{"type":"play"}', '*');
+                                iframe.contentWindow.postMessage('{"command":"play"}', '*');
+                            }
+                            
+                            // Method 10: Google Drive autoplay
                             if (iframe.src.includes('drive.google.com')) {
                                 iframe.contentWindow.postMessage('{"method":"play"}', '*');
+                                iframe.contentWindow.postMessage('{"action":"play"}', '*');
+                                iframe.contentWindow.postMessage('{"command":"play"}', '*');
                             }
                             
-                            // Method 7: For Mega.nz
+                            // Method 11: Mega.nz autoplay
                             if (iframe.src.includes('mega.nz')) {
                                 iframe.contentWindow.postMessage('{"action":"play"}', '*');
+                                iframe.contentWindow.postMessage('{"type":"play"}', '*');
+                                iframe.contentWindow.postMessage('{"command":"play"}', '*');
                             }
                             
-                            console.log('✅ Embedded autoplay commands sent successfully');
+                            // Method 12: Universal autoplay attempts
+                            iframe.focus();
+                            iframe.contentWindow.postMessage('{"play":true}', '*');
+                            iframe.contentWindow.postMessage('{"autoplay":true}', '*');
+                            iframe.contentWindow.postMessage('{"start":true}', '*');
+                            
+                            // Method 13: Additional universal methods for newer players
+                            iframe.contentWindow.postMessage('{"function":"play"}', '*');
+                            iframe.contentWindow.postMessage('{"event":"play"}', '*');
+                            iframe.contentWindow.postMessage('{"trigger":"play"}', '*');
+                            iframe.contentWindow.postMessage('{"execute":"play"}', '*');
+                            
+                            // Method 14: Try to simulate user interaction
+                            try {
+                                iframe.contentWindow.document.querySelector('video')?.play();
+                                iframe.contentWindow.document.querySelector('audio')?.play();
+                            } catch (e) {
+                                // Ignore errors for cross-origin restrictions
+                            }
+                            
+                            // Method 15: Additional postMessage formats for various players
+                            iframe.contentWindow.postMessage('{"type":"command","action":"play"}', '*');
+                            iframe.contentWindow.postMessage('{"type":"action","command":"play"}', '*');
+                            iframe.contentWindow.postMessage('{"type":"function","name":"play"}', '*');
+                            iframe.contentWindow.postMessage('{"type":"event","name":"play"}', '*');
+                            
+                            // Method 16: Try different message formats
+                            iframe.contentWindow.postMessage('play', '*');
+                            iframe.contentWindow.postMessage('{"play":1}', '*');
+                            iframe.contentWindow.postMessage('{"play":"true"}', '*');
+                            iframe.contentWindow.postMessage('{"play":true,"autoplay":true}', '*');
+                            
+                            console.log('✅ Comprehensive embedded autoplay commands sent for all link types');
                         } catch (error) {
                             console.log('⚠️ Embedded autoplay attempt failed:', error);
                         }
