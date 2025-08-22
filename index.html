@@ -3982,21 +3982,55 @@
                     // Auto-play embedded content after load
                     console.log('✅ Embedded content loaded, attempting autoplay');
                     
-                    // Try to trigger autoplay for embedded content
-                    try {
-                        // For some embedded players, we can try to send play commands
-                        iframe.contentWindow.postMessage('{"event":"command","func":"play","args":""}', '*');
-                        
-                        // Alternative autoplay method
-                        iframe.contentWindow.postMessage('{"method":"play"}', '*');
-                        
-                        // For YouTube embeds
-                        if (iframe.src.includes('youtube.com') || iframe.src.includes('youtu.be')) {
-                            iframe.contentWindow.postMessage('{"event":"command","func":"playVideo","args":""}', '*');
+                    // Enhanced autoplay for embedded content
+                    const attemptEmbeddedAutoplay = () => {
+                        try {
+                            // Method 1: Standard postMessage autoplay
+                            iframe.contentWindow.postMessage('{"event":"command","func":"play","args":""}', '*');
+                            
+                            // Method 2: Alternative autoplay method
+                            iframe.contentWindow.postMessage('{"method":"play"}', '*');
+                            
+                            // Method 3: For YouTube embeds
+                            if (iframe.src.includes('youtube.com') || iframe.src.includes('youtu.be')) {
+                                iframe.contentWindow.postMessage('{"event":"command","func":"playVideo","args":""}', '*');
+                            }
+                            
+                            // Method 4: For Vidsrc and similar players
+                            if (iframe.src.includes('vidsrc') || iframe.src.includes('vidjoy') || iframe.src.includes('2embed')) {
+                                iframe.contentWindow.postMessage('{"action":"play"}', '*');
+                                iframe.contentWindow.postMessage('{"type":"play"}', '*');
+                                iframe.contentWindow.postMessage('{"command":"play"}', '*');
+                            }
+                            
+                            // Method 5: Try to focus and send play key
+                            iframe.focus();
+                            iframe.contentWindow.postMessage('{"key":"play"}', '*');
+                            
+                            // Method 6: For Google Drive
+                            if (iframe.src.includes('drive.google.com')) {
+                                iframe.contentWindow.postMessage('{"method":"play"}', '*');
+                            }
+                            
+                            // Method 7: For Mega.nz
+                            if (iframe.src.includes('mega.nz')) {
+                                iframe.contentWindow.postMessage('{"action":"play"}', '*');
+                            }
+                            
+                            console.log('✅ Embedded autoplay commands sent successfully');
+                        } catch (error) {
+                            console.log('⚠️ Embedded autoplay attempt failed:', error);
                         }
-                    } catch (error) {
-                        console.log('⚠️ Embedded autoplay attempt failed:', error);
-                    }
+                    };
+                    
+                    // Multiple autoplay attempts with different delays
+                    const autoplayDelays = [500, 1000, 2000, 3000];
+                    autoplayDelays.forEach((delay, index) => {
+                        setTimeout(() => {
+                            console.log(`🔄 Embedded autoplay attempt ${index + 1} after ${delay}ms`);
+                            attemptEmbeddedAutoplay();
+                        }, delay);
+                    });
                 };
                 
                 iframe.onerror = () => {
@@ -4097,37 +4131,66 @@
             if (playerInstance && playerInstance.media) {
                 playerInstance.media.preload = 'auto';
                 
+                // Multiple autoplay attempts for better success rate
+                const attemptAutoplay = () => {
+                    if (playerInstance && typeof playerInstance.play === 'function') {
+                        console.log('🎬 Attempting direct link autoplay...');
+                        
+                        // Try multiple autoplay methods
+                        Promise.resolve().then(() => {
+                            // Method 1: Direct play
+                            return playerInstance.play();
+                        }).then(() => {
+                            console.log('✅ Direct link autoplay successful');
+                            hideLoadingIndicator();
+                        }).catch((error1) => {
+                            console.log('⚠️ Method 1 failed, trying method 2:', error1);
+                            
+                            // Method 2: Enhanced autoplay
+                            return enhancedAutoplay(elements.player, playerInstance);
+                        }).catch((error2) => {
+                            console.log('⚠️ Method 2 failed, trying method 3:', error2);
+                            
+                            // Method 3: Force play with timeout
+                            setTimeout(() => {
+                                if (playerInstance && typeof playerInstance.play === 'function') {
+                                    playerInstance.play().catch(e => console.log('Final autoplay attempt failed:', e));
+                                }
+                            }, 1000);
+                        });
+                    }
+                };
+                
                 // Listen for loaded data events
                 playerInstance.media.addEventListener('loadeddata', () => {
                     console.log('✅ Video data loaded successfully');
                     hideLoadingIndicator();
-                    
-                    // Attempt autoplay after data is loaded
-                    setTimeout(() => {
-                        if (playerInstance && typeof playerInstance.play === 'function') {
-                            enhancedAutoplay(elements.player, playerInstance);
-                        }
-                    }, 200);
+                    attemptAutoplay();
                 });
                 
                 // Listen for canplay event as fallback
                 playerInstance.media.addEventListener('canplay', () => {
                     console.log('✅ Video can start playing');
                     hideLoadingIndicator();
-                    
-                    // Attempt autoplay if not already playing
-                    if (playerInstance && !playerInstance.playing && typeof playerInstance.play === 'function') {
-                        enhancedAutoplay(elements.player, playerInstance);
-                    }
+                    attemptAutoplay();
                 });
                 
-                // Fallback timeout for slow connections
-                setTimeout(() => {
-                    hideLoadingIndicator();
-                    if (playerInstance && typeof playerInstance.play === 'function') {
-                        enhancedAutoplay(elements.player, playerInstance);
-                    }
-                }, 3000);
+                // Listen for loadedmetadata event
+                playerInstance.media.addEventListener('loadedmetadata', () => {
+                    console.log('✅ Video metadata loaded');
+                    attemptAutoplay();
+                });
+                
+                // Multiple fallback attempts for slow connections
+                const fallbackAttempts = [1000, 2000, 4000, 6000];
+                fallbackAttempts.forEach((delay, index) => {
+                    setTimeout(() => {
+                        if (playerInstance && !playerInstance.playing) {
+                            console.log(`🔄 Fallback autoplay attempt ${index + 1} after ${delay}ms`);
+                            attemptAutoplay();
+                        }
+                    }, delay);
+                });
             } else {
                 // Fallback for older player instances
                 setTimeout(() => {
@@ -5477,7 +5540,20 @@
                             if (iframe._onloadHandler) {
                                 iframe.onload = iframe._onloadHandler;
                             }
+                            
+                            // Show loading indicator for server switch
+                            showLoadingIndicator(`Switching to ${displayName}...`);
+                            
                             iframe.src = filterEmbeddedUrl(server.url);
+                            
+                            // Auto-hide server selector after selection
+                            setTimeout(() => {
+                                const selector = document.getElementById('embedded-server-selector');
+                                if (selector) {
+                                    selector.style.opacity = '0.3';
+                                    selector.style.transform = 'scale(0.95)';
+                                }
+                            }, 1000);
                         }
                         
                         // Update visual selection
@@ -5847,6 +5923,9 @@
                     // Add click handler to switch servers
                     serverItem.addEventListener('click', () => {
                         if (server.url !== playerInstance?.source?.sources?.[0]?.src) {
+                            // Show loading indicator for server switch
+                            showLoadingIndicator(`Switching to ${displayName}...`);
+                            
                             // Switch to new server
                             playUrl(server.url, servers);
                             
