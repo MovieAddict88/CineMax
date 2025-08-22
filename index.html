@@ -3042,7 +3042,8 @@
             nextEpisodeBtn: null,
             hamburgerBtn: document.getElementById('hamburger-btn'),
             mobileFiltersMenu: document.querySelector('.mobile-filters-menu'),
-            stretchBtn: document.getElementById('stretch-btn')
+            stretchBtn: document.getElementById('stretch-btn'),
+            inlineServerButtons: document.getElementById('inline-server-buttons')
         };
         
         // State
@@ -4497,7 +4498,6 @@
             
             updateLoadingStatus('All MPD sources failed. Please try again later.', true);
         }
-        
         // Detect DRM protection in MPD manifest
         async function detectDRMProtection(mpdUrl) {
             try {
@@ -5248,7 +5248,6 @@
                 }
             }
         }
-
         // Universal DRM detection for any channel
         async function detectChannelDRMRequirements(url, servers = []) {
             try {
@@ -6325,6 +6324,7 @@
                 console.log('📺 Playing episode with servers:', episode.Servers.length, 'servers available');
                 console.log('🔍 Episode server details:', episode.Servers.map(s => ({name: s.name, url: s.url?.substring(0, 50) + '...'})));
                 updatePlayerSource(episode.Servers);
+                renderInlineServerButtons(episode.Servers);
             }
 
             // Ensure the episode selector reflects the current episode
