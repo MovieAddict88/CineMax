@@ -3774,7 +3774,9 @@
                     console.log('🎬 Loading content with servers:', content.Servers.length, 'servers available');
                     console.log('🔍 Server details:', content.Servers.map(s => ({name: s.name, url: s.url?.substring(0, 50) + '...'})));
                     updatePlayerSource(content.Servers);
-                    renderInlineServerButtons(content.Servers);
+                    if (typeof renderInlineServerButtons === 'function') {
+                        renderInlineServerButtons(content.Servers);
+                    }
                 }
                 elements.seasonsGrid.innerHTML = '';
 
@@ -6324,7 +6326,9 @@
                 console.log('📺 Playing episode with servers:', episode.Servers.length, 'servers available');
                 console.log('🔍 Episode server details:', episode.Servers.map(s => ({name: s.name, url: s.url?.substring(0, 50) + '...'})));
                 updatePlayerSource(episode.Servers);
-                renderInlineServerButtons(episode.Servers);
+                if (typeof renderInlineServerButtons === 'function') {
+                    renderInlineServerButtons(episode.Servers);
+                }
             }
 
             // Ensure the episode selector reflects the current episode
