@@ -3921,7 +3921,7 @@
                 playerInstance.once('ready', event => {
                     setupViewerAndPlay();
                     addStretchButtonToPlayer();
-                    addPipButtonToPlayer();
+                    // addPipButtonToPlayer(); // Removed - Plyr already has 'pip' in controls
                     addServerSelectorToSettingsButton();
                     
                     // Event listeners for fullscreen etc. should be attached here too, only once
