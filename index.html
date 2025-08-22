@@ -3860,7 +3860,7 @@
                 playerInstance.once('ready', event => {
                     setupViewerAndPlay();
                     addStretchButtonToPlayer();
-                    addServerSelectorToSettingsButton();
+                    injectServerSelectorIntoSettings();
                     
                     // Event listeners for fullscreen etc. should be attached here too, only once
                     playerInstance.on('enterfullscreen', () => {
@@ -3899,7 +3899,7 @@
                 
                 // Ensure server selector functionality is available for existing player
                 setTimeout(() => {
-                    addServerSelectorToSettingsButton();
+                    injectServerSelectorIntoSettings();
                 }, 500);
             }
 
@@ -5561,10 +5561,15 @@
                     align-items: center;
                     min-height: 20px;
                     word-wrap: break-word;
-                    white-space: nowrap;
+                    white-space: normal;
                     overflow: hidden;
                     text-overflow: ellipsis;
                 `;
+                
+                // Ensure vertical stacking
+                serverItem.style.display = 'flex';
+                serverItem.style.flexDirection = 'row';
+                serverItem.style.alignItems = 'center';
                 
                 // Highlight current server
                 if (server.url === iframe?.src) {
@@ -5580,7 +5585,7 @@
                     flex: 1;
                     overflow: hidden;
                     text-overflow: ellipsis;
-                    white-space: nowrap;
+                    white-space: normal;
                     margin-right: 10px;
                 `;
                 serverItem.appendChild(serverName);
@@ -6711,39 +6716,41 @@
             }
         }
 
-        // Function to add server selector functionality to Plyr settings button
-        function addServerSelectorToSettingsButton() {
-            if (!playerInstance || !playerInstance.elements || !playerInstance.elements.controls) {
+        // Inject a non-destructive Servers item into Plyr settings menu
+        function injectServerSelectorIntoSettings() {
+            if (!playerInstance || !playerInstance.elements || !playerInstance.elements.settings) {
                 return;
             }
+            const settingsMenu = playerInstance.elements.settings;
+            if (!settingsMenu) return;
 
-            const controlsContainer = playerInstance.elements.controls;
-            const settingsButton = controlsContainer.querySelector('button[data-plyr="settings"]');
+            // Avoid duplicates
+            if (settingsMenu.querySelector('[data-cinecraze="servers-item"]')) return;
 
-            if (!settingsButton) return;
+            // Build a settings item matching Plyr structure
+            const item = document.createElement('button');
+            item.setAttribute('type', 'button');
+            item.setAttribute('role', 'menuitemradio');
+            item.setAttribute('data-cinecraze', 'servers-item');
+            item.className = 'plyr__control';
+            item.textContent = 'Servers';
 
-            // Remove existing click handlers to avoid duplicates
-            const newSettingsButton = settingsButton.cloneNode(true);
-            settingsButton.parentNode.replaceChild(newSettingsButton, settingsButton);
-
-            // Add server selector functionality to settings button
-            newSettingsButton.addEventListener('click', (event) => {
-                // Check if we have servers available
-                if (currentContentInfo && currentContentInfo.servers && currentContentInfo.servers.length > 1) {
-                    // Show server selector instead of default settings
-                    event.preventDefault();
-                    event.stopPropagation();
-                    showDirectLinkServerSelector();
-                } else {
-                    // Fall back to default settings behavior
-                    // This will be handled by Plyr's default settings functionality
+            item.addEventListener('click', (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                const servers = (currentContentInfo && currentContentInfo.servers) || [];
+                if (servers && servers.length > 1) {
+                    const playerContainer = document.querySelector('.player-container');
+                    const iframe = playerContainer && playerContainer.querySelector('iframe.external-content-iframe');
+                    if (iframe && iframe.style.display !== 'none') {
+                        createEmbeddedServerSelector(servers);
+                    } else {
+                        showDirectLinkServerSelector();
+                    }
                 }
             });
 
-            // Add tooltip to indicate server selection capability
-            if (currentContentInfo && currentContentInfo.servers && currentContentInfo.servers.length > 1) {
-                newSettingsButton.title = `Server Selection (${currentContentInfo.servers.length} servers available) - Click for server options`;
-            }
+            settingsMenu.appendChild(item);
         }
         
         // Toggle theme
