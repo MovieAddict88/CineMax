@@ -3853,33 +3853,14 @@
                     },
                     autoplay: false, // Start with autoplay disabled for better mobile compatibility
                     muted: false, // Allow sound by default
-                    // Custom controls for server selection
-                    customControls: true,
-                    // Add custom server selector button
-                    customButtons: {
-                        serverSelector: {
-                            icon: '🌐',
-                            label: 'Server Selection',
-                            position: 'controls',
-                            click: function() {
-                                showDirectLinkServerSelector();
-                            }
-                        }
-                    }
+
                 });
 
-                // Add custom server selector button to Plyr controls
+                // Add custom controls and server selector functionality to Plyr
                 playerInstance.once('ready', event => {
                     setupViewerAndPlay();
                     addStretchButtonToPlayer();
-                    addServerSelectorButtonToPlayer();
-                    
-                    // Ensure server selector button is always available
-                    setTimeout(() => {
-                        if (!document.querySelector('.plyr__server-selector-button')) {
-                            addServerSelectorButtonToPlayer();
-                        }
-                    }, 1000);
+                    addServerSelectorToSettingsButton();
                     
                     // Event listeners for fullscreen etc. should be attached here too, only once
                     playerInstance.on('enterfullscreen', () => {
@@ -3916,11 +3897,9 @@
                 // Player already exists, it should be ready.
                 setupViewerAndPlay();
                 
-                // Ensure server selector button is available for existing player
+                // Ensure server selector functionality is available for existing player
                 setTimeout(() => {
-                    if (!document.querySelector('.plyr__server-selector-button')) {
-                        addServerSelectorButtonToPlayer();
-                    }
+                    addServerSelectorToSettingsButton();
                 }, 500);
             }
 
@@ -3999,6 +3978,25 @@
                 iframe.onload = () => {
                     // Store the onload handler for reuse when switching servers
                     iframe._onloadHandler = iframe.onload;
+                    
+                    // Auto-play embedded content after load
+                    console.log('✅ Embedded content loaded, attempting autoplay');
+                    
+                    // Try to trigger autoplay for embedded content
+                    try {
+                        // For some embedded players, we can try to send play commands
+                        iframe.contentWindow.postMessage('{"event":"command","func":"play","args":""}', '*');
+                        
+                        // Alternative autoplay method
+                        iframe.contentWindow.postMessage('{"method":"play"}', '*');
+                        
+                        // For YouTube embeds
+                        if (iframe.src.includes('youtube.com') || iframe.src.includes('youtu.be')) {
+                            iframe.contentWindow.postMessage('{"event":"command","func":"playVideo","args":""}', '*');
+                        }
+                    } catch (error) {
+                        console.log('⚠️ Embedded autoplay attempt failed:', error);
+                    }
                 };
                 
                 iframe.onerror = () => {
@@ -5343,7 +5341,9 @@
             
             // Group servers by type for better organization
             const serverGroups = {};
-            servers.forEach(server => {
+            console.log('🔍 Processing servers for grouping:', servers.length, 'total servers');
+            
+            servers.forEach((server, index) => {
                 let group = 'Other';
                 if (isVidsrcUrl(server.url)) group = 'VidSrc';
                 else if (isVidjoyUrl(server.url)) group = 'VidJoy';
@@ -5357,7 +5357,11 @@
                 
                 if (!serverGroups[group]) serverGroups[group] = [];
                 serverGroups[group].push(server);
+                
+                console.log(`🔍 Server ${index + 1}: ${server.name || 'Unknown'} (${server.url?.substring(0, 50)}...) -> Group: ${group}`);
             });
+            
+            console.log('📊 Server groups created:', Object.entries(serverGroups).map(([group, servers]) => `${group}: ${servers.length}`));
             
             // Create server list
             const serverList = document.createElement('div');
@@ -5368,7 +5372,11 @@
             
             // Add servers grouped by type
             let globalIndex = 0;
+            console.log('🎯 Creating server list items...');
+            
             Object.entries(serverGroups).forEach(([groupName, groupServers]) => {
+                console.log(`📋 Processing group: ${groupName} with ${groupServers.length} servers`);
+                
                 // Add group header if there are multiple groups
                 if (Object.keys(serverGroups).length > 1) {
                     const groupHeader = document.createElement('div');
@@ -5386,6 +5394,7 @@
                 
                 groupServers.forEach((server, index) => {
                     globalIndex++;
+                    console.log(`✅ Creating server item ${globalIndex}: ${server.name || 'Unknown'} for group ${groupName}`);
                 const serverItem = document.createElement('div');
                 serverItem.style.cssText = `
                     padding: 8px 12px;
@@ -5470,6 +5479,7 @@
                 });
             });
             
+            console.log(`🎉 Server selector created with ${globalIndex} total server items`);
             selectorContainer.appendChild(serverList);
             
             // Add close button
@@ -6522,8 +6532,8 @@
             }
         }
 
-        // Function to add server selector button to Plyr controls
-        function addServerSelectorButtonToPlayer() {
+        // Function to add server selector functionality to Plyr settings button
+        function addServerSelectorToSettingsButton() {
             if (!playerInstance || !playerInstance.elements || !playerInstance.elements.controls) {
                 return;
             }
@@ -6531,28 +6541,30 @@
             const controlsContainer = playerInstance.elements.controls;
             const settingsButton = controlsContainer.querySelector('button[data-plyr="settings"]');
 
-            // Check if server selector button already exists
-            if (controlsContainer.querySelector('.plyr__server-selector-button')) return;
+            if (!settingsButton) return;
 
-            const serverSelectorButton = document.createElement('button');
-            serverSelectorButton.type = 'button';
-            serverSelectorButton.className = 'plyr__controls__item plyr__control plyr__server-selector-button';
-            serverSelectorButton.setAttribute('data-plyr', 'server-selector');
-            serverSelectorButton.setAttribute('aria-label', 'Server Selection');
-            serverSelectorButton.title = 'Server Selection (Ctrl+S)';
-            serverSelectorButton.innerHTML = '🌐';
+            // Remove existing click handlers to avoid duplicates
+            const newSettingsButton = settingsButton.cloneNode(true);
+            settingsButton.parentNode.replaceChild(newSettingsButton, settingsButton);
 
-            // Insert before the settings button
-            if (settingsButton) {
-                settingsButton.parentNode.insertBefore(serverSelectorButton, settingsButton);
-            } else {
-                controlsContainer.appendChild(serverSelectorButton);
-            }
-
-            // Add click event
-            serverSelectorButton.addEventListener('click', () => {
-                showDirectLinkServerSelector();
+            // Add server selector functionality to settings button
+            newSettingsButton.addEventListener('click', (event) => {
+                // Check if we have servers available
+                if (currentContentInfo && currentContentInfo.servers && currentContentInfo.servers.length > 1) {
+                    // Show server selector instead of default settings
+                    event.preventDefault();
+                    event.stopPropagation();
+                    showDirectLinkServerSelector();
+                } else {
+                    // Fall back to default settings behavior
+                    // This will be handled by Plyr's default settings functionality
+                }
             });
+
+            // Add tooltip to indicate server selection capability
+            if (currentContentInfo && currentContentInfo.servers && currentContentInfo.servers.length > 1) {
+                newSettingsButton.title = `Server Selection (${currentContentInfo.servers.length} servers available) - Click for server options`;
+            }
         }
         
         // Toggle theme
