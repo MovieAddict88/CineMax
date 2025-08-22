@@ -6326,9 +6326,7 @@
                 console.log('📺 Playing episode with servers:', episode.Servers.length, 'servers available');
                 console.log('🔍 Episode server details:', episode.Servers.map(s => ({name: s.name, url: s.url?.substring(0, 50) + '...'})));
                 updatePlayerSource(episode.Servers);
-                if (typeof renderInlineServerButtons === 'function') {
-                    renderInlineServerButtons(episode.Servers);
-                }
+                renderInlineServerButtons(episode.Servers);
             }
 
             // Ensure the episode selector reflects the current episode
