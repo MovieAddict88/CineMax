@@ -792,15 +792,12 @@
 .content-card.grid .card-title {
     height: auto; /* Allow title to define its own height up to max-height / line-clamp */
 }
-
-
 .card-meta {
     display: flex;
     gap: 10px;
     font-size: 14px;
     color: var(--youtube-light-gray);
 }
-
 .content-card.grid .card-meta {
     /* display: none; */ /* Hide rating and duration in grid view - Commented out to show meta */
     display: flex; /* Ensure it's a flex container */
@@ -1597,7 +1594,6 @@
             left: 0;
             width: 100%;
         }
-
         /* Loading Spinner */
         .loading-spinner {
             display: none;
@@ -1853,7 +1849,6 @@
                 /* max-height: calc(13px * 1.4 * 2); /* Fallback for non-webkit */
             }
         }
-
         /* Smart TV and Large Screens */
         @media (min-width: 1600px) {
             .carousel {
@@ -2496,6 +2491,7 @@
                                     <button class="action-btn" id="dislike-btn"><i class="fas fa-thumbs-down"></i> <span id="dislike-count-span">1K</span></button>
                                     <button class="action-btn" id="share-video-btn"><i class="fas fa-share"></i> <span>Share</span></button>
                                 </div>
+                                <div id="inline-server-buttons" style="display:flex;flex-wrap:wrap;gap:8px;margin-top:10px;"></div>
                             </div>
                         </div>
 
@@ -2977,7 +2973,6 @@
             return originalWindowOpen.apply(this, arguments);
         };
     </script>
-    
     <script>
         if ('scrollRestoration' in history) {
             history.scrollRestoration = 'manual';
@@ -3723,7 +3718,6 @@
             window.addEventListener('scroll', lazyLoad);
             window.addEventListener('resize', lazyLoad);
         }
-        
         // Open viewer for content
         function openViewer(content) {
             if (playerInstance) {
@@ -3747,7 +3741,7 @@
                 type: content.type,
                 description: content.Description,
                 poster: content.Poster || content.Thumbnail,
-                Servers: content.Servers
+                servers: content.Servers
             };
 
             incrementViewCount(content.Title);
@@ -3779,6 +3773,7 @@
                     console.log('🎬 Loading content with servers:', content.Servers.length, 'servers available');
                     console.log('🔍 Server details:', content.Servers.map(s => ({name: s.name, url: s.url?.substring(0, 50) + '...'})));
                     updatePlayerSource(content.Servers);
+                    renderInlineServerButtons(content.Servers);
                 }
                 elements.seasonsGrid.innerHTML = '';
 
@@ -4525,7 +4520,6 @@
                 return { hasDRM: false };
             }
         }
-        
         // Universal channel format detection and handling
         function detectChannelFormat(url) {
             const formatInfo = {
@@ -5324,7 +5318,6 @@
                    url.includes('godriveplayer') || url.includes('vidlink.pro') || url.includes('2embed.cc') ||
                    url.includes('embed.su') || url.includes('autoembed.cc');
         }
-
         // Check if URL is Vidjoy
         function isVidjoyUrl(url) {
             if (!url) return false;
@@ -5919,7 +5912,6 @@
             if (!url) return false;
             return url.includes('drive.google.com') || url.includes('drive.usercontent.google.com');
         }
-
         // Direct Link Server Selector Functions
         function showDirectLinkServerSelector() {
             if (!currentContentInfo || !currentContentInfo.servers || currentContentInfo.servers.length <= 1) {
@@ -6523,7 +6515,6 @@
             // If episode navigation fails, close viewer
             closeViewerInternalLogic();
         }
-
         // Setup event listeners
         function setupEventListeners() {
             // Theme toggle
@@ -6835,8 +6826,6 @@
     timeout = setTimeout(later, wait);
   };
 }
-
-
         // Handle search
         function handleSearch() {
             const query = elements.searchInput.value.toLowerCase();
