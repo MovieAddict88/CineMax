@@ -3963,8 +3963,8 @@
             if (isVidsrcUrl(url) || isVidjoyUrl(url) || isVidsrcMeUrl(url) || isVidsrcToUrl(url) || isVidsrcXyzUrl(url) || isGoDrivePlayerUrl(url) || isVidLinkProUrl(url) || is2EmbedUrl(url) || isEmbedSuUrl(url) || isAutoEmbedUrl(url)) {
                 elements.player.style.display = 'none'; // Hide Plyr player
                 
-                // Create server selector for embedded sources (non-blocking)
-                setTimeout(() => createEmbeddedServerSelector(servers), 100);
+                // Create server selector for all sources (non-blocking)
+                setTimeout(() => createAllServersSelector(servers), 100);
                 
                 if (!iframe) {
                     iframe = createSecureIframe(url, playerContainer);
@@ -4133,8 +4133,8 @@
                     iframe.src = 'about:blank'; // Clear the iframe src
                 }
                 
-                // Hide embedded server selector when switching to non-embedded sources
-                hideEmbeddedServerSelector();
+                // Hide all servers selector when switching to non-embedded sources
+                hideAllServersSelector();
                 
                 elements.player.style.display = 'block'; // Show Plyr player
             }
@@ -5380,7 +5380,7 @@
         }
 
         // Create server selector for ALL sources (embedded and direct links)
-        function createEmbeddedServerSelector(servers) {
+        function createAllServersSelector(servers) {
             if (!servers || servers.length <= 1) {
                 console.log('🔍 Server selector not created - only', servers?.length || 0, 'servers available');
                 return; // No need for selector if only one server
@@ -5389,14 +5389,14 @@
             console.log('🎯 Creating server selector with', servers.length, 'servers:', servers.map(s => s.name || 'Unknown'));
             
             // Remove existing server selector if it exists
-            const existingSelector = document.getElementById('embedded-server-selector');
+            const existingSelector = document.getElementById('all-servers-selector');
             if (existingSelector) {
                 existingSelector.remove();
             }
             
             // Create server selector container
             const selectorContainer = document.createElement('div');
-            selectorContainer.id = 'embedded-server-selector';
+            selectorContainer.id = 'all-servers-selector';
             selectorContainer.style.cssText = `
                 position: absolute;
                 top: 10px;
@@ -5424,7 +5424,7 @@
                 margin-bottom: 8px;
                 text-align: center;
             `;
-            title.textContent = '🌐 Server Selection';
+            title.textContent = '🌐 All Server Sources';
             selectorContainer.appendChild(title);
             
             // Add Back to Home button
@@ -5637,11 +5637,56 @@
                             // Show loading indicator for server switch
                             showLoadingIndicator(`Switching to ${displayName}...`);
                             
-                            iframe.src = filterEmbeddedUrl(server.url);
+                            // Check if this is a direct video link or embedded link
+                            const isDirectVideo = server.url.includes('.m3u8') || server.url.includes('.mpd') || 
+                                               server.url.includes('.mp4') || server.url.includes('.mkv') || 
+                                               server.url.includes('.avi') || server.url.includes('.mov') || 
+                                               server.url.includes('.webm') || server.url.includes('.flv');
+                            
+                            if (isDirectVideo) {
+                                // For direct video links, switch back to Plyr player
+                                iframe.style.display = 'none';
+                                iframe.src = 'about:blank';
+                                
+                                // Show the Plyr player again
+                                if (elements.player) {
+                                    elements.player.style.display = 'block';
+                                }
+                                
+                                // Update Plyr source with the selected server
+                                if (playerInstance) {
+                                    const sources = [{
+                                        src: server.url,
+                                        size: parseInt(server.name?.replace(/\D/g, '') || '0'),
+                                        type: server.url.includes('m3u8') ? 'application/x-mpegURL' : 
+                                              server.url.includes('mpd') ? 'application/dash+xml' : 'video/mp4'
+                                    }];
+                                    
+                                    playerInstance.source = {
+                                        type: 'video',
+                                        sources: sources,
+                                    };
+                                    
+                                    // Play the video
+                                    playerInstance.play();
+                                }
+                                
+                                // Remove the server selector
+                                selectorContainer.remove();
+                                
+                                // Remove the indicator button
+                                const indicatorButton = document.getElementById('server-selector-indicator');
+                                if (indicatorButton) {
+                                    indicatorButton.remove();
+                                }
+                            } else {
+                                // For embedded links, update iframe source
+                                iframe.src = filterEmbeddedUrl(server.url);
+                            }
                             
                             // Auto-hide server selector after selection
                             setTimeout(() => {
-                                const selector = document.getElementById('embedded-server-selector');
+                                const selector = document.getElementById('all-servers-selector');
                                 if (selector) {
                                     selector.style.opacity = '0.3';
                                     selector.style.transform = 'scale(0.95)';
@@ -5650,7 +5695,7 @@
                         }
                         
                         // Update visual selection
-                        document.querySelectorAll('#embedded-server-selector .server-item').forEach(item => {
+                        document.querySelectorAll('#all-servers-selector .server-item').forEach(item => {
                             item.style.background = 'rgba(255, 255, 255, 0.1)';
                             item.style.border = 'none';
                         });
@@ -5723,7 +5768,7 @@
                     opacity: 0.7;
                 `;
                 indicatorButton.innerHTML = `🌐 ${servers.length} Server${servers.length !== 1 ? 's' : ''}`;
-                indicatorButton.title = `Click to show server selector - ${servers.length} embedded sources available (Ctrl+S)`;
+                indicatorButton.title = `Click to show server selector - ${servers.length} total sources available (Ctrl+S)`;
                 
                 indicatorButton.addEventListener('click', () => {
                     selectorContainer.style.opacity = '1';
@@ -5801,9 +5846,9 @@
             selectorContainer._keyPressHandler = handleKeyPress;
         }
 
-        // Hide embedded server selector
-        function hideEmbeddedServerSelector() {
-            const existingSelector = document.getElementById('embedded-server-selector');
+        // Hide all servers selector
+        function hideAllServersSelector() {
+            const existingSelector = document.getElementById('all-servers-selector');
             if (existingSelector) {
                 // Remove keyboard event listener before removing element
                 if (existingSelector._keyPressHandler) {
@@ -5818,7 +5863,7 @@
                 indicatorButton.remove();
             }
             
-            // Clear any loading messages for embedded content
+            // Clear any loading messages for server content
             if (elements.playerMessageArea && elements.playerMessageArea.textContent.includes('embedded')) {
                 elements.playerMessageArea.style.display = 'none';
             }
@@ -6751,7 +6796,7 @@
                     const playerContainer = document.querySelector('.player-container');
                     const iframe = playerContainer && playerContainer.querySelector('iframe.external-content-iframe');
                     if (iframe && iframe.style.display !== 'none') {
-                        createEmbeddedServerSelector(servers);
+                        createAllServersSelector(servers);
                     } else {
                         showDirectLinkServerSelector();
                     }
@@ -6920,7 +6965,7 @@
                     {name: 'Google Drive', url: 'https://drive.google.com/file/d/123'},
                 ];
                 console.log('📊 Test servers:', testServers);
-                createEmbeddedServerSelector(testServers);
+                createAllServersSelector(testServers);
             };
         });
 
