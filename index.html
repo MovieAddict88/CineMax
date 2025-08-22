@@ -1010,6 +1010,94 @@
         .action-btn i {
             font-size: 18px;
         }
+        
+        /* Server Source Button Styles */
+        .server-source-btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            background: var(--youtube-red);
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 13px;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            white-space: nowrap;
+            min-width: 80px;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .server-source-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            transition: left 0.5s ease;
+        }
+        
+        .server-source-btn:hover::before {
+            left: 100%;
+        }
+        
+        .server-source-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
+        }
+        
+        .server-source-btn:active {
+            transform: translateY(0);
+        }
+        
+        /* Server Selector Container Styles */
+        #inline-server-buttons {
+            margin-top: 15px;
+            padding: 15px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 12px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        #inline-server-buttons .server-source-btn {
+            margin: 2px;
+        }
+        
+        /* Enhanced Server Selector Styles */
+        #all-servers-selector,
+        #direct-link-server-selector {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        }
+        
+        #all-servers-selector .server-item,
+        #direct-link-server-selector .server-item {
+            position: relative;
+            overflow: hidden;
+        }
+        
+        #all-servers-selector .server-item::before,
+        #direct-link-server-selector .server-item::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(59, 130, 246, 0.1), transparent);
+            transition: left 0.6s ease;
+        }
+        
+        #all-servers-selector .server-item:hover::before,
+        #direct-link-server-selector .server-item:hover::before {
+            left: 100%;
+        }
 
         .video-description {
             background-color: var(--youtube-gray);
@@ -5862,6 +5950,109 @@
                 elements.playerMessageArea.style.display = 'none';
             }
         }
+        
+        // Enhanced inline server buttons renderer for embedded servers
+        function renderInlineServerButtons(servers) {
+            if (!servers || servers.length <= 1) {
+                return;
+            }
+            
+            const inlineServerButtonsContainer = document.getElementById('inline-server-buttons');
+            if (!inlineServerButtonsContainer) {
+                return;
+            }
+            
+            // Clear existing buttons
+            inlineServerButtonsContainer.innerHTML = '';
+            
+            // Check if first server is embedded
+            const firstServer = servers[0];
+            const isFirstServerEmbedded = firstServer && (
+                isVidsrcUrl(firstServer.url) || 
+                isVidjoyUrl(firstServer.url) || 
+                is2EmbedUrl(firstServer.url) || 
+                isEmbedSuUrl(firstServer.url) || 
+                isAutoEmbedUrl(firstServer.url) || 
+                isGoDrivePlayerUrl(firstServer.url) || 
+                isVidLinkProUrl(firstServer.url)
+            );
+            
+            if (isFirstServerEmbedded) {
+                // Create horizontal button layout for embedded servers
+                const buttonContainer = document.createElement('div');
+                buttonContainer.style.cssText = `
+                    display: flex;
+                    flex-wrap: wrap;
+                    gap: 8px;
+                    margin-top: 10px;
+                    align-items: center;
+                `;
+                
+                // Add label
+                const label = document.createElement('span');
+                label.textContent = '🌐 Server Sources:';
+                label.style.cssText = `
+                    color: var(--text-color);
+                    font-size: 14px;
+                    font-weight: 500;
+                    margin-right: 8px;
+                `;
+                buttonContainer.appendChild(label);
+                
+                // Create server buttons with different colors
+                const colors = [
+                    'rgba(59, 130, 246, 0.8)',   // Blue
+                    'rgba(16, 185, 129, 0.8)',   // Green
+                    'rgba(245, 158, 11, 0.8)',   // Yellow
+                    'rgba(239, 68, 68, 0.8)',    // Red
+                    'rgba(139, 92, 246, 0.8)',   // Purple
+                    'rgba(236, 72, 153, 0.8)',   // Pink
+                    'rgba(14, 165, 233, 0.8)',   // Sky
+                    'rgba(34, 197, 94, 0.8)'     // Emerald
+                ];
+                
+                servers.forEach((server, index) => {
+                    const serverButton = document.createElement('button');
+                    serverButton.className = 'server-source-btn';
+                    serverButton.textContent = server.name || `Server ${index + 1}`;
+                    serverButton.style.cssText = `
+                        background: ${colors[index % colors.length]};
+                        color: white;
+                        border: none;
+                        padding: 8px 16px;
+                        border-radius: 20px;
+                        cursor: pointer;
+                        font-size: 13px;
+                        font-weight: 500;
+                        transition: all 0.2s ease;
+                        border: 1px solid rgba(255, 255, 255, 0.2);
+                        white-space: nowrap;
+                        min-width: 80px;
+                    `;
+                    
+                    // Add hover effects
+                    serverButton.addEventListener('mouseenter', () => {
+                        serverButton.style.transform = 'translateY(-2px)';
+                        serverButton.style.boxShadow = '0 4px 12px rgba(0, 0, 0, 0.3)';
+                    });
+                    
+                    serverButton.addEventListener('mouseleave', () => {
+                        serverButton.style.transform = 'translateY(0)';
+                        serverButton.style.boxShadow = 'none';
+                    });
+                    
+                    // Add click handler
+                    serverButton.addEventListener('click', () => {
+                        console.log(`🎯 Inline server button clicked:`, server);
+                        loadServer(server, index + 1);
+                    });
+                    
+                    buttonContainer.appendChild(serverButton);
+                });
+                
+                inlineServerButtonsContainer.appendChild(buttonContainer);
+            }
+        }
 
         // Show feedback when switching servers
         function showServerSwitchFeedback(serverName) {
@@ -5888,6 +6079,28 @@
                     @keyframes slideInRight {
                         from { transform: translateX(100%); opacity: 0; }
                         to { transform: translateX(0); opacity: 1; }
+                    }
+                    
+                    @keyframes serverSelectorSlideIn {
+                        from { 
+                            transform: translate(-50%, -50%) scale(0.9); 
+                            opacity: 0; 
+                        }
+                        to { 
+                            transform: translate(-50%, -50%) scale(1); 
+                            opacity: 1; 
+                        }
+                    }
+                    
+                    @keyframes serverSelectorSlideOut {
+                        from { 
+                            transform: translate(-50%, -50%) scale(1); 
+                            opacity: 1; 
+                        }
+                        to { 
+                            transform: translate(-50%, -50%) scale(0.9); 
+                            opacity: 0; 
+                        }
                     }
                 `;
                 document.head.appendChild(style);
@@ -5936,28 +6149,71 @@
                 transform: translate(-50%, -50%);
                 z-index: 10000;
                 background: rgba(0, 0, 0, 0.95);
-                border-radius: 12px;
-                padding: 20px;
-                min-width: 300px;
-                max-width: 500px;
-                backdrop-filter: blur(15px);
-                border: 2px solid rgba(255, 255, 255, 0.2);
-                box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5);
+                border-radius: 16px;
+                padding: 24px;
+                min-width: 320px;
+                max-width: 520px;
+                backdrop-filter: blur(20px);
+                border: 2px solid rgba(255, 255, 255, 0.15);
+                box-shadow: 0 25px 50px rgba(0, 0, 0, 0.6);
+                animation: serverSelectorSlideIn 0.3s ease-out;
             `;
 
             // Create title
             const title = document.createElement('div');
             title.style.cssText = `
                 color: white;
-                font-size: 18px;
+                font-size: 20px;
                 font-weight: bold;
-                margin-bottom: 20px;
+                margin-bottom: 24px;
                 text-align: center;
-                border-bottom: 1px solid rgba(255, 255, 255, 0.2);
-                padding-bottom: 15px;
+                border-bottom: 2px solid rgba(59, 130, 246, 0.6);
+                padding-bottom: 16px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                gap: 12px;
             `;
-            title.textContent = '🌐 Direct Link Server Selection';
+            title.innerHTML = '<i class="fas fa-server"></i> Direct Link Server Selection';
+            
+            // Add close button
+            const closeButton = document.createElement('button');
+            closeButton.innerHTML = '<i class="fas fa-times"></i>';
+            closeButton.style.cssText = `
+                position: absolute;
+                top: 20px;
+                right: 20px;
+                background: rgba(239, 68, 68, 0.8);
+                color: white;
+                border: none;
+                width: 32px;
+                height: 32px;
+                border-radius: 50%;
+                cursor: pointer;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                font-size: 14px;
+                transition: all 0.2s ease;
+                border: 1px solid rgba(255, 255, 255, 0.2);
+            `;
+            
+            closeButton.addEventListener('mouseenter', () => {
+                closeButton.style.background = 'rgba(239, 68, 68, 1)';
+                closeButton.style.transform = 'scale(1.1)';
+            });
+            
+            closeButton.addEventListener('mouseleave', () => {
+                closeButton.style.background = 'rgba(239, 68, 68, 0.8)';
+                closeButton.style.transform = 'scale(1)';
+            });
+            
+            closeButton.addEventListener('click', () => {
+                hideDirectLinkServerSelector();
+            });
+            
             selectorContainer.appendChild(title);
+            selectorContainer.appendChild(closeButton);
 
             // Create server list
             const serverList = document.createElement('div');
@@ -5999,18 +6255,30 @@
 
                 groupServers.forEach((server, index) => {
                     const serverItem = document.createElement('div');
+                    serverItem.className = 'server-item';
                     serverItem.style.cssText = `
-                        padding: 12px 15px;
-                        margin: 5px 0;
-                        background: rgba(255, 255, 255, 0.1);
-                        border-radius: 8px;
+                        padding: 16px 18px;
+                        margin: 8px 0;
+                        background: rgba(255, 255, 255, 0.08);
+                        border-radius: 12px;
                         cursor: pointer;
-                        transition: all 0.2s ease;
+                        transition: all 0.3s ease;
                         color: white;
                         font-size: 14px;
                         display: flex;
                         justify-content: space-between;
                         align-items: center;
+                        border: 1px solid rgba(255, 255, 255, 0.1);
+                        position: relative;
+                        overflow: hidden;
+                    `;
+                    
+                    // Add subtle gradient background
+                    serverItem.style.background = `
+                        linear-gradient(135deg, 
+                            rgba(255, 255, 255, 0.08) 0%, 
+                            rgba(255, 255, 255, 0.05) 100%
+                        )
                     `;
 
                     // Highlight current server
@@ -6038,17 +6306,32 @@
 
                     // Add hover effects
                     serverItem.addEventListener('mouseenter', () => {
-                        serverItem.style.background = 'rgba(255, 255, 255, 0.2)';
-                        serverItem.style.transform = 'translateX(3px)';
+                        serverItem.style.background = `
+                            linear-gradient(135deg, 
+                                rgba(59, 130, 246, 0.15) 0%, 
+                                rgba(59, 130, 246, 0.08) 100%
+                            )
+                        `;
+                        serverItem.style.borderColor = 'rgba(59, 130, 246, 0.4)';
+                        serverItem.style.transform = 'translateX(5px) scale(1.02)';
+                        serverItem.style.boxShadow = '0 8px 25px rgba(59, 130, 246, 0.2)';
                     });
 
                     serverItem.addEventListener('mouseleave', () => {
                         if (server.url === playerInstance?.source?.sources?.[0]?.src) {
                             serverItem.style.background = 'rgba(59, 130, 246, 0.6)';
+                            serverItem.style.borderColor = 'rgba(59, 130, 246, 0.8)';
                         } else {
-                            serverItem.style.background = 'rgba(255, 255, 255, 0.1)';
+                            serverItem.style.background = `
+                                linear-gradient(135deg, 
+                                    rgba(255, 255, 255, 0.08) 0%, 
+                                    rgba(255, 255, 255, 0.05) 100%
+                                )
+                            `;
+                            serverItem.style.borderColor = 'rgba(255, 255, 255, 0.1)';
                         }
-                        serverItem.style.transform = 'translateX(0)';
+                        serverItem.style.transform = 'translateX(0) scale(1)';
+                        serverItem.style.boxShadow = 'none';
                     });
 
                     // Add click handler to switch servers
@@ -6132,11 +6415,17 @@
         function hideDirectLinkServerSelector() {
             const existingSelector = document.getElementById('direct-link-server-selector');
             if (existingSelector) {
-                // Remove keyboard event listener before removing element
-                if (existingSelector._keyPressHandler) {
-                    document.removeEventListener('keydown', existingSelector._keyPressHandler);
-                }
-                existingSelector.remove();
+                // Add exit animation
+                existingSelector.style.animation = 'serverSelectorSlideOut 0.3s ease-in';
+                setTimeout(() => {
+                    if (existingSelector.parentNode) {
+                        // Remove keyboard event listener before removing element
+                        if (existingSelector._keyPressHandler) {
+                            document.removeEventListener('keydown', existingSelector._keyPressHandler);
+                        }
+                        existingSelector.remove();
+                    }
+                }, 300);
             }
         }
 
@@ -6779,7 +7068,7 @@
             item.setAttribute('role', 'menuitemradio');
             item.setAttribute('data-cinecraze', 'servers-item');
             item.className = 'plyr__control';
-            item.textContent = 'Servers';
+            item.innerHTML = '<i class="fas fa-server"></i> Servers';
 
             item.addEventListener('click', (e) => {
                 e.preventDefault();
@@ -6793,7 +7082,19 @@
                     } else {
                         showDirectLinkServerSelector();
                     }
+                } else {
+                    // Show feedback if no additional servers available
+                    showServerSwitchFeedback('No additional servers available');
                 }
+            });
+
+            // Add hover effects
+            item.addEventListener('mouseenter', () => {
+                item.style.background = 'rgba(255, 255, 255, 0.1)';
+            });
+            
+            item.addEventListener('mouseleave', () => {
+                item.style.background = 'transparent';
             });
 
             settingsMenu.appendChild(item);
