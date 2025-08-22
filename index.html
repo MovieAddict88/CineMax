@@ -3806,6 +3806,9 @@
             document.querySelector('.content-container').style.display = 'none';
 
             const setupViewerAndPlay = () => {
+                // Remove any existing server selector first
+                hideEmbeddedServerSelector();
+                
                 elements.viewerTitle.textContent = content.Title;
                 elements.viewerDescription.textContent = content.Description || 'No description available.';
                 // Reset selectors
@@ -3827,6 +3830,12 @@
                     console.log('🎬 Loading content with servers:', content.Servers.length, 'servers available');
                     console.log('🔍 Server details:', content.Servers.map(s => ({name: s.name, url: s.url?.substring(0, 50) + '...'})));
                     updatePlayerSource(content.Servers);
+                    
+                    // Create server selector for ALL content with multiple servers
+                    if (content.Servers.length > 1) {
+                        console.log('🎯 Creating server selector for non-series content');
+                        setTimeout(() => createEmbeddedServerSelector(content.Servers), 200);
+                    }
                 }
                 elements.seasonsGrid.innerHTML = '';
 
@@ -6200,6 +6209,12 @@
                 console.log('📺 Playing episode with servers:', episode.Servers.length, 'servers available');
                 console.log('🔍 Episode server details:', episode.Servers.map(s => ({name: s.name, url: s.url?.substring(0, 50) + '...'})));
                 updatePlayerSource(episode.Servers);
+                
+                // Create server selector for series episodes with multiple servers
+                if (episode.Servers.length > 1) {
+                    console.log('🎯 Creating server selector for series episode');
+                    setTimeout(() => createEmbeddedServerSelector(episode.Servers), 200);
+                }
             }
 
             // Ensure the episode selector reflects the current episode
