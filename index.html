@@ -5379,7 +5379,7 @@
             return url.includes('autoembed.cc');
         }
 
-        // Create server selector for embedded sources when Plyr player is hidden
+        // Create server selector for ALL sources (embedded and direct links)
         function createEmbeddedServerSelector(servers) {
             if (!servers || servers.length <= 1) {
                 console.log('🔍 Server selector not created - only', servers?.length || 0, 'servers available');
@@ -5486,7 +5486,7 @@
             });
             selectorContainer.appendChild(backToHomeButton);
             
-            // Group servers by type for better organization
+            // Group servers by type for better organization - now including ALL server types
             const serverGroups = {};
             console.log('🔍 Processing servers for grouping:', servers.length, 'total servers');
             
@@ -5501,6 +5501,14 @@
                 else if (isVidLinkProUrl(server.url)) group = 'VidLink.pro';
                 else if (isGoogleDriveUrl(server.url)) group = 'Google Drive';
                 else if (isMegaNzUrl(server.url)) group = 'Mega.nz';
+                else if (server.url.includes('.m3u8')) group = 'HLS Streams';
+                else if (server.url.includes('.mpd')) group = 'MPD Streams';
+                else if (server.url.includes('.mp4')) group = 'MP4 Files';
+                else if (server.url.includes('.mkv')) group = 'MKV Files';
+                else if (server.url.includes('.avi')) group = 'AVI Files';
+                else if (server.url.includes('.mov')) group = 'MOV Files';
+                else if (server.url.includes('.webm')) group = 'WebM Files';
+                else if (server.url.includes('.flv')) group = 'FLV Files';
                 
                 if (!serverGroups[group]) serverGroups[group] = [];
                 serverGroups[group].push(server);
