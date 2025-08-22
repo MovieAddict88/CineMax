@@ -3834,7 +3834,17 @@
                     // Create server selector for ALL content with multiple servers
                     if (content.Servers.length > 1) {
                         console.log('🎯 Creating server selector for non-series content');
-                        setTimeout(() => createEmbeddedServerSelector(content.Servers), 200);
+                        console.log('🔍 Looking for video-actions container...');
+                        const videoActions = document.querySelector('.video-actions');
+                        if (videoActions) {
+                            console.log('✅ Found video-actions container:', videoActions);
+                        } else {
+                            console.error('❌ video-actions container NOT FOUND!');
+                        }
+                        setTimeout(() => {
+                            console.log('🚀 Calling createEmbeddedServerSelector now...');
+                            createEmbeddedServerSelector(content.Servers);
+                        }, 500);
                     }
                 }
                 elements.seasonsGrid.innerHTML = '';
@@ -5721,11 +5731,25 @@
             
             // Add to video actions container (below like/dislike/share buttons)
             const videoActionsContainer = document.querySelector('.video-actions');
+            console.log('🔍 DEBUG: videoActionsContainer found:', videoActionsContainer);
+            console.log('🔍 DEBUG: videoActionsContainer.parentElement:', videoActionsContainer?.parentElement);
+            
             if (videoActionsContainer && videoActionsContainer.parentElement) {
                 // Insert the server selector after the video-actions container
+                console.log('✅ DEBUG: Inserting server selector after video-actions');
                 videoActionsContainer.parentElement.insertBefore(selectorContainer, videoActionsContainer.nextSibling);
+                console.log('✅ DEBUG: Server selector inserted successfully');
             } else {
-                console.warn('⚠️ Video actions container not found - server selector not added');
+                console.error('❌ DEBUG: Video actions container not found - server selector not added');
+                console.log('🔍 DEBUG: Available elements with class containing "action":', document.querySelectorAll('[class*="action"]'));
+                // Fallback: add to video details container
+                const videoDetails = document.querySelector('.video-details');
+                if (videoDetails) {
+                    console.log('🔄 DEBUG: Fallback - adding to video-details container');
+                    videoDetails.appendChild(selectorContainer);
+                } else {
+                    console.error('❌ DEBUG: No suitable container found for server selector');
+                }
             }
             
             console.log('✅ Server selector successfully positioned below video actions');
