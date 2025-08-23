@@ -989,25 +989,54 @@
             gap: 15px;
         }
 
-        /* Embedded Server Selector Styles */
-        #embedded-server-selector {
-            animation: slideInUp 0.3s ease-out;
+        /* Enhanced Server Selector Styles */
+        .server-selector-container {
+            animation: slideInUp 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(255, 255, 255, 0.1);
+        }
+
+        .server-selector-container:hover {
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.6), 0 0 0 1px rgba(255, 255, 255, 0.15);
+            transform: translateY(-2px);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .server-selector-container::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+        }
+
+        .server-selector-container::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
         }
 
         @keyframes slideInUp {
             from {
                 opacity: 0;
-                transform: translateY(20px);
+                transform: translateY(30px) scale(0.95);
             }
             to {
                 opacity: 1;
-                transform: translateY(0);
+                transform: translateY(0) scale(1);
             }
         }
 
         .server-button {
             position: relative;
             overflow: hidden;
+            transform-origin: center;
         }
 
         .server-button::before {
@@ -1017,12 +1046,56 @@
             left: -100%;
             width: 100%;
             height: 100%;
-            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
-            transition: left 0.5s;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+            transition: left 0.6s cubic-bezier(0.4, 0, 0.2, 1);
         }
 
         .server-button:hover::before {
             left: 100%;
+        }
+
+        .server-button:active {
+            transform: scale(0.98) translateY(0);
+            transition: transform 0.1s ease;
+        }
+
+        /* Mobile Responsiveness for Server Selector */
+        @media (max-width: 768px) {
+            .server-selector-container {
+                margin: 15px 10px;
+                padding: 15px;
+                border-radius: 12px;
+            }
+            
+            .server-selector-container .server-button {
+                min-width: 100px;
+                padding: 10px 16px;
+                font-size: 13px;
+                margin: 5px;
+            }
+            
+            .server-selector-container .server-buttons-container {
+                gap: 10px;
+                justify-content: center;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .server-selector-container {
+                margin: 10px 5px;
+                padding: 12px;
+            }
+            
+            .server-selector-container .server-button {
+                min-width: 90px;
+                padding: 8px 14px;
+                font-size: 12px;
+                margin: 3px;
+            }
+            
+            .server-selector-container .server-buttons-container {
+                gap: 8px;
+            }
         }
 
         .action-btn {
@@ -3841,10 +3914,11 @@
                         } else {
                             console.error('❌ video-actions container NOT FOUND!');
                         }
+                        // Reduced delay for better user experience
                         setTimeout(() => {
                             console.log('🚀 Calling createEmbeddedServerSelector now...');
                             createEmbeddedServerSelector(content.Servers);
-                        }, 500);
+                        }, 200);
                     }
                 }
                 elements.seasonsGrid.innerHTML = '';
@@ -5469,85 +5543,54 @@
             // Create server selector container
             const selectorContainer = document.createElement('div');
             selectorContainer.id = 'embedded-server-selector';
+            selectorContainer.className = 'server-selector-container';
             selectorContainer.style.cssText = `
-                margin-top: 20px;
-                background: rgba(30, 30, 30, 0.95);
-                border-radius: 12px;
+                margin-top: 15px;
+                margin-bottom: 20px;
+                background: linear-gradient(135deg, rgba(30, 30, 30, 0.98), rgba(40, 40, 40, 0.95));
+                border-radius: 16px;
                 padding: 20px;
-                backdrop-filter: blur(15px);
-                border: 1px solid rgba(255, 255, 255, 0.1);
+                backdrop-filter: blur(20px);
+                border: 1px solid rgba(255, 255, 255, 0.15);
                 transition: all 0.3s ease;
-                box-shadow: 0 8px 25px rgba(0, 0, 0, 0.4);
+                box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+                position: relative;
+                overflow: hidden;
             `;
+            
+            // Add subtle background pattern
+            const backgroundPattern = document.createElement('div');
+            backgroundPattern.style.cssText = `
+                position: absolute;
+                top: 0;
+                left: 0;
+                right: 0;
+                bottom: 0;
+                background-image: 
+                    radial-gradient(circle at 20% 20%, rgba(255, 255, 255, 0.03) 1px, transparent 1px),
+                    radial-gradient(circle at 80% 80%, rgba(255, 255, 255, 0.02) 1px, transparent 1px);
+                background-size: 30px 30px, 40px 40px;
+                pointer-events: none;
+                z-index: 0;
+            `;
+            selectorContainer.appendChild(backgroundPattern);
             
             // Create title
             const title = document.createElement('div');
             title.style.cssText = `
                 color: white;
-                font-size: 16px;
-                font-weight: bold;
-                margin-bottom: 15px;
+                font-size: 18px;
+                font-weight: 700;
+                margin-bottom: 20px;
                 text-align: center;
-                border-bottom: 1px solid rgba(255, 255, 255, 0.2);
-                padding-bottom: 10px;
+                border-bottom: 2px solid rgba(255, 255, 255, 0.2);
+                padding-bottom: 12px;
+                text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+                position: relative;
+                z-index: 1;
             `;
             title.textContent = `🎬 Available Servers (${servers.length})`;
             selectorContainer.appendChild(title);
-            
-            // Add Back to Home button
-            const backToHomeButton = document.createElement('button');
-            backToHomeButton.innerHTML = '🏠 Back to Home';
-            backToHomeButton.style.cssText = `
-                background: rgba(239, 68, 68, 0.7);
-                color: white;
-                border: none;
-                padding: 8px 16px;
-                border-radius: 6px;
-                cursor: pointer;
-                margin-bottom: 12px;
-                width: 100%;
-                font-size: 13px;
-                font-weight: 500;
-                transition: all 0.2s ease;
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                gap: 6px;
-            `;
-            backToHomeButton.addEventListener('mouseenter', () => {
-                backToHomeButton.style.background = 'rgba(239, 68, 68, 0.9)';
-                backToHomeButton.style.transform = 'scale(1.02)';
-            });
-            backToHomeButton.addEventListener('mouseleave', () => {
-                backToHomeButton.style.background = 'rgba(239, 68, 68, 0.7)';
-                backToHomeButton.style.transform = 'scale(1)';
-            });
-            backToHomeButton.addEventListener('click', () => {
-                // Hide the iframe
-                if (iframe) {
-                    iframe.style.display = 'none';
-                    iframe.src = 'about:blank';
-                }
-                
-                // Show the Plyr player again
-                if (elements.player) {
-                    elements.player.style.display = 'block';
-                }
-                
-                // Remove the server selector
-                selectorContainer.remove();
-                
-                // No indicator button to remove in the new design
-                
-                // Clear any embedded content loading messages
-                if (elements.playerMessageArea && elements.playerMessageArea.textContent.includes('embedded')) {
-                    elements.playerMessageArea.style.display = 'none';
-                }
-                
-                // Show success message
-                showServerSwitchFeedback('Returned to Home');
-            });
-            selectorContainer.appendChild(backToHomeButton);
             
             // Group servers by type for better organization
             const serverGroups = {};
@@ -5573,7 +5616,7 @@
             
             console.log('📊 Server groups created:', Object.entries(serverGroups).map(([group, servers]) => `${group}: ${servers.length}`));
             
-            // Define server type colors and icons
+            // Define server type colors and icons with enhanced color palette
             const serverColors = {
                 'VidSrc': '#3b82f6',      // Blue
                 'VidJoy': '#10b981',      // Green
@@ -5585,6 +5628,20 @@
                 'Google Drive': '#22c55e', // Light green
                 'Mega.nz': '#dc2626',     // Dark red
                 'Other': '#6b7280'        // Gray
+            };
+            
+            // Enhanced color variations for better visual appeal
+            const serverColorVariants = {
+                'VidSrc': { primary: '#3b82f6', hover: '#2563eb', active: '#1d4ed8' },
+                'VidJoy': { primary: '#10b981', hover: '#059669', active: '#047857' },
+                '2Embed': { primary: '#f59e0b', hover: '#d97706', active: '#b45309' },
+                'Embed.su': { primary: '#ef4444', hover: '#dc2626', active: '#b91c1c' },
+                'AutoEmbed': { primary: '#8b5cf6', hover: '#7c3aed', active: '#6d28d9' },
+                'GoDrivePlayer': { primary: '#06b6d4', hover: '#0891b2', active: '#0e7490' },
+                'VidLink.pro': { primary: '#f97316', hover: '#ea580c', active: '#c2410c' },
+                'Google Drive': { primary: '#22c55e', hover: '#16a34a', active: '#15803d' },
+                'Mega.nz': { primary: '#dc2626', hover: '#b91c1c', active: '#991b1b' },
+                'Other': { primary: '#6b7280', hover: '#4b5563', active: '#374151' }
             };
 
             const serverIcons = {
@@ -5605,8 +5662,12 @@
             serverButtonsContainer.style.cssText = `
                 display: flex;
                 flex-wrap: wrap;
-                gap: 12px;
+                gap: 15px;
                 margin-bottom: 15px;
+                justify-content: center;
+                align-items: center;
+                position: relative;
+                z-index: 1;
             `;
             
             // Add servers as buttons grouped by type
@@ -5627,45 +5688,53 @@
                     
                     serverButton.innerHTML = `${serverIcon} ${displayName}`;
                     serverButton.style.cssText = `
-                        background: ${serverColor};
+                        background: linear-gradient(135deg, ${serverColorVariants[groupName]?.primary || serverColor}, ${serverColorVariants[groupName]?.hover || serverColor});
                         color: white;
                         border: none;
-                        padding: 10px 16px;
-                        border-radius: 25px;
+                        padding: 12px 20px;
+                        border-radius: 30px;
                         cursor: pointer;
-                        font-size: 13px;
-                        font-weight: 500;
-                        transition: all 0.3s ease;
-                        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+                        font-size: 14px;
+                        font-weight: 600;
+                        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+                        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
                         position: relative;
                         overflow: hidden;
-                        min-width: 100px;
+                        min-width: 120px;
                         text-align: center;
                         white-space: nowrap;
+                        border: 2px solid transparent;
+                        text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
                     `;
                     
                     // Highlight current server
                     if (server.url === iframe?.src) {
-                        serverButton.style.background = `linear-gradient(45deg, ${serverColor}, #ffffff40)`;
-                        serverButton.style.boxShadow = `0 0 20px ${serverColor}80`;
-                        serverButton.style.transform = 'scale(1.05)';
+                        const variants = serverColorVariants[groupName] || serverColorVariants['Other'];
+                        serverButton.style.background = `linear-gradient(135deg, ${variants.active}, ${variants.primary})`;
+                        serverButton.style.boxShadow = `0 0 25px ${variants.primary}90`;
+                        serverButton.style.transform = 'scale(1.08)';
+                        serverButton.style.borderColor = `${variants.primary}60`;
                         serverButton.innerHTML = `✅ ${serverIcon} ${displayName}`;
                     }
                     
-                    // Add hover effects
+                    // Add enhanced hover effects
                     serverButton.addEventListener('mouseenter', () => {
                         if (server.url !== iframe?.src) {
-                            serverButton.style.background = `linear-gradient(45deg, ${serverColor}, #ffffff20)`;
-                            serverButton.style.transform = 'translateY(-2px) scale(1.02)';
-                            serverButton.style.boxShadow = `0 4px 15px ${serverColor}60`;
+                            const variants = serverColorVariants[groupName] || serverColorVariants['Other'];
+                            serverButton.style.background = `linear-gradient(135deg, ${variants.hover}, ${variants.primary})`;
+                            serverButton.style.transform = 'translateY(-3px) scale(1.05)';
+                            serverButton.style.boxShadow = `0 8px 25px ${variants.primary}80`;
+                            serverButton.style.borderColor = `${variants.primary}40`;
                         }
                     });
                     
                     serverButton.addEventListener('mouseleave', () => {
                         if (server.url !== iframe?.src) {
-                            serverButton.style.background = serverColor;
+                            const variants = serverColorVariants[groupName] || serverColorVariants['Other'];
+                            serverButton.style.background = `linear-gradient(135deg, ${variants.primary}, ${variants.hover})`;
                             serverButton.style.transform = 'translateY(0) scale(1)';
-                            serverButton.style.boxShadow = '0 2px 8px rgba(0, 0, 0, 0.2)';
+                            serverButton.style.boxShadow = '0 4px 15px rgba(0, 0, 0, 0.3)';
+                            serverButton.style.borderColor = 'transparent';
                         }
                     });
                     
@@ -5694,21 +5763,24 @@
                             serverButtonsContainer.querySelectorAll('button').forEach(btn => {
                                 if (btn !== serverButton) {
                                     const btnGroupName = btn.getAttribute('data-group');
-                                    const btnColor = serverColors[btnGroupName] || serverColors['Other'];
+                                    const variants = serverColorVariants[btnGroupName] || serverColorVariants['Other'];
                                     const btnIcon = serverIcons[btnGroupName] || serverIcons['Other'];
-                                    btn.style.background = btnColor;
-                                    btn.style.boxShadow = '0 2px 8px rgba(0, 0, 0, 0.2)';
+                                    btn.style.background = `linear-gradient(135deg, ${variants.primary}, ${variants.hover})`;
+                                    btn.style.boxShadow = '0 4px 15px rgba(0, 0, 0, 0.3)';
                                     btn.style.transform = 'translateY(0) scale(1)';
+                                    btn.style.borderColor = 'transparent';
                                     btn.innerHTML = `${btnIcon} ${btn.getAttribute('data-original-name')}`;
                                 }
                             });
                             
                             // After a short delay, highlight selected button
                             setTimeout(() => {
-                                serverButton.style.background = `linear-gradient(45deg, ${serverColor}, #ffffff40)`;
-                                serverButton.style.boxShadow = `0 0 20px ${serverColor}80`;
-                                serverButton.style.transform = 'scale(1.05)';
+                                const variants = serverColorVariants[groupName] || serverColorVariants['Other'];
+                                serverButton.style.background = `linear-gradient(135deg, ${variants.active}, ${variants.primary})`;
+                                serverButton.style.boxShadow = `0 0 25px ${variants.primary}90`;
+                                serverButton.style.transform = 'scale(1.08)';
                                 serverButton.style.opacity = '1';
+                                serverButton.style.borderColor = `${variants.primary}60`;
                                 serverButton.innerHTML = `✅ ${serverIcon} ${displayName}`;
                                 serverButton.disabled = false;
                             }, 1000);
@@ -5732,7 +5804,6 @@
             // Add to video actions container (below like/dislike/share buttons)
             const videoActionsContainer = document.querySelector('.video-actions');
             console.log('🔍 DEBUG: videoActionsContainer found:', videoActionsContainer);
-            console.log('🔍 DEBUG: videoActionsContainer.parentElement:', videoActionsContainer?.parentElement);
             
             if (videoActionsContainer && videoActionsContainer.parentElement) {
                 // Insert the server selector after the video-actions container
@@ -5741,18 +5812,46 @@
                 console.log('✅ DEBUG: Server selector inserted successfully');
             } else {
                 console.error('❌ DEBUG: Video actions container not found - server selector not added');
-                console.log('🔍 DEBUG: Available elements with class containing "action":', document.querySelectorAll('[class*="action"]'));
-                // Fallback: add to video details container
-                const videoDetails = document.querySelector('.video-details');
-                if (videoDetails) {
-                    console.log('🔄 DEBUG: Fallback - adding to video-details container');
-                    videoDetails.appendChild(selectorContainer);
-                } else {
+                
+                // Try alternative selectors for the video actions area
+                const alternativeSelectors = [
+                    '.video-details',
+                    '.viewer-content',
+                    '.video-info',
+                    '.content-info'
+                ];
+                
+                let containerFound = false;
+                for (const selector of alternativeSelectors) {
+                    const container = document.querySelector(selector);
+                    if (container) {
+                        console.log(`🔄 DEBUG: Fallback - adding to ${selector} container`);
+                        container.appendChild(selectorContainer);
+                        containerFound = true;
+                        break;
+                    }
+                }
+                
+                if (!containerFound) {
                     console.error('❌ DEBUG: No suitable container found for server selector');
+                    // Last resort: add to body
+                    document.body.appendChild(selectorContainer);
                 }
             }
             
             console.log('✅ Server selector successfully positioned below video actions');
+            
+            // Add a subtle entrance animation
+            setTimeout(() => {
+                selectorContainer.style.opacity = '0';
+                selectorContainer.style.transform = 'translateY(10px)';
+                selectorContainer.style.transition = 'all 0.3s ease';
+                
+                requestAnimationFrame(() => {
+                    selectorContainer.style.opacity = '1';
+                    selectorContainer.style.transform = 'translateY(0)';
+                });
+            }, 50);
         }
 
         // Hide embedded server selector
@@ -6237,7 +6336,7 @@
                 // Create server selector for series episodes with multiple servers
                 if (episode.Servers.length > 1) {
                     console.log('🎯 Creating server selector for series episode');
-                    setTimeout(() => createEmbeddedServerSelector(episode.Servers), 200);
+                    setTimeout(() => createEmbeddedServerSelector(episode.Servers), 100);
                 }
             }
 
