@@ -5665,24 +5665,52 @@
             
             // Group servers by type for better organization
             const serverGroups = {};
-            console.log('🔍 Processing servers for grouping:', servers.length, 'total servers');
+            console.log('🔍 Processing servers for grouping:', serverArray.length, 'total servers');
             
-            servers.forEach((server, index) => {
+            serverArray.forEach((server, index) => {
+                // Handle different server data structures
+                let serverName = 'Unknown';
+                let serverUrl = '';
+                
+                if (typeof server === 'string') {
+                    serverName = `Server ${index + 1}`;
+                    serverUrl = server;
+                } else if (typeof server === 'object' && server !== null) {
+                    serverName = server.name || server.Name || server.title || server.Title || `Server ${index + 1}`;
+                    serverUrl = server.url || server.Url || server.link || server.Link || server.src || server.Src || '';
+                } else {
+                    serverName = `Server ${index + 1}`;
+                    serverUrl = String(server);
+                }
+                
+                console.log(`🔍 DEBUG: Server ${index + 1} data:`, {
+                    original: server,
+                    name: serverName,
+                    url: serverUrl,
+                    type: typeof server
+                });
+                
                 let group = 'Other';
-                if (isVidsrcUrl(server.url)) group = 'VidSrc';
-                else if (isVidjoyUrl(server.url)) group = 'VidJoy';
-                else if (is2EmbedUrl(server.url)) group = '2Embed';
-                else if (isEmbedSuUrl(server.url)) group = 'Embed.su';
-                else if (isAutoEmbedUrl(server.url)) group = 'AutoEmbed';
-                else if (isGoDrivePlayerUrl(server.url)) group = 'GoDrivePlayer';
-                else if (isVidLinkProUrl(server.url)) group = 'VidLink.pro';
-                else if (isGoogleDriveUrl(server.url)) group = 'Google Drive';
-                else if (isMegaNzUrl(server.url)) group = 'Mega.nz';
+                if (serverUrl && typeof serverUrl === 'string') {
+                    if (isVidsrcUrl(serverUrl)) group = 'VidSrc';
+                    else if (isVidjoyUrl(serverUrl)) group = 'VidJoy';
+                    else if (is2EmbedUrl(serverUrl)) group = '2Embed';
+                    else if (isEmbedSuUrl(serverUrl)) group = 'Embed.su';
+                    else if (isAutoEmbedUrl(serverUrl)) group = 'AutoEmbed';
+                    else if (isGoDrivePlayerUrl(serverUrl)) group = 'GoDrivePlayer';
+                    else if (isVidLinkProUrl(serverUrl)) group = 'VidLink.pro';
+                    else if (isGoogleDriveUrl(serverUrl)) group = 'Google Drive';
+                    else if (isMegaNzUrl(serverUrl)) group = 'Mega.nz';
+                }
                 
                 if (!serverGroups[group]) serverGroups[group] = [];
-                serverGroups[group].push(server);
+                serverGroups[group].push({
+                    name: serverName,
+                    url: serverUrl,
+                    original: server
+                });
                 
-                console.log(`🔍 Server ${index + 1}: ${server.name || 'Unknown'} (${server.url?.substring(0, 50)}...) -> Group: ${group}`);
+                console.log(`🔍 Server ${index + 1}: ${serverName} (${serverUrl?.substring(0, 50)}...) -> Group: ${group}`);
             });
             
             console.log('📊 Server groups created:', Object.entries(serverGroups).map(([group, servers]) => `${group}: ${servers.length}`));
@@ -5811,6 +5839,12 @@
                     
                     // Add click handler to switch servers
                     serverButton.addEventListener('click', () => {
+                        console.log('🔍 DEBUG: Server button clicked:', {
+                            serverName: displayName,
+                            serverUrl: server.url,
+                            currentIframeSrc: iframe?.src
+                        });
+                        
                         if (server.url !== iframe?.src) {
                             // Update iframe source
                             if (iframe) {
@@ -7121,6 +7155,56 @@
                 console.log('✅ Server selector forced to be visible');
             } else {
                 console.log('❌ No server selector found to force show');
+            }
+        };
+
+        // Function to test server selector with different data structures
+        window.testServerSelectorData = function() {
+            console.log('🧪 Testing server selector with different data structures...');
+            
+            // Test 1: Array of objects with name/url
+            const testServers1 = [
+                { name: 'VidSrc Server', url: 'https://vidsrc.net/embed/movie/123' },
+                { name: 'VidJoy Server', url: 'https://vidjoy.pro/embed/movie/123' }
+            ];
+            console.log('📊 Test 1 - Array of objects:', testServers1);
+            createEmbeddedServerSelector(testServers1);
+            
+            // Test 2: Array of strings
+            const testServers2 = [
+                'https://vidsrc.net/embed/movie/123',
+                'https://vidjoy.pro/embed/movie/123'
+            ];
+            console.log('📊 Test 2 - Array of strings:', testServers2);
+            setTimeout(() => createEmbeddedServerSelector(testServers2), 2000);
+            
+            // Test 3: Object with Servers property
+            const testServers3 = {
+                Servers: [
+                    { name: 'Server 1', url: 'https://server1.com' },
+                    { name: 'Server 2', url: 'https://server2.com' }
+                ]
+            };
+            console.log('📊 Test 3 - Object with Servers:', testServers3);
+            setTimeout(() => createEmbeddedServerSelector(testServers3), 4000);
+        };
+
+        // Function to manually create server selector with current content
+        window.createServerSelectorNow = function() {
+            console.log('🚀 Manually creating server selector...');
+            
+            // Check if we have current content
+            if (currentContentInfo && currentContentInfo.Servers) {
+                console.log('📊 Current content servers:', currentContentInfo.Servers);
+                createEmbeddedServerSelector(currentContentInfo.Servers);
+            } else if (currentSeries && currentSeason && currentEpisode && currentEpisode.Servers) {
+                console.log('📊 Current episode servers:', currentEpisode.Servers);
+                createEmbeddedServerSelector(currentEpisode.Servers);
+            } else {
+                console.log('❌ No servers found in current content');
+                console.log('Current content info:', currentContentInfo);
+                console.log('Current series:', currentSeries);
+                console.log('Current episode:', currentEpisode);
             }
         };
         });
