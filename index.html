@@ -4051,6 +4051,11 @@
             if (existingSelector) {
                 existingSelector.remove();
             }
+            // Ensure any existing indicator/overlay is cleaned up
+            const existingIndicatorOnce2 = document.getElementById('server-selector-indicator');
+            if (existingIndicatorOnce2) existingIndicatorOnce2.remove();
+            const existingOverlayOnce2 = document.getElementById('server-selector-overlay');
+            if (existingOverlayOnce2) existingOverlayOnce2.remove();
             
             // Create server selector container
             const selectorContainer = document.createElement('div');
