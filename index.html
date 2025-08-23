@@ -1,4 +1,4 @@
- <!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -4071,6 +4071,27 @@
                 overflow-y: auto;
             `;
             
+            // Mobile adjustments
+            try {
+                const isNarrow = window.matchMedia('(max-width: 768px)').matches;
+                if (isNarrow) {
+                    selectorContainer.style.position = 'fixed';
+                    selectorContainer.style.top = 'auto';
+                    selectorContainer.style.right = 'auto';
+                    selectorContainer.style.left = '50%';
+                    selectorContainer.style.bottom = 'max(10px, env(safe-area-inset-bottom))';
+                    selectorContainer.style.transform = 'translateX(-50%)';
+                    selectorContainer.style.width = 'min(92vw, 480px)';
+                    selectorContainer.style.minWidth = 'auto';
+                    selectorContainer.style.maxHeight = 'min(60vh, 480px)';
+                    selectorContainer.style.padding = '12px';
+                    selectorContainer.style.borderRadius = '14px';
+                    selectorContainer.style.backdropFilter = 'blur(12px)';
+                    selectorContainer.style.boxShadow = '0 12px 40px rgba(0,0,0,0.5)';
+                    selectorContainer.style.overflowY = 'auto';
+                }
+            } catch (e) {}
+            
             // Create title
             const title = document.createElement('div');
             title.style.cssText = `
@@ -4082,6 +4103,11 @@
                 padding-bottom: 10px;
                 border-bottom: 1px solid rgba(255, 255, 255, 0.2);
             `;
+            if (window.matchMedia && window.matchMedia('(max-width: 768px)').matches) {
+                title.style.fontSize = '14px';
+                title.style.marginBottom = '10px';
+                title.style.paddingBottom = '8px';
+            }
             title.textContent = '🌐 Server Selection';
             selectorContainer.appendChild(title);
             
@@ -4092,6 +4118,9 @@
                 flex-direction: column;
                 gap: 8px;
             `;
+            if (window.matchMedia && window.matchMedia('(max-width: 768px)').matches) {
+                serverList.style.gap = '6px';
+            }
             
             servers.forEach((server, index) => {
                 const serverItem = document.createElement('div');
@@ -4108,6 +4137,11 @@
                     align-items: center;
                     border: 2px solid transparent;
                 `;
+                if (window.matchMedia && window.matchMedia('(max-width: 768px)').matches) {
+                    serverItem.style.padding = '10px 12px';
+                    serverItem.style.fontSize = '13px';
+                    serverItem.style.borderWidth = '1px';
+                }
                 
                 // Highlight current server
                 const isCurrentServer = currentServer && (
@@ -4118,6 +4152,9 @@
                 if (isCurrentServer) {
                     serverItem.style.background = 'rgba(59, 130, 246, 0.6)';
                     serverItem.style.border = '2px solid rgba(59, 130, 246, 0.8)';
+                    if (window.matchMedia && window.matchMedia('(max-width: 768px)').matches) {
+                        serverItem.style.border = '1px solid rgba(59, 130, 246, 0.8)';
+                    }
                 }
                 
                 // Server name with quality indicator
@@ -4127,6 +4164,9 @@
                     align-items: center;
                     gap: 8px;
                 `;
+                if (window.matchMedia && window.matchMedia('(max-width: 768px)').matches) {
+                    serverName.style.gap = '6px';
+                }
                 
                 // Add quality icon based on server name
                 let qualityIcon = '📺';
@@ -4155,6 +4195,11 @@
                     margin-left: 12px;
                     box-shadow: 0 0 8px rgba(16, 185, 129, 0.6);
                 `;
+                if (window.matchMedia && window.matchMedia('(max-width: 768px)').matches) {
+                    statusIndicator.style.width = '8px';
+                    statusIndicator.style.height = '8px';
+                    statusIndicator.style.marginLeft = '8px';
+                }
                 serverItem.appendChild(statusIndicator);
                 
                 // Add hover effects
@@ -4183,9 +4228,15 @@
                         document.querySelectorAll('#universal-server-selector .server-item').forEach(item => {
                             item.style.background = 'rgba(255, 255, 255, 0.1)';
                             item.style.border = '2px solid transparent';
+                            if (window.matchMedia && window.matchMedia('(max-width: 768px)').matches) {
+                                item.style.border = '1px solid transparent';
+                            }
                         });
                         serverItem.style.background = 'rgba(59, 130, 246, 0.6)';
                         serverItem.style.border = '2px solid rgba(59, 130, 246, 0.8)';
+                        if (window.matchMedia && window.matchMedia('(max-width: 768px)').matches) {
+                            serverItem.style.border = '1px solid rgba(59, 130, 246, 0.8)';
+                        }
                         
                         // Show feedback
                         showServerSwitchFeedback(server.name || `Server ${index + 1}`);
@@ -4219,6 +4270,13 @@
                 align-items: center;
                 justify-content: center;
             `;
+            if (window.matchMedia && window.matchMedia('(max-width: 768px)').matches) {
+                closeButton.style.top = '6px';
+                closeButton.style.right = '6px';
+                closeButton.style.width = '28px';
+                closeButton.style.height = '28px';
+                closeButton.style.fontSize = '16px';
+            }
             closeButton.innerHTML = '×';
             closeButton.addEventListener('click', () => {
                 selectorContainer.remove();
@@ -4264,6 +4322,12 @@
                     font-weight: 500;
                     box-shadow: 0 4px 16px rgba(59, 130, 246, 0.4);
                 `;
+                if (window.matchMedia && window.matchMedia('(max-width: 768px)').matches) {
+                    indicatorButton.style.top = '8px';
+                    indicatorButton.style.left = '8px';
+                    indicatorButton.style.fontSize = '11px';
+                    indicatorButton.style.padding = '6px 10px';
+                }
                 indicatorButton.innerHTML = `🌐 ${servers.length} Servers`;
                 indicatorButton.title = 'Click to show server selector';
                 
@@ -4974,6 +5038,27 @@
                 overflow-y: auto;
             `;
             
+            // Mobile adjustments
+            try {
+                const isNarrow = window.matchMedia('(max-width: 768px)').matches;
+                if (isNarrow) {
+                    selectorContainer.style.position = 'fixed';
+                    selectorContainer.style.top = 'auto';
+                    selectorContainer.style.right = 'auto';
+                    selectorContainer.style.left = '50%';
+                    selectorContainer.style.bottom = 'max(10px, env(safe-area-inset-bottom))';
+                    selectorContainer.style.transform = 'translateX(-50%)';
+                    selectorContainer.style.width = 'min(92vw, 480px)';
+                    selectorContainer.style.minWidth = 'auto';
+                    selectorContainer.style.maxHeight = 'min(60vh, 480px)';
+                    selectorContainer.style.padding = '12px';
+                    selectorContainer.style.borderRadius = '14px';
+                    selectorContainer.style.backdropFilter = 'blur(12px)';
+                    selectorContainer.style.boxShadow = '0 12px 40px rgba(0,0,0,0.5)';
+                    selectorContainer.style.overflowY = 'auto';
+                }
+            } catch (e) {}
+            
             // Create title
             const title = document.createElement('div');
             title.style.cssText = `
@@ -4985,6 +5070,11 @@
                 padding-bottom: 10px;
                 border-bottom: 1px solid rgba(255, 255, 255, 0.2);
             `;
+            if (window.matchMedia && window.matchMedia('(max-width: 768px)').matches) {
+                title.style.fontSize = '14px';
+                title.style.marginBottom = '10px';
+                title.style.paddingBottom = '8px';
+            }
             title.textContent = '🌐 Server Selection';
             selectorContainer.appendChild(title);
             
@@ -4995,6 +5085,9 @@
                 flex-direction: column;
                 gap: 8px;
             `;
+            if (window.matchMedia && window.matchMedia('(max-width: 768px)').matches) {
+                serverList.style.gap = '6px';
+            }
             
             servers.forEach((server, index) => {
                 const serverItem = document.createElement('div');
@@ -5011,6 +5104,11 @@
                     align-items: center;
                     border: 2px solid transparent;
                 `;
+                if (window.matchMedia && window.matchMedia('(max-width: 768px)').matches) {
+                    serverItem.style.padding = '10px 12px';
+                    serverItem.style.fontSize = '13px';
+                    serverItem.style.borderWidth = '1px';
+                }
                 
                 // Highlight current server
                 const isCurrentServer = currentServer && (
@@ -5021,6 +5119,9 @@
                 if (isCurrentServer) {
                     serverItem.style.background = 'rgba(59, 130, 246, 0.6)';
                     serverItem.style.border = '2px solid rgba(59, 130, 246, 0.8)';
+                    if (window.matchMedia && window.matchMedia('(max-width: 768px)').matches) {
+                        serverItem.style.border = '1px solid rgba(59, 130, 246, 0.8)';
+                    }
                 }
                 
                 // Server name with quality indicator
@@ -5030,6 +5131,9 @@
                     align-items: center;
                     gap: 8px;
                 `;
+                if (window.matchMedia && window.matchMedia('(max-width: 768px)').matches) {
+                    serverName.style.gap = '6px';
+                }
                 
                 // Add quality icon based on server name
                 let qualityIcon = '📺';
@@ -5058,6 +5162,11 @@
                     margin-left: 12px;
                     box-shadow: 0 0 8px rgba(16, 185, 129, 0.6);
                 `;
+                if (window.matchMedia && window.matchMedia('(max-width: 768px)').matches) {
+                    statusIndicator.style.width = '8px';
+                    statusIndicator.style.height = '8px';
+                    statusIndicator.style.marginLeft = '8px';
+                }
                 serverItem.appendChild(statusIndicator);
                 
                 // Add hover effects
@@ -5086,9 +5195,15 @@
                         document.querySelectorAll('#universal-server-selector .server-item').forEach(item => {
                             item.style.background = 'rgba(255, 255, 255, 0.1)';
                             item.style.border = '2px solid transparent';
+                            if (window.matchMedia && window.matchMedia('(max-width: 768px)').matches) {
+                                item.style.border = '1px solid transparent';
+                            }
                         });
                         serverItem.style.background = 'rgba(59, 130, 246, 0.6)';
                         serverItem.style.border = '2px solid rgba(59, 130, 246, 0.8)';
+                        if (window.matchMedia && window.matchMedia('(max-width: 768px)').matches) {
+                            serverItem.style.border = '1px solid rgba(59, 130, 246, 0.8)';
+                        }
                         
                         // Show feedback
                         showServerSwitchFeedback(server.name || `Server ${index + 1}`);
@@ -5122,6 +5237,13 @@
                 align-items: center;
                 justify-content: center;
             `;
+            if (window.matchMedia && window.matchMedia('(max-width: 768px)').matches) {
+                closeButton.style.top = '6px';
+                closeButton.style.right = '6px';
+                closeButton.style.width = '28px';
+                closeButton.style.height = '28px';
+                closeButton.style.fontSize = '16px';
+            }
             closeButton.innerHTML = '×';
             closeButton.addEventListener('click', () => {
                 selectorContainer.remove();
@@ -5167,6 +5289,12 @@
                     font-weight: 500;
                     box-shadow: 0 4px 16px rgba(59, 130, 246, 0.4);
                 `;
+                if (window.matchMedia && window.matchMedia('(max-width: 768px)').matches) {
+                    indicatorButton.style.top = '8px';
+                    indicatorButton.style.left = '8px';
+                    indicatorButton.style.fontSize = '11px';
+                    indicatorButton.style.padding = '6px 10px';
+                }
                 indicatorButton.innerHTML = `🌐 ${servers.length} Servers`;
                 indicatorButton.title = 'Click to show server selector';
                 
@@ -6749,4 +6877,4 @@ playerInstance.on('ready', event => {
     </script>
 
 </body>
-</html
+</html>
