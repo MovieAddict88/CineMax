@@ -6888,73 +6888,28 @@ playerInstance.on('ready', event => {
         function openUniversalSelector() {
             const selector = document.getElementById('universal-server-selector');
             if (!selector) return;
-            let overlay = document.getElementById('server-selector-overlay');
             const isNarrow = window.matchMedia && window.matchMedia('(max-width: 768px)').matches;
-            if (!overlay) {
-                overlay = document.createElement('div');
-                overlay.id = 'server-selector-overlay';
-                overlay.style.cssText = `
-                    position: fixed;
-                    inset: 0;
-                    background: rgba(0,0,0,0.5);
-                    opacity: 0;
-                    transition: opacity 0.3s ease;
-                    z-index: 999;
-                `;
-                document.body.appendChild(overlay);
-                overlay.addEventListener('click', closeUniversalSelector);
-            }
             selector.style.display = 'block';
-            void selector.offsetHeight;
-            if (isNarrow) {
-                selector.style.transform = 'translateY(0)';
-            }
-            selector.style.opacity = '1';
-            overlay.style.opacity = '1';
+            selector.style.pointerEvents = 'none';
+            requestAnimationFrame(() => {
+                if (isNarrow) selector.style.transform = 'translateY(0)';
+                selector.style.opacity = '1';
+                setTimeout(() => { selector.style.pointerEvents = 'auto'; }, 160);
+            });
         }
         
         function closeUniversalSelector() {
             const selector = document.getElementById('universal-server-selector');
-            const overlay = document.getElementById('server-selector-overlay');
-            if (!selector) {
-                if (overlay && overlay.parentNode) overlay.parentNode.removeChild(overlay);
-                return;
-            }
+            if (!selector) return;
             const isNarrow = window.matchMedia && window.matchMedia('(max-width: 768px)').matches;
-            if (isNarrow) {
-                selector.style.transform = 'translateY(100%)';
-            }
+            selector.style.pointerEvents = 'none';
+            if (isNarrow) selector.style.transform = 'translateY(100%)';
             selector.style.opacity = '0';
-            if (overlay) overlay.style.opacity = '0';
-            setTimeout(() => {
+            setTimeout(()n=>{
                 selector.style.display = 'none';
-                if (overlay && overlay.parentNode) overlay.parentNode.removeChild(overlay);
-            }, 300);
+                selector.style.pointerEvents = 'auto';
+            }, 180);
         }
-        
-        // Event delegation to override default indicator/close behavior
-        document.addEventListener('click', function(event) {
-            const target = event.target;
-            if (target && target.id === 'server-selector-indicator') {
-                event.preventDefault();
-                event.stopImmediatePropagation();
-                openUniversalSelector();
-            }
-        }, true);
-        
-        document.addEventListener('click', function(event) {
-            const target = event.target;
-            if (!target) return;
-            const inSelector = target.closest && target.closest('#universal-server-selector');
-            if (inSelector && target.matches && target.matches('button')) {
-                const label = (target.textContent || '').trim();
-                if (label === '×') {
-                    event.preventDefault();
-                    event.stopImmediatePropagation();
-                    closeUniversalSelector();
-                }
-            }
-        }, true);
 
     </script>
 
