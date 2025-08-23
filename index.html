@@ -1,70 +1,12 @@
-<!DOCTYPE html>
+ <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>CineCraze</title>
-    
-    <!-- Enhanced Content Security Policy for Ad Blocking (Permissive for data loading) -->
-    <!-- Temporarily relaxed CSP to ensure data loading works, while still blocking ads through other methods -->
-    <!--
-    <meta http-equiv="Content-Security-Policy" content="
-        default-src 'self' 'unsafe-inline' 'unsafe-eval' data: blob: *;
-        script-src 'self' 'unsafe-inline' 'unsafe-eval' *;
-        connect-src 'self' *;
-        frame-src 'self' *;
-        img-src 'self' data: blob: *;
-        style-src 'self' 'unsafe-inline' *;
-        font-src 'self' *;
-        media-src 'self' blob: data: *;
-        object-src 'none';
-        base-uri 'self';
-        form-action 'self';
-    ">
-    -->
-    
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flag-icon-css@4.1.7/css/flag-icons.min.css">
     <link rel="stylesheet" href="https://cdn.plyr.io/3.7.8/plyr.css">
-    
-    <!-- Ad Blocking Styles -->
-    <style>
-        /* Ad Blocking CSS - Hide common ad elements */
-        [class*="ad-"], [class*="ads-"], [class*="advertisement"],
-        [id*="ad-"], [id*="ads-"], [id*="advertisement"],
-        .advertisement, .ads, .ad-banner, .ad-container,
-        .google-ads, .adsense, .adnxs, .doubleclick,
-        iframe[src*="googleads"], iframe[src*="googlesyndication"],
-        iframe[src*="doubleclick"], iframe[src*="adsystem"],
-        iframe[src*="amazon-adsystem"], iframe[src*="adsense"],
-        iframe[src*="popads"], iframe[src*="popcash"],
-        iframe[src*="propellerads"], iframe[src*="adnxs"],
-        iframe[src*="outbrain"], iframe[src*="taboola"],
-        iframe[src*="revcontent"], iframe[src*="mgid"],
-        iframe[src*="exoclick"], iframe[src*="ero-advertising"] {
-            display: none !important;
-            visibility: hidden !important;
-            opacity: 0 !important;
-            width: 0 !important;
-            height: 0 !important;
-            position: absolute !important;
-            left: -9999px !important;
-            top: -9999px !important;
-        }
-        
-        /* Enhanced iframe security for embedded content */
-        .external-content-iframe {
-            /* Enhanced sandbox for ad blocking while preserving functionality */
-            /* Note: sandbox attribute will be set dynamically in JavaScript */
-        }
-        
-        /* Hide popup overlays and modal ads */
-        [class*="popup"], [class*="modal"][class*="ad"],
-        [class*="overlay"][class*="ad"], [class*="banner"][class*="ad"] {
-            display: none !important;
-        }
-    </style>
-    
     <style>
         /* Notification Bar Styles */
         .notification-bar {
@@ -989,42 +931,6 @@
             gap: 15px;
         }
 
-        /* Embedded Server Selector Styles */
-        #embedded-server-selector {
-            animation: slideInUp 0.3s ease-out;
-        }
-
-        @keyframes slideInUp {
-            from {
-                opacity: 0;
-                transform: translateY(20px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
-        .server-button {
-            position: relative;
-            overflow: hidden;
-        }
-
-        .server-button::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: -100%;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
-            transition: left 0.5s;
-        }
-
-        .server-button:hover::before {
-            left: 100%;
-        }
-
         .action-btn {
             display: flex;
             align-items: center;
@@ -1557,53 +1463,6 @@
             margin-top: 30px;
         }
 
-        /* Enhanced Loading States */
-        .enhanced-loading {
-            position: relative;
-            overflow: hidden;
-        }
-
-        .enhanced-loading::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: -100%;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.1), transparent);
-            animation: loadingShimmer 1.5s infinite;
-        }
-
-        @keyframes loadingShimmer {
-            0% { left: -100%; }
-            100% { left: 100%; }
-        }
-
-        /* Server Selector Enhancements */
-        .server-selector-enhanced {
-            backdrop-filter: blur(15px);
-            -webkit-backdrop-filter: blur(15px);
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-        }
-
-        .server-selector-enhanced:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.6);
-        }
-
-        /* Player Loading Optimizations */
-        .player-loading {
-            background: linear-gradient(45deg, #1a1a1a, #2a2a2a, #1a1a1a);
-            background-size: 200% 200%;
-            animation: gradientShift 2s ease infinite;
-        }
-
-        @keyframes gradientShift {
-            0% { background-position: 0% 50%; }
-            50% { background-position: 100% 50%; }
-            100% { background-position: 0% 50%; }
-        }
-
         .load-more-btn {
             background-color: var(--youtube-red);
             color: white;
@@ -1732,18 +1591,6 @@
             .video-actions {
                 width: 100%;
                 justify-content: space-between;
-            }
-
-            /* Server Selector Mobile Responsiveness */
-            #embedded-server-selector {
-                padding: 15px;
-                margin-top: 15px;
-            }
-
-            .server-button {
-                font-size: 12px;
-                padding: 8px 12px;
-                min-width: 80px;
             }
         }
 
@@ -2402,23 +2249,6 @@
             <button class="theme-toggle" id="theme-toggle">
                 <i class="fas fa-moon"></i>
             </button>
-            <!-- Ad Blocker Status Indicator -->
-            <div class="ad-blocker-status" id="ad-blocker-status" title="Ad Blocker Active - Blocking ads while preserving Google Drive, Mega.nz, and YouTube" style="
-                background: #10b981;
-                color: white;
-                padding: 6px 10px;
-                border-radius: 15px;
-                font-size: 12px;
-                font-weight: 600;
-                display: none;
-                align-items: center;
-                gap: 5px;
-                cursor: pointer;
-                transition: all 0.3s ease;
-            ">
-                <i class="fas fa-shield-alt"></i>
-                <span>AD-FREE</span>
-            </div>
             <div class="user-profile">
                 <i class="fas fa-user"></i>
             </div>
@@ -2654,378 +2484,6 @@
     <script src="https://cdn.plyr.io/3.7.8/plyr.js"></script>
     <script src="https://cdn.dashjs.org/latest/dash.all.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/shaka-player/4.3.7/shaka-player.compiled.js"></script>
-    
-    <!-- Ad Blocking JavaScript -->
-    <script>
-        // Enhanced Ad Blocking System for CineCraze
-        class AdBlocker {
-            constructor() {
-                this.adDomains = [
-                    // Common ad networks
-                    'googleads.g.doubleclick.net',
-                    'googlesyndication.com',
-                    'google-analytics.com',
-                    'googleadservices.com',
-                    'doubleclick.net',
-                    'adsystem.amazon.com',
-                    'amazon-adsystem.com',
-                    'facebook.com/tr',
-                    'connect.facebook.net',
-                    
-                    // Pop-up and redirect ads
-                    'popads.net',
-                    'popcash.net',
-                    'propellerads.com',
-                    'adnxs.com',
-                    'adskeeper.co.uk',
-                    'mgid.com',
-                    'outbrain.com',
-                    'taboola.com',
-                    'revcontent.com',
-                    'exoclick.com',
-                    'ero-advertising.com',
-                    'juicyads.com',
-                    'trafficjunky.net',
-                    'exosrv.com',
-                    'popunder.net',
-                    'adsterra.com',
-                    'hilltopads.net',
-                    'clickadu.com',
-                    'adcash.com',
-                    'bidvertiser.com',
-                    'media.net',
-                    'infolinks.com',
-                    'chitika.com',
-                    'buysellads.com',
-                    'carbonads.net',
-                    'adsense.google.com',
-                    
-                    // Video ad networks
-                    'ima3.googlesyndication.com',
-                    'imasdk.googleapis.com',
-                    'video-ad-stats.googlesyndication.com',
-                    'pubads.g.doubleclick.net',
-                    'securepubads.g.doubleclick.net',
-                    'tpc.googlesyndication.com',
-                    
-                    // Crypto miners
-                    'coinhive.com',
-                    'coin-hive.com',
-                    'jsecoin.com',
-                    'authedmine.com',
-                    'crypto-loot.com',
-                    
-                    // Tracking and analytics
-                    'hotjar.com',
-                    'mouseflow.com',
-                    'crazyegg.com',
-                    'mixpanel.com',
-                    'segment.com'
-                ];
-                
-                this.allowedDomains = [
-                    'drive.google.com',
-                    'drive.usercontent.google.com',
-                    'mega.nz',
-                    'youtube.com',
-                    'www.youtube.com',
-                    'youtu.be',
-                    'm.youtube.com',
-                    // Data sources
-                    'github.com',
-                    'raw.githubusercontent.com',
-                    'cdn.jsdelivr.net',
-                    'movie-fcs.fwh.is',
-                    // CDN and libraries
-                    'cdn.plyr.io',
-                    'cdn.dashjs.org',
-                    'cdnjs.cloudflare.com',
-                    // DRM and streaming
-                    'qp-pldt-live-grp-02-prod.akamaized.net'
-                ];
-                
-                this.init();
-            }
-            
-            init() {
-                // Only enable DOM and iframe blocking initially
-                // Network request blocking is disabled to avoid data loading issues
-                this.blockDOMElements();
-                this.setupMutationObserver();
-                this.enhanceIframeSecurity();
-                console.log('🛡️ AdBlocker initialized (DOM/iframe blocking only) - protecting against ads while preserving data loading');
-            }
-            
-            // Block network requests to ad domains (safe mode)
-            blockNetworkRequests() {
-                // Don't override fetch if debug mode is already overriding it
-                if (window.CINECRAZE_DEBUG) {
-                    console.log('🔍 Debug mode active - using safer ad blocking approach');
-                    return;
-                }
-                
-                // Use a safer approach that doesn't interfere with data fetching
-                // Only block requests that are clearly ads
-                const originalFetch = window.fetch;
-                window.fetch = (...args) => {
-                    const url = args[0];
-                    if (typeof url === 'string') {
-                        // Only block if it's clearly an ad domain AND not a data source
-                        if (this.isStrictAdDomain(url)) {
-                            console.log('🚫 Blocked ad request:', url);
-                            return Promise.reject(new Error('Blocked by AdBlocker'));
-                        }
-                    }
-                    return originalFetch.apply(this, args);
-                };
-                
-                // More conservative XMLHttpRequest override
-                const originalOpen = XMLHttpRequest.prototype.open;
-                XMLHttpRequest.prototype.open = function(method, url, ...args) {
-                    if (window.adBlocker && typeof url === 'string' && window.adBlocker.isStrictAdDomain(url)) {
-                        console.log('🚫 Blocked XHR ad request:', url);
-                        this.abort();
-                        return;
-                    }
-                    return originalOpen.apply(this, [method, url, ...args]);
-                };
-            }
-            
-            // Stricter ad domain checking for network requests
-            isStrictAdDomain(url) {
-                if (!url) return false;
-                
-                // Always allow data sources and essential services
-                const essentialDomains = [
-                    'github.com', 'raw.githubusercontent.com', 'cdn.jsdelivr.net',
-                    'movie-fcs.fwh.is', 'drive.google.com', 'mega.nz',
-                    'youtube.com', 'youtu.be', 'cdn.plyr.io', 'cdn.dashjs.org',
-                    'cdnjs.cloudflare.com', 'qp-pldt-live-grp-02-prod.akamaized.net'
-                ];
-                
-                if (essentialDomains.some(domain => url.includes(domain))) {
-                    return false;
-                }
-                
-                // Only block obvious ad domains
-                const strictAdDomains = [
-                    'googleads.g.doubleclick.net',
-                    'googlesyndication.com',
-                    'google-analytics.com',
-                    'doubleclick.net',
-                    'popads.net',
-                    'popcash.net',
-                    'propellerads.com',
-                    'exoclick.com',
-                    'juicyads.com'
-                ];
-                
-                return strictAdDomains.some(adDomain => url.includes(adDomain));
-            }
-            
-            // Check if URL belongs to ad domain
-            isAdDomain(url) {
-                if (!url) return false;
-                
-                // Always allow whitelisted domains
-                for (const domain of this.allowedDomains) {
-                    if (url.includes(domain)) {
-                        return false;
-                    }
-                }
-                
-                // Block known ad domains
-                for (const adDomain of this.adDomains) {
-                    if (url.includes(adDomain)) {
-                        return true;
-                    }
-                }
-                
-                return false;
-            }
-            
-            // Block DOM elements that look like ads
-            blockDOMElements() {
-                const adSelectors = [
-                    '[class*="ad-"]', '[class*="ads-"]', '[class*="advertisement"]',
-                    '[id*="ad-"]', '[id*="ads-"]', '[id*="advertisement"]',
-                    '.advertisement', '.ads', '.ad-banner', '.ad-container',
-                    '.google-ads', '.adsense', '.adnxs', '.doubleclick',
-                    'iframe[src*="googleads"]', 'iframe[src*="googlesyndication"]',
-                    'iframe[src*="doubleclick"]', 'iframe[src*="adsystem"]',
-                    'div[class*="popup"]', 'div[class*="overlay"][class*="ad"]'
-                ];
-                
-                adSelectors.forEach(selector => {
-                    try {
-                        const elements = document.querySelectorAll(selector);
-                        elements.forEach(el => {
-                            // Don't block if it's from allowed domains
-                            if (el.src && this.allowedDomains.some(domain => el.src.includes(domain))) {
-                                return;
-                            }
-                            this.hideElement(el);
-                        });
-                    } catch (e) {
-                        // Ignore selector errors
-                    }
-                });
-            }
-            
-            // Hide ad element
-            hideElement(element) {
-                if (element) {
-                    element.style.display = 'none';
-                    element.style.visibility = 'hidden';
-                    element.style.opacity = '0';
-                    element.style.width = '0';
-                    element.style.height = '0';
-                    element.style.position = 'absolute';
-                    element.style.left = '-9999px';
-                    element.style.top = '-9999px';
-                    console.log('🚫 Blocked ad element:', element);
-                }
-            }
-            
-            // Monitor for dynamically added ad elements
-            setupMutationObserver() {
-                const observer = new MutationObserver((mutations) => {
-                    mutations.forEach((mutation) => {
-                        mutation.addedNodes.forEach((node) => {
-                            if (node.nodeType === Node.ELEMENT_NODE) {
-                                this.scanElementForAds(node);
-                            }
-                        });
-                    });
-                });
-                
-                observer.observe(document.body, {
-                    childList: true,
-                    subtree: true
-                });
-            }
-            
-            // Scan element for ad patterns
-            scanElementForAds(element) {
-                // Check the element itself
-                if (this.isAdElement(element)) {
-                    this.hideElement(element);
-                    return;
-                }
-                
-                // Check children
-                const adElements = element.querySelectorAll([
-                    '[class*="ad-"]', '[class*="ads-"]', '[class*="advertisement"]',
-                    '[id*="ad-"]', '[id*="ads-"]', '[id*="advertisement"]',
-                    'iframe[src*="googleads"]', 'iframe[src*="googlesyndication"]',
-                    'iframe[src*="doubleclick"]', 'iframe[src*="adsystem"]'
-                ].join(','));
-                
-                adElements.forEach(el => {
-                    // Don't block if it's from allowed domains
-                    if (el.src && this.allowedDomains.some(domain => el.src.includes(domain))) {
-                        return;
-                    }
-                    this.hideElement(el);
-                });
-            }
-            
-            // Check if element is an ad
-            isAdElement(element) {
-                if (!element || !element.className && !element.id) return false;
-                
-                const className = element.className.toString().toLowerCase();
-                const id = element.id ? element.id.toLowerCase() : '';
-                const src = element.src ? element.src.toLowerCase() : '';
-                
-                // Don't block allowed domains
-                if (src && this.allowedDomains.some(domain => src.includes(domain))) {
-                    return false;
-                }
-                
-                // Check for ad patterns
-                const adPatterns = ['ad-', 'ads-', 'advertisement', 'google-ads', 'adsense', 'doubleclick'];
-                return adPatterns.some(pattern => 
-                    className.includes(pattern) || 
-                    id.includes(pattern) || 
-                    src.includes(pattern)
-                );
-            }
-            
-            // Enhanced iframe security (permissive for functionality)
-            enhanceIframeSecurity() {
-                const iframes = document.querySelectorAll('iframe');
-                iframes.forEach(iframe => {
-                    if (!iframe.src) return;
-                    
-                    // Apply permissive sandbox to all iframes for functionality
-                    const functionalSandbox = [
-                        'allow-scripts',
-                        'allow-same-origin',
-                        'allow-presentation',
-                        'allow-forms',
-                        'allow-popups',
-                        'allow-top-navigation-by-user-activation'
-                    ].join(' ');
-                    
-                    iframe.setAttribute('sandbox', functionalSandbox);
-                    
-                    // Add referrer policy based on domain trust
-                    if (this.allowedDomains.some(domain => iframe.src.includes(domain))) {
-                        iframe.setAttribute('referrerpolicy', 'strict-origin-when-cross-origin');
-                        console.log('✅ Applied trusted iframe settings for:', iframe.src);
-                    } else {
-                        iframe.setAttribute('referrerpolicy', 'no-referrer');
-                        console.log('🛡️ Applied functional iframe settings with tracking protection for:', iframe.src);
-                    }
-                    
-                    // Allow all necessary iframe features
-                    iframe.setAttribute('allow', 'autoplay; encrypted-media; picture-in-picture; fullscreen');
-                });
-            }
-        }
-        
-        // Initialize ad blocker when DOM is ready
-        let adBlocker;
-        
-        // Block popup windows and redirects
-        window.addEventListener('beforeunload', (e) => {
-            // Allow navigation for trusted domains
-            const href = window.location.href;
-            if (adBlocker && adBlocker.allowedDomains.some(domain => href.includes(domain))) {
-                return;
-            }
-            
-            // Block suspicious redirects
-            if (document.referrer && adBlocker && adBlocker.isAdDomain(document.referrer)) {
-                e.preventDefault();
-                e.returnValue = '';
-                console.log('🚫 Blocked suspicious redirect');
-            }
-        });
-        
-        // Override window.open to block popup ads
-        const originalWindowOpen = window.open;
-        window.open = function(url, name, features) {
-            if (!url) return originalWindowOpen.apply(this, arguments);
-            
-            // Always allow trusted domains
-            if (adBlocker && adBlocker.allowedDomains.some(domain => url.includes(domain))) {
-                console.log('✅ Allowing popup from trusted domain:', url);
-                return originalWindowOpen.apply(this, arguments);
-            }
-            
-            // Block ad domains
-            if (adBlocker && adBlocker.isAdDomain(url)) {
-                console.log('🚫 Blocked popup ad:', url);
-                return null;
-            }
-            
-            // Allow other popups (like legitimate video players)
-            return originalWindowOpen.apply(this, arguments);
-        };
-    </script>
-    
     <script>
         if ('scrollRestoration' in history) {
             history.scrollRestoration = 'manual';
@@ -3222,13 +2680,10 @@
             });
         }
         
-        // Enhanced data fetching with multiple fallback sources and performance optimizations
+        // Enhanced data fetching with multiple fallback sources
         async function fetchData() {
             try {
                 elements.loadingSpinner.style.display = 'block';
-                
-                // Show enhanced loading indicator
-                showLoadingIndicator('Loading content data...');
                 
                 // Primary source
                 const primaryUrl = "https://github.com/MovieAddict88/Movie-Source/raw/main/playlist.json";
@@ -3250,7 +2705,6 @@
                         localStorage.setItem('cineCrazeDataCache', JSON.stringify(cineData));
                         localStorage.setItem('cineCrazeDataTimestamp', Date.now().toString());
                         console.log("✅ Loaded data from primary source");
-                        hideLoadingIndicator();
                         return;
                     }
                 } catch (err) {
@@ -3265,7 +2719,6 @@
                         if (response.ok) {
                             cineData = await response.json();
                             console.log(`✅ Loaded data from fallback: ${fallbackUrl}`);
-                            hideLoadingIndicator();
                             return;
                         }
                     } catch (err) {
@@ -3280,7 +2733,6 @@
                     try {
                         cineData = JSON.parse(cachedData);
                         console.log("✅ Loaded data from cache");
-                        hideLoadingIndicator();
                         return;
                     } catch (err) {
                         console.warn("⚠️ Cache parsing failed:", err);
@@ -3323,7 +2775,6 @@
                 document.body.appendChild(errorMessage);
             } finally {
                 elements.loadingSpinner.style.display = 'none';
-                hideLoadingIndicator();
             }
         }
         
@@ -3806,9 +3257,6 @@
             document.querySelector('.content-container').style.display = 'none';
 
             const setupViewerAndPlay = () => {
-                // Remove any existing server selector first
-                hideEmbeddedServerSelector();
-                
                 elements.viewerTitle.textContent = content.Title;
                 elements.viewerDescription.textContent = content.Description || 'No description available.';
                 // Reset selectors
@@ -3827,25 +3275,7 @@
                 currentSeries = content;
 
                 if (content.type !== 'series' && content.Servers) {
-                    console.log('🎬 Loading content with servers:', content.Servers.length, 'servers available');
-                    console.log('🔍 Server details:', content.Servers.map(s => ({name: s.name, url: s.url?.substring(0, 50) + '...'})));
                     updatePlayerSource(content.Servers);
-                    
-                    // Create server selector for ALL content with multiple servers
-                    if (content.Servers.length > 1) {
-                        console.log('🎯 Creating server selector for non-series content');
-                        console.log('🔍 Looking for video-actions container...');
-                        const videoActions = document.querySelector('.video-actions');
-                        if (videoActions) {
-                            console.log('✅ Found video-actions container:', videoActions);
-                        } else {
-                            console.error('❌ video-actions container NOT FOUND!');
-                        }
-                        setTimeout(() => {
-                            console.log('🚀 Calling createEmbeddedServerSelector now...');
-                            createEmbeddedServerSelector(content.Servers);
-                        }, 500);
-                    }
                 }
                 elements.seasonsGrid.innerHTML = '';
 
@@ -3918,22 +3348,13 @@
                         default: 720,
                         options: [1080, 720, 480, 360, 240],
                     },
-                    speed: {
-                        selected: 1,
-                        options: [0.5, 0.75, 1, 1.25, 1.5, 1.75, 2]
-                    },
                     autoplay: false, // Start with autoplay disabled for better mobile compatibility
                     muted: false, // Allow sound by default
-
                 });
 
-                // Add custom controls and server selector functionality to Plyr
                 playerInstance.once('ready', event => {
                     setupViewerAndPlay();
                     addStretchButtonToPlayer();
-                    // addPipButtonToPlayer(); // Removed - Plyr already has 'pip' in controls
-                    addServerSelectorToSettingsButton();
-                    
                     // Event listeners for fullscreen etc. should be attached here too, only once
                     playerInstance.on('enterfullscreen', () => {
                         if (screen.orientation && screen.orientation.lock) {
@@ -3941,8 +3362,6 @@
                                 console.log('Orientation lock failed: ', error);
                             });
                         }
-                        // Ensure server selector is visible in fullscreen
-                        showDirectLinkServerSelectorInFullscreen();
                     });
                     playerInstance.on('exitfullscreen', () => {
                         if (screen.orientation && screen.orientation.unlock) {
@@ -3951,8 +3370,6 @@
                         if (elements.searchContainer) {
                             elements.searchContainer.classList.remove('show');
                         }
-                        // Hide fullscreen server selector
-                        hideDirectLinkServerSelectorInFullscreen();
                     });
                 });
 
@@ -3968,11 +3385,6 @@
             } else {
                 // Player already exists, it should be ready.
                 setupViewerAndPlay();
-                
-                // Ensure server selector functionality is available for existing player
-                setTimeout(() => {
-                    addServerSelectorToSettingsButton();
-                }, 500);
             }
 
             elements.viewerPage.style.display = 'block';
@@ -4014,9 +3426,20 @@
                     const embedUrl = `https://drive.google.com/file/d/${fileId}/preview`;
                     elements.player.style.display = 'none'; // Hide Plyr player
                     if (!iframe) {
-                        iframe = createSecureIframe(embedUrl, playerContainer);
+                        iframe = document.createElement('iframe');
+                        iframe.className = 'external-content-iframe';
+                        iframe.style.position = 'absolute';
+                        iframe.style.top = '0';
+                        iframe.style.left = '0';
+                        iframe.style.width = '100%';
+                        iframe.style.height = '100%';
+                        iframe.style.border = 'none';
+                        iframe.setAttribute('allowfullscreen', '');
+                        iframe.setAttribute('allow', 'autoplay; encrypted-media; picture-in-picture');
+                        iframe.setAttribute('sandbox', 'allow-scripts allow-same-origin allow-presentation allow-forms');
+                        playerContainer.appendChild(iframe);
                     }
-                    iframe.src = embedUrl; // Google Drive URLs don't need filtering
+                    iframe.src = embedUrl;
                     iframe.style.display = 'block';
                     return;
                 }
@@ -4025,9 +3448,20 @@
             if (isMegaNzUrl(url)) {
                 elements.player.style.display = 'none'; // Hide Plyr player
                 if (!iframe) {
-                    iframe = createSecureIframe(url, playerContainer);
+                    iframe = document.createElement('iframe');
+                    iframe.className = 'external-content-iframe';
+                    iframe.style.position = 'absolute';
+                    iframe.style.top = '0';
+                    iframe.style.left = '0';
+                    iframe.style.width = '100%';
+                    iframe.style.height = '100%';
+                    iframe.style.border = 'none';
+                    iframe.setAttribute('allowfullscreen', '');
+                    iframe.setAttribute('allow', 'autoplay; encrypted-media; picture-in-picture');
+                    iframe.setAttribute('sandbox', 'allow-scripts allow-same-origin allow-presentation allow-forms');
+                    playerContainer.appendChild(iframe);
                 }
-                iframe.src = url.replace('/file/', '/embed/'); // Mega.nz URLs don't need filtering
+                iframe.src = url.replace('/file/', '/embed/');
                 iframe.style.display = 'block';
                 return;
             }
@@ -4039,150 +3473,27 @@
                 setTimeout(() => createEmbeddedServerSelector(servers), 100);
                 
                 if (!iframe) {
-                    iframe = createSecureIframe(url, playerContainer);
+                    iframe = document.createElement('iframe');
+                    iframe.className = 'external-content-iframe';
+                    iframe.style.position = 'absolute';
+                    iframe.style.top = '0';
+                    iframe.style.left = '0';
+                    iframe.style.width = '100%';
+                    iframe.style.height = '100%';
+                    iframe.style.border = 'none';
+                    iframe.setAttribute('allowfullscreen', '');
+                    iframe.setAttribute('allow', 'autoplay; encrypted-media; picture-in-picture');
+                    playerContainer.appendChild(iframe);
                 }
                 
-                // Load iframe immediately for auto-play with URL filtering
+                // Load iframe immediately for auto-play
                 iframe.style.display = 'block';
-                iframe.src = filterEmbeddedUrl(url);
+                iframe.src = url;
                 
                 // Handle iframe load events (non-blocking)
                 iframe.onload = () => {
                     // Store the onload handler for reuse when switching servers
                     iframe._onloadHandler = iframe.onload;
-                    
-                    // Auto-play embedded content after load
-                    console.log('✅ Embedded content loaded, attempting autoplay');
-                    
-                    // Enhanced autoplay for embedded content - covering ALL embedded link types
-                    const attemptEmbeddedAutoplay = () => {
-                        try {
-                            // Method 1: Standard postMessage autoplay (universal)
-                            iframe.contentWindow.postMessage('{"event":"command","func":"play","args":""}', '*');
-                            iframe.contentWindow.postMessage('{"method":"play"}', '*');
-                            iframe.contentWindow.postMessage('{"action":"play"}', '*');
-                            iframe.contentWindow.postMessage('{"type":"play"}', '*');
-                            iframe.contentWindow.postMessage('{"command":"play"}', '*');
-                            iframe.contentWindow.postMessage('{"key":"play"}', '*');
-                            
-                            // Method 2: YouTube-specific autoplay
-                            if (iframe.src.includes('youtube.com') || iframe.src.includes('youtu.be')) {
-                                iframe.contentWindow.postMessage('{"event":"command","func":"playVideo","args":""}', '*');
-                                iframe.contentWindow.postMessage('{"event":"command","func":"play","args":""}', '*');
-                            }
-                            
-                            // Method 3: VidSrc family autoplay (vidsrc.net, vidsrc.me, vidsrc.to, vidsrc.xyz)
-                            if (iframe.src.includes('vidsrc.net') || iframe.src.includes('vidsrc.me') || 
-                                iframe.src.includes('vidsrc.to') || iframe.src.includes('vidsrc.xyz') || 
-                                iframe.src.includes('vidsrc.pro')) {
-                                iframe.contentWindow.postMessage('{"action":"play"}', '*');
-                                iframe.contentWindow.postMessage('{"type":"play"}', '*');
-                                iframe.contentWindow.postMessage('{"command":"play"}', '*');
-                                iframe.contentWindow.postMessage('{"method":"play"}', '*');
-                            }
-                            
-                            // Method 4: VidJoy autoplay
-                            if (iframe.src.includes('vidjoy.pro')) {
-                                iframe.contentWindow.postMessage('{"action":"play"}', '*');
-                                iframe.contentWindow.postMessage('{"type":"play"}', '*');
-                                iframe.contentWindow.postMessage('{"command":"play"}', '*');
-                            }
-                            
-                            // Method 5: GoDrivePlayer autoplay
-                            if (iframe.src.includes('godriveplayer')) {
-                                iframe.contentWindow.postMessage('{"action":"play"}', '*');
-                                iframe.contentWindow.postMessage('{"type":"play"}', '*');
-                                iframe.contentWindow.postMessage('{"command":"play"}', '*');
-                            }
-                            
-                            // Method 6: VidLink.pro autoplay
-                            if (iframe.src.includes('vidlink.pro')) {
-                                iframe.contentWindow.postMessage('{"action":"play"}', '*');
-                                iframe.contentWindow.postMessage('{"type":"play"}', '*');
-                                iframe.contentWindow.postMessage('{"command":"play"}', '*');
-                            }
-                            
-                            // Method 7: 2Embed.cc autoplay
-                            if (iframe.src.includes('2embed.cc')) {
-                                iframe.contentWindow.postMessage('{"action":"play"}', '*');
-                                iframe.contentWindow.postMessage('{"type":"play"}', '*');
-                                iframe.contentWindow.postMessage('{"command":"play"}', '*');
-                            }
-                            
-                            // Method 8: Embed.su autoplay
-                            if (iframe.src.includes('embed.su')) {
-                                iframe.contentWindow.postMessage('{"action":"play"}', '*');
-                                iframe.contentWindow.postMessage('{"type":"play"}', '*');
-                                iframe.contentWindow.postMessage('{"command":"play"}', '*');
-                            }
-                            
-                            // Method 9: AutoEmbed.cc autoplay
-                            if (iframe.src.includes('autoembed.cc')) {
-                                iframe.contentWindow.postMessage('{"action":"play"}', '*');
-                                iframe.contentWindow.postMessage('{"type":"play"}', '*');
-                                iframe.contentWindow.postMessage('{"command":"play"}', '*');
-                            }
-                            
-                            // Method 10: Google Drive autoplay
-                            if (iframe.src.includes('drive.google.com')) {
-                                iframe.contentWindow.postMessage('{"method":"play"}', '*');
-                                iframe.contentWindow.postMessage('{"action":"play"}', '*');
-                                iframe.contentWindow.postMessage('{"command":"play"}', '*');
-                            }
-                            
-                            // Method 11: Mega.nz autoplay
-                            if (iframe.src.includes('mega.nz')) {
-                                iframe.contentWindow.postMessage('{"action":"play"}', '*');
-                                iframe.contentWindow.postMessage('{"type":"play"}', '*');
-                                iframe.contentWindow.postMessage('{"command":"play"}', '*');
-                            }
-                            
-                            // Method 12: Universal autoplay attempts
-                            iframe.focus();
-                            iframe.contentWindow.postMessage('{"play":true}', '*');
-                            iframe.contentWindow.postMessage('{"autoplay":true}', '*');
-                            iframe.contentWindow.postMessage('{"start":true}', '*');
-                            
-                            // Method 13: Additional universal methods for newer players
-                            iframe.contentWindow.postMessage('{"function":"play"}', '*');
-                            iframe.contentWindow.postMessage('{"event":"play"}', '*');
-                            iframe.contentWindow.postMessage('{"trigger":"play"}', '*');
-                            iframe.contentWindow.postMessage('{"execute":"play"}', '*');
-                            
-                            // Method 14: Try to simulate user interaction
-                            try {
-                                iframe.contentWindow.document.querySelector('video')?.play();
-                                iframe.contentWindow.document.querySelector('audio')?.play();
-                            } catch (e) {
-                                // Ignore errors for cross-origin restrictions
-                            }
-                            
-                            // Method 15: Additional postMessage formats for various players
-                            iframe.contentWindow.postMessage('{"type":"command","action":"play"}', '*');
-                            iframe.contentWindow.postMessage('{"type":"action","command":"play"}', '*');
-                            iframe.contentWindow.postMessage('{"type":"function","name":"play"}', '*');
-                            iframe.contentWindow.postMessage('{"type":"event","name":"play"}', '*');
-                            
-                            // Method 16: Try different message formats
-                            iframe.contentWindow.postMessage('play', '*');
-                            iframe.contentWindow.postMessage('{"play":1}', '*');
-                            iframe.contentWindow.postMessage('{"play":"true"}', '*');
-                            iframe.contentWindow.postMessage('{"play":true,"autoplay":true}', '*');
-                            
-                            console.log('✅ Comprehensive embedded autoplay commands sent for all link types');
-                        } catch (error) {
-                            console.log('⚠️ Embedded autoplay attempt failed:', error);
-                        }
-                    };
-                    
-                    // Multiple autoplay attempts with different delays
-                    const autoplayDelays = [500, 1000, 2000, 3000];
-                    autoplayDelays.forEach((delay, index) => {
-                        setTimeout(() => {
-                            console.log(`🔄 Embedded autoplay attempt ${index + 1} after ${delay}ms`);
-                            attemptEmbeddedAutoplay();
-                        }, delay);
-                    });
                 };
                 
                 iframe.onerror = () => {
@@ -4193,7 +3504,7 @@
                     if (currentIndex < servers.length - 1) {
                         const nextServer = servers[currentIndex + 1];
                         console.log('Trying next server:', nextServer.name);
-                        iframe.src = filterEmbeddedUrl(nextServer.url);
+                        iframe.src = nextServer.url;
                     }
                 };
                 
@@ -4276,82 +3587,12 @@
                 }]
             };
             
-            // Enhanced autoplay for direct links with better loading
-            showLoadingIndicator('Loading video content...');
-            
-            // Preload video data for better performance
-            if (playerInstance && playerInstance.media) {
-                playerInstance.media.preload = 'auto';
-                
-                // Multiple autoplay attempts for better success rate
-                const attemptAutoplay = () => {
-                    if (playerInstance && typeof playerInstance.play === 'function') {
-                        console.log('🎬 Attempting direct link autoplay...');
-                        
-                        // Try multiple autoplay methods
-                        Promise.resolve().then(() => {
-                            // Method 1: Direct play
-                            return playerInstance.play();
-                        }).then(() => {
-                            console.log('✅ Direct link autoplay successful');
-                            hideLoadingIndicator();
-                        }).catch((error1) => {
-                            console.log('⚠️ Method 1 failed, trying method 2:', error1);
-                            
-                            // Method 2: Enhanced autoplay
-                            return enhancedAutoplay(elements.player, playerInstance);
-                        }).catch((error2) => {
-                            console.log('⚠️ Method 2 failed, trying method 3:', error2);
-                            
-                            // Method 3: Force play with timeout
-                            setTimeout(() => {
-                                if (playerInstance && typeof playerInstance.play === 'function') {
-                                    playerInstance.play().catch(e => console.log('Final autoplay attempt failed:', e));
-                                }
-                            }, 1000);
-                        });
-                    }
-                };
-                
-                // Listen for loaded data events
-                playerInstance.media.addEventListener('loadeddata', () => {
-                    console.log('✅ Video data loaded successfully');
-                    hideLoadingIndicator();
-                    attemptAutoplay();
-                });
-                
-                // Listen for canplay event as fallback
-                playerInstance.media.addEventListener('canplay', () => {
-                    console.log('✅ Video can start playing');
-                    hideLoadingIndicator();
-                    attemptAutoplay();
-                });
-                
-                // Listen for loadedmetadata event
-                playerInstance.media.addEventListener('loadedmetadata', () => {
-                    console.log('✅ Video metadata loaded');
-                    attemptAutoplay();
-                });
-                
-                // Multiple fallback attempts for slow connections
-                const fallbackAttempts = [1000, 2000, 4000, 6000];
-                fallbackAttempts.forEach((delay, index) => {
-                    setTimeout(() => {
-                        if (playerInstance && !playerInstance.playing) {
-                            console.log(`🔄 Fallback autoplay attempt ${index + 1} after ${delay}ms`);
-                            attemptAutoplay();
-                        }
-                    }, delay);
-                });
-            } else {
-                // Fallback for older player instances
-                setTimeout(() => {
-                    hideLoadingIndicator();
-                    if (playerInstance && typeof playerInstance.play === 'function') {
-                        enhancedAutoplay(elements.player, playerInstance);
-                    }
-                }, 500);
-            }
+            // Autoplay regular video content
+            setTimeout(() => {
+                if (playerInstance && typeof playerInstance.play === 'function') {
+                    enhancedAutoplay(elements.player, playerInstance);
+                }
+            }, 500);
         }
 
         // Enhanced MPD handling with Shaka Player only (universal channel compatibility)
@@ -4695,160 +3936,33 @@
             }
         }
 
-        // Enhanced autoplay with mobile detection and improved loading
+        // Enhanced autoplay with mobile detection
         function enhancedAutoplay(videoElement, playerInstance = null) {
             // Check if it's a mobile device
             const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
             
-            // Show loading indicator
-            showLoadingIndicator('Preparing video playback...');
-            
-            // Preload video for better performance
-            if (videoElement.preload !== 'auto') {
-                videoElement.preload = 'auto';
-            }
-            
-            // Enhanced loading with progress tracking
-            const loadProgress = () => {
-                if (videoElement.readyState >= 3) { // HAVE_FUTURE_DATA
-                    hideLoadingIndicator();
-                    
-                    if (isMobile) {
-                        // On mobile, try muted autoplay first (more likely to work)
-                        videoElement.muted = true;
-                        videoElement.play().then(() => {
-                            console.log('✅ Mobile muted autoplay successful');
-                            // Unmute after successful autoplay
-                            setTimeout(() => {
-                                videoElement.muted = false;
-                            }, 100);
-                        }).catch(error => {
-                            console.log('Mobile muted autoplay failed:', error);
-                            // Show play button for manual start
-                            showPlayButton();
-                        });
-                    } else {
-                        // On desktop, try normal autoplay
-                        videoElement.play().then(() => {
-                            console.log('✅ Desktop autoplay successful');
-                        }).catch(error => {
-                            console.log('Desktop autoplay failed:', error);
-                            showPlayButton();
-                        });
-                    }
-                } else {
-                    // Continue waiting for data
-                    setTimeout(loadProgress, 100);
-                }
-            };
-            
-            // Start loading progress
-            loadProgress();
-            
-            // Fallback timeout for slow connections
-            setTimeout(() => {
-                if (videoElement.readyState < 3) {
-                    console.log('⚠️ Video loading taking longer than expected, attempting autoplay anyway');
-                    hideLoadingIndicator();
-                    
-                    if (isMobile) {
-                        videoElement.muted = true;
-                        videoElement.play().catch(error => {
-                            console.log('Fallback mobile autoplay failed:', error);
-                            showPlayButton();
-                        });
-                    } else {
-                        videoElement.play().catch(error => {
-                            console.log('Fallback desktop autoplay failed:', error);
-                            showPlayButton();
-                        });
-                    }
-                }
-            }, 5000);
-        }
-
-        // Loading indicator functions for better user experience
-        function showLoadingIndicator(message = 'Loading...') {
-            // Remove existing loading indicator
-            hideLoadingIndicator();
-            
-            const loadingIndicator = document.createElement('div');
-            loadingIndicator.id = 'enhanced-loading-indicator';
-            loadingIndicator.style.cssText = `
-                position: fixed;
-                top: 50%;
-                left: 50%;
-                transform: translate(-50%, -50%);
-                z-index: 10000;
-                background: rgba(0, 0, 0, 0.9);
-                color: white;
-                padding: 20px 30px;
-                border-radius: 12px;
-                backdrop-filter: blur(15px);
-                border: 2px solid rgba(255, 255, 255, 0.2);
-                text-align: center;
-                font-size: 16px;
-                font-weight: 500;
-                box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5);
-                animation: fadeInScale 0.3s ease;
-            `;
-            
-            // Add loading spinner
-            const spinner = document.createElement('div');
-            spinner.style.cssText = `
-                width: 40px;
-                height: 40px;
-                border: 4px solid rgba(255, 255, 255, 0.3);
-                border-radius: 50%;
-                border-top-color: #3b82f6;
-                animation: spin 1s linear infinite;
-                margin: 0 auto 15px auto;
-            `;
-            
-            loadingIndicator.appendChild(spinner);
-            
-            // Add message
-            const messageDiv = document.createElement('div');
-            messageDiv.textContent = message;
-            loadingIndicator.appendChild(messageDiv);
-            
-            // Add CSS animations if not already present
-            if (!document.getElementById('enhanced-loading-animations')) {
-                const style = document.createElement('style');
-                style.id = 'enhanced-loading-animations';
-                style.textContent = `
-                    @keyframes fadeInScale {
-                        from { opacity: 0; transform: translate(-50%, -50%) scale(0.8); }
-                        to { opacity: 1; transform: translate(-50%, -50%) scale(1); }
-                    }
-                    @keyframes spin {
-                        to { transform: rotate(360deg); }
-                    }
-                `;
-                document.head.appendChild(style);
-            }
-            
-            document.body.appendChild(loadingIndicator);
-        }
-
-        function hideLoadingIndicator() {
-            const existingIndicator = document.getElementById('enhanced-loading-indicator');
-            if (existingIndicator) {
-                existingIndicator.style.animation = 'fadeOutScale 0.3s ease';
-                setTimeout(() => existingIndicator.remove(), 300);
-                
-                // Add fade out animation if not present
-                if (!document.getElementById('enhanced-loading-animations')) {
-                    const style = document.createElement('style');
-                    style.id = 'enhanced-loading-animations';
-                    style.textContent = `
-                        @keyframes fadeOutScale {
-                            from { opacity: 1; transform: translate(-50%, -50%) scale(1); }
-                            to { opacity: 0; transform: translate(-50%, -50%) scale(0.8); }
-                        }
-                    `;
-                    document.head.appendChild(style);
-                }
+            if (isMobile) {
+                // On mobile, try muted autoplay first (more likely to work)
+                videoElement.muted = true;
+                videoElement.play().then(() => {
+                    console.log('✅ Mobile muted autoplay successful');
+                    // Unmute after successful autoplay
+                    setTimeout(() => {
+                        videoElement.muted = false;
+                    }, 100);
+                }).catch(error => {
+                    console.log('Mobile muted autoplay failed:', error);
+                    // Show play button for manual start
+                    showPlayButton();
+                });
+            } else {
+                // On desktop, try normal autoplay
+                videoElement.play().then(() => {
+                    console.log('✅ Desktop autoplay successful');
+                }).catch(error => {
+                    console.log('Desktop autoplay failed:', error);
+                    showPlayButton();
+                });
             }
         }
 
@@ -5287,7 +4401,7 @@
             }
         }
         
-        // Update loading status with proper indicators and enhanced loading states
+        // Update loading status with proper indicators
         function updateLoadingStatus(message, isError = false) {
             if (elements.playerMessageArea) {
                 elements.playerMessageArea.textContent = message;
@@ -5299,30 +4413,6 @@
                 } else {
                     elements.playerMessageArea.style.color = '#ffffff';
                     elements.playerMessageArea.style.backgroundColor = 'rgba(255, 255, 255, 0.1)';
-                }
-                
-                // Add loading animation for non-error messages
-                if (!isError) {
-                    elements.playerMessageArea.style.backgroundImage = 'linear-gradient(90deg, transparent, rgba(255,255,255,0.1), transparent)';
-                    elements.playerMessageArea.style.backgroundSize = '200% 100%';
-                    elements.playerMessageArea.style.animation = 'loadingShimmer 2s infinite';
-                    
-                    // Add CSS animation if not present
-                    if (!document.getElementById('loading-shimmer-animation')) {
-                        const style = document.createElement('style');
-                        style.id = 'loading-shimmer-animation';
-                        style.textContent = `
-                            @keyframes loadingShimmer {
-                                0% { background-position: -200% 0; }
-                                100% { background-position: 200% 0; }
-                            }
-                        `;
-                        document.head.appendChild(style);
-                    }
-                } else {
-                    // Remove loading animation for error messages
-                    elements.playerMessageArea.style.backgroundImage = 'none';
-                    elements.playerMessageArea.style.animation = 'none';
                 }
             }
         }
@@ -5453,12 +4543,7 @@
 
         // Create server selector for embedded sources when Plyr player is hidden
         function createEmbeddedServerSelector(servers) {
-            if (!servers || servers.length <= 1) {
-                console.log('🔍 Server selector not created - only', servers?.length || 0, 'servers available');
-                return; // No need for selector if only one server
-            }
-            
-            console.log('🎯 Creating server selector with', servers.length, 'servers:', servers.map(s => s.name || 'Unknown'));
+            if (!servers || servers.length <= 1) return; // No need for selector if only one server
             
             // Remove existing server selector if it exists
             const existingSelector = document.getElementById('embedded-server-selector');
@@ -5470,28 +4555,28 @@
             const selectorContainer = document.createElement('div');
             selectorContainer.id = 'embedded-server-selector';
             selectorContainer.style.cssText = `
-                margin-top: 20px;
-                background: rgba(30, 30, 30, 0.95);
-                border-radius: 12px;
-                padding: 20px;
-                backdrop-filter: blur(15px);
+                position: absolute;
+                top: 10px;
+                right: 10px;
+                z-index: 1000;
+                background: rgba(0, 0, 0, 0.8);
+                border-radius: 8px;
+                padding: 10px;
+                min-width: 200px;
+                backdrop-filter: blur(10px);
                 border: 1px solid rgba(255, 255, 255, 0.1);
-                transition: all 0.3s ease;
-                box-shadow: 0 8px 25px rgba(0, 0, 0, 0.4);
             `;
             
             // Create title
             const title = document.createElement('div');
             title.style.cssText = `
                 color: white;
-                font-size: 16px;
+                font-size: 14px;
                 font-weight: bold;
-                margin-bottom: 15px;
+                margin-bottom: 8px;
                 text-align: center;
-                border-bottom: 1px solid rgba(255, 255, 255, 0.2);
-                padding-bottom: 10px;
             `;
-            title.textContent = `🎬 Available Servers (${servers.length})`;
+            title.textContent = '🌐 Server Selection';
             selectorContainer.appendChild(title);
             
             // Add Back to Home button
@@ -5537,7 +4622,11 @@
                 // Remove the server selector
                 selectorContainer.remove();
                 
-                // No indicator button to remove in the new design
+                // Remove the indicator button
+                const indicatorButton = document.getElementById('server-selector-indicator');
+                if (indicatorButton) {
+                    indicatorButton.remove();
+                }
                 
                 // Clear any embedded content loading messages
                 if (elements.playerMessageArea && elements.playerMessageArea.textContent.includes('embedded')) {
@@ -5549,218 +4638,226 @@
             });
             selectorContainer.appendChild(backToHomeButton);
             
-            // Group servers by type for better organization
-            const serverGroups = {};
-            console.log('🔍 Processing servers for grouping:', servers.length, 'total servers');
-            
-            servers.forEach((server, index) => {
-                let group = 'Other';
-                if (isVidsrcUrl(server.url)) group = 'VidSrc';
-                else if (isVidjoyUrl(server.url)) group = 'VidJoy';
-                else if (is2EmbedUrl(server.url)) group = '2Embed';
-                else if (isEmbedSuUrl(server.url)) group = 'Embed.su';
-                else if (isAutoEmbedUrl(server.url)) group = 'AutoEmbed';
-                else if (isGoDrivePlayerUrl(server.url)) group = 'GoDrivePlayer';
-                else if (isVidLinkProUrl(server.url)) group = 'VidLink.pro';
-                else if (isGoogleDriveUrl(server.url)) group = 'Google Drive';
-                else if (isMegaNzUrl(server.url)) group = 'Mega.nz';
-                
-                if (!serverGroups[group]) serverGroups[group] = [];
-                serverGroups[group].push(server);
-                
-                console.log(`🔍 Server ${index + 1}: ${server.name || 'Unknown'} (${server.url?.substring(0, 50)}...) -> Group: ${group}`);
-            });
-            
-            console.log('📊 Server groups created:', Object.entries(serverGroups).map(([group, servers]) => `${group}: ${servers.length}`));
-            
-            // Define server type colors and icons
-            const serverColors = {
-                'VidSrc': '#3b82f6',      // Blue
-                'VidJoy': '#10b981',      // Green
-                '2Embed': '#f59e0b',      // Orange
-                'Embed.su': '#ef4444',    // Red
-                'AutoEmbed': '#8b5cf6',   // Purple
-                'GoDrivePlayer': '#06b6d4', // Cyan
-                'VidLink.pro': '#f97316', // Orange-red
-                'Google Drive': '#22c55e', // Light green
-                'Mega.nz': '#dc2626',     // Dark red
-                'Other': '#6b7280'        // Gray
-            };
-
-            const serverIcons = {
-                'VidSrc': '🎬',
-                'VidJoy': '🎭',
-                '2Embed': '📺',
-                'Embed.su': '🎪',
-                'AutoEmbed': '🤖',
-                'GoDrivePlayer': '☁️',
-                'VidLink.pro': '🔗',
-                'Google Drive': '💾',
-                'Mega.nz': '🌊',
-                'Other': '🌐'
-            };
-            
-            // Create server buttons container
-            const serverButtonsContainer = document.createElement('div');
-            serverButtonsContainer.style.cssText = `
-                display: flex;
-                flex-wrap: wrap;
-                gap: 12px;
-                margin-bottom: 15px;
+            // Create server list
+            const serverList = document.createElement('div');
+            serverList.style.cssText = `
+                max-height: 200px;
+                overflow-y: auto;
             `;
             
-            // Add servers as buttons grouped by type
-            let globalIndex = 0;
-            console.log('🎯 Creating server buttons...');
-            
-            Object.entries(serverGroups).forEach(([groupName, groupServers]) => {
-                console.log(`📋 Processing group: ${groupName} with ${groupServers.length} servers`);
+            servers.forEach((server, index) => {
+                const serverItem = document.createElement('div');
+                serverItem.style.cssText = `
+                    padding: 8px 12px;
+                    margin: 4px 0;
+                    background: rgba(255, 255, 255, 0.1);
+                    border-radius: 6px;
+                    cursor: pointer;
+                    transition: all 0.2s ease;
+                    color: white;
+                    font-size: 13px;
+                    display: flex;
+                    justify-content: space-between;
+                    align-items: center;
+                `;
                 
-                groupServers.forEach((server, index) => {
-                    globalIndex++;
-                    console.log(`✅ Creating server button ${globalIndex}: ${server.name || 'Unknown'} for group ${groupName}`);
-                    
-                    const serverButton = document.createElement('button');
-                    const displayName = server.name || `${groupName} ${index + 1}`;
-                    const serverColor = serverColors[groupName] || serverColors['Other'];
-                    const serverIcon = serverIcons[groupName] || serverIcons['Other'];
-                    
-                    serverButton.innerHTML = `${serverIcon} ${displayName}`;
-                    serverButton.style.cssText = `
-                        background: ${serverColor};
-                        color: white;
-                        border: none;
-                        padding: 10px 16px;
-                        border-radius: 25px;
-                        cursor: pointer;
-                        font-size: 13px;
-                        font-weight: 500;
-                        transition: all 0.3s ease;
-                        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
-                        position: relative;
-                        overflow: hidden;
-                        min-width: 100px;
-                        text-align: center;
-                        white-space: nowrap;
-                    `;
-                    
-                    // Highlight current server
-                    if (server.url === iframe?.src) {
-                        serverButton.style.background = `linear-gradient(45deg, ${serverColor}, #ffffff40)`;
-                        serverButton.style.boxShadow = `0 0 20px ${serverColor}80`;
-                        serverButton.style.transform = 'scale(1.05)';
-                        serverButton.innerHTML = `✅ ${serverIcon} ${displayName}`;
-                    }
-                    
-                    // Add hover effects
-                    serverButton.addEventListener('mouseenter', () => {
-                        if (server.url !== iframe?.src) {
-                            serverButton.style.background = `linear-gradient(45deg, ${serverColor}, #ffffff20)`;
-                            serverButton.style.transform = 'translateY(-2px) scale(1.02)';
-                            serverButton.style.boxShadow = `0 4px 15px ${serverColor}60`;
-                        }
-                    });
-                    
-                    serverButton.addEventListener('mouseleave', () => {
-                        if (server.url !== iframe?.src) {
-                            serverButton.style.background = serverColor;
-                            serverButton.style.transform = 'translateY(0) scale(1)';
-                            serverButton.style.boxShadow = '0 2px 8px rgba(0, 0, 0, 0.2)';
-                        }
-                    });
-                    
-                    // Add click handler to switch servers
-                    serverButton.addEventListener('click', () => {
-                        if (server.url !== iframe?.src) {
-                            // Update iframe source
-                            if (iframe) {
-                                // Re-attach the onload handler for the new server
-                                if (iframe._onloadHandler) {
-                                    iframe.onload = iframe._onloadHandler;
-                                }
-                                
-                                // Show loading indicator for server switch
-                                showLoadingIndicator(`Switching to ${displayName}...`);
-                                
-                                iframe.src = filterEmbeddedUrl(server.url);
-                            }
-                            
-                            // Show loading state on clicked button
-                            serverButton.innerHTML = `⏳ Loading...`;
-                            serverButton.style.opacity = '0.7';
-                            serverButton.disabled = true;
-                            
-                            // Update visual selection - reset all buttons
-                            serverButtonsContainer.querySelectorAll('button').forEach(btn => {
-                                if (btn !== serverButton) {
-                                    const btnGroupName = btn.getAttribute('data-group');
-                                    const btnColor = serverColors[btnGroupName] || serverColors['Other'];
-                                    const btnIcon = serverIcons[btnGroupName] || serverIcons['Other'];
-                                    btn.style.background = btnColor;
-                                    btn.style.boxShadow = '0 2px 8px rgba(0, 0, 0, 0.2)';
-                                    btn.style.transform = 'translateY(0) scale(1)';
-                                    btn.innerHTML = `${btnIcon} ${btn.getAttribute('data-original-name')}`;
-                                }
-                            });
-                            
-                            // After a short delay, highlight selected button
-                            setTimeout(() => {
-                                serverButton.style.background = `linear-gradient(45deg, ${serverColor}, #ffffff40)`;
-                                serverButton.style.boxShadow = `0 0 20px ${serverColor}80`;
-                                serverButton.style.transform = 'scale(1.05)';
-                                serverButton.style.opacity = '1';
-                                serverButton.innerHTML = `✅ ${serverIcon} ${displayName}`;
-                                serverButton.disabled = false;
-                            }, 1000);
-                            
-                            // Show feedback
-                            showServerSwitchFeedback(displayName);
-                        }
-                    });
-                    
-                    // Store metadata for later use
-                    serverButton.setAttribute('data-group', groupName);
-                    serverButton.setAttribute('data-original-name', displayName);
-                    serverButton.className = 'server-button';
-                    serverButtonsContainer.appendChild(serverButton);
+                // Highlight current server
+                if (server.url === iframe?.src) {
+                    serverItem.style.background = 'rgba(59, 130, 246, 0.6)';
+                    serverItem.style.border = '1px solid rgba(59, 130, 246, 0.8)';
+                }
+                
+                // Server name
+                const serverName = document.createElement('span');
+                serverName.textContent = server.name || `Server ${index + 1}`;
+                serverItem.appendChild(serverName);
+                
+                // Server status indicator
+                const statusIndicator = document.createElement('span');
+                statusIndicator.style.cssText = `
+                    width: 8px;
+                    height: 8px;
+                    border-radius: 50%;
+                    background: #10b981;
+                    margin-left: 8px;
+                `;
+                serverItem.appendChild(statusIndicator);
+                
+                // Add hover effects
+                serverItem.addEventListener('mouseenter', () => {
+                    serverItem.style.background = 'rgba(255, 255, 255, 0.2)';
+                    serverItem.style.transform = 'translateX(2px)';
                 });
+                
+                serverItem.addEventListener('mouseleave', () => {
+                    if (server.url === iframe?.src) {
+                        serverItem.style.background = 'rgba(59, 130, 246, 0.6)';
+                    } else {
+                        serverItem.style.background = 'rgba(255, 255, 255, 0.1)';
+                    }
+                    serverItem.style.transform = 'translateX(0)';
+                });
+                
+                // Add click handler to switch servers
+                serverItem.addEventListener('click', () => {
+                    if (server.url !== iframe?.src) {
+                        // Update iframe source
+                        if (iframe) {
+                            // Re-attach the onload handler for the new server
+                            if (iframe._onloadHandler) {
+                                iframe.onload = iframe._onloadHandler;
+                            }
+                            iframe.src = server.url;
+                        }
+                        
+                        // Update visual selection
+                        document.querySelectorAll('#embedded-server-selector .server-item').forEach(item => {
+                            item.style.background = 'rgba(255, 255, 255, 0.1)';
+                            item.style.border = 'none';
+                        });
+                        serverItem.style.background = 'rgba(59, 130, 246, 0.6)';
+                        serverItem.style.border = '1px solid rgba(59, 130, 246, 0.8)';
+                        
+                        // Show feedback
+                        showServerSwitchFeedback(server.name || `Server ${index + 1}`);
+                    }
+                });
+                
+                // Add class for easy selection
+                serverItem.className = 'server-item';
+                serverList.appendChild(serverItem);
             });
             
-            console.log(`🎉 Server selector created with ${globalIndex} total server buttons`);
-            selectorContainer.appendChild(serverButtonsContainer);
+            selectorContainer.appendChild(serverList);
             
-            // Add to video actions container (below like/dislike/share buttons)
-            const videoActionsContainer = document.querySelector('.video-actions');
-            console.log('🔍 DEBUG: videoActionsContainer found:', videoActionsContainer);
-            console.log('🔍 DEBUG: videoActionsContainer.parentElement:', videoActionsContainer?.parentElement);
+            // Add close button
+            const closeButton = document.createElement('button');
+            closeButton.style.cssText = `
+                position: absolute;
+                top: 5px;
+                right: 5px;
+                background: none;
+                border: none;
+                color: white;
+                font-size: 16px;
+                cursor: pointer;
+                padding: 2px;
+                border-radius: 4px;
+                transition: background 0.2s ease;
+            `;
+            closeButton.innerHTML = '×';
+            closeButton.addEventListener('click', () => {
+                selectorContainer.remove();
+            });
+            closeButton.addEventListener('mouseenter', () => {
+                closeButton.style.background = 'rgba(255, 255, 255, 0.2)';
+            });
+            closeButton.addEventListener('mouseleave', () => {
+                closeButton.style.background = 'none';
+            });
+            selectorContainer.appendChild(closeButton);
             
-            if (videoActionsContainer && videoActionsContainer.parentElement) {
-                // Insert the server selector after the video-actions container
-                console.log('✅ DEBUG: Inserting server selector after video-actions');
-                videoActionsContainer.parentElement.insertBefore(selectorContainer, videoActionsContainer.nextSibling);
-                console.log('✅ DEBUG: Server selector inserted successfully');
-            } else {
-                console.error('❌ DEBUG: Video actions container not found - server selector not added');
-                console.log('🔍 DEBUG: Available elements with class containing "action":', document.querySelectorAll('[class*="action"]'));
-                // Fallback: add to video details container
-                const videoDetails = document.querySelector('.video-details');
-                if (videoDetails) {
-                    console.log('🔄 DEBUG: Fallback - adding to video-details container');
-                    videoDetails.appendChild(selectorContainer);
-                } else {
-                    console.error('❌ DEBUG: No suitable container found for server selector');
-                }
+                            // Add to player container
+                const playerContainer = document.querySelector('.player-container') || document.getElementById('player-container');
+                if (playerContainer) {
+                    playerContainer.appendChild(selectorContainer);
+                    
+                    // Add a small floating indicator button
+                const indicatorButton = document.createElement('div');
+                indicatorButton.id = 'server-selector-indicator';
+                indicatorButton.style.cssText = `
+                    position: absolute;
+                    top: 10px;
+                    left: 10px;
+                    background: rgba(59, 130, 246, 0.8);
+                    color: white;
+                    padding: 6px 10px;
+                    border-radius: 20px;
+                    font-size: 11px;
+                    cursor: pointer;
+                    z-index: 999;
+                    backdrop-filter: blur(5px);
+                    border: 1px solid rgba(255, 255, 255, 0.2);
+                    transition: all 0.2s ease;
+                    opacity: 0.7;
+                `;
+                indicatorButton.innerHTML = `🌐 ${servers.length} Servers`;
+                indicatorButton.title = 'Click to show server selector (Ctrl+S)';
+                
+                indicatorButton.addEventListener('click', () => {
+                    selectorContainer.style.opacity = '1';
+                    selectorContainer.style.transform = 'scale(1)';
+                    clearTimeout(hideTimeout);
+                });
+                
+                indicatorButton.addEventListener('mouseenter', () => {
+                    indicatorButton.style.opacity = '1';
+                    indicatorButton.style.transform = 'scale(1.05)';
+                });
+                
+                indicatorButton.addEventListener('mouseleave', () => {
+                    indicatorButton.style.opacity = '0.7';
+                    indicatorButton.style.transform = 'scale(1)';
+                });
+                
+                playerContainer.appendChild(indicatorButton);
             }
             
-            console.log('✅ Server selector successfully positioned below video actions');
+            // Auto-hide after 5 seconds of inactivity
+            let hideTimeout;
+            const resetHideTimeout = () => {
+                clearTimeout(hideTimeout);
+                hideTimeout = setTimeout(() => {
+                    selectorContainer.style.opacity = '0.3';
+                    selectorContainer.style.transform = 'scale(0.95)';
+                }, 5000);
+            };
+            
+            selectorContainer.addEventListener('mouseenter', () => {
+                selectorContainer.style.opacity = '1';
+                selectorContainer.style.transform = 'scale(1)';
+                clearTimeout(hideTimeout);
+            });
+            
+            selectorContainer.addEventListener('mouseleave', resetHideTimeout);
+            resetHideTimeout();
+            
+            // Add keyboard shortcut (S key) to toggle server selector
+            const handleKeyPress = (event) => {
+                if (event.key.toLowerCase() === 's' && event.ctrlKey) {
+                    event.preventDefault();
+                    if (selectorContainer.style.opacity === '0.3') {
+                        selectorContainer.style.opacity = '1';
+                        selectorContainer.style.transform = 'scale(1)';
+                        clearTimeout(hideTimeout);
+                    } else {
+                        selectorContainer.style.opacity = '0.3';
+                        selectorContainer.style.transform = 'scale(0.95)';
+                    }
+                }
+            };
+            
+            document.addEventListener('keydown', handleKeyPress);
+            
+            // Store the event listener reference for cleanup
+            selectorContainer._keyPressHandler = handleKeyPress;
         }
 
         // Hide embedded server selector
         function hideEmbeddedServerSelector() {
             const existingSelector = document.getElementById('embedded-server-selector');
             if (existingSelector) {
+                // Remove keyboard event listener before removing element
+                if (existingSelector._keyPressHandler) {
+                    document.removeEventListener('keydown', existingSelector._keyPressHandler);
+                }
                 existingSelector.remove();
-                console.log('🗑️ Embedded server selector removed');
+            }
+            
+            // Also remove the indicator button
+            const indicatorButton = document.getElementById('server-selector-indicator');
+            if (indicatorButton) {
+                indicatorButton.remove();
             }
             
             // Clear any loading messages for embedded content
@@ -5820,251 +4917,6 @@
             return url.includes('drive.google.com') || url.includes('drive.usercontent.google.com');
         }
 
-        // Direct Link Server Selector Functions
-        function showDirectLinkServerSelector() {
-            if (!currentContentInfo || !currentContentInfo.servers || currentContentInfo.servers.length <= 1) {
-                console.log('🔍 No servers available for direct link server selector');
-                return;
-            }
-
-            // Remove existing direct link server selector
-            hideDirectLinkServerSelector();
-
-            const servers = currentContentInfo.servers;
-            console.log('🎯 Creating direct link server selector with', servers.length, 'servers');
-
-            // Create server selector container
-            const selectorContainer = document.createElement('div');
-            selectorContainer.id = 'direct-link-server-selector';
-            selectorContainer.style.cssText = `
-                position: absolute;
-                top: 50%;
-                left: 50%;
-                transform: translate(-50%, -50%);
-                z-index: 10000;
-                background: rgba(0, 0, 0, 0.95);
-                border-radius: 12px;
-                padding: 20px;
-                min-width: 300px;
-                max-width: 500px;
-                backdrop-filter: blur(15px);
-                border: 2px solid rgba(255, 255, 255, 0.2);
-                box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5);
-            `;
-
-            // Create title
-            const title = document.createElement('div');
-            title.style.cssText = `
-                color: white;
-                font-size: 18px;
-                font-weight: bold;
-                margin-bottom: 20px;
-                text-align: center;
-                border-bottom: 1px solid rgba(255, 255, 255, 0.2);
-                padding-bottom: 15px;
-            `;
-            title.textContent = '🌐 Direct Link Server Selection';
-            selectorContainer.appendChild(title);
-
-            // Create server list
-            const serverList = document.createElement('div');
-            serverList.style.cssText = `
-                max-height: 400px;
-                overflow-y: auto;
-                margin-bottom: 20px;
-            `;
-
-            // Group servers by type
-            const serverGroups = {};
-            servers.forEach(server => {
-                let group = 'Other';
-                if (server.url.includes('.mp4')) group = 'MP4';
-                else if (server.url.includes('.m3u8')) group = 'HLS';
-                else if (server.url.includes('.mkv')) group = 'MKV';
-                else if (server.url.includes('.webm')) group = 'WebM';
-                else if (server.url.includes('.avi')) group = 'AVI';
-                else if (server.url.includes('.mpd')) group = 'MPD';
-                
-                if (!serverGroups[group]) serverGroups[group] = [];
-                serverGroups[group].push(server);
-            });
-
-            // Add servers grouped by type
-            Object.entries(serverGroups).forEach(([groupName, groupServers]) => {
-                // Add group header
-                const groupHeader = document.createElement('div');
-                groupHeader.style.cssText = `
-                    color: rgba(255, 255, 255, 0.8);
-                    font-size: 14px;
-                    font-weight: bold;
-                    padding: 10px 15px 5px 15px;
-                    margin-top: 10px;
-                    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-                `;
-                groupHeader.textContent = `${groupName} (${groupServers.length})`;
-                serverList.appendChild(groupHeader);
-
-                groupServers.forEach((server, index) => {
-                    const serverItem = document.createElement('div');
-                    serverItem.style.cssText = `
-                        padding: 12px 15px;
-                        margin: 5px 0;
-                        background: rgba(255, 255, 255, 0.1);
-                        border-radius: 8px;
-                        cursor: pointer;
-                        transition: all 0.2s ease;
-                        color: white;
-                        font-size: 14px;
-                        display: flex;
-                        justify-content: space-between;
-                        align-items: center;
-                    `;
-
-                    // Highlight current server
-                    if (server.url === playerInstance?.source?.sources?.[0]?.src) {
-                        serverItem.style.background = 'rgba(59, 130, 246, 0.6)';
-                        serverItem.style.border = '1px solid rgba(59, 130, 246, 0.8)';
-                    }
-
-                    // Server name with quality info
-                    const serverName = document.createElement('span');
-                    const displayName = server.name || `${groupName} Server ${index + 1}`;
-                    serverName.textContent = displayName;
-                    serverItem.appendChild(serverName);
-
-                    // Server status indicator
-                    const statusIndicator = document.createElement('span');
-                    statusIndicator.style.cssText = `
-                        width: 10px;
-                        height: 10px;
-                        border-radius: 50%;
-                        background: #10b981;
-                        margin-left: 10px;
-                    `;
-                    serverItem.appendChild(statusIndicator);
-
-                    // Add hover effects
-                    serverItem.addEventListener('mouseenter', () => {
-                        serverItem.style.background = 'rgba(255, 255, 255, 0.2)';
-                        serverItem.style.transform = 'translateX(3px)';
-                    });
-
-                    serverItem.addEventListener('mouseleave', () => {
-                        if (server.url === playerInstance?.source?.sources?.[0]?.src) {
-                            serverItem.style.background = 'rgba(59, 130, 246, 0.6)';
-                        } else {
-                            serverItem.style.background = 'rgba(255, 255, 255, 0.1)';
-                        }
-                        serverItem.style.transform = 'translateX(0)';
-                    });
-
-                    // Add click handler to switch servers
-                    serverItem.addEventListener('click', () => {
-                        if (server.url !== playerInstance?.source?.sources?.[0]?.src) {
-                            // Show loading indicator for server switch
-                            showLoadingIndicator(`Switching to ${displayName}...`);
-                            
-                            // Switch to new server
-                            playUrl(server.url, servers);
-                            
-                            // Update visual selection
-                            document.querySelectorAll('#direct-link-server-selector .server-item').forEach(item => {
-                                item.style.background = 'rgba(255, 255, 255, 0.1)';
-                                item.style.border = 'none';
-                            });
-                            serverItem.style.background = 'rgba(59, 130, 246, 0.6)';
-                            serverItem.style.border = '1px solid rgba(59, 130, 246, 0.8)';
-                            
-                            // Show feedback
-                            showServerSwitchFeedback(displayName);
-                            
-                            // Hide selector after selection
-                            setTimeout(() => hideDirectLinkServerSelector(), 1000);
-                        }
-                    });
-
-                    // Add class for easy selection
-                    serverItem.className = 'server-item';
-                    serverList.appendChild(serverItem);
-                });
-            });
-
-            selectorContainer.appendChild(serverList);
-
-            // Add close button
-            const closeButton = document.createElement('button');
-            closeButton.style.cssText = `
-                position: absolute;
-                top: 10px;
-                right: 10px;
-                background: none;
-                border: none;
-                color: white;
-                font-size: 20px;
-                cursor: pointer;
-                padding: 5px;
-                border-radius: 6px;
-                transition: background 0.2s ease;
-            `;
-            closeButton.innerHTML = '×';
-            closeButton.addEventListener('click', () => {
-                hideDirectLinkServerSelector();
-            });
-            closeButton.addEventListener('mouseenter', () => {
-                closeButton.style.background = 'rgba(255, 255, 255, 0.2)';
-            });
-            closeButton.addEventListener('mouseleave', () => {
-                closeButton.style.background = 'none';
-            });
-            selectorContainer.appendChild(closeButton);
-
-            // Add to player container
-            const playerContainer = document.querySelector('.player-container') || document.getElementById('player-container');
-            if (playerContainer) {
-                playerContainer.appendChild(selectorContainer);
-                
-                // Add keyboard shortcut (Ctrl+S) to toggle server selector
-                const handleKeyPress = (event) => {
-                    if (event.key.toLowerCase() === 's' && event.ctrlKey) {
-                        event.preventDefault();
-                        hideDirectLinkServerSelector();
-                    }
-                };
-                
-                document.addEventListener('keydown', handleKeyPress);
-                selectorContainer._keyPressHandler = handleKeyPress;
-            }
-        }
-
-        function hideDirectLinkServerSelector() {
-            const existingSelector = document.getElementById('direct-link-server-selector');
-            if (existingSelector) {
-                // Remove keyboard event listener before removing element
-                if (existingSelector._keyPressHandler) {
-                    document.removeEventListener('keydown', existingSelector._keyPressHandler);
-                }
-                existingSelector.remove();
-            }
-        }
-
-        function showDirectLinkServerSelectorInFullscreen() {
-            // Ensure server selector is visible in fullscreen mode
-            const existingSelector = document.getElementById('direct-link-server-selector');
-            if (existingSelector) {
-                existingSelector.style.zIndex = '10001';
-                existingSelector.style.position = 'fixed';
-            }
-        }
-
-        function hideDirectLinkServerSelectorInFullscreen() {
-            // Restore normal positioning when exiting fullscreen
-            const existingSelector = document.getElementById('direct-link-server-selector');
-            if (existingSelector) {
-                existingSelector.style.zIndex = '10000';
-                existingSelector.style.position = 'absolute';
-            }
-        }
-
         // Extract YouTube ID
         function extractYouTubeId(url) {
             const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|&v=)([^#&?]*).*/;
@@ -6088,64 +4940,6 @@
             return id;
         }
         
-        // Enhanced iframe creation with ad blocking
-        function createSecureIframe(url, playerContainer) {
-            const iframe = document.createElement('iframe');
-            iframe.className = 'external-content-iframe';
-            iframe.style.position = 'absolute';
-            iframe.style.top = '0';
-            iframe.style.left = '0';
-            iframe.style.width = '100%';
-            iframe.style.height = '100%';
-            iframe.style.border = 'none';
-            iframe.setAttribute('allowfullscreen', '');
-            
-            // Apply different security levels based on domain trust
-            if (window.adBlocker && window.adBlocker.allowedDomains.some(domain => url.includes(domain))) {
-                // Trusted domains (Google Drive, Mega.nz, YouTube) - fully permissive
-                iframe.setAttribute('sandbox', 'allow-scripts allow-same-origin allow-presentation allow-forms allow-popups allow-top-navigation allow-top-navigation-by-user-activation');
-                iframe.setAttribute('allow', 'autoplay; encrypted-media; picture-in-picture; fullscreen');
-                iframe.setAttribute('referrerpolicy', 'strict-origin-when-cross-origin');
-                console.log('✅ Created trusted iframe for:', url);
-            } else {
-                // Embedded video sources - permissive sandbox for functionality, ad blocking via other methods
-                iframe.setAttribute('sandbox', 'allow-scripts allow-same-origin allow-presentation allow-forms allow-popups allow-top-navigation-by-user-activation');
-                iframe.setAttribute('allow', 'autoplay; encrypted-media; picture-in-picture; fullscreen');
-                iframe.setAttribute('referrerpolicy', 'no-referrer');
-                
-                // Use CSS and URL-based ad blocking instead of restrictive sandbox
-                iframe.style.pointerEvents = 'auto'; // Allow video controls
-                
-                // Apply ad-blocking CSS to iframe content when possible
-                iframe.addEventListener('load', () => {
-                    try {
-                        // Try to inject ad blocking styles if same-origin
-                        const iframeDoc = iframe.contentDocument || iframe.contentWindow.document;
-                        if (iframeDoc) {
-                            const style = iframeDoc.createElement('style');
-                            style.textContent = `
-                                /* Hide common ad elements */
-                                [class*="ad-"], [class*="ads-"], [class*="advertisement"],
-                                [id*="ad-"], [id*="ads-"], [id*="advertisement"],
-                                .advertisement, .ads, .ad-banner, .ad-container,
-                                .popup, .modal, .overlay { display: none !important; }
-                            `;
-                            iframeDoc.head.appendChild(style);
-                            console.log('🛡️ Injected ad blocking CSS into iframe');
-                        }
-                    } catch (e) {
-                        // Cross-origin restriction - this is expected for most embedded sources
-                        console.log('ℹ️ Cross-origin iframe - using URL-based ad blocking');
-                    }
-                });
-                
-                console.log('🛡️ Created iframe with CSS-based ad blocking for:', url);
-            }
-            
-            playerContainer.appendChild(iframe);
-            return iframe;
-        }
-
         // Enhanced player source update with DRM awareness
         async function updatePlayerSource(servers) {
             if (!playerInstance) return;
@@ -6155,17 +4949,9 @@
                 const optimalServer = selectOptimalServer(servers);
                 
                 if (optimalServer) {
-                    // Check for special URLs first - pass ALL servers, not just optimal one
+                    // Check for special URLs first
                     if (isVidsrcUrl(optimalServer.url) || isVidjoyUrl(optimalServer.url) || isVidsrcMeUrl(optimalServer.url) || isVidsrcToUrl(optimalServer.url) || isVidsrcXyzUrl(optimalServer.url) || isGoDrivePlayerUrl(optimalServer.url) || isVidLinkProUrl(optimalServer.url) || is2EmbedUrl(optimalServer.url) || isEmbedSuUrl(optimalServer.url) || isAutoEmbedUrl(optimalServer.url) || isMegaNzUrl(optimalServer.url) || isGoogleDriveUrl(optimalServer.url)) {
-                        // Filter to get all embedded servers (not just the optimal one)
-                        const allEmbeddedServers = servers.filter(server => 
-                            isVidsrcUrl(server.url) || isVidjoyUrl(server.url) || isVidsrcMeUrl(server.url) || 
-                            isVidsrcToUrl(server.url) || isVidsrcXyzUrl(server.url) || isGoDrivePlayerUrl(server.url) || 
-                            isVidLinkProUrl(server.url) || is2EmbedUrl(server.url) || isEmbedSuUrl(server.url) || 
-                            isAutoEmbedUrl(server.url) || isMegaNzUrl(server.url) || isGoogleDriveUrl(server.url)
-                        );
-                        console.log(`🎯 Found ${allEmbeddedServers.length} embedded servers:`, allEmbeddedServers.map(s => s.name || 'Unknown'));
-                        playUrl(optimalServer.url, allEmbeddedServers);
+                        playUrl(optimalServer.url, servers);
                         return;
                     }
                     
@@ -6230,15 +5016,7 @@
 
             // Update quality selector
             if (episode.Servers) {
-                console.log('📺 Playing episode with servers:', episode.Servers.length, 'servers available');
-                console.log('🔍 Episode server details:', episode.Servers.map(s => ({name: s.name, url: s.url?.substring(0, 50) + '...'})));
                 updatePlayerSource(episode.Servers);
-                
-                // Create server selector for series episodes with multiple servers
-                if (episode.Servers.length > 1) {
-                    console.log('🎯 Creating server selector for series episode');
-                    setTimeout(() => createEmbeddedServerSelector(episode.Servers), 200);
-                }
             }
 
             // Ensure the episode selector reflects the current episode
@@ -6674,14 +5452,6 @@
                 controlsContainer.appendChild(stretchButton);
             }
         }
-
-        // Function to add server selector functionality to Plyr settings button
-        function addServerSelectorToSettingsButton() {
-            // DO NOT OVERRIDE THE SETTINGS BUTTON - this breaks Plyr's default settings functionality
-            // The settings button should work normally for playback speed, quality, etc.
-            // Server selection is now handled by the embedded server selector below the video actions
-            console.log('Settings button left intact for normal Plyr functionality');
-        }
         
         // Toggle theme
         function toggleTheme() {
@@ -6788,62 +5558,8 @@
                 console.log('✅ Shaka Player polyfills installed');
             }
             
-            // Initialize app first, then ad blocker to avoid interference
             init();
             fetchNotification();
-            
-            // Initialize ad blocker after data is loaded
-            setTimeout(() => {
-                if (!window.adBlocker) {
-                    window.adBlocker = new AdBlocker();
-                }
-            }, 3000); // Wait 3 seconds for data to load
-            
-            // Show ad blocker status
-            setTimeout(() => {
-                console.log('🛡️ CineCraze Ad Blocker Status:');
-                console.log('✅ Blocking ads from embedded sources (vidsrc, vidjoy, 2embed, etc.)');
-                console.log('✅ Preserving full functionality for all video sources');
-                console.log('✅ Enhanced iframe security with functional sandbox');
-                console.log('✅ DOM element blocking active');
-                console.log('✅ CSS-based ad blocking for iframes');
-                console.log('✅ URL parameter ad blocking');
-                console.log('✅ Popup and redirect blocking active');
-                console.log('ℹ️ Using non-intrusive ad blocking methods');
-                
-                // Show visual indicator
-                const adBlockerStatus = document.getElementById('ad-blocker-status');
-                if (adBlockerStatus) {
-                    adBlockerStatus.style.display = 'flex';
-                    
-                    // Add click handler for more info
-                    adBlockerStatus.addEventListener('click', () => {
-                        alert('🛡️ CineCraze Ad Blocker is Active!\n\n' +
-                              '✅ Blocking ads from embedded video sources\n' +
-                              '✅ Preserving full functionality for all sources\n' +
-                              '✅ CSS-based ad element hiding\n' +
-                              '✅ URL parameter ad blocking\n' +
-                              '✅ Popup and redirect blocking\n' +
-                              '✅ Non-intrusive ad blocking methods\n\n' +
-                              'Enjoy ad-free streaming with full functionality!');
-                    });
-                }
-            }, 2000);
-            
-            // Add debugging function for server selector testing
-            window.testServerSelector = function() {
-                console.log('🧪 Testing server selector functionality...');
-                const testServers = [
-                    {name: 'VidSrc Server 1', url: 'https://vidsrc.net/embed/movie/123'},
-                    {name: 'VidSrc Server 2', url: 'https://vidsrc.me/embed/movie/123'},
-                    {name: 'VidJoy Server 1', url: 'https://vidjoy.pro/embed/movie/123'},
-                    {name: '2Embed Server', url: 'https://2embed.cc/embed/movie/123'},
-                    {name: 'AutoEmbed Server', url: 'https://autoembed.cc/embed/movie/123'},
-                    {name: 'Google Drive', url: 'https://drive.google.com/file/d/123'},
-                ];
-                console.log('📊 Test servers:', testServers);
-                createEmbeddedServerSelector(testServers);
-            };
         });
 
         // --- Notification Functionality ---
@@ -7247,158 +5963,11 @@ function addPipButtonToPlayer() {
     }
 }
 
-// PiP button is now called in the main player initialization above
+// Call this function after the player is initialized
+playerInstance.on('ready', event => {
+    addPipButtonToPlayer();
+});
         // --- End Stretch Functionality ---
-        
-        // --- Enhanced Ad Blocking Functions ---
-        
-        // Periodic ad cleanup function
-        function performAdCleanup() {
-            if (!window.adBlocker) return;
-            
-            // Remove any ad elements that might have been dynamically added
-            window.adBlocker.blockDOMElements();
-            
-            // Check all iframes and enhance their security
-            const iframes = document.querySelectorAll('iframe.external-content-iframe');
-            iframes.forEach(iframe => {
-                if (!iframe.src) return;
-                
-                // Re-apply security measures if they were somehow removed
-                if (!window.adBlocker.allowedDomains.some(domain => iframe.src.includes(domain))) {
-                    // For embedded video sources, ensure permissive sandbox for functionality
-                    if (!iframe.getAttribute('sandbox') || !iframe.getAttribute('sandbox').includes('allow-scripts')) {
-                        iframe.setAttribute('sandbox', 'allow-scripts allow-same-origin allow-presentation allow-forms allow-popups allow-top-navigation-by-user-activation');
-                        iframe.setAttribute('referrerpolicy', 'no-referrer');
-                        console.log('🛡️ Re-applied functional sandbox to iframe:', iframe.src);
-                    }
-                }
-            });
-            
-            // Remove any popup overlays or modal ads
-            const popups = document.querySelectorAll('[class*="popup"], [class*="modal"][class*="ad"], [class*="overlay"][class*="ad"]');
-            popups.forEach(popup => {
-                if (!window.adBlocker.allowedDomains.some(domain => popup.src?.includes(domain))) {
-                    window.adBlocker.hideElement(popup);
-                }
-            });
-        }
-        
-        // URL filtering for embedded sources
-        function filterEmbeddedUrl(url) {
-            if (!url || !window.adBlocker) return url;
-            
-            // Always allow trusted domains
-            if (window.adBlocker.allowedDomains.some(domain => url.includes(domain))) {
-                return url;
-            }
-            
-            // For embedded video sources, add URL parameters to potentially block ads
-            try {
-                const urlObj = new URL(url);
-                
-                // Add common ad-blocking parameters for embedded sources
-                urlObj.searchParams.set('autoplay', '1');
-                urlObj.searchParams.set('muted', '0');
-                urlObj.searchParams.set('controls', '1');
-                
-                // Try to disable ads with common parameters
-                urlObj.searchParams.set('ads', '0');
-                urlObj.searchParams.set('ad', '0');
-                urlObj.searchParams.set('adblock', '1');
-                urlObj.searchParams.set('noad', '1');
-                urlObj.searchParams.set('no_ads', '1');
-                
-                // Disable tracking
-                urlObj.searchParams.set('tracking', '0');
-                urlObj.searchParams.set('analytics', '0');
-                
-                console.log('🛡️ Applied ad-blocking URL parameters to:', urlObj.toString());
-                return urlObj.toString();
-            } catch (e) {
-                console.warn('Could not parse URL for ad blocking:', url);
-                return url;
-            }
-        }
-        
-        // Enhanced iframe monitoring
-        function monitorIframeContent() {
-            const iframes = document.querySelectorAll('iframe.external-content-iframe');
-            
-            iframes.forEach(iframe => {
-                if (!iframe.src || !window.adBlocker) return;
-                
-                // Skip trusted domains
-                if (window.adBlocker.allowedDomains.some(domain => iframe.src.includes(domain))) {
-                    return;
-                }
-                
-                // Monitor iframe for ad-like behavior
-                iframe.addEventListener('load', () => {
-                    try {
-                        // Check if iframe is trying to navigate away (potential ad redirect)
-                        const iframeWindow = iframe.contentWindow;
-                        if (iframeWindow) {
-                            // Override location changes within iframe
-                            const originalReplace = iframeWindow.location.replace;
-                            const originalAssign = iframeWindow.location.assign;
-                            
-                            iframeWindow.location.replace = function(url) {
-                                if (window.adBlocker && window.adBlocker.isAdDomain(url)) {
-                                    console.log('🚫 Blocked iframe redirect to ad domain:', url);
-                                    return;
-                                }
-                                return originalReplace.call(this, url);
-                            };
-                            
-                            iframeWindow.location.assign = function(url) {
-                                if (window.adBlocker && window.adBlocker.isAdDomain(url)) {
-                                    console.log('🚫 Blocked iframe navigation to ad domain:', url);
-                                    return;
-                                }
-                                return originalAssign.call(this, url);
-                            };
-                        }
-                    } catch (e) {
-                        // Cross-origin restriction - expected
-                    }
-                });
-            });
-        }
-        
-        // Run ad cleanup periodically
-        setInterval(performAdCleanup, 5000); // Every 5 seconds
-        
-        // Monitor iframes when they're created
-        setInterval(monitorIframeContent, 3000); // Every 3 seconds
-        
-        // Enhanced iframe creation for server selector
-        function enhanceServerSelectorIframes() {
-            const serverItems = document.querySelectorAll('.server-item');
-            serverItems.forEach(item => {
-                item.addEventListener('click', () => {
-                    // When switching servers, ensure new iframe gets ad blocking
-                    setTimeout(() => {
-                        const iframe = document.querySelector('iframe.external-content-iframe');
-                        if (iframe && iframe.src) {
-                            // Apply URL filtering for ad blocking
-                            const filteredUrl = filterEmbeddedUrl(iframe.src);
-                            if (filteredUrl !== iframe.src) {
-                                iframe.src = filteredUrl;
-                            }
-                            
-                            // Ensure functional sandbox is applied
-                            if (!window.adBlocker.allowedDomains.some(domain => iframe.src.includes(domain))) {
-                                iframe.setAttribute('sandbox', 'allow-scripts allow-same-origin allow-presentation allow-forms allow-popups allow-top-navigation-by-user-activation');
-                                iframe.setAttribute('referrerpolicy', 'no-referrer');
-                            }
-                        }
-                    }, 100);
-                });
-            });
-        }
-        
-        // --- End Enhanced Ad Blocking Functions ---
 
     </script>
 
