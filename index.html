@@ -3913,6 +3913,9 @@
             document.querySelector('.carousel').style.display = 'none';
             document.querySelector('.filters-section').style.display = 'none';
             document.querySelector('.content-container').style.display = 'none';
+            
+            // Show the viewer page
+            elements.viewerPage.style.display = 'block';
 
             const setupViewerAndPlay = () => {
                 // Remove any existing server selector first
@@ -3940,21 +3943,10 @@
                     console.log('🔍 Server details:', content.Servers.map(s => ({name: s.name, url: s.url?.substring(0, 50) + '...'})));
                     updatePlayerSource(content.Servers);
                     
-                    // Create server selector for ALL content with multiple servers
+                    // Store servers for later server selector creation
                     if (content.Servers.length > 1) {
-                        console.log('🎯 Creating server selector for non-series content');
-                        console.log('🔍 Looking for video-actions container...');
-                        const videoActions = document.querySelector('.video-actions');
-                        if (videoActions) {
-                            console.log('✅ Found video-actions container:', videoActions);
-                        } else {
-                            console.error('❌ video-actions container NOT FOUND!');
-                        }
-                        // Reduced delay for better user experience
-                        setTimeout(() => {
-                            console.log('🚀 Calling createEmbeddedServerSelector now...');
-                            createEmbeddedServerSelector(content.Servers);
-                        }, 200);
+                        console.log('🎯 Storing servers for server selector creation');
+                        // Don't create server selector here - wait for DOM to be ready
                     }
                 }
                 elements.seasonsGrid.innerHTML = '';
@@ -3988,6 +3980,18 @@
                     }
                 } else { // Movie or Live TV
                     updateNavigationButtonsState(); // Hide episode buttons for non-series
+                    
+                    // Create server selector for movies/live TV AFTER DOM is ready
+                    if (content.Servers && content.Servers.length > 1) {
+                        console.log('🎯 Creating server selector for movie/live TV after DOM ready');
+                        // Use requestAnimationFrame to ensure DOM is fully rendered
+                        requestAnimationFrame(() => {
+                            setTimeout(() => {
+                                console.log('🚀 Creating server selector now...');
+                                createEmbeddedServerSelector(content.Servers);
+                            }, 100);
+                        });
+                    }
                 }
 
                 // Render related content
@@ -6471,7 +6475,13 @@
                 // Create server selector for series episodes with multiple servers
                 if (episode.Servers.length > 1) {
                     console.log('🎯 Creating server selector for series episode');
-                    setTimeout(() => createEmbeddedServerSelector(episode.Servers), 100);
+                    // Use requestAnimationFrame to ensure DOM is fully rendered
+                    requestAnimationFrame(() => {
+                        setTimeout(() => {
+                            console.log('🚀 Creating series episode server selector now...');
+                            createEmbeddedServerSelector(episode.Servers);
+                        }, 100);
+                    });
                 }
             }
 
