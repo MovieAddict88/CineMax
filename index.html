@@ -4001,13 +4001,11 @@
                     // Create server selector for movies/live TV AFTER DOM is ready
                     if (content.Servers && content.Servers.length > 1) {
                         console.log('🎯 Creating server selector for movie/live TV after DOM ready');
-                        // Use requestAnimationFrame to ensure DOM is fully rendered
-                        requestAnimationFrame(() => {
-                            setTimeout(() => {
-                                console.log('🚀 Creating server selector now...');
-                                createEmbeddedServerSelector(content.Servers);
-                            }, 100);
-                        });
+                        // Wait for DOM to be fully ready
+                        setTimeout(() => {
+                            console.log('🚀 Creating server selector now...');
+                            createEmbeddedServerSelector(content.Servers);
+                        }, 500); // Increased delay to ensure DOM is ready
                     }
                 }
 
@@ -5584,56 +5582,12 @@
 
         // Create server selector for embedded sources when Plyr player is hidden
         function createEmbeddedServerSelector(servers) {
-            // DEBUG: Log the actual server data structure
             console.log('🔍 DEBUG: Raw servers data:', servers);
-            console.log('🔍 DEBUG: Servers type:', typeof servers);
-            console.log('🔍 DEBUG: Servers length:', servers?.length);
-            console.log('🔍 DEBUG: Servers keys:', servers ? Object.keys(servers) : 'No servers');
             
             if (!servers || servers.length <= 1) {
                 console.log('🔍 Server selector not created - only', servers?.length || 0, 'servers available');
-                return; // No need for selector if only one server
-            }
-            
-            // Analyze the actual server structure
-            const firstServer = servers[0];
-            console.log('🔍 DEBUG: First server structure:', firstServer);
-            console.log('🔍 DEBUG: First server keys:', firstServer ? Object.keys(firstServer) : 'No first server');
-            
-            // Check if servers is an array or object
-            let serverArray = servers;
-            if (Array.isArray(servers)) {
-                serverArray = servers;
-            } else if (typeof servers === 'object' && servers !== null) {
-                // If it's an object, try to extract servers from it
-                if (servers.Servers && Array.isArray(servers.Servers)) {
-                    serverArray = servers.Servers;
-                } else if (servers.servers && Array.isArray(servers.servers)) {
-                    serverArray = servers.servers;
-                } else {
-                    // Convert object to array if possible
-                    serverArray = Object.values(servers);
-                }
-            }
-            
-            console.log('🔍 DEBUG: Processed server array:', serverArray);
-            console.log('🔍 DEBUG: Final server count:', serverArray?.length);
-            
-            if (!serverArray || serverArray.length <= 1) {
-                console.log('🔍 Server selector not created - processed array has', serverArray?.length || 0, 'servers');
                 return;
             }
-            
-            console.log('🎯 Creating server selector with', serverArray.length, 'servers:', serverArray.map(s => {
-                if (typeof s === 'string') return s;
-                if (typeof s === 'object' && s !== null) {
-                    return {
-                        name: s.name || s.Name || s.title || s.Title || 'Unknown',
-                        url: s.url || s.Url || s.link || s.Link || 'No URL'
-                    };
-                }
-                return String(s);
-            }));
             
             // Remove existing server selector if it exists
             const existingSelector = document.getElementById('embedded-server-selector');
@@ -5672,7 +5626,7 @@
                         padding-bottom: 12px;
                         text-shadow: 0 2px 4px rgba(0, 0, 0, 0.8);
                     ">
-                        🎬 Available Servers (${serverArray.length})
+                        🎬 Available Servers (${servers.length})
                     </div>
                     <div id="server-buttons-container" style="
                         display: flex;
@@ -5684,11 +5638,48 @@
                 </div>
             `;
             
-            // Group servers by type for better organization
-            const serverGroups = {};
-            console.log('🔍 Processing servers for grouping:', serverArray.length, 'total servers');
+                        // Create server buttons container
+            const serverButtonsContainer = document.createElement('div');
+            serverButtonsContainer.style.cssText = `
+                display: flex;
+                flex-wrap: wrap;
+                gap: 15px;
+                margin-bottom: 15px;
+                justify-content: center;
+                align-items: center;
+                position: relative;
+                z-index: 1;
+            `;
             
-            serverArray.forEach((server, index) => {
+            // Define server type colors and icons
+            const serverColors = {
+                'VidSrc': '#3b82f6',      // Blue
+                'VidJoy': '#10b981',      // Green
+                '2Embed': '#f59e0b',      // Orange
+                'Embed.su': '#ef4444',    // Red
+                'AutoEmbed': '#8b5cf6',   // Purple
+                'GoDrivePlayer': '#06b6d4', // Cyan
+                'VidLink.pro': '#f97316', // Orange-red
+                'Google Drive': '#22c55e', // Light green
+                'Mega.nz': '#dc2626',     // Dark red
+                'Other': '#6b7280'        // Gray
+            };
+            
+            const serverIcons = {
+                'VidSrc': '🎬',
+                'VidJoy': '🎭',
+                '2Embed': '📺',
+                'Embed.su': '🎪',
+                'AutoEmbed': '🤖',
+                'GoDrivePlayer': '☁️',
+                'VidLink.pro': '🔗',
+                'Google Drive': '💾',
+                'Mega.nz': '🌊',
+                'Other': '🌐'
+            };
+            
+            // Add servers as buttons
+            servers.forEach((server, index) => {
                 // Handle different server data structures
                 let serverName = 'Unknown';
                 let serverUrl = '';
@@ -5698,18 +5689,11 @@
                     serverUrl = server;
                 } else if (typeof server === 'object' && server !== null) {
                     serverName = server.name || server.Name || server.title || server.Title || `Server ${index + 1}`;
-                    serverUrl = server.url || server.Url || server.link || server.Link || server.src || server.Src || '';
+                    serverUrl = server.url || server.Url || server.link || server.Link || '';
                 } else {
                     serverName = `Server ${index + 1}`;
                     serverUrl = String(server);
                 }
-                
-                console.log(`🔍 DEBUG: Server ${index + 1} data:`, {
-                    original: server,
-                    name: serverName,
-                    url: serverUrl,
-                    type: typeof server
-                });
                 
                 let group = 'Other';
                 if (serverUrl && typeof serverUrl === 'string') {
@@ -5724,290 +5708,109 @@
                     else if (isMegaNzUrl(serverUrl)) group = 'Mega.nz';
                 }
                 
-                if (!serverGroups[group]) serverGroups[group] = [];
-                serverGroups[group].push({
-                    name: serverName,
-                    url: serverUrl,
-                    original: server
-                });
+                const serverButton = document.createElement('button');
+                const displayName = serverName;
+                const serverColor = serverColors[group] || serverColors['Other'];
+                const serverIcon = serverIcons[group] || serverIcons['Other'];
                 
-                console.log(`🔍 Server ${index + 1}: ${serverName} (${serverUrl?.substring(0, 50)}...) -> Group: ${group}`);
-            });
-            
-            console.log('📊 Server groups created:', Object.entries(serverGroups).map(([group, servers]) => `${group}: ${servers.length}`));
-            
-            // Define server type colors and icons with enhanced color palette
-            const serverColors = {
-                'VidSrc': '#3b82f6',      // Blue
-                'VidJoy': '#10b981',      // Green
-                '2Embed': '#f59e0b',      // Orange
-                'Embed.su': '#ef4444',    // Red
-                'AutoEmbed': '#8b5cf6',   // Purple
-                'GoDrivePlayer': '#06b6d4', // Cyan
-                'VidLink.pro': '#f97316', // Orange-red
-                'Google Drive': '#22c55e', // Light green
-                'Mega.nz': '#dc2626',     // Dark red
-                'Other': '#6b7280'        // Gray
-            };
-            
-            // Enhanced color variations for better visual appeal
-            const serverColorVariants = {
-                'VidSrc': { primary: '#3b82f6', hover: '#2563eb', active: '#1d4ed8' },
-                'VidJoy': { primary: '#10b981', hover: '#059669', active: '#047857' },
-                '2Embed': { primary: '#f59e0b', hover: '#d97706', active: '#b45309' },
-                'Embed.su': { primary: '#ef4444', hover: '#dc2626', active: '#b91c1c' },
-                'AutoEmbed': { primary: '#8b5cf6', hover: '#7c3aed', active: '#6d28d9' },
-                'GoDrivePlayer': { primary: '#06b6d4', hover: '#0891b2', active: '#0e7490' },
-                'VidLink.pro': { primary: '#f97316', hover: '#ea580c', active: '#c2410c' },
-                'Google Drive': { primary: '#22c55e', hover: '#16a34a', active: '#15803d' },
-                'Mega.nz': { primary: '#dc2626', hover: '#b91c1c', active: '#991b1b' },
-                'Other': { primary: '#6b7280', hover: '#4b5563', active: '#374151' }
-            };
-
-            const serverIcons = {
-                'VidSrc': '🎬',
-                'VidJoy': '🎭',
-                '2Embed': '📺',
-                'Embed.su': '🎪',
-                'AutoEmbed': '🤖',
-                'GoDrivePlayer': '☁️',
-                'VidLink.pro': '🔗',
-                'Google Drive': '💾',
-                'Mega.nz': '🌊',
-                'Other': '🌐'
-            };
-            
-            // Create server buttons container
-            const serverButtonsContainer = document.createElement('div');
-            serverButtonsContainer.style.cssText = `
-                display: flex;
-                flex-wrap: wrap;
-                gap: 15px;
-                margin-bottom: 15px;
-                justify-content: center;
-                align-items: center;
-                position: relative;
-                z-index: 1;
-            `;
-            
-            // Add servers as buttons grouped by type
-            let globalIndex = 0;
-            console.log('🎯 Creating server buttons...');
-            
-            Object.entries(serverGroups).forEach(([groupName, groupServers]) => {
-                console.log(`📋 Processing group: ${groupName} with ${groupServers.length} servers`);
+                serverButton.innerHTML = `${serverIcon} ${displayName}`;
+                serverButton.style.cssText = `
+                    background: ${serverColor};
+                    color: white;
+                    border: none;
+                    padding: 12px 20px;
+                    border-radius: 30px;
+                    cursor: pointer;
+                    font-size: 14px;
+                    font-weight: 600;
+                    transition: all 0.3s ease;
+                    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+                    position: relative;
+                    overflow: hidden;
+                    min-width: 120px;
+                    text-align: center;
+                    white-space: nowrap;
+                    border: 2px solid transparent;
+                    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+                `;
                 
-                groupServers.forEach((server, index) => {
-                    globalIndex++;
-                    console.log(`✅ Creating server button ${globalIndex}: ${server.name || 'Unknown'} for group ${groupName}`);
-                    
-                    const serverButton = document.createElement('button');
-                    const displayName = server.name || `${groupName} ${index + 1}`;
-                    const serverColor = serverColors[groupName] || serverColors['Other'];
-                    const serverIcon = serverIcons[groupName] || serverIcons['Other'];
-                    
-                    serverButton.innerHTML = `${serverIcon} ${displayName}`;
-                    serverButton.style.cssText = `
-                        background: linear-gradient(135deg, ${serverColorVariants[groupName]?.primary || serverColor}, ${serverColorVariants[groupName]?.hover || serverColor});
-                        color: white;
-                        border: none;
-                        padding: 12px 20px;
-                        border-radius: 30px;
-                        cursor: pointer;
-                        font-size: 14px;
-                        font-weight: 600;
-                        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-                        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
-                        position: relative;
-                        overflow: hidden;
-                        min-width: 120px;
-                        text-align: center;
-                        white-space: nowrap;
-                        border: 2px solid transparent;
-                        text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
-                    `;
-                    
-                    // Highlight current server
-                    if (server.url === iframe?.src) {
-                        const variants = serverColorVariants[groupName] || serverColorVariants['Other'];
-                        serverButton.style.background = `linear-gradient(135deg, ${variants.active}, ${variants.primary})`;
-                        serverButton.style.boxShadow = `0 0 25px ${variants.primary}90`;
-                        serverButton.style.transform = 'scale(1.08)';
-                        serverButton.style.borderColor = `${variants.primary}60`;
-                        serverButton.innerHTML = `✅ ${serverIcon} ${displayName}`;
-                    }
-                    
-                    // Add enhanced hover effects
-                    serverButton.addEventListener('mouseenter', () => {
-                        if (server.url !== iframe?.src) {
-                            const variants = serverColorVariants[groupName] || serverColorVariants['Other'];
-                            serverButton.style.background = `linear-gradient(135deg, ${variants.hover}, ${variants.primary})`;
-                            serverButton.style.transform = 'translateY(-3px) scale(1.05)';
-                            serverButton.style.boxShadow = `0 8px 25px ${variants.primary}80`;
-                            serverButton.style.borderColor = `${variants.primary}40`;
-                        }
+                // Add click handler to switch servers
+                serverButton.addEventListener('click', () => {
+                    console.log('🔍 DEBUG: Server button clicked:', {
+                        serverName: displayName,
+                        serverUrl: serverUrl,
+                        currentIframeSrc: iframe?.src
                     });
                     
-                    serverButton.addEventListener('mouseleave', () => {
-                        if (server.url !== iframe?.src) {
-                            const variants = serverColorVariants[groupName] || serverColorVariants['Other'];
-                            serverButton.style.background = `linear-gradient(135deg, ${variants.primary}, ${variants.hover})`;
-                            serverButton.style.transform = 'translateY(0) scale(1)';
-                            serverButton.style.boxShadow = '0 4px 15px rgba(0, 0, 0, 0.3)';
-                            serverButton.style.borderColor = 'transparent';
+                    if (serverUrl !== iframe?.src) {
+                        // Update iframe source
+                        if (iframe) {
+                            iframe.src = filterEmbeddedUrl(serverUrl);
                         }
-                    });
-                    
-                    // Add click handler to switch servers
-                    serverButton.addEventListener('click', () => {
-                        console.log('🔍 DEBUG: Server button clicked:', {
-                            serverName: displayName,
-                            serverUrl: server.url,
-                            currentIframeSrc: iframe?.src
+                        
+                        // Show loading state on clicked button
+                        serverButton.innerHTML = `⏳ Loading...`;
+                        serverButton.style.opacity = '0.7';
+                        serverButton.disabled = true;
+                        
+                        // Update visual selection
+                        serverButtonsContainer.querySelectorAll('button').forEach(btn => {
+                            if (btn !== serverButton) {
+                                const btnGroup = btn.getAttribute('data-group');
+                                const btnColor = serverColors[btnGroup] || serverColors['Other'];
+                                const btnIcon = serverIcons[btnGroup] || serverIcons['Other'];
+                                btn.style.background = btnColor;
+                                btn.style.boxShadow = '0 4px 15px rgba(0, 0, 0, 0.3)';
+                                btn.style.transform = 'translateY(0) scale(1)';
+                                btn.style.borderColor = 'transparent';
+                                btn.innerHTML = `${btnIcon} ${btn.getAttribute('data-original-name')}`;
+                            }
                         });
                         
-                        if (server.url !== iframe?.src) {
-                            // Update iframe source
-                            if (iframe) {
-                                // Re-attach the onload handler for the new server
-                                if (iframe._onloadHandler) {
-                                    iframe.onload = iframe._onloadHandler;
-                                }
-                                
-                                // Show loading indicator for server switch
-                                showLoadingIndicator(`Switching to ${displayName}...`);
-                                
-                                iframe.src = filterEmbeddedUrl(server.url);
-                            }
-                            
-                            // Show loading state on clicked button
-                            serverButton.innerHTML = `⏳ Loading...`;
-                            serverButton.style.opacity = '0.7';
-                            serverButton.disabled = true;
-                            
-                            // Update visual selection - reset all buttons
-                            serverButtonsContainer.querySelectorAll('button').forEach(btn => {
-                                if (btn !== serverButton) {
-                                    const btnGroupName = btn.getAttribute('data-group');
-                                    const variants = serverColorVariants[btnGroupName] || serverColorVariants['Other'];
-                                    const btnIcon = serverIcons[btnGroupName] || serverIcons['Other'];
-                                    btn.style.background = `linear-gradient(135deg, ${variants.primary}, ${variants.hover})`;
-                                    btn.style.boxShadow = '0 4px 15px rgba(0, 0, 0, 0.3)';
-                                    btn.style.transform = 'translateY(0) scale(1)';
-                                    btn.style.borderColor = 'transparent';
-                                    btn.innerHTML = `${btnIcon} ${btn.getAttribute('data-original-name')}`;
-                                }
-                            });
-                            
-                            // After a short delay, highlight selected button
-                            setTimeout(() => {
-                                const variants = serverColorVariants[groupName] || serverColorVariants['Other'];
-                                serverButton.style.background = `linear-gradient(135deg, ${variants.active}, ${variants.primary})`;
-                                serverButton.style.boxShadow = `0 0 25px ${variants.primary}90`;
-                                serverButton.style.transform = 'scale(1.08)';
-                                serverButton.style.opacity = '1';
-                                serverButton.style.borderColor = `${variants.primary}60`;
-                                serverButton.innerHTML = `✅ ${serverIcon} ${displayName}`;
-                                serverButton.disabled = false;
-                            }, 1000);
-                            
-                            // Show feedback
-                            showServerSwitchFeedback(displayName);
-                        }
-                    });
-                    
-                    // Store metadata for later use
-                    serverButton.setAttribute('data-group', groupName);
-                    serverButton.setAttribute('data-original-name', displayName);
-                    serverButton.className = 'server-button';
-                    serverButtonsContainer.appendChild(serverButton);
+                        // After a short delay, highlight selected button
+                        setTimeout(() => {
+                            serverButton.style.background = `linear-gradient(135deg, ${serverColor}, #ffffff40)`;
+                            serverButton.style.boxShadow = `0 0 25px ${serverColor}90`;
+                            serverButton.style.transform = 'scale(1.08)';
+                            serverButton.style.opacity = '1';
+                            serverButton.style.borderColor = `${serverColor}60`;
+                            serverButton.innerHTML = `✅ ${serverIcon} ${displayName}`;
+                            serverButton.disabled = false;
+                        }, 1000);
+                        
+                        // Show feedback
+                        showServerSwitchFeedback(displayName);
+                    }
                 });
+                
+                // Store metadata for later use
+                serverButton.setAttribute('data-group', group);
+                serverButton.setAttribute('data-original-name', displayName);
+                serverButton.className = 'server-button';
+                serverButtonsContainer.appendChild(serverButton);
             });
             
-            console.log(`🎉 Server selector created with ${globalIndex} total server buttons`);
             selectorContainer.appendChild(serverButtonsContainer);
             
-            // Add to video actions container (below like/dislike/share buttons)
-            const videoActionsContainer = document.querySelector('.video-actions');
-            console.log('🔍 DEBUG: videoActionsContainer found:', videoActionsContainer);
-            
-            if (videoActionsContainer && videoActionsContainer.parentElement) {
-                // Find the video-description container to insert between video-actions and description
-                const videoDescription = document.querySelector('.video-description');
-                console.log('🔍 DEBUG: videoDescription found:', videoDescription);
-                
-                if (videoDescription) {
-                    // Insert the server selector between video-actions and video-description
-                    console.log('✅ DEBUG: Inserting server selector between video-actions and video-description');
-                    console.log('📍 DEBUG: Inserting before element:', videoDescription);
-                    console.log('📍 DEBUG: Parent container:', videoActionsContainer.parentElement);
-                    videoActionsContainer.parentElement.insertBefore(selectorContainer, videoDescription);
-                    console.log('✅ DEBUG: Server selector inserted successfully between containers');
-                    
-                    // Verify insertion
-                    const nextSibling = selectorContainer.nextSibling;
-                    console.log('📍 DEBUG: Next sibling after server selector:', nextSibling);
-                    console.log('📍 DEBUG: Server selector parent:', selectorContainer.parentElement);
+            // SIMPLE POSITIONING - Just add it to the video details container
+            const videoDetails = document.querySelector('.video-details');
+            if (videoDetails) {
+                // Insert after the video-info div (which contains video-actions)
+                const videoInfo = videoDetails.querySelector('.video-info');
+                if (videoInfo) {
+                    videoInfo.parentNode.insertBefore(selectorContainer, videoInfo.nextSibling);
+                    console.log('✅ Server selector inserted after video-info');
                 } else {
-                    // Fallback: insert after video-actions
-                    console.log('🔄 DEBUG: Fallback - inserting after video-actions');
-                    videoActionsContainer.parentElement.insertBefore(selectorContainer, videoActionsContainer.nextSibling);
+                    videoDetails.appendChild(selectorContainer);
+                    console.log('✅ Server selector appended to video-details');
                 }
             } else {
-                console.error('❌ DEBUG: Video actions container not found - server selector not added');
-                
-                // Try to find the exact structure we need
-                const videoInfo = document.querySelector('.video-info');
-                const videoDescription = document.querySelector('.video-description');
-                
-                if (videoInfo && videoDescription) {
-                    console.log('🔄 DEBUG: Found video-info and video-description, inserting between them');
-                    videoInfo.parentElement.insertBefore(selectorContainer, videoDescription);
-                } else {
-                    // Try alternative selectors for the video actions area
-                    const alternativeSelectors = [
-                        '.video-details',
-                        '.viewer-content'
-                    ];
-                    
-                    let containerFound = false;
-                    for (const selector of alternativeSelectors) {
-                        const container = document.querySelector(selector);
-                        if (container) {
-                            console.log(`🔄 DEBUG: Fallback - adding to ${selector} container`);
-                            container.appendChild(selectorContainer);
-                            containerFound = true;
-                            break;
-                        }
-                    }
-                    
-                    if (!containerFound) {
-                        console.error('❌ DEBUG: No suitable container found for server selector');
-                        // Last resort: add to body
-                        document.body.appendChild(selectorContainer);
-                    }
-                }
+                // Last resort: add to body
+                document.body.appendChild(selectorContainer);
+                console.log('✅ Server selector added to body (fallback)');
             }
             
-            console.log('✅ Server selector successfully positioned between video actions and description');
-            
-            // Ensure the server selector is visible and properly styled
-            selectorContainer.style.display = 'block';
-            selectorContainer.style.visibility = 'visible';
-            selectorContainer.style.opacity = '1';
-            selectorContainer.style.zIndex = '1000';
-            
-            // Add a subtle entrance animation
-            setTimeout(() => {
-                selectorContainer.style.opacity = '0';
-                selectorContainer.style.transform = 'translateY(10px)';
-                selectorContainer.style.transition = 'all 0.3s ease';
-                
-                requestAnimationFrame(() => {
-                    selectorContainer.style.opacity = '1';
-                    selectorContainer.style.transform = 'translateY(0)';
-                });
-            }, 50);
+            console.log('✅ Server selector created and positioned successfully');
         }
 
         // Hide embedded server selector
