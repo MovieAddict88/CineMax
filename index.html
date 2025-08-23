@@ -994,6 +994,13 @@
             animation: slideInUp 0.4s cubic-bezier(0.4, 0, 0.2, 1);
             position: relative;
             box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(255, 255, 255, 0.1);
+            display: block !important;
+            visibility: visible !important;
+            opacity: 1 !important;
+            z-index: 1000 !important;
+            margin: 20px 0 !important;
+            width: 100% !important;
+            max-width: none !important;
         }
 
         .server-selector-container:hover {
@@ -1078,6 +1085,35 @@
                 gap: 10px;
                 justify-content: center;
             }
+        }
+
+        /* Ensure server selector is always visible and properly positioned */
+        .video-details {
+            position: relative;
+            overflow: visible !important;
+        }
+
+        .video-info {
+            position: relative;
+            overflow: visible !important;
+        }
+
+        .viewer-content {
+            position: relative;
+            overflow: visible !important;
+        }
+
+        /* Force server selector to be visible */
+        #embedded-server-selector {
+            position: relative !important;
+            display: block !important;
+            visibility: visible !important;
+            opacity: 1 !important;
+            z-index: 1000 !important;
+            margin: 20px 0 !important;
+            width: 100% !important;
+            max-width: none !important;
+            overflow: visible !important;
         }
 
         @media (max-width: 480px) {
@@ -5806,40 +5842,70 @@
             console.log('🔍 DEBUG: videoActionsContainer found:', videoActionsContainer);
             
             if (videoActionsContainer && videoActionsContainer.parentElement) {
-                // Insert the server selector after the video-actions container
-                console.log('✅ DEBUG: Inserting server selector after video-actions');
-                videoActionsContainer.parentElement.insertBefore(selectorContainer, videoActionsContainer.nextSibling);
-                console.log('✅ DEBUG: Server selector inserted successfully');
+                // Find the video-description container to insert between video-actions and description
+                const videoDescription = document.querySelector('.video-description');
+                console.log('🔍 DEBUG: videoDescription found:', videoDescription);
+                
+                if (videoDescription) {
+                    // Insert the server selector between video-actions and video-description
+                    console.log('✅ DEBUG: Inserting server selector between video-actions and video-description');
+                    console.log('📍 DEBUG: Inserting before element:', videoDescription);
+                    console.log('📍 DEBUG: Parent container:', videoActionsContainer.parentElement);
+                    videoActionsContainer.parentElement.insertBefore(selectorContainer, videoDescription);
+                    console.log('✅ DEBUG: Server selector inserted successfully between containers');
+                    
+                    // Verify insertion
+                    const nextSibling = selectorContainer.nextSibling;
+                    console.log('📍 DEBUG: Next sibling after server selector:', nextSibling);
+                    console.log('📍 DEBUG: Server selector parent:', selectorContainer.parentElement);
+                } else {
+                    // Fallback: insert after video-actions
+                    console.log('🔄 DEBUG: Fallback - inserting after video-actions');
+                    videoActionsContainer.parentElement.insertBefore(selectorContainer, videoActionsContainer.nextSibling);
+                }
             } else {
                 console.error('❌ DEBUG: Video actions container not found - server selector not added');
                 
-                // Try alternative selectors for the video actions area
-                const alternativeSelectors = [
-                    '.video-details',
-                    '.viewer-content',
-                    '.video-info',
-                    '.content-info'
-                ];
+                // Try to find the exact structure we need
+                const videoInfo = document.querySelector('.video-info');
+                const videoDescription = document.querySelector('.video-description');
                 
-                let containerFound = false;
-                for (const selector of alternativeSelectors) {
-                    const container = document.querySelector(selector);
-                    if (container) {
-                        console.log(`🔄 DEBUG: Fallback - adding to ${selector} container`);
-                        container.appendChild(selectorContainer);
-                        containerFound = true;
-                        break;
+                if (videoInfo && videoDescription) {
+                    console.log('🔄 DEBUG: Found video-info and video-description, inserting between them');
+                    videoInfo.parentElement.insertBefore(selectorContainer, videoDescription);
+                } else {
+                    // Try alternative selectors for the video actions area
+                    const alternativeSelectors = [
+                        '.video-details',
+                        '.viewer-content'
+                    ];
+                    
+                    let containerFound = false;
+                    for (const selector of alternativeSelectors) {
+                        const container = document.querySelector(selector);
+                        if (container) {
+                            console.log(`🔄 DEBUG: Fallback - adding to ${selector} container`);
+                            container.appendChild(selectorContainer);
+                            containerFound = true;
+                            break;
+                        }
                     }
-                }
-                
-                if (!containerFound) {
-                    console.error('❌ DEBUG: No suitable container found for server selector');
-                    // Last resort: add to body
-                    document.body.appendChild(selectorContainer);
+                    
+                    if (!containerFound) {
+                        console.error('❌ DEBUG: No suitable container found for server selector');
+                        // Last resort: add to body
+                        document.body.appendChild(selectorContainer);
+                    }
                 }
             }
             
-            console.log('✅ Server selector successfully positioned below video actions');
+            console.log('✅ Server selector successfully positioned between video actions and description');
+            
+            // Ensure the server selector is visible and properly styled
+            selectorContainer.style.display = 'block';
+            selectorContainer.style.visibility = 'visible';
+            selectorContainer.style.opacity = '1';
+            selectorContainer.style.zIndex = '1000';
             
             // Add a subtle entrance animation
             setTimeout(() => {
@@ -6943,6 +7009,85 @@
                 console.log('📊 Test servers:', testServers);
                 createEmbeddedServerSelector(testServers);
             };
+
+                    // Enhanced debugging function to check server selector visibility
+        window.debugServerSelector = function() {
+            console.log('🔍 Debugging server selector...');
+            
+            const videoActions = document.querySelector('.video-actions');
+            const videoDescription = document.querySelector('.video-description');
+            const serverSelector = document.getElementById('embedded-server-selector');
+            
+            console.log('Video Actions:', videoActions);
+            console.log('Video Description:', videoDescription);
+            console.log('Server Selector:', serverSelector);
+            
+            if (serverSelector) {
+                console.log('Server Selector Styles:', {
+                    display: serverSelector.style.display,
+                    visibility: serverSelector.style.visibility,
+                    opacity: serverSelector.style.opacity,
+                    zIndex: serverSelector.style.zIndex,
+                    position: serverSelector.style.position,
+                    top: serverSelector.style.top,
+                    left: serverSelector.style.left
+                });
+                
+                console.log('Server Selector Computed Styles:', {
+                    display: window.getComputedStyle(serverSelector).display,
+                    visibility: window.getComputedStyle(serverSelector).opacity,
+                    zIndex: window.getComputedStyle(serverSelector).zIndex
+                });
+            }
+            
+            // Check if any parent containers are hiding the server selector
+            if (serverSelector) {
+                let parent = serverSelector.parentElement;
+                let depth = 0;
+                while (parent && depth < 5) {
+                    const computedStyle = window.getComputedStyle(parent);
+                    console.log(`Parent ${depth} (${parent.tagName}.${parent.className}):`, {
+                        display: computedStyle.display,
+                        visibility: computedStyle.visibility,
+                        opacity: computedStyle.opacity,
+                        overflow: computedStyle.overflow
+                    });
+                    parent = parent.parentElement;
+                    depth++;
+                }
+            }
+        };
+
+        // Function to force show server selector if it's hidden
+        window.forceShowServerSelector = function() {
+            console.log('🔧 Forcing server selector to be visible...');
+            
+            const serverSelector = document.getElementById('embedded-server-selector');
+            if (serverSelector) {
+                // Force visibility
+                serverSelector.style.cssText = `
+                    display: block !important;
+                    visibility: visible !important;
+                    opacity: 1 !important;
+                    z-index: 10000 !important;
+                    position: relative !important;
+                    margin: 20px 0 !important;
+                    width: 100% !important;
+                    max-width: none !important;
+                    overflow: visible !important;
+                    background: linear-gradient(135deg, rgba(30, 30, 30, 0.98), rgba(40, 40, 40, 0.95)) !important;
+                    border-radius: 16px !important;
+                    padding: 20px !important;
+                    backdrop-filter: blur(20px) !important;
+                    border: 1px solid rgba(255, 255, 255, 0.15) !important;
+                    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5) !important;
+                `;
+                
+                console.log('✅ Server selector forced to be visible');
+            } else {
+                console.log('❌ No server selector found to force show');
+            }
+        };
         });
 
         // --- Notification Functionality ---
