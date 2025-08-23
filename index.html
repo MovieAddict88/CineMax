@@ -5563,12 +5563,56 @@
 
         // Create server selector for embedded sources when Plyr player is hidden
         function createEmbeddedServerSelector(servers) {
+            // DEBUG: Log the actual server data structure
+            console.log('🔍 DEBUG: Raw servers data:', servers);
+            console.log('🔍 DEBUG: Servers type:', typeof servers);
+            console.log('🔍 DEBUG: Servers length:', servers?.length);
+            console.log('🔍 DEBUG: Servers keys:', servers ? Object.keys(servers) : 'No servers');
+            
             if (!servers || servers.length <= 1) {
                 console.log('🔍 Server selector not created - only', servers?.length || 0, 'servers available');
                 return; // No need for selector if only one server
             }
             
-            console.log('🎯 Creating server selector with', servers.length, 'servers:', servers.map(s => s.name || 'Unknown'));
+            // Analyze the actual server structure
+            const firstServer = servers[0];
+            console.log('🔍 DEBUG: First server structure:', firstServer);
+            console.log('🔍 DEBUG: First server keys:', firstServer ? Object.keys(firstServer) : 'No first server');
+            
+            // Check if servers is an array or object
+            let serverArray = servers;
+            if (Array.isArray(servers)) {
+                serverArray = servers;
+            } else if (typeof servers === 'object' && servers !== null) {
+                // If it's an object, try to extract servers from it
+                if (servers.Servers && Array.isArray(servers.Servers)) {
+                    serverArray = servers.Servers;
+                } else if (servers.servers && Array.isArray(servers.servers)) {
+                    serverArray = servers.servers;
+                } else {
+                    // Convert object to array if possible
+                    serverArray = Object.values(servers);
+                }
+            }
+            
+            console.log('🔍 DEBUG: Processed server array:', serverArray);
+            console.log('🔍 DEBUG: Final server count:', serverArray?.length);
+            
+            if (!serverArray || serverArray.length <= 1) {
+                console.log('🔍 Server selector not created - processed array has', serverArray?.length || 0, 'servers');
+                return;
+            }
+            
+            console.log('🎯 Creating server selector with', serverArray.length, 'servers:', serverArray.map(s => {
+                if (typeof s === 'string') return s;
+                if (typeof s === 'object' && s !== null) {
+                    return {
+                        name: s.name || s.Name || s.title || s.Title || 'Unknown',
+                        url: s.url || s.Url || s.link || s.Link || 'No URL'
+                    };
+                }
+                return String(s);
+            }));
             
             // Remove existing server selector if it exists
             const existingSelector = document.getElementById('embedded-server-selector');
@@ -5607,7 +5651,7 @@
                         padding-bottom: 12px;
                         text-shadow: 0 2px 4px rgba(0, 0, 0, 0.8);
                     ">
-                        🎬 Available Servers (${servers.length})
+                        🎬 Available Servers (${serverArray.length})
                     </div>
                     <div id="server-buttons-container" style="
                         display: flex;
