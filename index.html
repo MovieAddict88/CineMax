@@ -5576,57 +5576,48 @@
                 existingSelector.remove();
             }
             
-            // Create server selector container
+            // Create server selector container with GUARANTEED visibility
             const selectorContainer = document.createElement('div');
             selectorContainer.id = 'embedded-server-selector';
             selectorContainer.className = 'server-selector-container';
-            selectorContainer.style.cssText = `
-                margin-top: 15px;
-                margin-bottom: 20px;
-                background: linear-gradient(135deg, rgba(30, 30, 30, 0.98), rgba(40, 40, 40, 0.95));
-                border-radius: 16px;
-                padding: 20px;
-                backdrop-filter: blur(20px);
-                border: 1px solid rgba(255, 255, 255, 0.15);
-                transition: all 0.3s ease;
-                box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
-                position: relative;
-                overflow: hidden;
+            selectorContainer.innerHTML = `
+                <div style="
+                    background: linear-gradient(135deg, #1e1e1e, #2a2a2a);
+                    border-radius: 16px;
+                    padding: 20px;
+                    border: 2px solid #ff4444;
+                    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.8);
+                    margin: 20px 0;
+                    position: relative;
+                    z-index: 9999;
+                    display: block !important;
+                    visibility: visible !important;
+                    opacity: 1 !important;
+                    width: 100% !important;
+                    max-width: none !important;
+                    overflow: visible !important;
+                ">
+                    <div style="
+                        color: white;
+                        font-size: 20px;
+                        font-weight: bold;
+                        margin-bottom: 20px;
+                        text-align: center;
+                        border-bottom: 2px solid #ff4444;
+                        padding-bottom: 12px;
+                        text-shadow: 0 2px 4px rgba(0, 0, 0, 0.8);
+                    ">
+                        🎬 Available Servers (${servers.length})
+                    </div>
+                    <div id="server-buttons-container" style="
+                        display: flex;
+                        flex-wrap: wrap;
+                        gap: 15px;
+                        justify-content: center;
+                        align-items: center;
+                    "></div>
+                </div>
             `;
-            
-            // Add subtle background pattern
-            const backgroundPattern = document.createElement('div');
-            backgroundPattern.style.cssText = `
-                position: absolute;
-                top: 0;
-                left: 0;
-                right: 0;
-                bottom: 0;
-                background-image: 
-                    radial-gradient(circle at 20% 20%, rgba(255, 255, 255, 0.03) 1px, transparent 1px),
-                    radial-gradient(circle at 80% 80%, rgba(255, 255, 255, 0.02) 1px, transparent 1px);
-                background-size: 30px 30px, 40px 40px;
-                pointer-events: none;
-                z-index: 0;
-            `;
-            selectorContainer.appendChild(backgroundPattern);
-            
-            // Create title
-            const title = document.createElement('div');
-            title.style.cssText = `
-                color: white;
-                font-size: 18px;
-                font-weight: 700;
-                margin-bottom: 20px;
-                text-align: center;
-                border-bottom: 2px solid rgba(255, 255, 255, 0.2);
-                padding-bottom: 12px;
-                text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
-                position: relative;
-                z-index: 1;
-            `;
-            title.textContent = `🎬 Available Servers (${servers.length})`;
-            selectorContainer.appendChild(title);
             
             // Group servers by type for better organization
             const serverGroups = {};
