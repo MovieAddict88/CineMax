@@ -3495,7 +3495,8 @@
                 
                 // Create universal server selector for multiple servers
                 if (servers && servers.length > 1) {
-                    setTimeout(() => createUniversalServerSelector(servers, { url: url }), 100);
+                    // Create immediately and idempotently; mobile delay caused duplicate animations
+                    createUniversalServerSelector(servers, { url: url });
                 }
                 
                 if (!iframe) {
