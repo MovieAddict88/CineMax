@@ -1,4 +1,4 @@
- <!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -4064,12 +4064,24 @@
                 border-radius: 12px;
                 padding: 15px;
                 min-width: 250px;
+                max-width: 90vw;
                 backdrop-filter: blur(15px);
                 border: 1px solid rgba(255, 255, 255, 0.2);
                 box-shadow: 0 8px 32px rgba(0, 0, 0, 0.6);
                 max-height: 400px;
                 overflow-y: auto;
             `;
+            // Hide by default; show via the indicator button
+            selectorContainer.style.display = 'none';
+            // Compact sizing on small screens
+            if (window.innerWidth <= 768) {
+                selectorContainer.style.minWidth = '180px';
+                selectorContainer.style.maxWidth = '85vw';
+                selectorContainer.style.maxHeight = '50vh';
+                selectorContainer.style.padding = '12px';
+                selectorContainer.style.top = '8px';
+                selectorContainer.style.right = '8px';
+            }
             
             // Create title
             const title = document.createElement('div');
@@ -4967,12 +4979,24 @@
                 border-radius: 12px;
                 padding: 15px;
                 min-width: 250px;
+                max-width: 90vw;
                 backdrop-filter: blur(15px);
                 border: 1px solid rgba(255, 255, 255, 0.2);
                 box-shadow: 0 8px 32px rgba(0, 0, 0, 0.6);
                 max-height: 400px;
                 overflow-y: auto;
             `;
+            // Hide by default; show via the indicator button
+            selectorContainer.style.display = 'none';
+            // Compact sizing on small screens
+            if (window.innerWidth <= 768) {
+                selectorContainer.style.minWidth = '180px';
+                selectorContainer.style.maxWidth = '85vw';
+                selectorContainer.style.maxHeight = '50vh';
+                selectorContainer.style.padding = '12px';
+                selectorContainer.style.top = '8px';
+                selectorContainer.style.right = '8px';
+            }
             
             // Create title
             const title = document.createElement('div');
