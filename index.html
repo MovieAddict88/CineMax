@@ -1116,6 +1116,23 @@
             overflow: visible !important;
         }
 
+        /* Add this to your existing CSS */
+        .server-selector-container {
+            display: block !important;
+            visibility: visible !important;
+            opacity: 1 !important;
+            z-index: 1000 !important;
+            margin: 20px 0 !important;
+            width: 100% !important;
+            max-width: none !important;
+            overflow: visible !important;
+        }
+
+        /* Ensure the video details container doesn't hide overflow */
+        .video-details {
+            overflow: visible !important;
+        }
+
         @media (max-width: 480px) {
             .server-selector-container {
                 margin: 10px 5px;
@@ -6005,6 +6022,11 @@
             if (elements.playerMessageArea && elements.playerMessageArea.textContent.includes('embedded')) {
                 elements.playerMessageArea.style.display = 'none';
             }
+        }
+
+        // Helper function to adjust color brightness
+        function adjustColor(color, amount) {
+            return '#' + color.replace(/^#/, '').replace(/../g, color => ('0' + Math.min(255, Math.max(0, parseInt(color, 16) + amount)).toString(16)).substr(-2));
         }
 
         // Show feedback when switching servers
