@@ -185,6 +185,13 @@
             background-color: var(--dark-2);
         }
 
+        .search-message {
+            padding: 12px 15px;
+            color: var(--light-2);
+            font-size: 14px;
+            border-bottom: 1px solid var(--dark-2);
+        }
+
         .search-result-item img {
             width: 50px;
             height: 70px;
@@ -2251,12 +2258,12 @@
 
         <div class="search-container">
             <div class="search-input-container">
-                <input type="text" id="search-input" placeholder="Search movies, TV shows...">
+                <input type="text" id="search-input" placeholder="Search movies, TV shows..." role="combobox" aria-autocomplete="list" aria-expanded="false" aria-owns="search-results" aria-haspopup="listbox">
                 <button class="close-search-btn">
                     <i class="fas fa-times"></i>
                 </button>
             </div>
-            <div class="search-results" id="search-results"></div>
+            <div class="search-results" id="search-results" role="listbox" aria-label="Search suggestions"></div>
         </div>
 
         <div class="header-controls">
@@ -6018,6 +6025,7 @@
             elements.closeSearchBtn.addEventListener('click', function() {
                 elements.searchInput.value = '';
                 elements.searchResults.style.display = 'none';
+                elements.searchInput.setAttribute('aria-expanded', 'false');
                 if (elements.searchContainer) {
                     elements.searchContainer.classList.remove('show');
                 }
@@ -6042,6 +6050,7 @@
                     elements.searchInput.focus();
                 } else {
                     elements.searchResults.style.display = 'none'; // Hide results when toggling off
+                    elements.searchInput.setAttribute('aria-expanded', 'false');
                 }
             });
 
@@ -6053,6 +6062,7 @@
                         !elements.mobileSearchBtn.contains(event.target)) {
                         elements.searchContainer.classList.remove('show');
                         elements.searchResults.style.display = 'none'; // Also hide results
+                        elements.searchInput.setAttribute('aria-expanded', 'false');
                     }
                 }
             });
@@ -6227,8 +6237,27 @@
             const query = elements.searchInput.value.toLowerCase();
             elements.searchResults.innerHTML = '';
 
+            // Collapse listbox by default until we decide to show something
+            elements.searchInput.setAttribute('aria-expanded', 'false');
+
+            // Require minimal input length
             if (query.length < 2) {
                 elements.searchResults.style.display = 'none';
+                return;
+            }
+
+            // Determine if data is available for searching
+            const dataLoaded = (cineData && cineData.Categories && cineData.Categories.length > 0) ||
+                               (Array.isArray(cachedContent) && cachedContent.length > 0);
+
+            if (!dataLoaded) {
+                const message = document.createElement('div');
+                message.className = 'search-message';
+                message.setAttribute('role', 'status');
+                message.textContent = 'Search unavailable. Content is still loading.';
+                elements.searchResults.appendChild(message);
+                elements.searchResults.style.display = 'block';
+                elements.searchInput.setAttribute('aria-expanded', 'true');
                 return;
             }
 
@@ -6251,6 +6280,8 @@
                 results.slice(0, 5).forEach(result => {
                     const resultItem = document.createElement('div');
                     resultItem.className = 'search-result-item';
+                    resultItem.setAttribute('role', 'option');
+                    resultItem.setAttribute('aria-selected', 'false');
                     resultItem.innerHTML = `
                         <img src="${result.thumbnail}" alt="${result.title}" onerror="this.onerror=null; this.src='${PLACEHOLDER_IMAGE_URL}';">
                         <div class="search-result-info">
@@ -6265,12 +6296,20 @@
                             openViewer(found);
                         }
                         elements.searchResults.style.display = 'none';
+                        elements.searchInput.setAttribute('aria-expanded', 'false');
                     });
                     elements.searchResults.appendChild(resultItem);
                 });
                 elements.searchResults.style.display = 'block';
+                elements.searchInput.setAttribute('aria-expanded', 'true');
             } else {
-                elements.searchResults.style.display = 'none';
+                const message = document.createElement('div');
+                message.className = 'search-message';
+                message.setAttribute('role', 'status');
+                message.textContent = `No results for "${elements.searchInput.value}"`;
+                elements.searchResults.appendChild(message);
+                elements.searchResults.style.display = 'block';
+                elements.searchInput.setAttribute('aria-expanded', 'true');
             }
         }
 
