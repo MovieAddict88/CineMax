@@ -1,4 +1,4 @@
- <!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -2216,6 +2216,9 @@
         .nav-item.active, .nav-item:hover {
             color: var(--youtube-red);
         }
+
+        
+
     </style>
 </head>
 <body>
@@ -3469,8 +3472,10 @@
             if (isVidsrcUrl(url) || isVidjoyUrl(url) || isVidsrcMeUrl(url) || isVidsrcToUrl(url) || isVidsrcXyzUrl(url) || isGoDrivePlayerUrl(url) || isVidLinkProUrl(url) || is2EmbedUrl(url) || isEmbedSuUrl(url) || isAutoEmbedUrl(url)) {
                 elements.player.style.display = 'none'; // Hide Plyr player
                 
-                // Create server selector for embedded sources (non-blocking)
-                setTimeout(() => createEmbeddedServerSelector(servers), 100);
+                // Create universal server selector for multiple servers
+                if (servers && servers.length > 1) {
+                    setTimeout(() => createUniversalServerSelector(servers, { url: url }), 100);
+                }
                 
                 if (!iframe) {
                     iframe = document.createElement('iframe');
@@ -4016,6 +4021,384 @@
             return selectedServer;
         }
         
+        // Create universal server selector for both Plyr and embedded sources
+        function createUniversalServerSelector(servers, currentServer = null) {
+            if (!servers || servers.length <= 1) return; // No need for selector if only one server
+            
+            // Remove existing server selector if it exists
+            const existingSelector = document.getElementById('universal-server-selector');
+            if (existingSelector) {
+                existingSelector.remove();
+            }
+            
+            // Create server selector container
+            const selectorContainer = document.createElement('div');
+            selectorContainer.id = 'universal-server-selector';
+            selectorContainer.style.cssText = `
+                position: absolute;
+                top: 10px;
+                right: 10px;
+                z-index: 1000;
+                background: rgba(0, 0, 0, 0.9);
+                border-radius: 12px;
+                padding: 15px;
+                min-width: 250px;
+                backdrop-filter: blur(15px);
+                border: 1px solid rgba(255, 255, 255, 0.2);
+                box-shadow: 0 8px 32px rgba(0, 0, 0, 0.6);
+                max-height: 400px;
+                overflow-y: auto;
+            `;
+            
+            // Create title
+            const title = document.createElement('div');
+            title.style.cssText = `
+                color: white;
+                font-size: 16px;
+                font-weight: bold;
+                margin-bottom: 15px;
+                text-align: center;
+                padding-bottom: 10px;
+                border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+            `;
+            title.textContent = '🌐 Server Selection';
+            selectorContainer.appendChild(title);
+            
+            // Create server list
+            const serverList = document.createElement('div');
+            serverList.style.cssText = `
+                display: flex;
+                flex-direction: column;
+                gap: 8px;
+            `;
+            
+            servers.forEach((server, index) => {
+                const serverItem = document.createElement('div');
+                serverItem.style.cssText = `
+                    padding: 12px 16px;
+                    background: rgba(255, 255, 255, 0.1);
+                    border-radius: 8px;
+                    cursor: pointer;
+                    transition: all 0.3s ease;
+                    color: white;
+                    font-size: 14px;
+                    display: flex;
+                    justify-content: space-between;
+                    align-items: center;
+                    border: 2px solid transparent;
+                `;
+                
+                // Highlight current server
+                const isCurrentServer = currentServer && (
+                    (currentServer.url && server.url === currentServer.url) ||
+                    (currentServer.src && server.url === currentServer.src)
+                );
+                
+                if (isCurrentServer) {
+                    serverItem.style.background = 'rgba(59, 130, 246, 0.6)';
+                    serverItem.style.border = '2px solid rgba(59, 130, 246, 0.8)';
+                }
+                
+                // Server name with quality indicator
+                const serverName = document.createElement('span');
+                serverName.style.cssText = `
+                    display: flex;
+                    align-items: center;
+                    gap: 8px;
+                `;
+                
+                // Add quality icon based on server name
+                let qualityIcon = '📺';
+                if (server.name) {
+                    if (server.name.includes('1080p') || server.name.includes('1080')) {
+                        qualityIcon = '🎬';
+                    } else if (server.name.includes('720p') || server.name.includes('720')) {
+                        qualityIcon = '📺';
+                    } else if (server.name.includes('480p') || server.name.includes('480')) {
+                        qualityIcon = '📱';
+                    } else if (server.name.includes('360p') || server.name.includes('360')) {
+                        qualityIcon = '📱';
+                    }
+                }
+                
+                serverName.innerHTML = `${qualityIcon} ${server.name || `Server ${index + 1}`}`;
+                serverItem.appendChild(serverName);
+                
+                // Server status indicator
+                const statusIndicator = document.createElement('span');
+                statusIndicator.style.cssText = `
+                    width: 10px;
+                    height: 10px;
+                    border-radius: 50%;
+                    background: #10b981;
+                    margin-left: 12px;
+                    box-shadow: 0 0 8px rgba(16, 185, 129, 0.6);
+                `;
+                serverItem.appendChild(statusIndicator);
+                
+                // Add hover effects
+                serverItem.addEventListener('mouseenter', () => {
+                    if (!isCurrentServer) {
+                        serverItem.style.background = 'rgba(255, 255, 255, 0.2)';
+                        serverItem.style.transform = 'translateX(3px)';
+                    }
+                });
+                
+                serverItem.addEventListener('mouseleave', () => {
+                    if (isCurrentServer) {
+                        serverItem.style.background = 'rgba(59, 130, 246, 0.6)';
+                    } else {
+                        serverItem.style.background = 'rgba(255, 255, 255, 0.1)';
+                    }
+                    serverItem.style.transform = 'translateX(0)';
+                });
+                
+                // Add click handler to switch servers
+                serverItem.addEventListener('click', () => {
+                    if (!isCurrentServer) {
+                        switchToServer(server, servers);
+                        
+                        // Update visual selection
+                        document.querySelectorAll('#universal-server-selector .server-item').forEach(item => {
+                            item.style.background = 'rgba(255, 255, 255, 0.1)';
+                            item.style.border = '2px solid transparent';
+                        });
+                        serverItem.style.background = 'rgba(59, 130, 246, 0.6)';
+                        serverItem.style.border = '2px solid rgba(59, 130, 246, 0.8)';
+                        
+                        // Show feedback
+                        showServerSwitchFeedback(server.name || `Server ${index + 1}`);
+                    }
+                });
+                
+                // Add class for easy selection
+                serverItem.className = 'server-item';
+                serverList.appendChild(serverItem);
+            });
+            
+            selectorContainer.appendChild(serverList);
+            
+            // Add close button
+            const closeButton = document.createElement('button');
+            closeButton.style.cssText = `
+                position: absolute;
+                top: 8px;
+                right: 8px;
+                background: rgba(255, 255, 255, 0.1);
+                border: none;
+                color: white;
+                font-size: 18px;
+                cursor: pointer;
+                padding: 4px 8px;
+                border-radius: 6px;
+                transition: all 0.2s ease;
+                width: 32px;
+                height: 32px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+            `;
+            closeButton.innerHTML = '×';
+            closeButton.addEventListener('click', () => {
+                selectorContainer.remove();
+                // Remove the indicator button
+                const indicatorButton = document.getElementById('server-selector-indicator');
+                if (indicatorButton) {
+                    indicatorButton.remove();
+                }
+            });
+            closeButton.addEventListener('mouseenter', () => {
+                closeButton.style.background = 'rgba(255, 255, 255, 0.2)';
+                closeButton.style.transform = 'scale(1.1)';
+            });
+            closeButton.addEventListener('mouseleave', () => {
+                closeButton.style.background = 'rgba(255, 255, 255, 0.1)';
+                closeButton.style.transform = 'scale(1)';
+            });
+            selectorContainer.appendChild(closeButton);
+            
+            // Add to player container
+            const playerContainer = document.querySelector('.player-container') || document.getElementById('player-container');
+            if (playerContainer) {
+                playerContainer.appendChild(selectorContainer);
+                
+                // Add a floating indicator button
+                const indicatorButton = document.createElement('div');
+                indicatorButton.id = 'server-selector-indicator';
+                indicatorButton.style.cssText = `
+                    position: absolute;
+                    top: 10px;
+                    left: 10px;
+                    background: rgba(59, 130, 246, 0.9);
+                    color: white;
+                    padding: 8px 12px;
+                    border-radius: 20px;
+                    font-size: 12px;
+                    cursor: pointer;
+                    z-index: 999;
+                    backdrop-filter: blur(10px);
+                    border: 1px solid rgba(255, 255, 255, 0.3);
+                    transition: all 0.3s ease;
+                    opacity: 0.8;
+                    font-weight: 500;
+                    box-shadow: 0 4px 16px rgba(59, 130, 246, 0.4);
+                `;
+                indicatorButton.innerHTML = `🌐 ${servers.length} Servers`;
+                indicatorButton.title = 'Click to show server selector';
+                
+                indicatorButton.addEventListener('click', () => {
+                    selectorContainer.style.display = 'block';
+                    selectorContainer.style.opacity = '1';
+                });
+                
+                indicatorButton.addEventListener('mouseenter', () => {
+                    indicatorButton.style.opacity = '1';
+                    indicatorButton.style.transform = 'scale(1.05)';
+                });
+                
+                indicatorButton.addEventListener('mouseleave', () => {
+                    indicatorButton.style.opacity = '0.8';
+                    indicatorButton.style.transform = 'scale(1)';
+                });
+                
+                playerContainer.appendChild(indicatorButton);
+            }
+        }
+        
+        // Function to switch between servers
+        async function switchToServer(server, allServers) {
+            try {
+                // Stop current playback
+                if (playerInstance) {
+                    playerInstance.pause();
+                }
+                
+                // Check if this is an embedded source
+                if (isVidsrcUrl(server.url) || isVidjoyUrl(server.url) || isVidsrcMeUrl(server.url) || 
+                    isVidsrcToUrl(server.url) || isVidsrcXyzUrl(server.url) || isGoDrivePlayerUrl(server.url) || 
+                    isVidLinkProUrl(server.url) || is2EmbedUrl(server.url) || isEmbedSuUrl(server.url) || 
+                    isAutoEmbedUrl(server.url) || isMegaNzUrl(server.url) || isGoogleDriveUrl(server.url)) {
+                    
+                    // Switch to embedded player
+                    await playUrl(server.url, allServers);
+                } else {
+                    // Switch to Plyr player
+                    if (playerInstance) {
+                        // Update player source
+                        const sources = allServers.map(s => ({
+                            src: s.url,
+                            size: parseInt(s.name?.replace(/\D/g, '') || '0'),
+                            type: s.url.includes('m3u8') ? 'application/x-mpegURL' : 'video/mp4'
+                        }));
+                        
+                        playerInstance.source = {
+                            type: 'video',
+                            sources: sources,
+                        };
+                        
+                        // Play the selected server
+                        playerInstance.play();
+                    }
+                }
+                
+                // Update current server tracking
+                window.currentServer = server;
+                
+            } catch (error) {
+                console.error('Error switching to server:', error);
+                showServerSwitchFeedback('Error switching server', 'error');
+            }
+        }
+        
+        // Enhanced function to show server switch feedback
+        function showServerSwitchFeedback(message, type = 'success') {
+            const feedbackDiv = document.createElement('div');
+            feedbackDiv.style.cssText = `
+                position: fixed;
+                top: 20px;
+                right: 20px;
+                background: ${type === 'success' ? 'rgba(16, 185, 129, 0.9)' : 'rgba(239, 68, 68, 0.9)'};
+                color: white;
+                padding: 12px 20px;
+                border-radius: 8px;
+                font-size: 14px;
+                font-weight: 500;
+                z-index: 10000;
+                backdrop-filter: blur(10px);
+                border: 1px solid rgba(255, 255, 255, 0.2);
+                box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
+                transform: translateX(100%);
+                transition: transform 0.3s ease;
+            `;
+            feedbackDiv.textContent = message;
+            
+            document.body.appendChild(feedbackDiv);
+            
+            // Animate in
+            setTimeout(() => {
+                feedbackDiv.style.transform = 'translateX(0)';
+            }, 100);
+            
+            // Remove after 3 seconds
+            setTimeout(() => {
+                feedbackDiv.style.transform = 'translateX(100%)';
+                setTimeout(() => {
+                    if (feedbackDiv.parentNode) {
+                        feedbackDiv.parentNode.removeChild(feedbackDiv);
+                    }
+                }, 300);
+            }, 3000);
+        }
+        
+        // Function to automatically try next server if current one fails
+        async function tryNextServer(servers, currentServerIndex = 0) {
+            if (!servers || servers.length <= 1) return false;
+            
+            const nextIndex = (currentServerIndex + 1) % servers.length;
+            const nextServer = servers[nextIndex];
+            
+            try {
+                showServerSwitchFeedback(`Trying next server: ${nextServer.name || 'Unknown'}`);
+                await switchToServer(nextServer, servers);
+                return true;
+            } catch (error) {
+                console.error('Failed to switch to next server:', error);
+                if (nextIndex !== 0) { // Don't loop infinitely
+                    return await tryNextServer(servers, nextIndex);
+                }
+                return false;
+            }
+        }
+        
+        // Add keyboard shortcuts for server selector
+        document.addEventListener('keydown', (event) => {
+            // Ctrl+S to toggle server selector
+            if (event.ctrlKey && event.key === 's') {
+                event.preventDefault();
+                const selector = document.getElementById('universal-server-selector');
+                if (selector) {
+                    if (selector.style.display === 'none') {
+                        selector.style.display = 'block';
+                        selector.style.opacity = '1';
+                    } else {
+                        selector.style.display = 'none';
+                    }
+                }
+            }
+            
+            // Escape key to close server selector
+            if (event.key === 'Escape') {
+                const selector = document.getElementById('universal-server-selector');
+                if (selector) {
+                    selector.remove();
+                    const indicatorButton = document.getElementById('server-selector-indicator');
+                    if (indicatorButton) {
+                        indicatorButton.remove();
+                    }
+                }
+            }
+        });
+        
         // Automatic fallback between DRM and non-DRM sources with auto-Shaka loading
         async function handleAutomaticFallback(originalUrl, servers, drmFailed = false) {
             if (!servers || servers.length <= 1) {
@@ -4541,6 +4924,335 @@
             return url.includes('autoembed.cc');
         }
 
+        // Create universal server selector for both Plyr and embedded sources
+        function createUniversalServerSelector(servers, currentServer = null) {
+            if (!servers || servers.length <= 1) return; // No need for selector if only one server
+            
+            // Remove existing server selector if it exists
+            const existingSelector = document.getElementById('universal-server-selector');
+            if (existingSelector) {
+                existingSelector.remove();
+            }
+            
+            // Create server selector container
+            const selectorContainer = document.createElement('div');
+            selectorContainer.id = 'universal-server-selector';
+            selectorContainer.style.cssText = `
+                position: absolute;
+                top: 10px;
+                right: 10px;
+                z-index: 1000;
+                background: rgba(0, 0, 0, 0.9);
+                border-radius: 12px;
+                padding: 15px;
+                min-width: 250px;
+                backdrop-filter: blur(15px);
+                border: 1px solid rgba(255, 255, 255, 0.2);
+                box-shadow: 0 8px 32px rgba(0, 0, 0, 0.6);
+                max-height: 400px;
+                overflow-y: auto;
+            `;
+            
+            // Create title
+            const title = document.createElement('div');
+            title.style.cssText = `
+                color: white;
+                font-size: 16px;
+                font-weight: bold;
+                margin-bottom: 15px;
+                text-align: center;
+                padding-bottom: 10px;
+                border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+            `;
+            title.textContent = '🌐 Server Selection';
+            selectorContainer.appendChild(title);
+            
+            // Create server list
+            const serverList = document.createElement('div');
+            serverList.style.cssText = `
+                display: flex;
+                flex-direction: column;
+                gap: 8px;
+            `;
+            
+            servers.forEach((server, index) => {
+                const serverItem = document.createElement('div');
+                serverItem.style.cssText = `
+                    padding: 12px 16px;
+                    background: rgba(255, 255, 255, 0.1);
+                    border-radius: 8px;
+                    cursor: pointer;
+                    transition: all 0.3s ease;
+                    color: white;
+                    font-size: 14px;
+                    display: flex;
+                    justify-content: space-between;
+                    align-items: center;
+                    border: 2px solid transparent;
+                `;
+                
+                // Highlight current server
+                const isCurrentServer = currentServer && (
+                    (currentServer.url && server.url === currentServer.url) ||
+                    (currentServer.src && server.url === currentServer.src)
+                );
+                
+                if (isCurrentServer) {
+                    serverItem.style.background = 'rgba(59, 130, 246, 0.6)';
+                    serverItem.style.border = '2px solid rgba(59, 130, 246, 0.8)';
+                }
+                
+                // Server name with quality indicator
+                const serverName = document.createElement('span');
+                serverName.style.cssText = `
+                    display: flex;
+                    align-items: center;
+                    gap: 8px;
+                `;
+                
+                // Add quality icon based on server name
+                let qualityIcon = '📺';
+                if (server.name) {
+                    if (server.name.includes('1080p') || server.name.includes('1080')) {
+                        qualityIcon = '🎬';
+                    } else if (server.name.includes('720p') || server.name.includes('720')) {
+                        qualityIcon = '📺';
+                    } else if (server.name.includes('480p') || server.name.includes('480')) {
+                        qualityIcon = '📱';
+                    } else if (server.name.includes('360p') || server.name.includes('360')) {
+                        qualityIcon = '📱';
+                    }
+                }
+                
+                serverName.innerHTML = `${qualityIcon} ${server.name || `Server ${index + 1}`}`;
+                serverItem.appendChild(serverName);
+                
+                // Server status indicator
+                const statusIndicator = document.createElement('span');
+                statusIndicator.style.cssText = `
+                    width: 10px;
+                    height: 10px;
+                    border-radius: 50%;
+                    background: #10b981;
+                    margin-left: 12px;
+                    box-shadow: 0 0 8px rgba(16, 185, 129, 0.6);
+                `;
+                serverItem.appendChild(statusIndicator);
+                
+                // Add hover effects
+                serverItem.addEventListener('mouseenter', () => {
+                    if (!isCurrentServer) {
+                        serverItem.style.background = 'rgba(255, 255, 255, 0.2)';
+                        serverItem.style.transform = 'translateX(3px)';
+                    }
+                });
+                
+                serverItem.addEventListener('mouseleave', () => {
+                    if (isCurrentServer) {
+                        serverItem.style.background = 'rgba(59, 130, 246, 0.6)';
+                    } else {
+                        serverItem.style.background = 'rgba(255, 255, 255, 0.1)';
+                    }
+                    serverItem.style.transform = 'translateX(0)';
+                });
+                
+                // Add click handler to switch servers
+                serverItem.addEventListener('click', () => {
+                    if (!isCurrentServer) {
+                        switchToServer(server, servers);
+                        
+                        // Update visual selection
+                        document.querySelectorAll('#universal-server-selector .server-item').forEach(item => {
+                            item.style.background = 'rgba(255, 255, 255, 0.1)';
+                            item.style.border = '2px solid transparent';
+                        });
+                        serverItem.style.background = 'rgba(59, 130, 246, 0.6)';
+                        serverItem.style.border = '2px solid rgba(59, 130, 246, 0.8)';
+                        
+                        // Show feedback
+                        showServerSwitchFeedback(server.name || `Server ${index + 1}`);
+                    }
+                });
+                
+                // Add class for easy selection
+                serverItem.className = 'server-item';
+                serverList.appendChild(serverItem);
+            });
+            
+            selectorContainer.appendChild(serverList);
+            
+            // Add close button
+            const closeButton = document.createElement('button');
+            closeButton.style.cssText = `
+                position: absolute;
+                top: 8px;
+                right: 8px;
+                background: rgba(255, 255, 255, 0.1);
+                border: none;
+                color: white;
+                font-size: 18px;
+                cursor: pointer;
+                padding: 4px 8px;
+                border-radius: 6px;
+                transition: all 0.2s ease;
+                width: 32px;
+                height: 32px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+            `;
+            closeButton.innerHTML = '×';
+            closeButton.addEventListener('click', () => {
+                selectorContainer.remove();
+                // Remove the indicator button
+                const indicatorButton = document.getElementById('server-selector-indicator');
+                if (indicatorButton) {
+                    indicatorButton.remove();
+                }
+            });
+            closeButton.addEventListener('mouseenter', () => {
+                closeButton.style.background = 'rgba(255, 255, 255, 0.2)';
+                closeButton.style.transform = 'scale(1.1)';
+            });
+            closeButton.addEventListener('mouseleave', () => {
+                closeButton.style.background = 'rgba(255, 255, 255, 0.1)';
+                closeButton.style.transform = 'scale(1)';
+            });
+            selectorContainer.appendChild(closeButton);
+            
+            // Add to player container
+            const playerContainer = document.querySelector('.player-container') || document.getElementById('player-container');
+            if (playerContainer) {
+                playerContainer.appendChild(selectorContainer);
+                
+                // Add a floating indicator button
+                const indicatorButton = document.createElement('div');
+                indicatorButton.id = 'server-selector-indicator';
+                indicatorButton.style.cssText = `
+                    position: absolute;
+                    top: 10px;
+                    left: 10px;
+                    background: rgba(59, 130, 246, 0.9);
+                    color: white;
+                    padding: 8px 12px;
+                    border-radius: 20px;
+                    font-size: 12px;
+                    cursor: pointer;
+                    z-index: 999;
+                    backdrop-filter: blur(10px);
+                    border: 1px solid rgba(255, 255, 255, 0.3);
+                    transition: all 0.3s ease;
+                    opacity: 0.8;
+                    font-weight: 500;
+                    box-shadow: 0 4px 16px rgba(59, 130, 246, 0.4);
+                `;
+                indicatorButton.innerHTML = `🌐 ${servers.length} Servers`;
+                indicatorButton.title = 'Click to show server selector';
+                
+                indicatorButton.addEventListener('click', () => {
+                    selectorContainer.style.display = 'block';
+                    selectorContainer.style.opacity = '1';
+                });
+                
+                indicatorButton.addEventListener('mouseenter', () => {
+                    indicatorButton.style.opacity = '1';
+                    indicatorButton.style.transform = 'scale(1.05)';
+                });
+                
+                indicatorButton.addEventListener('mouseleave', () => {
+                    indicatorButton.style.opacity = '0.8';
+                    indicatorButton.style.transform = 'scale(1)';
+                });
+                
+                playerContainer.appendChild(indicatorButton);
+            }
+        }
+        
+        // Function to switch between servers
+        async function switchToServer(server, allServers) {
+            try {
+                // Stop current playback
+                if (playerInstance) {
+                    playerInstance.pause();
+                }
+                
+                // Check if this is an embedded source
+                if (isVidsrcUrl(server.url) || isVidjoyUrl(server.url) || isVidsrcMeUrl(server.url) || 
+                    isVidsrcToUrl(server.url) || isVidsrcXyzUrl(server.url) || isGoDrivePlayerUrl(server.url) || 
+                    isVidLinkProUrl(server.url) || is2EmbedUrl(server.url) || isEmbedSuUrl(server.url) || 
+                    isAutoEmbedUrl(server.url) || isMegaNzUrl(server.url) || isGoogleDriveUrl(server.url)) {
+                    
+                    // Switch to embedded player
+                    await playUrl(server.url, allServers);
+                } else {
+                    // Switch to Plyr player
+                    if (playerInstance) {
+                        // Update player source
+                        const sources = allServers.map(s => ({
+                            src: s.url,
+                            size: parseInt(s.name?.replace(/\D/g, '') || '0'),
+                            type: s.url.includes('m3u8') ? 'application/x-mpegURL' : 'video/mp4'
+                        }));
+                        
+                        playerInstance.source = {
+                            type: 'video',
+                            sources: sources,
+                        };
+                        
+                        // Play the selected server
+                        playerInstance.play();
+                    }
+                }
+                
+                // Update current server tracking
+                window.currentServer = server;
+                
+            } catch (error) {
+                console.error('Error switching to server:', error);
+                showServerSwitchFeedback('Error switching server', 'error');
+            }
+        }
+        
+        // Enhanced function to show server switch feedback
+        function showServerSwitchFeedback(message, type = 'success') {
+            const feedbackDiv = document.createElement('div');
+            feedbackDiv.style.cssText = `
+                position: fixed;
+                top: 20px;
+                right: 20px;
+                background: ${type === 'success' ? 'rgba(16, 185, 129, 0.9)' : 'rgba(239, 68, 68, 0.9)'};
+                color: white;
+                padding: 12px 20px;
+                border-radius: 8px;
+                font-size: 14px;
+                font-weight: 500;
+                z-index: 10000;
+                backdrop-filter: blur(10px);
+                border: 1px solid rgba(255, 255, 255, 0.2);
+                box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
+                transform: translateX(100%);
+                transition: transform 0.3s ease;
+            `;
+            feedbackDiv.textContent = message;
+            
+            document.body.appendChild(feedbackDiv);
+            
+            // Animate in
+            setTimeout(() => {
+                feedbackDiv.style.transform = 'translateX(0)';
+            }, 100);
+            
+            // Remove after 3 seconds
+            setTimeout(() => {
+                feedbackDiv.style.transform = 'translateX(100%)';
+                setTimeout(() => {
+                    if (feedbackDiv.parentNode) {
+                        feedbackDiv.parentNode.removeChild(feedbackDiv);
+                    }
+                }, 300);
+            }, 3000);
+        }
+
         // Create server selector for embedded sources when Plyr player is hidden
         function createEmbeddedServerSelector(servers) {
             if (!servers || servers.length <= 1) return; // No need for selector if only one server
@@ -4972,6 +5684,18 @@
                         type: 'video',
                         sources: sources,
                     };
+                    
+                    // Create universal server selector for multiple servers
+                    if (servers.length > 1) {
+                        createUniversalServerSelector(servers, optimalServer);
+                    }
+                    
+                    // Add error handling for automatic server switching
+                    playerInstance.on('error', async (event) => {
+                        console.log('Player error detected, trying next server...');
+                        const currentIndex = servers.findIndex(s => s.url === optimalServer.url);
+                        await tryNextServer(servers, currentIndex);
+                    });
                 }
             }
         }

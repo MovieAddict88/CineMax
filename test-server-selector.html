@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Server Selector Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background: #1a1a1a;
+            color: white;
+        }
+        
+        .test-container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        
+        .test-button {
+            background: #3b82f6;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            cursor: pointer;
+            margin: 10px;
+            font-size: 16px;
+            transition: all 0.3s ease;
+        }
+        
+        .test-button:hover {
+            background: #2563eb;
+            transform: translateY(-2px);
+        }
+        
+        .player-container {
+            position: relative;
+            width: 100%;
+            height: 400px;
+            background: #000;
+            border-radius: 12px;
+            margin: 20px 0;
+            overflow: hidden;
+        }
+        
+        .demo-video {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        
+        .info-box {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 20px;
+            border-radius: 8px;
+            margin: 20px 0;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        
+        .keyboard-shortcuts {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin: 20px 0;
+        }
+        
+        .shortcut-item {
+            background: rgba(255, 255, 255, 0.05);
+            padding: 15px;
+            border-radius: 8px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .shortcut-key {
+            background: #3b82f6;
+            color: white;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-family: monospace;
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+    <div class="test-container">
+        <h1>🌐 Dynamic Server Selector Test</h1>
+        
+        <div class="info-box">
+            <h3>Features</h3>
+            <ul>
+                <li>✅ Automatically detects multiple servers from JSON data</li>
+                <li>✅ Shows quality indicators (1080p, 720p, 480p, 360p)</li>
+                <li>✅ Works with both Plyr player and embedded sources</li>
+                <li>✅ Supports vidsrc, vidjoy, mega, Google Drive, and more</li>
+                <li>✅ Automatic server switching on failure</li>
+                <li>✅ Keyboard shortcuts (Ctrl+S, Escape)</li>
+                <li>✅ Beautiful modern UI with animations</li>
+            </ul>
+        </div>
+        
+        <div class="keyboard-shortcuts">
+            <div class="shortcut-item">
+                <strong>Toggle Server Selector</strong><br>
+                <span class="shortcut-key">Ctrl + S</span>
+            </div>
+            <div class="shortcut-item">
+                <strong>Close Server Selector</strong><br>
+                <span class="shortcut-key">Escape</span>
+            </div>
+        </div>
+        
+        <button class="test-button" onclick="testMultipleServers()">
+            🎬 Test Multiple Servers (1080p + 720p)
+        </button>
+        
+        <button class="test-button" onclick="testEmbeddedServers()">
+            🌐 Test Embedded Servers (vidsrc + vidjoy)
+        </button>
+        
+        <button class="test-button" onclick="testMixedServers()">
+            🔀 Test Mixed Servers (MP4 + M3U8 + Embedded)
+        </button>
+        
+        <div class="player-container" id="player-container">
+            <video class="demo-video" controls>
+                <source src="https://sample-videos.com/zip/10/mp4/SampleVideo_1280x720_1mb.mp4" type="video/mp4">
+                Your browser does not support the video tag.
+            </video>
+        </div>
+        
+        <div class="info-box">
+            <h3>How it works</h3>
+            <p>When you click a test button, the system will:</p>
+            <ol>
+                <li>Detect multiple servers in the JSON data</li>
+                <li>Automatically select the optimal server (highest quality, best compatibility)</li>
+                <li>Show a floating server selector button (🌐 X Servers)</li>
+                <li>Display a beautiful server selection panel when clicked</li>
+                <li>Allow switching between servers with visual feedback</li>
+                <li>Automatically try the next server if the current one fails</li>
+            </ol>
+        </div>
+        
+        <div class="info-box">
+            <h3>JSON Data Structure</h3>
+            <pre style="background: rgba(0,0,0,0.3); padding: 15px; border-radius: 8px; overflow-x: auto;">
+{
+  "Servers": [
+    {"name": "1080p", "url": "https://example.com/video-1080p.mp4"},
+    {"name": "720p", "url": "https://example.com/video-720p.mp4"},
+    {"name": "vidsrc", "url": "https://vidsrc.to/embed/movie/123"},
+    {"name": "vidjoy", "url": "https://vidjoy.net/embed/123"}
+  ]
+}</pre>
+        </div>
+    </div>
+
+    <script>
+        // Mock server data for testing
+        const mockServers = {
+            multipleQuality: [
+                { name: "1080p", url: "https://sample-videos.com/zip/10/mp4/SampleVideo_1280x720_1mb.mp4" },
+                { name: "720p", url: "https://sample-videos.com/zip/10/mp4/SampleVideo_1280x720_1mb.mp4" }
+            ],
+            embedded: [
+                { name: "vidsrc", url: "https://vidsrc.to/embed/movie/123" },
+                { name: "vidjoy", url: "https://vidjoy.net/embed/123" },
+                { name: "mega", url: "https://mega.nz/file/example" }
+            ],
+            mixed: [
+                { name: "1080p MP4", url: "https://sample-videos.com/zip/10/mp4/SampleVideo_1280x720_1mb.mp4" },
+                { name: "720p HLS", url: "https://sample-videos.com/zip/10/mp4/SampleVideo_1280x720_1mb.mp4" },
+                { name: "vidsrc", url: "https://vidsrc.to/embed/movie/123" }
+            ]
+        };
+
+        function testMultipleServers() {
+            alert('Testing multiple quality servers (1080p + 720p)\n\nThis would normally trigger the server selector when multiple servers are detected in the JSON data.');
+        }
+
+        function testEmbeddedServers() {
+            alert('Testing embedded servers (vidsrc + vidjoy + mega)\n\nThis would normally show the server selector for embedded sources.');
+        }
+
+        function testMixedServers() {
+            alert('Testing mixed servers (MP4 + HLS + Embedded)\n\nThis would normally show the server selector for mixed source types.');
+        }
+
+        // Simulate the server selector functionality
+        function createTestServerSelector(servers) {
+            const container = document.getElementById('player-container');
+            
+            // Remove existing selector
+            const existing = container.querySelector('.test-server-selector');
+            if (existing) existing.remove();
+            
+            if (servers.length <= 1) return;
+            
+            const selector = document.createElement('div');
+            selector.className = 'test-server-selector';
+            selector.style.cssText = `
+                position: absolute;
+                top: 10px;
+                right: 10px;
+                background: rgba(0, 0, 0, 0.9);
+                color: white;
+                padding: 15px;
+                border-radius: 12px;
+                min-width: 200px;
+                z-index: 1000;
+                border: 1px solid rgba(255, 255, 255, 0.2);
+            `;
+            
+            selector.innerHTML = `
+                <h4 style="margin: 0 0 15px 0; text-align: center;">🌐 Server Selection</h4>
+                ${servers.map((server, index) => `
+                    <div style="
+                        padding: 10px;
+                        margin: 5px 0;
+                        background: rgba(255, 255, 255, 0.1);
+                        border-radius: 6px;
+                        cursor: pointer;
+                        transition: background 0.2s;
+                    " onmouseover="this.style.background='rgba(255,255,255,0.2)'" 
+                       onmouseout="this.style.background='rgba(255,255,255,0.1)'"
+                       onclick="alert('Switching to: ${server.name}')">
+                        ${server.name}
+                    </div>
+                `).join('')}
+                <button onclick="this.parentElement.remove()" style="
+                    width: 100%;
+                    margin-top: 10px;
+                    padding: 8px;
+                    background: rgba(239, 68, 68, 0.8);
+                    color: white;
+                    border: none;
+                    border-radius: 6px;
+                    cursor: pointer;
+                ">Close</button>
+            `;
+            
+            container.appendChild(selector);
+        }
+
+        // Add keyboard shortcuts for demo
+        document.addEventListener('keydown', (event) => {
+            if (event.ctrlKey && event.key === 's') {
+                event.preventDefault();
+                createTestServerSelector(mockServers.multipleQuality);
+            }
+        });
+    </script>
+</body>
+</html>
