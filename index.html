@@ -832,6 +832,20 @@
         }
 
 
+        /* Live TV: uniform, non-cropped logos */
+        .content-card[data-type="live"] .card-img {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background-color: var(--youtube-dark-gray);
+        }
+        .content-card[data-type="live"] .card-img img {
+            object-fit: contain;
+            width: 100%;
+            height: 100%;
+            padding: 8%;
+        }
+
         /* Viewer Page - YouTube Style */
         .viewer-page {
             display: none;
