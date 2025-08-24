@@ -2244,13 +2244,13 @@
     <style id="server-selector-mobile-css">
         @media (max-width: 768px) {
             #universal-server-selector {
-                position: fixed !important;
+                position: absolute !important;
                 min-width: 120px !important;
                 max-width: 86vw !important;
                 max-height: 70vh !important;
                 padding: 6px !important;
-                top: max(6px, env(safe-area-inset-top)) !important;
-                right: max(6px, env(safe-area-inset-right)) !important;
+                bottom: 6px !important;
+                right: 6px !important;
                 overflow-y: auto !important;
                 overflow-x: hidden !important;
                 -webkit-overflow-scrolling: touch !important;
@@ -2271,13 +2271,13 @@
                 padding-bottom: 6px !important;
             }
             #embedded-server-selector {
-                position: fixed !important;
+                position: absolute !important;
                 min-width: 120px !important;
                 max-width: 86vw !important;
                 max-height: 70vh !important;
                 padding: 6px !important;
-                top: max(6px, env(safe-area-inset-top)) !important;
-                right: max(6px, env(safe-area-inset-right)) !important;
+                bottom: 6px !important;
+                right: 6px !important;
                 overflow-y: auto !important;
                 overflow-x: hidden !important;
                 -webkit-overflow-scrolling: touch !important;
@@ -2295,24 +2295,26 @@
             #server-selector-indicator {
                 font-size: 10px !important;
                 padding: 4px 8px !important;
-                left: max(6px, env(safe-area-inset-left)) !important;
-                top: max(6px, env(safe-area-inset-top)) !important;
+                right: 6px !important;
+                bottom: 6px !important;
+                left: auto !important;
+                top: auto !important;
             }
         }
         @media (max-width: 480px) {
             #universal-server-selector {
-                position: fixed !important;
+                position: absolute !important;
                 max-width: 90vw !important;
                 max-height: 72vh !important;
-                top: max(6px, env(safe-area-inset-top)) !important;
-                right: max(6px, env(safe-area-inset-right)) !important;
+                bottom: 6px !important;
+                right: 6px !important;
             }
             #embedded-server-selector {
-                position: fixed !important;
+                position: absolute !important;
                 max-width: 90vw !important;
                 max-height: 72vh !important;
-                top: max(6px, env(safe-area-inset-top)) !important;
-                right: max(6px, env(safe-area-inset-right)) !important;
+                bottom: 6px !important;
+                right: 6px !important;
             }
         }
     </style>
@@ -4132,7 +4134,7 @@
             selectorContainer.id = 'universal-server-selector';
             selectorContainer.style.cssText = `
                 position: absolute;
-                top: 10px;
+                bottom: 10px;
                 right: 10px;
                 z-index: 1000;
                 background: rgba(0, 0, 0, 0.9);
@@ -4154,7 +4156,7 @@
                 selectorContainer.style.maxWidth = '85vw';
                 selectorContainer.style.maxHeight = '50vh';
                 selectorContainer.style.padding = '12px';
-                selectorContainer.style.top = '8px';
+                selectorContainer.style.bottom = '8px';
                 selectorContainer.style.right = '8px';
             }
             
@@ -4330,8 +4332,8 @@
                 indicatorButton.id = 'server-selector-indicator';
                 indicatorButton.style.cssText = `
                     position: absolute;
-                    top: 10px;
-                    left: 10px;
+                    bottom: 10px;
+                    right: 10px;
                     background: rgba(59, 130, 246, 0.9);
                     color: white;
                     padding: 8px 12px;
@@ -5044,7 +5046,7 @@
             selectorContainer.id = 'universal-server-selector';
             selectorContainer.style.cssText = `
                 position: absolute;
-                top: 10px;
+                bottom: 10px;
                 right: 10px;
                 z-index: 1000;
                 background: rgba(0, 0, 0, 0.9);
@@ -5066,7 +5068,7 @@
                 selectorContainer.style.maxWidth = '85vw';
                 selectorContainer.style.maxHeight = '50vh';
                 selectorContainer.style.padding = '12px';
-                selectorContainer.style.top = '8px';
+                selectorContainer.style.bottom = '8px';
                 selectorContainer.style.right = '8px';
             }
             
@@ -5242,8 +5244,8 @@
                 indicatorButton.id = 'server-selector-indicator';
                 indicatorButton.style.cssText = `
                     position: absolute;
-                    top: 10px;
-                    left: 10px;
+                    bottom: 10px;
+                    right: 10px;
                     background: rgba(59, 130, 246, 0.9);
                     color: white;
                     padding: 8px 12px;
@@ -5380,7 +5382,7 @@
             selectorContainer.id = 'embedded-server-selector';
             selectorContainer.style.cssText = `
                 position: absolute;
-                top: 10px;
+                bottom: 10px;
                 right: 10px;
                 z-index: 1000;
                 background: rgba(0, 0, 0, 0.8);
@@ -5591,8 +5593,8 @@
                 indicatorButton.id = 'server-selector-indicator';
                 indicatorButton.style.cssText = `
                     position: absolute;
-                    top: 10px;
-                    left: 10px;
+                    bottom: 10px;
+                    right: 10px;
                     background: rgba(59, 130, 246, 0.8);
                     color: white;
                     padding: 6px 10px;
