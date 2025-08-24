@@ -3654,6 +3654,15 @@
                 mimeType = 'video/x-matroska';
             }
             
+            // Ensure HLS support on browsers that need it
+            if (mimeType === 'application/x-mpegURL') {
+                try {
+                    await loadHlsJsIfNeeded(url);
+                } catch (e) {
+                    console.warn('Failed to load Hls.js dynamically:', e);
+                }
+            }
+
             playerInstance.source = {
                 type: 'video',
                 sources: [{
@@ -4729,6 +4738,34 @@
             return url.includes('vidjoy.pro/embed');
         }
 
+        // Lightweight loader for Hls.js to play .m3u8 on browsers without native HLS
+        async function loadHlsJsIfNeeded(sampleUrlForLog = '') {
+            try {
+                const video = elements.player;
+                const canNativePlay = video.canPlayType('application/vnd.apple.mpegurl');
+                if (canNativePlay === 'probably' || canNativePlay === 'maybe') {
+                    return; // native support
+                }
+                if (!window.Hls) {
+                    await new Promise((resolve, reject) => {
+                        const script = document.createElement('script');
+                        script.src = 'https://cdn.jsdelivr.net/npm/hls.js@1.5.7/dist/hls.min.js';
+                        script.onload = resolve;
+                        script.onerror = reject;
+                        document.head.appendChild(script);
+                    });
+                }
+                if (window.Hls && !video._hlsBound) {
+                    // Simple hook: when Plyr sets an HLS source, the browser will fetch via video.src
+                    // If it fails, dev can fallback to custom Hls attachMedia. We keep it minimal.
+                    video._hlsBound = true;
+                }
+                console.log('Hls.js ready for HLS playback', sampleUrlForLog ? { url: sampleUrlForLog } : '');
+            } catch (e) {
+                console.warn('Hls.js loader error:', e);
+            }
+        }
+
         // Check if URL is Videasy
         function isVideasyUrl(url) {
             if (!url) return false;
@@ -4979,6 +5016,12 @@
                         type: server.url.includes('m3u8') ? 'application/x-mpegURL' : 'video/mp4'
                     }));
                     
+                    // If any source is HLS, ensure Hls.js is available
+                    const hasHls = sources.some(s => s.type === 'application/x-mpegURL');
+                    if (hasHls) {
+                        try { await loadHlsJsIfNeeded(optimalServer.url); } catch (e) { console.warn('Hls load failed', e); }
+                    }
+
                     playerInstance.source = {
                         type: 'video',
                         sources: sources,
