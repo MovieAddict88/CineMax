@@ -185,6 +185,13 @@
             background-color: var(--dark-2);
         }
 
+        .search-message {
+            padding: 12px 15px;
+            color: var(--light-2);
+            font-size: 14px;
+            border-bottom: 1px solid var(--dark-2);
+        }
+
         .search-result-item img {
             width: 50px;
             height: 70px;
@@ -831,6 +838,20 @@
             /* line-height: 1; /* Helps with vertical alignment if text is taller */
         }
 
+
+        /* Live TV: uniform, non-cropped logos */
+        .content-card[data-type="live"] .card-img {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background-color: var(--youtube-dark-gray);
+        }
+        .content-card[data-type="live"] .card-img img {
+            object-fit: contain;
+            width: 100%;
+            height: 100%;
+            padding: 8%;
+        }
 
         /* Viewer Page - YouTube Style */
         .viewer-page {
@@ -2220,6 +2241,63 @@
         
 
     </style>
+    <style id="server-selector-mobile-css">
+        @media (max-width: 768px) {
+            #universal-server-selector {
+                min-width: 120px !important;
+                max-width: 52vw !important;
+                max-height: 32vh !important;
+                padding: 6px !important;
+                top: 6px !important;
+                right: 6px !important;
+                overflow-y: auto !important;
+                overflow-x: hidden !important;
+                overscroll-behavior: contain;
+            }
+            #universal-server-selector .server-item {
+                padding: 4px 6px !important;
+                font-size: 10px !important;
+                line-height: 1.2 !important;
+            }
+            #universal-server-selector > div:first-child {
+                font-size: 12px !important;
+                margin-bottom: 8px !important;
+                padding-bottom: 6px !important;
+            }
+            #embedded-server-selector {
+                min-width: 120px !important;
+                max-width: 56vw !important;
+                max-height: 34vh !important;
+                padding: 6px !important;
+                top: 6px !important;
+                right: 6px !important;
+                overflow-y: auto !important;
+                overflow-x: hidden !important;
+                overscroll-behavior: contain;
+            }
+            #embedded-server-selector .server-item {
+                padding: 4px 6px !important;
+                font-size: 10px !important;
+                line-height: 1.2 !important;
+            }
+            #server-selector-indicator {
+                font-size: 10px !important;
+                padding: 4px 8px !important;
+                left: 6px !important;
+                top: 6px !important;
+            }
+        }
+        @media (max-width: 480px) {
+            #universal-server-selector {
+                max-width: 50vw !important;
+                max-height: 28vh !important;
+            }
+            #embedded-server-selector {
+                max-width: 52vw !important;
+                max-height: 30vh !important;
+            }
+        }
+    </style>
 </head>
 <body>
     <!-- Notification Bar -->
@@ -2237,12 +2315,12 @@
 
         <div class="search-container">
             <div class="search-input-container">
-                <input type="text" id="search-input" placeholder="Search movies, TV shows...">
+                <input type="text" id="search-input" placeholder="Search movies, TV shows..." role="combobox" aria-autocomplete="list" aria-expanded="false" aria-owns="search-results" aria-haspopup="listbox">
                 <button class="close-search-btn">
                     <i class="fas fa-times"></i>
                 </button>
             </div>
-            <div class="search-results" id="search-results"></div>
+            <div class="search-results" id="search-results" role="listbox" aria-label="Search suggestions"></div>
         </div>
 
         <div class="header-controls">
@@ -4043,12 +4121,24 @@
                 border-radius: 12px;
                 padding: 15px;
                 min-width: 250px;
+                max-width: 90vw;
                 backdrop-filter: blur(15px);
                 border: 1px solid rgba(255, 255, 255, 0.2);
                 box-shadow: 0 8px 32px rgba(0, 0, 0, 0.6);
                 max-height: 400px;
                 overflow-y: auto;
             `;
+            // Hide by default; show via the indicator button
+            selectorContainer.style.display = 'none';
+            // Compact sizing on small screens
+            if (window.innerWidth <= 768) {
+                selectorContainer.style.minWidth = '180px';
+                selectorContainer.style.maxWidth = '85vw';
+                selectorContainer.style.maxHeight = '50vh';
+                selectorContainer.style.padding = '12px';
+                selectorContainer.style.top = '8px';
+                selectorContainer.style.right = '8px';
+            }
             
             // Create title
             const title = document.createElement('div');
@@ -4200,12 +4290,7 @@
             `;
             closeButton.innerHTML = '×';
             closeButton.addEventListener('click', () => {
-                selectorContainer.remove();
-                // Remove the indicator button
-                const indicatorButton = document.getElementById('server-selector-indicator');
-                if (indicatorButton) {
-                    indicatorButton.remove();
-                }
+                selectorContainer.style.display = 'none';
             });
             closeButton.addEventListener('mouseenter', () => {
                 closeButton.style.background = 'rgba(255, 255, 255, 0.2)';
@@ -4390,11 +4475,7 @@
             if (event.key === 'Escape') {
                 const selector = document.getElementById('universal-server-selector');
                 if (selector) {
-                    selector.remove();
-                    const indicatorButton = document.getElementById('server-selector-indicator');
-                    if (indicatorButton) {
-                        indicatorButton.remove();
-                    }
+                    selector.style.display = 'none';
                 }
             }
         });
@@ -4946,12 +5027,24 @@
                 border-radius: 12px;
                 padding: 15px;
                 min-width: 250px;
+                max-width: 90vw;
                 backdrop-filter: blur(15px);
                 border: 1px solid rgba(255, 255, 255, 0.2);
                 box-shadow: 0 8px 32px rgba(0, 0, 0, 0.6);
                 max-height: 400px;
                 overflow-y: auto;
             `;
+            // Hide by default; show via the indicator button
+            selectorContainer.style.display = 'none';
+            // Compact sizing on small screens
+            if (window.innerWidth <= 768) {
+                selectorContainer.style.minWidth = '180px';
+                selectorContainer.style.maxWidth = '85vw';
+                selectorContainer.style.maxHeight = '50vh';
+                selectorContainer.style.padding = '12px';
+                selectorContainer.style.top = '8px';
+                selectorContainer.style.right = '8px';
+            }
             
             // Create title
             const title = document.createElement('div');
@@ -5103,12 +5196,7 @@
             `;
             closeButton.innerHTML = '×';
             closeButton.addEventListener('click', () => {
-                selectorContainer.remove();
-                // Remove the indicator button
-                const indicatorButton = document.getElementById('server-selector-indicator');
-                if (indicatorButton) {
-                    indicatorButton.remove();
-                }
+                selectorContainer.style.display = 'none';
             });
             closeButton.addEventListener('mouseenter', () => {
                 closeButton.style.background = 'rgba(255, 255, 255, 0.2)';
@@ -6004,6 +6092,7 @@
             elements.closeSearchBtn.addEventListener('click', function() {
                 elements.searchInput.value = '';
                 elements.searchResults.style.display = 'none';
+                elements.searchInput.setAttribute('aria-expanded', 'false');
                 if (elements.searchContainer) {
                     elements.searchContainer.classList.remove('show');
                 }
@@ -6028,6 +6117,7 @@
                     elements.searchInput.focus();
                 } else {
                     elements.searchResults.style.display = 'none'; // Hide results when toggling off
+                    elements.searchInput.setAttribute('aria-expanded', 'false');
                 }
             });
 
@@ -6039,6 +6129,7 @@
                         !elements.mobileSearchBtn.contains(event.target)) {
                         elements.searchContainer.classList.remove('show');
                         elements.searchResults.style.display = 'none'; // Also hide results
+                        elements.searchInput.setAttribute('aria-expanded', 'false');
                     }
                 }
             });
@@ -6213,8 +6304,27 @@
             const query = elements.searchInput.value.toLowerCase();
             elements.searchResults.innerHTML = '';
 
+            // Collapse listbox by default until we decide to show something
+            elements.searchInput.setAttribute('aria-expanded', 'false');
+
+            // Require minimal input length
             if (query.length < 2) {
                 elements.searchResults.style.display = 'none';
+                return;
+            }
+
+            // Determine if data is available for searching
+            const dataLoaded = (cineData && cineData.Categories && cineData.Categories.length > 0) ||
+                               (Array.isArray(cachedContent) && cachedContent.length > 0);
+
+            if (!dataLoaded) {
+                const message = document.createElement('div');
+                message.className = 'search-message';
+                message.setAttribute('role', 'status');
+                message.textContent = 'Search unavailable. Content is still loading.';
+                elements.searchResults.appendChild(message);
+                elements.searchResults.style.display = 'block';
+                elements.searchInput.setAttribute('aria-expanded', 'true');
                 return;
             }
 
@@ -6237,6 +6347,8 @@
                 results.slice(0, 5).forEach(result => {
                     const resultItem = document.createElement('div');
                     resultItem.className = 'search-result-item';
+                    resultItem.setAttribute('role', 'option');
+                    resultItem.setAttribute('aria-selected', 'false');
                     resultItem.innerHTML = `
                         <img src="${result.thumbnail}" alt="${result.title}" onerror="this.onerror=null; this.src='${PLACEHOLDER_IMAGE_URL}';">
                         <div class="search-result-info">
@@ -6251,12 +6363,20 @@
                             openViewer(found);
                         }
                         elements.searchResults.style.display = 'none';
+                        elements.searchInput.setAttribute('aria-expanded', 'false');
                     });
                     elements.searchResults.appendChild(resultItem);
                 });
                 elements.searchResults.style.display = 'block';
+                elements.searchInput.setAttribute('aria-expanded', 'true');
             } else {
-                elements.searchResults.style.display = 'none';
+                const message = document.createElement('div');
+                message.className = 'search-message';
+                message.setAttribute('role', 'status');
+                message.textContent = `No results for "${elements.searchInput.value}"`;
+                elements.searchResults.appendChild(message);
+                elements.searchResults.style.display = 'block';
+                elements.searchInput.setAttribute('aria-expanded', 'true');
             }
         }
 
