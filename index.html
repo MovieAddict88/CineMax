@@ -2244,16 +2244,16 @@
     <style id="server-selector-mobile-css">
         @media (max-width: 768px) {
             #universal-server-selector {
-                min-width: 150px !important;
-                max-width: 70vw !important;
-                max-height: 40vh !important;
-                padding: 10px !important;
+                min-width: 140px !important;
+                max-width: 60vw !important;
+                max-height: 35vh !important;
+                padding: 8px !important;
                 top: 8px !important;
                 right: 8px !important;
             }
             #universal-server-selector .server-item {
-                padding: 6px 10px !important;
-                font-size: 12px !important;
+                padding: 5px 8px !important;
+                font-size: 11px !important;
             }
             #universal-server-selector > div:first-child {
                 font-size: 14px !important;
@@ -2261,22 +2261,22 @@
                 padding-bottom: 8px !important;
             }
             #embedded-server-selector {
-                min-width: 160px !important;
-                max-width: 75vw !important;
-                max-height: 45vh !important;
+                min-width: 150px !important;
+                max-width: 65vw !important;
+                max-height: 40vh !important;
                 padding: 8px !important;
                 top: 8px !important;
                 right: 8px !important;
             }
             #embedded-server-selector .server-item {
-                padding: 6px 10px !important;
-                font-size: 12px !important;
+                padding: 5px 8px !important;
+                font-size: 11px !important;
             }
         }
         @media (max-width: 480px) {
             #universal-server-selector {
-                max-width: 65vw !important;
-                max-height: 35vh !important;
+                max-width: 55vw !important;
+                max-height: 30vh !important;
             }
         }
     </style>
@@ -4272,12 +4272,7 @@
             `;
             closeButton.innerHTML = '×';
             closeButton.addEventListener('click', () => {
-                selectorContainer.remove();
-                // Remove the indicator button
-                const indicatorButton = document.getElementById('server-selector-indicator');
-                if (indicatorButton) {
-                    indicatorButton.remove();
-                }
+                selectorContainer.style.display = 'none';
             });
             closeButton.addEventListener('mouseenter', () => {
                 closeButton.style.background = 'rgba(255, 255, 255, 0.2)';
@@ -4462,11 +4457,7 @@
             if (event.key === 'Escape') {
                 const selector = document.getElementById('universal-server-selector');
                 if (selector) {
-                    selector.remove();
-                    const indicatorButton = document.getElementById('server-selector-indicator');
-                    if (indicatorButton) {
-                        indicatorButton.remove();
-                    }
+                    selector.style.display = 'none';
                 }
             }
         });
@@ -5187,12 +5178,7 @@
             `;
             closeButton.innerHTML = '×';
             closeButton.addEventListener('click', () => {
-                selectorContainer.remove();
-                // Remove the indicator button
-                const indicatorButton = document.getElementById('server-selector-indicator');
-                if (indicatorButton) {
-                    indicatorButton.remove();
-                }
+                selectorContainer.style.display = 'none';
             });
             closeButton.addEventListener('mouseenter', () => {
                 closeButton.style.background = 'rgba(255, 255, 255, 0.2)';
