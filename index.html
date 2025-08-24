@@ -3471,6 +3471,9 @@
         // Play URL with YouTube and Vidsrc support
         async function playUrl(url, servers = []) {
             if (!url || !playerInstance) return;
+            
+            console.log(`🎬 playUrl called with: ${url}`);
+            console.log(`📋 Available servers:`, servers);
 
             const playerContainer = document.querySelector('.player-container');
             let iframe = playerContainer.querySelector('iframe.external-content-iframe');
@@ -3518,6 +3521,7 @@
             if (isMegaNzUrl(url)) {
                 elements.player.style.display = 'none'; // Hide Plyr player
                 if (!iframe) {
+                    console.log(`🆕 Creating new iframe for embedded content`);
                     iframe = document.createElement('iframe');
                     iframe.className = 'external-content-iframe';
                     iframe.style.position = 'absolute';
@@ -3537,6 +3541,7 @@
             }
 
             if (isVidsrcUrl(url) || isVidjoyUrl(url) || isVideasyUrl(url) || isVidsrcMeUrl(url) || isVidsrcToUrl(url) || isVidsrcXyzUrl(url) || isGoDrivePlayerUrl(url) || isVidLinkProUrl(url) || is2EmbedUrl(url) || isEmbedSuUrl(url) || isAutoEmbedUrl(url)) {
+                console.log(`🎭 Loading embedded content: ${url}`);
                 elements.player.style.display = 'none'; // Hide Plyr player
                 
                 // Update dropdown spinner under description for multiple servers
@@ -3562,6 +3567,7 @@
                 
                 // Load iframe immediately for auto-play
                 iframe.style.display = 'block';
+                console.log(`🎯 Setting iframe source to: ${url}`);
                 iframe.src = url;
                 
                 // Handle iframe load events (non-blocking)
@@ -3584,17 +3590,36 @@
                 
                 return;
             } else {
-                // If it's not a Vidsrc or Vidjoy URL, hide the iframe if it exists
+                // If it's not a Vidsrc or Vidjoy URL, properly clean up the iframe
+                console.log(`🧹 Cleaning up iframe for direct link: ${url}`);
                 if (iframe) {
                     iframe.style.display = 'none';
                     iframe.src = 'about:blank'; // Clear the iframe src
+                    // Remove the iframe completely to ensure clean state
+                    iframe.remove();
+                    console.log(`✅ Iframe cleaned up successfully`);
                 }
+                
+                // Also check for any other iframes that might exist
+                const allIframes = playerContainer.querySelectorAll('iframe.external-content-iframe');
+                allIframes.forEach(ifr => {
+                    if (ifr !== iframe) {
+                        console.log(`🧹 Cleaning up additional iframe: ${ifr.src}`);
+                        ifr.style.display = 'none';
+                        ifr.src = 'about:blank';
+                        ifr.remove();
+                    }
+                });
                 
                 // Hide legacy floating selector if present (no-op now)
                 const legacyEmbedded = document.getElementById('embedded-server-selector');
                 if (legacyEmbedded) legacyEmbedded.remove();
                 
-                elements.player.style.display = 'block'; // Show Plyr player
+                // Small delay to ensure iframe cleanup is complete
+                setTimeout(() => {
+                    elements.player.style.display = 'block'; // Show Plyr player
+                    console.log(`🎯 Plyr player now visible for direct link`);
+                }, 100);
             }
 
             // Check if it's a YouTube URL
@@ -3663,6 +3688,7 @@
                 }
             }
 
+            console.log(`🎯 Setting Plyr player source for direct link: ${url}`);
             playerInstance.source = {
                 type: 'video',
                 sources: [{
@@ -3677,6 +3703,14 @@
                     enhancedAutoplay(elements.player, playerInstance);
                 }
             }, 500);
+            
+            // Ensure server dropdown reflects current selection for direct links
+            if (servers && servers.length > 1) {
+                const currentServer = servers.find(s => s.url === url);
+                if (currentServer) {
+                    setTimeout(() => updateServerDropdown(servers, currentServer), 100);
+                }
+            }
         }
 
         // Enhanced MPD handling with Shaka Player only (universal channel compatibility)
@@ -4126,14 +4160,24 @@
                     const option = document.createElement('option');
                     option.value = String(index);
                     option.textContent = server?.name || `Server ${index + 1}`;
-                    if (
-                        currentServer && (
-                            (currentServer.url && currentServer.url === server.url) ||
-                            (currentServer.src && currentServer.src === server.url)
-                        )
-                    ) {
-                        option.selected = true;
+                    
+                    // Improved current server detection
+                    let isCurrentServer = false;
+                    if (currentServer) {
+                        if (currentServer.url && currentServer.url === server.url) {
+                            isCurrentServer = true;
+                        } else if (currentServer.src && currentServer.src === server.url) {
+                            isCurrentServer = true;
+                        } else if (window.currentServer && window.currentServer.url === server.url) {
+                            isCurrentServer = true;
+                        }
                     }
+                    
+                    if (isCurrentServer) {
+                        option.selected = true;
+                        console.log(`🎯 Selected server in dropdown: ${server.name || 'Unknown'} (${server.url})`);
+                    }
+                    
                     select.appendChild(option);
                 });
 
@@ -4155,48 +4199,45 @@
         // Function to switch between servers
         async function switchToServer(server, allServers) {
             try {
+                console.log(`🔄 Switching to server: ${server.name || 'Unknown'} (${server.url})`);
+                
                 // Stop current playback
                 if (playerInstance) {
                     playerInstance.pause();
                 }
                 
-                // Check if this is an embedded source
-                if (isVidsrcUrl(server.url) || isVidjoyUrl(server.url) || isVideasyUrl(server.url) || 
-                    isVidsrcToUrl(server.url) || isVidsrcXyzUrl(server.url) || isGoDrivePlayerUrl(server.url) || 
-                    isVidLinkProUrl(server.url) || is2EmbedUrl(server.url) || isEmbedSuUrl(server.url) || 
-                    isAutoEmbedUrl(server.url) || isMegaNzUrl(server.url) || isGoogleDriveUrl(server.url)) {
-                    
-                    // Switch to embedded player
-                    await playUrl(server.url, allServers);
-                } else {
-                    // Switch to Plyr player
-                    if (playerInstance) {
-                        // Update player source
-                        const sources = allServers.map(s => ({
-                            src: s.url,
-                            size: parseInt(s.name?.replace(/\D/g, '') || '0'),
-                            type: s.url.includes('m3u8') ? 'application/x-mpegURL' : 'video/mp4'
-                        }));
-                        
-                        playerInstance.source = {
-                            type: 'video',
-                            sources: sources,
-                        };
-                        
-                        // Play the selected server
-                        playerInstance.play();
-                    }
-                }
+                // Always call playUrl to ensure proper content loading regardless of server type
+                await playUrl(server.url, allServers);
                 
                 // Update current server tracking
                 window.currentServer = server;
                 // Ensure dropdown reflects current selection
-                updateServerDropdown(allServers || [], server);
+                setTimeout(() => {
+                    updateServerDropdown(allServers || [], server);
+                    console.log(`🔄 Updated server dropdown for: ${server.name || 'Unknown'}`);
+                }, 100);
+                
+                // Show feedback for successful server switch
+                showServerSwitchFeedback(`Switched to ${server.name || 'Server'}`);
+                
+                console.log(`✅ Successfully switched to server: ${server.name || 'Unknown'}`);
+                console.log('🔍 After server switch:');
+                debugServerState();
                 
             } catch (error) {
                 console.error('Error switching to server:', error);
                 showServerSwitchFeedback('Error switching server', 'error');
             }
+        }
+        
+        // Debug function to show current server state
+        function debugServerState() {
+            console.log('🔍 Current server state:');
+            console.log('  - window.currentServer:', window.currentServer);
+            console.log('  - playerInstance.source:', playerInstance?.source);
+            console.log('  - iframe exists:', !!document.querySelector('iframe.external-content-iframe'));
+            console.log('  - iframe src:', document.querySelector('iframe.external-content-iframe')?.src);
+            console.log('  - player visible:', elements.player.style.display);
         }
         
         // Enhanced function to show server switch feedback
@@ -5445,6 +5486,9 @@
                         if (!Array.isArray(servers) || index < 0 || index >= servers.length) return;
                         const server = servers[index];
                         if (server) {
+                            console.log(`🔄 Server dropdown change triggered: ${server.name || 'Unknown'} (${server.url})`);
+                            console.log('🔍 Before server switch:');
+                            debugServerState();
                             switchToServer(server, servers);
                         }
                     } catch (err) {
