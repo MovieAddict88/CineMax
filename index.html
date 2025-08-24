@@ -2766,26 +2766,30 @@
             try {
                 elements.loadingSpinner.style.display = 'block';
                 
-                // Primary source
-                const primaryUrl = "https://github.com/MovieAddict88/Movie-Source/raw/main/playlist.json";
+                // Google Drive file ID for playlist.json
+                const driveFileId = "1XMshCON-d0401aze4FoQsmRhQczxj0UE";
+
+                // Optional: use a CORS proxy if needed
+                const useCorsProxy = false; // toggle to true if you hit CORS locally
+                const corsProxyUrl = "https://cors.isteed.cc/"; // replace with your proxy if desired
+                const maybeProxy = (url) => useCorsProxy && /^https?:\/\//.test(url) ? (corsProxyUrl + url) : url;
+
+                // Candidate endpoints
+                const drivePrimary = `https://drive.google.com/uc?export=download&id=${driveFileId}`;
+                const driveAltHost = `https://drive.usercontent.google.com/uc?export=download&id=${driveFileId}`;
                 
-                // Fallback sources
+                // Strict Google Drive-only mode: try alt host first, then standard host.
+                const primaryUrl = maybeProxy(driveAltHost);
                 const fallbackUrls = [
-                    "https://raw.githubusercontent.com/MovieAddict88/Movie-Source/main/playlist.json",
-                    "https://cdn.jsdelivr.net/gh/MovieAddict88/Movie-Source@main/playlist.json",
-                    "./playlist.json", // Local fallback
-                    "./data/playlist.json" // Alternative local path
+                    maybeProxy(drivePrimary)
                 ];
                 
                 // Try primary source first
                 try {
-                    const response = await fetch(primaryUrl + "?t=" + new Date().getTime());
+                    const response = await fetch(primaryUrl + (primaryUrl.includes("?") ? "&" : "?") + "t=" + new Date().getTime());
                     if (response.ok) {
                         cineData = await response.json();
-                        // Cache the successful data
-                        localStorage.setItem('cineCrazeDataCache', JSON.stringify(cineData));
-                        localStorage.setItem('cineCrazeDataTimestamp', Date.now().toString());
-                        console.log("✅ Loaded data from primary source");
+                        console.log("✅ Loaded data from Google Drive (primary)");
                         return;
                     }
                 } catch (err) {
@@ -2796,7 +2800,7 @@
                 for (const fallbackUrl of fallbackUrls) {
                     try {
                         console.log(`🔄 Trying fallback: ${fallbackUrl}`);
-                        const response = await fetch(fallbackUrl + "?t=" + new Date().getTime());
+                        const response = await fetch(fallbackUrl + (fallbackUrl.includes("?") ? "&" : "?") + "t=" + new Date().getTime());
                         if (response.ok) {
                             cineData = await response.json();
                             console.log(`✅ Loaded data from fallback: ${fallbackUrl}`);
@@ -2805,18 +2809,6 @@
                     } catch (err) {
                         console.warn(`⚠️ Fallback failed: ${fallbackUrl}`, err);
                         continue;
-                    }
-                }
-                
-                // If all sources fail, try to load from localStorage cache
-                const cachedData = localStorage.getItem('cineCrazeDataCache');
-                if (cachedData) {
-                    try {
-                        cineData = JSON.parse(cachedData);
-                        console.log("✅ Loaded data from cache");
-                        return;
-                    } catch (err) {
-                        console.warn("⚠️ Cache parsing failed:", err);
                     }
                 }
                 
