@@ -2789,9 +2789,6 @@
                     const response = await fetch(primaryUrl + (primaryUrl.includes("?") ? "&" : "?") + "t=" + new Date().getTime());
                     if (response.ok) {
                         cineData = await response.json();
-                        // Cache the successful data
-                        localStorage.setItem('cineCrazeDataCache', JSON.stringify(cineData));
-                        localStorage.setItem('cineCrazeDataTimestamp', Date.now().toString());
                         console.log("✅ Loaded data from Google Drive (primary)");
                         return;
                     }
@@ -2812,18 +2809,6 @@
                     } catch (err) {
                         console.warn(`⚠️ Fallback failed: ${fallbackUrl}`, err);
                         continue;
-                    }
-                }
-                
-                // If all sources fail, try to load from localStorage cache
-                const cachedData = localStorage.getItem('cineCrazeDataCache');
-                if (cachedData) {
-                    try {
-                        cineData = JSON.parse(cachedData);
-                        console.log("✅ Loaded data from cache");
-                        return;
-                    } catch (err) {
-                        console.warn("⚠️ Cache parsing failed:", err);
                     }
                 }
                 
