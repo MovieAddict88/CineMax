@@ -2244,20 +2244,26 @@
     <style id="server-selector-mobile-css">
         @media (max-width: 768px) {
             #universal-server-selector {
+                position: absolute !important;
                 min-width: 120px !important;
-                max-width: 52vw !important;
-                max-height: 32vh !important;
+                max-width: 86vw !important;
+                max-height: 70vh !important;
                 padding: 6px !important;
-                top: 6px !important;
+                bottom: 6px !important;
                 right: 6px !important;
                 overflow-y: auto !important;
                 overflow-x: hidden !important;
+                -webkit-overflow-scrolling: touch !important;
                 overscroll-behavior: contain;
             }
             #universal-server-selector .server-item {
                 padding: 4px 6px !important;
                 font-size: 10px !important;
                 line-height: 1.2 !important;
+                white-space: nowrap !important;
+                text-overflow: ellipsis !important;
+                overflow: hidden !important;
+                max-width: 100% !important;
             }
             #universal-server-selector > div:first-child {
                 font-size: 12px !important;
@@ -2265,36 +2271,50 @@
                 padding-bottom: 6px !important;
             }
             #embedded-server-selector {
+                position: absolute !important;
                 min-width: 120px !important;
-                max-width: 56vw !important;
-                max-height: 34vh !important;
+                max-width: 86vw !important;
+                max-height: 70vh !important;
                 padding: 6px !important;
-                top: 6px !important;
+                bottom: 6px !important;
                 right: 6px !important;
                 overflow-y: auto !important;
                 overflow-x: hidden !important;
+                -webkit-overflow-scrolling: touch !important;
                 overscroll-behavior: contain;
             }
             #embedded-server-selector .server-item {
                 padding: 4px 6px !important;
                 font-size: 10px !important;
                 line-height: 1.2 !important;
+                white-space: nowrap !important;
+                text-overflow: ellipsis !important;
+                overflow: hidden !important;
+                max-width: 100% !important;
             }
             #server-selector-indicator {
                 font-size: 10px !important;
                 padding: 4px 8px !important;
-                left: 6px !important;
-                top: 6px !important;
+                right: 6px !important;
+                bottom: 6px !important;
+                left: auto !important;
+                top: auto !important;
             }
         }
         @media (max-width: 480px) {
             #universal-server-selector {
-                max-width: 50vw !important;
-                max-height: 28vh !important;
+                position: absolute !important;
+                max-width: 90vw !important;
+                max-height: 72vh !important;
+                bottom: 6px !important;
+                right: 6px !important;
             }
             #embedded-server-selector {
-                max-width: 52vw !important;
-                max-height: 30vh !important;
+                position: absolute !important;
+                max-width: 90vw !important;
+                max-height: 72vh !important;
+                bottom: 6px !important;
+                right: 6px !important;
             }
         }
     </style>
@@ -4114,7 +4134,7 @@
             selectorContainer.id = 'universal-server-selector';
             selectorContainer.style.cssText = `
                 position: absolute;
-                top: 10px;
+                bottom: 10px;
                 right: 10px;
                 z-index: 1000;
                 background: rgba(0, 0, 0, 0.9);
@@ -4136,7 +4156,7 @@
                 selectorContainer.style.maxWidth = '85vw';
                 selectorContainer.style.maxHeight = '50vh';
                 selectorContainer.style.padding = '12px';
-                selectorContainer.style.top = '8px';
+                selectorContainer.style.bottom = '8px';
                 selectorContainer.style.right = '8px';
             }
             
@@ -4312,8 +4332,8 @@
                 indicatorButton.id = 'server-selector-indicator';
                 indicatorButton.style.cssText = `
                     position: absolute;
-                    top: 10px;
-                    left: 10px;
+                    bottom: 10px;
+                    right: 10px;
                     background: rgba(59, 130, 246, 0.9);
                     color: white;
                     padding: 8px 12px;
@@ -5026,7 +5046,7 @@
             selectorContainer.id = 'universal-server-selector';
             selectorContainer.style.cssText = `
                 position: absolute;
-                top: 10px;
+                bottom: 10px;
                 right: 10px;
                 z-index: 1000;
                 background: rgba(0, 0, 0, 0.9);
@@ -5048,7 +5068,7 @@
                 selectorContainer.style.maxWidth = '85vw';
                 selectorContainer.style.maxHeight = '50vh';
                 selectorContainer.style.padding = '12px';
-                selectorContainer.style.top = '8px';
+                selectorContainer.style.bottom = '8px';
                 selectorContainer.style.right = '8px';
             }
             
@@ -5224,8 +5244,8 @@
                 indicatorButton.id = 'server-selector-indicator';
                 indicatorButton.style.cssText = `
                     position: absolute;
-                    top: 10px;
-                    left: 10px;
+                    bottom: 10px;
+                    right: 10px;
                     background: rgba(59, 130, 246, 0.9);
                     color: white;
                     padding: 8px 12px;
@@ -5362,7 +5382,7 @@
             selectorContainer.id = 'embedded-server-selector';
             selectorContainer.style.cssText = `
                 position: absolute;
-                top: 10px;
+                bottom: 10px;
                 right: 10px;
                 z-index: 1000;
                 background: rgba(0, 0, 0, 0.8);
@@ -5573,8 +5593,8 @@
                 indicatorButton.id = 'server-selector-indicator';
                 indicatorButton.style.cssText = `
                     position: absolute;
-                    top: 10px;
-                    left: 10px;
+                    bottom: 10px;
+                    right: 10px;
                     background: rgba(59, 130, 246, 0.8);
                     color: white;
                     padding: 6px 10px;
