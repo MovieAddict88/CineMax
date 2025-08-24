@@ -2772,20 +2772,39 @@
                 // Optional: use a CORS proxy if needed
                 const useCorsProxy = false; // toggle to true if you hit CORS locally
                 const corsProxyUrl = "https://cors.isteed.cc/"; // replace with your proxy if desired
+                const maybeProxy = (url) => useCorsProxy && /^https?:\/\//.test(url) ? (corsProxyUrl + url) : url;
 
-                // Primary source (Google Drive direct download endpoints)
+                // Allow runtime preference via query param: ?source=drive|github
+                const sourcePreference = new URLSearchParams(window.location.search).get('source');
+
+                // Candidate endpoints
                 const drivePrimary = `https://drive.google.com/uc?export=download&id=${driveFileId}`;
                 const driveAltHost = `https://drive.usercontent.google.com/uc?export=download&id=${driveFileId}`;
-                const primaryUrl = useCorsProxy ? (corsProxyUrl + driveAltHost) : driveAltHost;
-                
-                // Fallback sources
-                const fallbackUrls = [
-                    useCorsProxy ? (corsProxyUrl + drivePrimary) : drivePrimary,
-                    "https://raw.githubusercontent.com/MovieAddict88/Movie-Source/main/playlist.json",
-                    "https://cdn.jsdelivr.net/gh/MovieAddict88/Movie-Source@main/playlist.json",
-                    "./playlist.json", // Local fallback
-                    "./data/playlist.json" // Alternative local path
-                ];
+                const githubPrimary = "https://raw.githubusercontent.com/MovieAddict88/Movie-Source/main/playlist.json";
+                const githubCdn = "https://cdn.jsdelivr.net/gh/MovieAddict88/Movie-Source@main/playlist.json";
+
+                // Choose order based on preference (default to Drive first)
+                let primaryUrl;
+                let fallbackUrls;
+                if ((sourcePreference || 'drive').toLowerCase() === 'github') {
+                    primaryUrl = maybeProxy(githubPrimary);
+                    fallbackUrls = [
+                        maybeProxy(githubCdn),
+                        maybeProxy(driveAltHost),
+                        maybeProxy(drivePrimary),
+                        "./playlist.json",
+                        "./data/playlist.json"
+                    ];
+                } else {
+                    primaryUrl = maybeProxy(driveAltHost);
+                    fallbackUrls = [
+                        maybeProxy(drivePrimary),
+                        maybeProxy(githubPrimary),
+                        maybeProxy(githubCdn),
+                        "./playlist.json",
+                        "./data/playlist.json"
+                    ];
+                }
                 
                 // Try primary source first
                 try {
