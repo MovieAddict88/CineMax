@@ -1016,6 +1016,35 @@
             border-color: var(--youtube-red);
         }
 
+        /* Server selector (dropdown spinner) */
+        .server-selector-container {
+            display: none; /* JS handles visibility */
+            margin-bottom: 20px;
+            background-color: var(--youtube-gray);
+            border-radius: var(--radius);
+            padding: 15px;
+        }
+        .server-selector-container h3 {
+            font-size: 16px;
+            color: var(--light);
+            margin-bottom: 10px;
+            font-weight: 600;
+        }
+        .server-selector {
+            width: 100%;
+            padding: 10px 12px;
+            border-radius: 4px;
+            background-color: var(--youtube-dark-gray);
+            border: 1px solid var(--dark-3);
+            color: var(--light);
+            font-size: 14px;
+            cursor: pointer;
+        }
+        .server-selector:focus {
+            outline: none;
+            border-color: var(--youtube-red);
+        }
+
 
         .season-selector {
             display: none; /* JS handles visibility */
@@ -2462,6 +2491,13 @@
                             Description will appear here...
                         </div>
 
+                        <div class="server-selector-container" id="server-selector-container">
+                            <h3>Select Server</h3>
+                            <select class="server-selector" id="server-selector">
+                                <!-- Server options will be dynamically added -->
+                            </select>
+                        </div>
+
                         <div class="episode-selector-container" id="episode-selector-container">
                             <h3>Select Episode</h3>
                             <select class="episode-selector" id="episode-selector">
@@ -2606,6 +2642,8 @@
             // viewerCountry: document.getElementById('viewer-country'), // Not used
             serverSelect: document.getElementById('quality-select'),
             playerServerSelector: document.getElementById('player-server-selector'),
+            serverSelectorContainer: document.getElementById('server-selector-container'),
+            serverSelector: document.getElementById('server-selector'),
             episodeSelectorContainer: document.getElementById('episode-selector-container'),
             episodeSelector: document.getElementById('episode-selector'),
             seasonSelector: document.getElementById('season-selector'),
@@ -3344,11 +3382,18 @@
                 elements.episodeSelectorContainer.style.display = 'none';
                 elements.episodeSelector.innerHTML = '<option value="">Select Episode</option>';
                 elements.seasonSelector.style.display = 'none';
+                if (elements.serverSelectorContainer) {
+                    elements.serverSelectorContainer.style.display = 'none';
+                    if (elements.serverSelector) elements.serverSelector.innerHTML = '';
+                }
                 if (elements.episodeSelectorContainer.parentNode !== elements.videoDetailsContainer) {
                     elements.videoDetailsContainer.appendChild(elements.episodeSelectorContainer);
                 }
                 if (elements.seasonSelector.parentNode !== elements.videoDetailsContainer) {
                     elements.videoDetailsContainer.appendChild(elements.seasonSelector);
+                }
+                if (elements.serverSelectorContainer && elements.serverSelectorContainer.parentNode !== elements.videoDetailsContainer) {
+                    elements.videoDetailsContainer.appendChild(elements.serverSelectorContainer);
                 }
 
                 currentSeason = null;
@@ -3550,9 +3595,11 @@
             if (isVidsrcUrl(url) || isVidjoyUrl(url) || isVideasyUrl(url) || isVidsrcMeUrl(url) || isVidsrcToUrl(url) || isVidsrcXyzUrl(url) || isGoDrivePlayerUrl(url) || isVidLinkProUrl(url) || is2EmbedUrl(url) || isEmbedSuUrl(url) || isAutoEmbedUrl(url)) {
                 elements.player.style.display = 'none'; // Hide Plyr player
                 
-                // Create universal server selector for multiple servers
+                // Update dropdown spinner under description for multiple servers
                 if (servers && servers.length > 1) {
-                    setTimeout(() => createUniversalServerSelector(servers, { url: url }), 100);
+                    setTimeout(() => updateServerDropdown(servers, { url: url }), 50);
+                } else {
+                    updateServerDropdown([], null);
                 }
                 
                 if (!iframe) {
@@ -4099,6 +4146,51 @@
             return selectedServer;
         }
         
+        // Server dropdown spinner under description (mobile-friendly)
+        function updateServerDropdown(servers, currentServer = null) {
+            try {
+                const container = elements.serverSelectorContainer;
+                const select = elements.serverSelector;
+                if (!container || !select) return;
+
+                // Remove any floating selectors if present
+                const universal = document.getElementById('universal-server-selector');
+                if (universal) universal.remove();
+                if (typeof hideEmbeddedServerSelector === 'function') hideEmbeddedServerSelector();
+
+                if (!servers || servers.length <= 1) {
+                    container.style.display = 'none';
+                    select.innerHTML = '';
+                    select._servers = [];
+                    return;
+                }
+
+                // Populate options
+                select.innerHTML = '';
+                servers.forEach((server, index) => {
+                    const option = document.createElement('option');
+                    option.value = String(index);
+                    option.textContent = server?.name || `Server ${index + 1}`;
+                    if (
+                        currentServer && (
+                            (currentServer.url && currentServer.url === server.url) ||
+                            (currentServer.src && currentServer.src === server.url)
+                        )
+                    ) {
+                        option.selected = true;
+                    }
+                    select.appendChild(option);
+                });
+
+                // Save ref for change handler
+                select._servers = servers;
+
+                container.style.display = 'block';
+            } catch (err) {
+                console.warn('Failed to update server dropdown:', err);
+            }
+        }
+        
         // Create universal server selector for both Plyr and embedded sources
         function createUniversalServerSelector(servers, currentServer = null) {
             if (!servers || servers.length <= 1) return; // No need for selector if only one server
@@ -4388,6 +4480,8 @@
                 
                 // Update current server tracking
                 window.currentServer = server;
+                // Ensure dropdown reflects current selection
+                updateServerDropdown(allServers || [], server);
                 
             } catch (error) {
                 console.error('Error switching to server:', error);
@@ -4455,30 +4549,7 @@
             }
         }
         
-        // Add keyboard shortcuts for server selector
-        document.addEventListener('keydown', (event) => {
-            // Ctrl+S to toggle server selector
-            if (event.ctrlKey && event.key === 's') {
-                event.preventDefault();
-                const selector = document.getElementById('universal-server-selector');
-                if (selector) {
-                    if (selector.style.display === 'none') {
-                        selector.style.display = 'block';
-                        selector.style.opacity = '1';
-                    } else {
-                        selector.style.display = 'none';
-                    }
-                }
-            }
-            
-            // Escape key to close server selector
-            if (event.key === 'Escape') {
-                const selector = document.getElementById('universal-server-selector');
-                if (selector) {
-                    selector.style.display = 'none';
-                }
-            }
-        });
+        // Server selector now uses a dropdown under description; no floating toggle shortcuts needed
         
         // Automatic fallback between DRM and non-DRM sources with auto-Shaka loading
         async function handleAutomaticFallback(originalUrl, servers, drmFailed = false) {
@@ -5779,10 +5850,8 @@
                         sources: sources,
                     };
                     
-                    // Create universal server selector for multiple servers
-                    if (servers.length > 1) {
-                        createUniversalServerSelector(servers, optimalServer);
-                    }
+                    // Update dropdown spinner under description for multiple servers
+                    updateServerDropdown(servers, optimalServer);
                     
                     // Add error handling for automatic server switching
                     playerInstance.on('error', async (event) => {
@@ -5919,9 +5988,13 @@
             if (elements.videoDetailsContainer) { // Ensure container exists
                 elements.videoDetailsContainer.appendChild(elements.episodeSelectorContainer);
                 elements.videoDetailsContainer.appendChild(elements.seasonSelector);
+                if (elements.serverSelectorContainer) {
+                    elements.videoDetailsContainer.appendChild(elements.serverSelectorContainer);
+                }
             }
             elements.episodeSelectorContainer.style.display = 'none';
             elements.seasonSelector.style.display = 'none';
+            if (elements.serverSelectorContainer) elements.serverSelectorContainer.style.display = 'none';
 
             // Reset viewer state
             currentEpisode = null;
@@ -6185,6 +6258,23 @@
                     playEpisode(episode);
                 }
             });
+
+            // Server dropdown change
+            if (elements.serverSelector) {
+                elements.serverSelector.addEventListener('change', function() {
+                    try {
+                        const index = parseInt(this.value);
+                        const servers = this._servers || [];
+                        if (!Array.isArray(servers) || index < 0 || index >= servers.length) return;
+                        const server = servers[index];
+                        if (server) {
+                            switchToServer(server, servers);
+                        }
+                    } catch (err) {
+                        console.warn('Server switch failed from dropdown:', err);
+                    }
+                });
+            }
 
             // History API handling
             window.addEventListener('popstate', function(event) {
