@@ -1,4 +1,4 @@
- <!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -3547,7 +3547,7 @@
                 return;
             }
 
-            if (isVidsrcUrl(url) || isVidjoyUrl(url) || isVidsrcMeUrl(url) || isVidsrcToUrl(url) || isVidsrcXyzUrl(url) || isGoDrivePlayerUrl(url) || isVidLinkProUrl(url) || is2EmbedUrl(url) || isEmbedSuUrl(url) || isAutoEmbedUrl(url)) {
+            if (isVidsrcUrl(url) || isVidjoyUrl(url) || isVideasyUrl(url) || isVidsrcMeUrl(url) || isVidsrcToUrl(url) || isVidsrcXyzUrl(url) || isGoDrivePlayerUrl(url) || isVidLinkProUrl(url) || is2EmbedUrl(url) || isEmbedSuUrl(url) || isAutoEmbedUrl(url)) {
                 elements.player.style.display = 'none'; // Hide Plyr player
                 
                 // Create universal server selector for multiple servers
@@ -4359,7 +4359,7 @@
                 }
                 
                 // Check if this is an embedded source
-                if (isVidsrcUrl(server.url) || isVidjoyUrl(server.url) || isVidsrcMeUrl(server.url) || 
+                if (isVidsrcUrl(server.url) || isVidjoyUrl(server.url) || isVideasyUrl(server.url) || 
                     isVidsrcToUrl(server.url) || isVidsrcXyzUrl(server.url) || isGoDrivePlayerUrl(server.url) || 
                     isVidLinkProUrl(server.url) || is2EmbedUrl(server.url) || isEmbedSuUrl(server.url) || 
                     isAutoEmbedUrl(server.url) || isMegaNzUrl(server.url) || isGoogleDriveUrl(server.url)) {
@@ -4957,6 +4957,12 @@
             return url.includes('vidjoy.pro/embed');
         }
 
+        // Check if URL is Videasy
+        function isVideasyUrl(url) {
+            if (!url) return false;
+            return url.includes('player.videasy.net');
+        }
+
         // Check if URL is VidSrc.me (New embeddable source)
         function isVidsrcMeUrl(url) {
             if (!url) return false;
@@ -5265,7 +5271,7 @@
                 }
                 
                 // Check if this is an embedded source
-                if (isVidsrcUrl(server.url) || isVidjoyUrl(server.url) || isVidsrcMeUrl(server.url) || 
+                if (isVidsrcUrl(server.url) || isVidjoyUrl(server.url) || isVideasyUrl(server.url) || 
                     isVidsrcToUrl(server.url) || isVidsrcXyzUrl(server.url) || isGoDrivePlayerUrl(server.url) || 
                     isVidLinkProUrl(server.url) || is2EmbedUrl(server.url) || isEmbedSuUrl(server.url) || 
                     isAutoEmbedUrl(server.url) || isMegaNzUrl(server.url) || isGoogleDriveUrl(server.url)) {
@@ -5750,7 +5756,7 @@
                 
                 if (optimalServer) {
                     // Check for special URLs first
-                    if (isVidsrcUrl(optimalServer.url) || isVidjoyUrl(optimalServer.url) || isVidsrcMeUrl(optimalServer.url) || isVidsrcToUrl(optimalServer.url) || isVidsrcXyzUrl(optimalServer.url) || isGoDrivePlayerUrl(optimalServer.url) || isVidLinkProUrl(optimalServer.url) || is2EmbedUrl(optimalServer.url) || isEmbedSuUrl(optimalServer.url) || isAutoEmbedUrl(optimalServer.url) || isMegaNzUrl(optimalServer.url) || isGoogleDriveUrl(optimalServer.url)) {
+                    if (isVidsrcUrl(optimalServer.url) || isVidjoyUrl(optimalServer.url) || isVideasyUrl(optimalServer.url) || isVidsrcMeUrl(optimalServer.url) || isVidsrcToUrl(optimalServer.url) || isVidsrcXyzUrl(optimalServer.url) || isGoDrivePlayerUrl(optimalServer.url) || isVidLinkProUrl(optimalServer.url) || is2EmbedUrl(optimalServer.url) || isEmbedSuUrl(optimalServer.url) || isAutoEmbedUrl(optimalServer.url) || isMegaNzUrl(optimalServer.url) || isGoogleDriveUrl(optimalServer.url)) {
                         playUrl(optimalServer.url, servers);
                         return;
                     }
