@@ -1,4 +1,4 @@
- <!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -2241,6 +2241,45 @@
         
 
     </style>
+    <style id="server-selector-mobile-css">
+        @media (max-width: 768px) {
+            #universal-server-selector {
+                min-width: 140px !important;
+                max-width: 60vw !important;
+                max-height: 35vh !important;
+                padding: 8px !important;
+                top: 8px !important;
+                right: 8px !important;
+            }
+            #universal-server-selector .server-item {
+                padding: 5px 8px !important;
+                font-size: 11px !important;
+            }
+            #universal-server-selector > div:first-child {
+                font-size: 14px !important;
+                margin-bottom: 10px !important;
+                padding-bottom: 8px !important;
+            }
+            #embedded-server-selector {
+                min-width: 150px !important;
+                max-width: 65vw !important;
+                max-height: 40vh !important;
+                padding: 8px !important;
+                top: 8px !important;
+                right: 8px !important;
+            }
+            #embedded-server-selector .server-item {
+                padding: 5px 8px !important;
+                font-size: 11px !important;
+            }
+        }
+        @media (max-width: 480px) {
+            #universal-server-selector {
+                max-width: 55vw !important;
+                max-height: 30vh !important;
+            }
+        }
+    </style>
 </head>
 <body>
     <!-- Notification Bar -->
@@ -4064,12 +4103,24 @@
                 border-radius: 12px;
                 padding: 15px;
                 min-width: 250px;
+                max-width: 90vw;
                 backdrop-filter: blur(15px);
                 border: 1px solid rgba(255, 255, 255, 0.2);
                 box-shadow: 0 8px 32px rgba(0, 0, 0, 0.6);
                 max-height: 400px;
                 overflow-y: auto;
             `;
+            // Hide by default; show via the indicator button
+            selectorContainer.style.display = 'none';
+            // Compact sizing on small screens
+            if (window.innerWidth <= 768) {
+                selectorContainer.style.minWidth = '180px';
+                selectorContainer.style.maxWidth = '85vw';
+                selectorContainer.style.maxHeight = '50vh';
+                selectorContainer.style.padding = '12px';
+                selectorContainer.style.top = '8px';
+                selectorContainer.style.right = '8px';
+            }
             
             // Create title
             const title = document.createElement('div');
@@ -4221,12 +4272,7 @@
             `;
             closeButton.innerHTML = '×';
             closeButton.addEventListener('click', () => {
-                selectorContainer.remove();
-                // Remove the indicator button
-                const indicatorButton = document.getElementById('server-selector-indicator');
-                if (indicatorButton) {
-                    indicatorButton.remove();
-                }
+                selectorContainer.style.display = 'none';
             });
             closeButton.addEventListener('mouseenter', () => {
                 closeButton.style.background = 'rgba(255, 255, 255, 0.2)';
@@ -4411,11 +4457,7 @@
             if (event.key === 'Escape') {
                 const selector = document.getElementById('universal-server-selector');
                 if (selector) {
-                    selector.remove();
-                    const indicatorButton = document.getElementById('server-selector-indicator');
-                    if (indicatorButton) {
-                        indicatorButton.remove();
-                    }
+                    selector.style.display = 'none';
                 }
             }
         });
@@ -4967,12 +5009,24 @@
                 border-radius: 12px;
                 padding: 15px;
                 min-width: 250px;
+                max-width: 90vw;
                 backdrop-filter: blur(15px);
                 border: 1px solid rgba(255, 255, 255, 0.2);
                 box-shadow: 0 8px 32px rgba(0, 0, 0, 0.6);
                 max-height: 400px;
                 overflow-y: auto;
             `;
+            // Hide by default; show via the indicator button
+            selectorContainer.style.display = 'none';
+            // Compact sizing on small screens
+            if (window.innerWidth <= 768) {
+                selectorContainer.style.minWidth = '180px';
+                selectorContainer.style.maxWidth = '85vw';
+                selectorContainer.style.maxHeight = '50vh';
+                selectorContainer.style.padding = '12px';
+                selectorContainer.style.top = '8px';
+                selectorContainer.style.right = '8px';
+            }
             
             // Create title
             const title = document.createElement('div');
@@ -5124,12 +5178,7 @@
             `;
             closeButton.innerHTML = '×';
             closeButton.addEventListener('click', () => {
-                selectorContainer.remove();
-                // Remove the indicator button
-                const indicatorButton = document.getElementById('server-selector-indicator');
-                if (indicatorButton) {
-                    indicatorButton.remove();
-                }
+                selectorContainer.style.display = 'none';
             });
             closeButton.addEventListener('mouseenter', () => {
                 closeButton.style.background = 'rgba(255, 255, 255, 0.2)';
