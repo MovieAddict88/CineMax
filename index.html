@@ -2244,38 +2244,56 @@
     <style id="server-selector-mobile-css">
         @media (max-width: 768px) {
             #universal-server-selector {
-                min-width: 140px !important;
-                max-width: 60vw !important;
-                max-height: 35vh !important;
-                padding: 8px !important;
-                top: 8px !important;
-                right: 8px !important;
+                min-width: 120px !important;
+                max-width: 52vw !important;
+                max-height: 32vh !important;
+                padding: 6px !important;
+                top: 6px !important;
+                right: 6px !important;
+                overflow-y: auto !important;
+                overflow-x: hidden !important;
+                overscroll-behavior: contain;
             }
             #universal-server-selector .server-item {
-                padding: 5px 8px !important;
-                font-size: 11px !important;
+                padding: 4px 6px !important;
+                font-size: 10px !important;
+                line-height: 1.2 !important;
             }
             #universal-server-selector > div:first-child {
-                font-size: 14px !important;
-                margin-bottom: 10px !important;
-                padding-bottom: 8px !important;
+                font-size: 12px !important;
+                margin-bottom: 8px !important;
+                padding-bottom: 6px !important;
             }
             #embedded-server-selector {
-                min-width: 150px !important;
-                max-width: 65vw !important;
-                max-height: 40vh !important;
-                padding: 8px !important;
-                top: 8px !important;
-                right: 8px !important;
+                min-width: 120px !important;
+                max-width: 56vw !important;
+                max-height: 34vh !important;
+                padding: 6px !important;
+                top: 6px !important;
+                right: 6px !important;
+                overflow-y: auto !important;
+                overflow-x: hidden !important;
+                overscroll-behavior: contain;
             }
             #embedded-server-selector .server-item {
-                padding: 5px 8px !important;
-                font-size: 11px !important;
+                padding: 4px 6px !important;
+                font-size: 10px !important;
+                line-height: 1.2 !important;
+            }
+            #server-selector-indicator {
+                font-size: 10px !important;
+                padding: 4px 8px !important;
+                left: 6px !important;
+                top: 6px !important;
             }
         }
         @media (max-width: 480px) {
             #universal-server-selector {
-                max-width: 55vw !important;
+                max-width: 50vw !important;
+                max-height: 28vh !important;
+            }
+            #embedded-server-selector {
+                max-width: 52vw !important;
                 max-height: 30vh !important;
             }
         }
