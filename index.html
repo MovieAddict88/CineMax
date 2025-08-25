@@ -888,6 +888,142 @@
             border-radius: var(--radius);
         }
 
+        /* Enhanced Plyr Loading State Indicators */
+        .plyr--loading .plyr__progress__loaded,
+        .plyr--loading .plyr__progress__buffer {
+            background: linear-gradient(
+                -45deg,
+                var(--youtube-red) 25%,
+                transparent 25%,
+                transparent 50%,
+                var(--youtube-red) 50%,
+                var(--youtube-red) 75%,
+                transparent 75%,
+                transparent
+            );
+            background-size: 15px 15px;
+            animation: plyr-loading-stripes 1s linear infinite;
+        }
+
+        @keyframes plyr-loading-stripes {
+            0% {
+                background-position: 0 0;
+            }
+            100% {
+                background-position: 15px 0;
+            }
+        }
+
+        /* Custom loading overlay for better visibility */
+        .plyr__loading-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 3;
+            border-radius: var(--radius);
+        }
+
+        .plyr--loading .plyr__loading-overlay {
+            display: flex;
+        }
+
+        .plyr__loading-spinner {
+            width: 40px;
+            height: 40px;
+            border: 3px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            border-top-color: var(--youtube-red);
+            animation: plyr-spinner 1s ease-in-out infinite;
+        }
+
+        @keyframes plyr-spinner {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        .plyr__loading-text {
+            color: white;
+            font-size: 14px;
+            margin-top: 15px;
+            text-align: center;
+            font-weight: 500;
+        }
+
+        /* Enhanced buffering indicator */
+        .plyr__progress--buffer {
+            background: rgba(255, 255, 255, 0.25);
+        }
+
+        .plyr--loading .plyr__progress--buffer {
+            background: linear-gradient(
+                90deg,
+                rgba(229, 9, 20, 0.3) 0%,
+                rgba(229, 9, 20, 0.6) 50%,
+                rgba(229, 9, 20, 0.3) 100%
+            );
+            animation: plyr-buffer-pulse 2s ease-in-out infinite;
+        }
+
+        @keyframes plyr-buffer-pulse {
+            0%, 100% {
+                opacity: 0.3;
+            }
+            50% {
+                opacity: 0.8;
+            }
+        }
+
+        /* Loading state for poster/thumbnail */
+        .plyr__poster {
+            transition: opacity 0.3s ease;
+        }
+
+        .plyr--loading .plyr__poster {
+            opacity: 0.7;
+        }
+
+        /* Custom loading message area styling */
+        #player-message-area {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            text-align: center;
+            padding: 20px;
+            background-color: rgba(20, 20, 20, 0.9);
+            border-radius: var(--radius);
+            color: white;
+            font-size: 16px;
+            font-weight: 500;
+            z-index: 4;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+            min-width: 200px;
+        }
+
+        #player-message-area.loading {
+            background-color: rgba(229, 9, 20, 0.1);
+            border-color: rgba(229, 9, 20, 0.3);
+        }
+
+        #player-message-area.success {
+            background-color: rgba(76, 175, 80, 0.1);
+            border-color: rgba(76, 175, 80, 0.3);
+        }
+
+        #player-message-area.error {
+            background-color: rgba(255, 87, 34, 0.1);
+            border-color: rgba(255, 87, 34, 0.3);
+        }
+
         /* UPDATED: Viewer Content - YouTube Style Grid Layout */
         .viewer-content {
             display: grid;
@@ -2411,7 +2547,13 @@
                     <video id="player" playsinline controls crossorigin="anonymous">
                         <!-- Source will be set dynamically -->
                     </video>
-                    <div id="player-message-area" style="display: none; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); text-align: center; padding: 20px; background-color: var(--youtube-gray); border-radius: var(--radius);"></div>
+                    <div class="plyr__loading-overlay">
+                        <div>
+                            <div class="plyr__loading-spinner"></div>
+                            <div class="plyr__loading-text">Loading...</div>
+                        </div>
+                    </div>
+                    <div id="player-message-area" style="display: none;"></div>
                 </div>
 
                 <div class="viewer-content">
@@ -3299,8 +3441,18 @@
 
             // Re-create the video element to ensure a clean state
             const playerContainer = document.querySelector('.player-container');
-            playerContainer.innerHTML = '<video id="player" playsinline controls crossorigin="anonymous"></video>';
+            playerContainer.innerHTML = `
+                <video id="player" playsinline controls crossorigin="anonymous"></video>
+                <div class="plyr__loading-overlay">
+                    <div>
+                        <div class="plyr__loading-spinner"></div>
+                        <div class="plyr__loading-text">Loading...</div>
+                    </div>
+                </div>
+                <div id="player-message-area" style="display: none;"></div>
+            `;
             elements.player = document.getElementById('player');
+            elements.playerMessageArea = document.getElementById('player-message-area');
 
 
             currentContentInfo = {
@@ -3425,6 +3577,7 @@
                 playerInstance.once('ready', event => {
                     setupViewerAndPlay();
                     addStretchButtonToPlayer();
+                    setupPlyrLoadingStates();
                     // Event listeners for fullscreen etc. should be attached here too, only once
                     playerInstance.on('enterfullscreen', () => {
                         if (screen.orientation && screen.orientation.lock) {
@@ -3544,6 +3697,10 @@
                 console.log(`🎭 Loading embedded content: ${url}`);
                 elements.player.style.display = 'none'; // Hide Plyr player
                 
+                // Show loading state for embedded content
+                const embedType = getEmbedType(url);
+                updateLoadingStatus(`Loading ${embedType} Player...`);
+                
                 // Update dropdown spinner under description for multiple servers
                 if (servers && servers.length > 1) {
                     setTimeout(() => updateServerDropdown(servers, { url: url }), 50);
@@ -3572,6 +3729,10 @@
                 
                 // Handle iframe load events (non-blocking)
                 iframe.onload = () => {
+                    // Hide loading message when iframe loads successfully
+                    elements.playerMessageArea.style.display = 'none';
+                    console.log('✅ Embedded content loaded successfully');
+                    
                     // Store the onload handler for reuse when switching servers
                     iframe._onloadHandler = iframe.onload;
                 };
@@ -3667,6 +3828,10 @@
             const formatInfo = detectChannelFormat(url);
             console.log(`📺 Playing ${formatInfo.type} content (${formatInfo.quality}) with ${formatInfo.recommendedPlayer}`);
             
+            // Show format-specific loading message
+            const loadingMessage = getLoadingMessageForFormat(formatInfo, url);
+            updateLoadingStatus(loadingMessage);
+            
             // Determine MIME type based on format
             let mimeType = 'video/mp4'; // Default
             if (url.includes('.m3u8')) {
@@ -3677,6 +3842,10 @@
                 mimeType = 'video/x-msvideo';
             } else if (url.includes('.mkv')) {
                 mimeType = 'video/x-matroska';
+            } else if (url.includes('.mov')) {
+                mimeType = 'video/quicktime';
+            } else if (url.includes('.flv')) {
+                mimeType = 'video/x-flv';
             }
             
             // Ensure HLS support on browsers that need it
@@ -3689,6 +3858,12 @@
             }
 
             console.log(`🎯 Setting Plyr player source for direct link: ${url}`);
+            
+            // Show loading state before setting source
+            if (window.showPlyrLoading) {
+                window.showPlyrLoading(`Loading ${formatInfo.type} content...`);
+            }
+            
             playerInstance.source = {
                 type: 'video',
                 sources: [{
@@ -4022,6 +4197,12 @@
             } else if (url.includes('.mkv')) {
                 formatInfo.type = 'MKV';
                 formatInfo.recommendedPlayer = 'Plyr';
+            } else if (url.includes('.mov')) {
+                formatInfo.type = 'MOV';
+                formatInfo.recommendedPlayer = 'Plyr';
+            } else if (url.includes('.flv')) {
+                formatInfo.type = 'FLV';
+                formatInfo.recommendedPlayer = 'Plyr';
             }
             
             // Detect if it's likely a live stream
@@ -4045,13 +4226,82 @@
             return formatInfo;
         }
 
+        // Get appropriate loading message for different media formats
+        function getLoadingMessageForFormat(formatInfo, url) {
+            const quality = formatInfo.quality !== 'unknown' ? ` (${formatInfo.quality})` : '';
+            const isLive = formatInfo.isLive ? 'Live ' : '';
+            
+            switch (formatInfo.type) {
+                case 'MPD':
+                    return `Loading ${isLive}MPD Stream${quality}...`;
+                case 'HLS':
+                    return `Loading ${isLive}HLS Stream${quality}...`;
+                case 'MP4':
+                    return `Loading ${isLive}MP4 Video${quality}...`;
+                case 'WebM':
+                    return `Loading ${isLive}WebM Video${quality}...`;
+                case 'AVI':
+                    return `Loading ${isLive}AVI Video${quality}...`;
+                case 'MKV':
+                    return `Loading ${isLive}MKV Video${quality}...`;
+                case 'MOV':
+                    return `Loading ${isLive}QuickTime Video${quality}...`;
+                case 'FLV':
+                    return `Loading ${isLive}FLV Video${quality}...`;
+                default:
+                    // Try to detect from URL
+                    if (url.includes('youtube.com') || url.includes('youtu.be')) {
+                        return 'Loading YouTube Video...';
+                    } else if (url.includes('drive.google.com')) {
+                        return 'Loading Google Drive Video...';
+                    } else if (url.includes('mega.nz')) {
+                        return 'Loading Mega Video...';
+                    } else if (formatInfo.isLive) {
+                        return `Loading ${isLive}Stream${quality}...`;
+                    } else {
+                        return `Loading Media Content${quality}...`;
+                    }
+            }
+        }
+
+        // Get embed type for loading messages
+        function getEmbedType(url) {
+            if (isVidsrcUrl(url)) return 'Vidsrc';
+            if (isVidjoyUrl(url)) return 'Vidjoy';
+            if (isVideasyUrl(url)) return 'Videasy';
+            if (isVidsrcMeUrl(url)) return 'Vidsrc.me';
+            if (isVidsrcToUrl(url)) return 'Vidsrc.to';
+            if (isVidsrcXyzUrl(url)) return 'Vidsrc.xyz';
+            if (isGoDrivePlayerUrl(url)) return 'GoDrive';
+            if (isVidLinkProUrl(url)) return 'VidLink';
+            if (is2EmbedUrl(url)) return '2Embed';
+            if (isEmbedSuUrl(url)) return 'Embed.su';
+            if (isAutoEmbedUrl(url)) return 'AutoEmbed';
+            return 'Embedded';
+        }
+
         // Show current playing status (like in shaka.html)
         function showPlayingStatus(channelName, status = 'Playing') {
             if (elements.playerMessageArea) {
                 elements.playerMessageArea.textContent = `${status}: ${channelName}`;
                 elements.playerMessageArea.style.display = 'block';
-                elements.playerMessageArea.style.color = '#4CAF50';
-                elements.playerMessageArea.style.backgroundColor = 'rgba(76, 175, 80, 0.1)';
+                
+                // Remove existing classes and add success class
+                elements.playerMessageArea.classList.remove('loading', 'error');
+                elements.playerMessageArea.classList.add('success');
+                
+                // Hide Plyr loading state
+                if (window.hidePlyrLoading) {
+                    window.hidePlyrLoading();
+                }
+                
+                // Auto-hide success message after 3 seconds
+                setTimeout(() => {
+                    if (elements.playerMessageArea.classList.contains('success')) {
+                        elements.playerMessageArea.style.display = 'none';
+                        elements.playerMessageArea.classList.remove('success');
+                    }
+                }, 3000);
             }
         }
 
@@ -4723,18 +4973,98 @@
             }
         }
         
+        // Setup Plyr loading state management
+        function setupPlyrLoadingStates() {
+            if (!playerInstance || !playerInstance.elements) return;
+            
+            const playerContainer = document.querySelector('.player-container');
+            const loadingOverlay = playerContainer.querySelector('.plyr__loading-overlay');
+            const loadingText = loadingOverlay.querySelector('.plyr__loading-text');
+            
+            // Show loading state
+            function showPlyrLoading(message = 'Loading...') {
+                playerInstance.elements.container.classList.add('plyr--loading');
+                if (loadingText) loadingText.textContent = message;
+                console.log('🔄 Plyr loading state:', message);
+            }
+            
+            // Hide loading state
+            function hidePlyrLoading() {
+                playerInstance.elements.container.classList.remove('plyr--loading');
+                console.log('✅ Plyr loading completed');
+            }
+            
+            // Loading events for direct media links
+            playerInstance.on('loadstart', () => {
+                showPlyrLoading('Initializing media...');
+            });
+            
+            playerInstance.on('loadedmetadata', () => {
+                showPlyrLoading('Loading media data...');
+            });
+            
+            playerInstance.on('loadeddata', () => {
+                showPlyrLoading('Preparing playback...');
+            });
+            
+            playerInstance.on('canplay', () => {
+                hidePlyrLoading();
+                elements.playerMessageArea.style.display = 'none';
+            });
+            
+            playerInstance.on('canplaythrough', () => {
+                hidePlyrLoading();
+                elements.playerMessageArea.style.display = 'none';
+            });
+            
+            // Buffering events
+            playerInstance.on('waiting', () => {
+                showPlyrLoading('Buffering...');
+            });
+            
+            playerInstance.on('playing', () => {
+                hidePlyrLoading();
+                elements.playerMessageArea.style.display = 'none';
+            });
+            
+            // Error handling
+            playerInstance.on('error', (event) => {
+                hidePlyrLoading();
+                console.error('Plyr error:', event);
+            });
+            
+            // Seeking events
+            playerInstance.on('seeking', () => {
+                showPlyrLoading('Seeking...');
+            });
+            
+            playerInstance.on('seeked', () => {
+                hidePlyrLoading();
+            });
+            
+            // Store references for external access
+            window.showPlyrLoading = showPlyrLoading;
+            window.hidePlyrLoading = hidePlyrLoading;
+        }
+
         // Update loading status with proper indicators
         function updateLoadingStatus(message, isError = false) {
             if (elements.playerMessageArea) {
                 elements.playerMessageArea.textContent = message;
                 elements.playerMessageArea.style.display = 'block';
                 
+                // Remove existing classes
+                elements.playerMessageArea.classList.remove('loading', 'success', 'error');
+                
                 if (isError) {
-                    elements.playerMessageArea.style.color = '#ff5722';
-                    elements.playerMessageArea.style.backgroundColor = 'rgba(255, 87, 34, 0.1)';
+                    elements.playerMessageArea.classList.add('error');
                 } else {
-                    elements.playerMessageArea.style.color = '#ffffff';
-                    elements.playerMessageArea.style.backgroundColor = 'rgba(255, 255, 255, 0.1)';
+                    elements.playerMessageArea.classList.add('loading');
+                }
+                
+                // Also trigger Plyr loading state if available
+                if (window.showPlyrLoading && !isError) {
+                    window.showPlyrLoading(message);
                 }
             }
         }
