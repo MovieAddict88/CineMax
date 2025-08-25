@@ -3299,7 +3299,7 @@
 
             // Re-create the video element to ensure a clean state
             const playerContainer = document.querySelector('.player-container');
-            playerContainer.innerHTML = '<video id="player" playsinline controls></video>';
+            playerContainer.innerHTML = '<video id="player" playsinline controls crossorigin="anonymous"></video>';
             elements.player = document.getElementById('player');
 
 
@@ -3697,12 +3697,48 @@
                 }]
             };
             
+            // Ensure the video element preloads data for faster start
+            try { elements.player.setAttribute('preload', 'auto'); } catch (e) {}
+            
+            // If HLS is used and the browser lacks native support, bind Hls.js explicitly
+            if (mimeType === 'application/x-mpegURL') {
+                try {
+                    const video = elements.player;
+                    const canNativePlay = video.canPlayType('application/vnd.apple.mpegurl');
+                    if ((canNativePlay !== 'probably' && canNativePlay !== 'maybe') && window.Hls && window.Hls.isSupported && window.Hls.isSupported()) {
+                        if (window._currentHls) { try { window._currentHls.destroy(); } catch (_) {} }
+                        const hls = new Hls();
+                        window._currentHls = hls;
+                        hls.attachMedia(video);
+                        hls.on(Hls.Events.MEDIA_ATTACHED, () => {
+                            hls.loadSource(url);
+                        });
+                        hls.on(Hls.Events.MANIFEST_PARSED, () => {
+                            enhancedAutoplay(video, playerInstance);
+                        });
+                    }
+                } catch (e) {
+                    console.warn('HLS attach failed:', e);
+                }
+            }
+            
             // Autoplay regular video content
             setTimeout(() => {
                 if (playerInstance && typeof playerInstance.play === 'function') {
                     enhancedAutoplay(elements.player, playerInstance);
                 }
             }, 500);
+            
+            // Also attempt autoplay once the media is actually ready
+            try {
+                const onReadyToAutoplay = () => {
+                    if (playerInstance && typeof playerInstance.play === 'function') {
+                        enhancedAutoplay(elements.player, playerInstance);
+                    }
+                };
+                elements.player.addEventListener('loadeddata', onReadyToAutoplay, { once: true });
+                elements.player.addEventListener('canplay', onReadyToAutoplay, { once: true });
+            } catch (_) {}
             
             // Ensure server dropdown reflects current selection for direct links
             if (servers && servers.length > 1) {
@@ -4869,41 +4905,30 @@
         // Function to switch between servers
         async function switchToServer(server, allServers) {
             try {
-                // Stop current playback
+                console.log(`🔄 Switching to server: ${server.name || 'Unknown'} (${server.url})`);
+                
                 if (playerInstance) {
                     playerInstance.pause();
                 }
                 
-                // Check if this is an embedded source
-                if (isVidsrcUrl(server.url) || isVidjoyUrl(server.url) || isVideasyUrl(server.url) || 
-                    isVidsrcToUrl(server.url) || isVidsrcXyzUrl(server.url) || isGoDrivePlayerUrl(server.url) || 
-                    isVidLinkProUrl(server.url) || is2EmbedUrl(server.url) || isEmbedSuUrl(server.url) || 
-                    isAutoEmbedUrl(server.url) || isMegaNzUrl(server.url) || isGoogleDriveUrl(server.url)) {
-                    
-                    // Switch to embedded player
-                    await playUrl(server.url, allServers);
-                } else {
-                    // Switch to Plyr player
-                    if (playerInstance) {
-                        // Update player source
-                        const sources = allServers.map(s => ({
-                            src: s.url,
-                            size: parseInt(s.name?.replace(/\D/g, '') || '0'),
-                            type: s.url.includes('m3u8') ? 'application/x-mpegURL' : 'video/mp4'
-                        }));
-                        
-                        playerInstance.source = {
-                            type: 'video',
-                            sources: sources,
-                        };
-                        
-                        // Play the selected server
-                        playerInstance.play();
-                    }
-                }
+                // Delegate to playUrl so it handles iframe cleanup vs direct link playback uniformly
+                await playUrl(server.url, allServers);
                 
                 // Update current server tracking
                 window.currentServer = server;
+                
+                // Ensure dropdown reflects current selection
+                setTimeout(() => {
+                    updateServerDropdown(allServers || [], server);
+                    console.log(`🔄 Updated server dropdown for: ${server.name || 'Unknown'}`);
+                }, 100);
+                
+                // Show feedback for successful server switch
+                showServerSwitchFeedback(`Switched to ${server.name || 'Server'}`);
+                
+                console.log(`✅ Successfully switched to server: ${server.name || 'Unknown'}`);
+                console.log('🔍 After server switch:');
+                debugServerState();
                 
             } catch (error) {
                 console.error('Error switching to server:', error);
@@ -5067,6 +5092,13 @@
                         type: 'video',
                         sources: sources,
                     };
+                    
+                    // Attempt autoplay after setting sources
+                    setTimeout(() => {
+                        if (playerInstance && typeof playerInstance.play === 'function') {
+                            enhancedAutoplay(elements.player, playerInstance);
+                        }
+                    }, 500);
                     
                     // Update dropdown spinner under description for multiple servers
                     updateServerDropdown(servers, optimalServer);
