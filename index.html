@@ -4869,41 +4869,30 @@
         // Function to switch between servers
         async function switchToServer(server, allServers) {
             try {
-                // Stop current playback
+                console.log(`🔄 Switching to server: ${server.name || 'Unknown'} (${server.url})`);
+                
                 if (playerInstance) {
                     playerInstance.pause();
                 }
                 
-                // Check if this is an embedded source
-                if (isVidsrcUrl(server.url) || isVidjoyUrl(server.url) || isVideasyUrl(server.url) || 
-                    isVidsrcToUrl(server.url) || isVidsrcXyzUrl(server.url) || isGoDrivePlayerUrl(server.url) || 
-                    isVidLinkProUrl(server.url) || is2EmbedUrl(server.url) || isEmbedSuUrl(server.url) || 
-                    isAutoEmbedUrl(server.url) || isMegaNzUrl(server.url) || isGoogleDriveUrl(server.url)) {
-                    
-                    // Switch to embedded player
-                    await playUrl(server.url, allServers);
-                } else {
-                    // Switch to Plyr player
-                    if (playerInstance) {
-                        // Update player source
-                        const sources = allServers.map(s => ({
-                            src: s.url,
-                            size: parseInt(s.name?.replace(/\D/g, '') || '0'),
-                            type: s.url.includes('m3u8') ? 'application/x-mpegURL' : 'video/mp4'
-                        }));
-                        
-                        playerInstance.source = {
-                            type: 'video',
-                            sources: sources,
-                        };
-                        
-                        // Play the selected server
-                        playerInstance.play();
-                    }
-                }
+                // Delegate to playUrl so it handles iframe cleanup vs direct link playback uniformly
+                await playUrl(server.url, allServers);
                 
                 // Update current server tracking
                 window.currentServer = server;
+                
+                // Ensure dropdown reflects current selection
+                setTimeout(() => {
+                    updateServerDropdown(allServers || [], server);
+                    console.log(`🔄 Updated server dropdown for: ${server.name || 'Unknown'}`);
+                }, 100);
+                
+                // Show feedback for successful server switch
+                showServerSwitchFeedback(`Switched to ${server.name || 'Server'}`);
+                
+                console.log(`✅ Successfully switched to server: ${server.name || 'Unknown'}`);
+                console.log('🔍 After server switch:');
+                debugServerState();
                 
             } catch (error) {
                 console.error('Error switching to server:', error);
