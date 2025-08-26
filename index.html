@@ -1,4 +1,4 @@
- <!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -1016,6 +1016,33 @@
             border-color: var(--youtube-red);
         }
 
+        .server-selector-container {
+            display: none;
+            margin-bottom: 12px;
+            background-color: var(--youtube-gray);
+            border-radius: var(--radius);
+            padding: 12px;
+        }
+        .server-selector-container h3 {
+            font-size: 16px;
+            color: var(--light);
+            margin-bottom: 8px;
+            font-weight: 600;
+        }
+        .server-selector {
+            width: 100%;
+            padding: 10px 12px;
+            border-radius: 4px;
+            background-color: var(--youtube-dark-gray);
+            border: 1px solid var(--dark-3);
+            color: var(--light);
+            font-size: 14px;
+            cursor: pointer;
+        }
+        .server-selector:focus {
+            outline: none;
+            border-color: var(--youtube-red);
+        }
 
         .season-selector {
             display: none; /* JS handles visibility */
@@ -2462,6 +2489,11 @@
                             Description will appear here...
                         </div>
 
+                        <div class="server-selector-container" id="server-selector-container">
+                            <h3>Select Server</h3>
+                            <select class="server-selector" id="server-selector"></select>
+                        </div>
+
                         <div class="episode-selector-container" id="episode-selector-container">
                             <h3>Select Episode</h3>
                             <select class="episode-selector" id="episode-selector">
@@ -2606,6 +2638,8 @@
             // viewerCountry: document.getElementById('viewer-country'), // Not used
             serverSelect: document.getElementById('quality-select'),
             playerServerSelector: document.getElementById('player-server-selector'),
+            serverSelectorContainer: document.getElementById('server-selector-container'),
+            serverSelector: document.getElementById('server-selector'),
             episodeSelectorContainer: document.getElementById('episode-selector-container'),
             episodeSelector: document.getElementById('episode-selector'),
             seasonSelector: document.getElementById('season-selector'),
@@ -3341,6 +3375,12 @@
                 elements.viewerTitle.textContent = content.Title;
                 elements.viewerDescription.textContent = content.Description || 'No description available.';
                 // Reset selectors
+                if (elements.serverSelectorContainer) {
+                    elements.serverSelectorContainer.style.display = 'none';
+                }
+                if (elements.serverSelector) {
+                    elements.serverSelector.innerHTML = '';
+                }
                 elements.episodeSelectorContainer.style.display = 'none';
                 elements.episodeSelector.innerHTML = '<option value="">Select Episode</option>';
                 elements.seasonSelector.style.display = 'none';
@@ -3547,12 +3587,12 @@
                 return;
             }
 
-            if (isVidsrcUrl(url) || isVidjoyUrl(url) || isVidsrcMeUrl(url) || isVidsrcToUrl(url) || isVidsrcXyzUrl(url) || isGoDrivePlayerUrl(url) || isVidLinkProUrl(url) || is2EmbedUrl(url) || isEmbedSuUrl(url) || isAutoEmbedUrl(url)) {
+            if (isVidsrcUrl(url) || isVidjoyUrl(url) || isVidsrcMeUrl(url) || isVidsrcToUrl(url) || isVidsrcXyzUrl(url) || isGoDrivePlayerUrl(url) || isVidLinkProUrl(url) || is2EmbedUrl(url) || isEmbedSuUrl(url) || isAutoEmbedUrl(url) || isVideasyUrl(url)) {
                 elements.player.style.display = 'none'; // Hide Plyr player
                 
-                // Create universal server selector for multiple servers
+                // Update in-page server dropdown for multiple servers
                 if (servers && servers.length > 1) {
-                    setTimeout(() => createUniversalServerSelector(servers, { url: url }), 100);
+                    setTimeout(() => updateServerDropdown(servers, { url: url }), 100);
                 }
                 
                 if (!iframe) {
@@ -4099,6 +4139,49 @@
             return selectedServer;
         }
         
+        // Update the compact in-page server dropdown
+        function updateServerDropdown(servers, currentServer = null) {
+            if (!elements.serverSelector || !elements.serverSelectorContainer) return;
+            
+            // Remove any floating selectors if present
+            const existingUniversal = document.getElementById('universal-server-selector');
+            if (existingUniversal && existingUniversal.parentNode) {
+                existingUniversal.parentNode.removeChild(existingUniversal);
+            }
+            const existingEmbedded = document.getElementById('embedded-server-selector');
+            if (existingEmbedded && existingEmbedded.parentNode) {
+                existingEmbedded.parentNode.removeChild(existingEmbedded);
+            }
+            
+            elements.serverSelector.innerHTML = '';
+            
+            if (!servers || servers.length <= 1) {
+                elements.serverSelectorContainer.style.display = 'none';
+                return;
+            }
+            
+            servers.forEach((s, idx) => {
+                const option = document.createElement('option');
+                option.value = s.url;
+                option.textContent = s.name || `Server ${idx + 1}`;
+                if (currentServer && (s.url === currentServer.url)) {
+                    option.selected = true;
+                }
+                elements.serverSelector.appendChild(option);
+            });
+            
+            elements.serverSelectorContainer.style.display = 'block';
+            
+            // Rebind change handler
+            elements.serverSelector.onchange = (e) => {
+                const selectedUrl = e.target.value;
+                const selected = servers.find(s => s.url === selectedUrl);
+                if (selected) {
+                    switchToServer(selected, servers);
+                }
+            };
+        }
+        
         // Create universal server selector for both Plyr and embedded sources
         function createUniversalServerSelector(servers, currentServer = null) {
             if (!servers || servers.length <= 1) return; // No need for selector if only one server
@@ -4362,7 +4445,7 @@
                 if (isVidsrcUrl(server.url) || isVidjoyUrl(server.url) || isVidsrcMeUrl(server.url) || 
                     isVidsrcToUrl(server.url) || isVidsrcXyzUrl(server.url) || isGoDrivePlayerUrl(server.url) || 
                     isVidLinkProUrl(server.url) || is2EmbedUrl(server.url) || isEmbedSuUrl(server.url) || 
-                    isAutoEmbedUrl(server.url) || isMegaNzUrl(server.url) || isGoogleDriveUrl(server.url)) {
+                    isAutoEmbedUrl(server.url) || isVideasyUrl(server.url) || isMegaNzUrl(server.url) || isGoogleDriveUrl(server.url)) {
                     
                     // Switch to embedded player
                     await playUrl(server.url, allServers);
@@ -4381,6 +4464,9 @@
                             sources: sources,
                         };
                         
+                        // Ensure stretch button persists after source change
+                        addStretchButtonToPlayer();
+                        
                         // Play the selected server
                         playerInstance.play();
                     }
@@ -4388,6 +4474,9 @@
                 
                 // Update current server tracking
                 window.currentServer = server;
+                if (elements.serverSelector) {
+                    elements.serverSelector.value = server.url;
+                }
                 
             } catch (error) {
                 console.error('Error switching to server:', error);
@@ -5005,6 +5094,12 @@
             return url.includes('autoembed.cc');
         }
 
+        // Check if URL is Videasy (embedded source)
+        function isVideasyUrl(url) {
+            if (!url) return false;
+            return url.includes('videasy');
+        }
+        
         // Create universal server selector for both Plyr and embedded sources
         function createUniversalServerSelector(servers, currentServer = null) {
             if (!servers || servers.length <= 1) return; // No need for selector if only one server
@@ -5268,7 +5363,7 @@
                 if (isVidsrcUrl(server.url) || isVidjoyUrl(server.url) || isVidsrcMeUrl(server.url) || 
                     isVidsrcToUrl(server.url) || isVidsrcXyzUrl(server.url) || isGoDrivePlayerUrl(server.url) || 
                     isVidLinkProUrl(server.url) || is2EmbedUrl(server.url) || isEmbedSuUrl(server.url) || 
-                    isAutoEmbedUrl(server.url) || isMegaNzUrl(server.url) || isGoogleDriveUrl(server.url)) {
+                    isAutoEmbedUrl(server.url) || isVideasyUrl(server.url) || isMegaNzUrl(server.url) || isGoogleDriveUrl(server.url)) {
                     
                     // Switch to embedded player
                     await playUrl(server.url, allServers);
@@ -5287,6 +5382,9 @@
                             sources: sources,
                         };
                         
+                        // Ensure stretch button persists after source change
+                        addStretchButtonToPlayer();
+                        
                         // Play the selected server
                         playerInstance.play();
                     }
@@ -5294,6 +5392,9 @@
                 
                 // Update current server tracking
                 window.currentServer = server;
+                if (elements.serverSelector) {
+                    elements.serverSelector.value = server.url;
+                }
                 
             } catch (error) {
                 console.error('Error switching to server:', error);
@@ -5750,7 +5851,7 @@
                 
                 if (optimalServer) {
                     // Check for special URLs first
-                    if (isVidsrcUrl(optimalServer.url) || isVidjoyUrl(optimalServer.url) || isVidsrcMeUrl(optimalServer.url) || isVidsrcToUrl(optimalServer.url) || isVidsrcXyzUrl(optimalServer.url) || isGoDrivePlayerUrl(optimalServer.url) || isVidLinkProUrl(optimalServer.url) || is2EmbedUrl(optimalServer.url) || isEmbedSuUrl(optimalServer.url) || isAutoEmbedUrl(optimalServer.url) || isMegaNzUrl(optimalServer.url) || isGoogleDriveUrl(optimalServer.url)) {
+                    if (isVidsrcUrl(optimalServer.url) || isVidjoyUrl(optimalServer.url) || isVidsrcMeUrl(optimalServer.url) || isVidsrcToUrl(optimalServer.url) || isVidsrcXyzUrl(optimalServer.url) || isGoDrivePlayerUrl(optimalServer.url) || isVidLinkProUrl(optimalServer.url) || is2EmbedUrl(optimalServer.url) || isEmbedSuUrl(optimalServer.url) || isAutoEmbedUrl(optimalServer.url) || isVideasyUrl(optimalServer.url) || isMegaNzUrl(optimalServer.url) || isGoogleDriveUrl(optimalServer.url)) {
                         playUrl(optimalServer.url, servers);
                         return;
                     }
@@ -5773,10 +5874,11 @@
                         sources: sources,
                     };
                     
-                    // Create universal server selector for multiple servers
-                    if (servers.length > 1) {
-                        createUniversalServerSelector(servers, optimalServer);
-                    }
+                    // Ensure stretch button persists after source change
+                    addStretchButtonToPlayer();
+                    
+                    // Update in-page server dropdown for multiple servers
+                    updateServerDropdown(servers, optimalServer);
                     
                     // Add error handling for automatic server switching
                     playerInstance.on('error', async (event) => {
@@ -6247,24 +6349,38 @@
             const controlsContainer = playerInstance.elements.controls;
             const settingsButton = controlsContainer.querySelector('button[data-plyr="settings"]');
 
-            // Create the button
-            const stretchButton = document.createElement('button');
-            stretchButton.type = 'button';
-            stretchButton.className = 'plyr__controls__item plyr__control';
-            stretchButton.innerHTML = '<i class="fas fa-expand-arrows-alt"></i>';
-            stretchButton.setAttribute('aria-label', 'Stretch');
+            // Reuse existing button if it already exists to avoid duplicates
+            let stretchButton = controlsContainer.querySelector('button[aria-label="Stretch"]');
+            if (!stretchButton) {
+                stretchButton = document.createElement('button');
+                stretchButton.type = 'button';
+                stretchButton.className = 'plyr__controls__item plyr__control';
+                stretchButton.innerHTML = '<i class="fas fa-expand-arrows-alt"></i>';
+                stretchButton.setAttribute('aria-label', 'Stretch');
 
-            // Add event listener
-            stretchButton.addEventListener('click', () => {
-                toggleStretch();
-                stretchButton.classList.toggle('active');
-            });
+                // Add event listener
+                stretchButton.addEventListener('click', () => {
+                    toggleStretch();
+                    stretchButton.classList.toggle('active');
+                });
 
-            // Insert before the settings button
-            if (settingsButton) {
-                settingsButton.parentNode.insertBefore(stretchButton, settingsButton);
+                // Insert before the settings button
+                if (settingsButton) {
+                    settingsButton.parentNode.insertBefore(stretchButton, settingsButton);
+                } else {
+                    controlsContainer.appendChild(stretchButton);
+                }
+            }
+
+            // Sync visual state and video fit
+            const videoElement = playerInstance.elements.container.querySelector('video');
+            if (videoElement) {
+                videoElement.style.objectFit = isStretched ? 'fill' : 'contain';
+            }
+            if (isStretched) {
+                stretchButton.classList.add('active');
             } else {
-                controlsContainer.appendChild(stretchButton);
+                stretchButton.classList.remove('active');
             }
         }
         
