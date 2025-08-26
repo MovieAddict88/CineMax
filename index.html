@@ -3508,6 +3508,10 @@
 
             elements.viewerPage.style.display = 'block';
             window.scrollTo(0, 0);
+            
+            // Initially hide server selector - it will be shown only if multiple servers are available
+            hideServerSelectorDropdown();
+            
             elements.shareVideoBtn.removeEventListener('click', handleShareVideo);
             elements.shareVideoBtn.addEventListener('click', handleShareVideo);
             updateLikeDislikeUI(currentContentInfo.id);
@@ -3591,6 +3595,9 @@
                 // Create server selector dropdown for multiple servers
                 if (servers && servers.length > 1) {
                     setTimeout(() => createServerSelectorDropdown(servers, { url: url }), 100);
+                } else {
+                    // Hide server selector for single server or no servers
+                    setTimeout(() => hideServerSelectorDropdown(), 100);
                 }
                 
                 if (!iframe) {
@@ -4137,9 +4144,12 @@
             return selectedServer;
         }
         
-        // Create server selector dropdown in episode selector container
-        function createServerSelectorDropdown(servers, currentServer = null) {
-            // Hide existing universal server selectors
+        // Hide server selector dropdown
+        function hideServerSelectorDropdown() {
+            if (elements.serverSelectorDropdown) {
+                elements.serverSelectorDropdown.style.display = 'none';
+            }
+            // Also hide existing universal server selectors
             const existingUniversalSelector = document.getElementById('universal-server-selector');
             if (existingUniversalSelector) {
                 existingUniversalSelector.style.display = 'none';
@@ -4152,12 +4162,16 @@
             if (existingIndicator) {
                 existingIndicator.style.display = 'none';
             }
+        }
+        
+        // Create server selector dropdown in episode selector container
+        function createServerSelectorDropdown(servers, currentServer = null) {
+            // Always hide all server selectors first
+            hideServerSelectorDropdown();
             
             if (!servers || servers.length <= 1) {
-                // Hide server selector if only one or no servers
-                if (elements.serverSelectorDropdown) {
-                    elements.serverSelectorDropdown.style.display = 'none';
-                }
+                // Keep server selector hidden for single server or no servers
+                console.log(`🔇 Server selector hidden - only ${servers ? servers.length : 0} server(s) available`);
                 return;
             }
             
@@ -5876,6 +5890,9 @@
                     // Create server selector dropdown for multiple servers
                     if (servers.length > 1) {
                         createServerSelectorDropdown(servers, optimalServer);
+                    } else {
+                        // Hide server selector for single server
+                        hideServerSelectorDropdown();
                     }
                     
                     // Add error handling for automatic server switching
