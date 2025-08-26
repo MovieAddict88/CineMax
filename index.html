@@ -888,6 +888,142 @@
             border-radius: var(--radius);
         }
 
+        /* Enhanced Plyr Loading State Indicators */
+        .plyr--loading .plyr__progress__loaded,
+        .plyr--loading .plyr__progress__buffer {
+            background: linear-gradient(
+                -45deg,
+                var(--youtube-red) 25%,
+                transparent 25%,
+                transparent 50%,
+                var(--youtube-red) 50%,
+                var(--youtube-red) 75%,
+                transparent 75%,
+                transparent
+            );
+            background-size: 15px 15px;
+            animation: plyr-loading-stripes 1s linear infinite;
+        }
+
+        @keyframes plyr-loading-stripes {
+            0% {
+                background-position: 0 0;
+            }
+            100% {
+                background-position: 15px 0;
+            }
+        }
+
+        /* Custom loading overlay for better visibility */
+        .plyr__loading-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 3;
+            border-radius: var(--radius);
+        }
+
+        .plyr--loading .plyr__loading-overlay {
+            display: flex;
+        }
+
+        .plyr__loading-spinner {
+            width: 40px;
+            height: 40px;
+            border: 3px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            border-top-color: var(--youtube-red);
+            animation: plyr-spinner 1s ease-in-out infinite;
+        }
+
+        @keyframes plyr-spinner {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        .plyr__loading-text {
+            color: white;
+            font-size: 14px;
+            margin-top: 15px;
+            text-align: center;
+            font-weight: 500;
+        }
+
+        /* Enhanced buffering indicator */
+        .plyr__progress--buffer {
+            background: rgba(255, 255, 255, 0.25);
+        }
+
+        .plyr--loading .plyr__progress--buffer {
+            background: linear-gradient(
+                90deg,
+                rgba(229, 9, 20, 0.3) 0%,
+                rgba(229, 9, 20, 0.6) 50%,
+                rgba(229, 9, 20, 0.3) 100%
+            );
+            animation: plyr-buffer-pulse 2s ease-in-out infinite;
+        }
+
+        @keyframes plyr-buffer-pulse {
+            0%, 100% {
+                opacity: 0.3;
+            }
+            50% {
+                opacity: 0.8;
+            }
+        }
+
+        /* Loading state for poster/thumbnail */
+        .plyr__poster {
+            transition: opacity 0.3s ease;
+        }
+
+        .plyr--loading .plyr__poster {
+            opacity: 0.7;
+        }
+
+        /* Custom loading message area styling */
+        #player-message-area {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            text-align: center;
+            padding: 20px;
+            background-color: rgba(20, 20, 20, 0.9);
+            border-radius: var(--radius);
+            color: white;
+            font-size: 16px;
+            font-weight: 500;
+            z-index: 4;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+            min-width: 200px;
+        }
+
+        #player-message-area.loading {
+            background-color: rgba(229, 9, 20, 0.1);
+            border-color: rgba(229, 9, 20, 0.3);
+        }
+
+        #player-message-area.success {
+            background-color: rgba(76, 175, 80, 0.1);
+            border-color: rgba(76, 175, 80, 0.3);
+        }
+
+        #player-message-area.error {
+            background-color: rgba(255, 87, 34, 0.1);
+            border-color: rgba(255, 87, 34, 0.3);
+        }
+
         /* UPDATED: Viewer Content - YouTube Style Grid Layout */
         .viewer-content {
             display: grid;
@@ -2411,7 +2547,13 @@
                     <video id="player" playsinline controls crossorigin="anonymous">
                         <!-- Source will be set dynamically -->
                     </video>
-                    <div id="player-message-area" style="display: none; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); text-align: center; padding: 20px; background-color: var(--youtube-gray); border-radius: var(--radius);"></div>
+                    <div class="plyr__loading-overlay">
+                        <div>
+                            <div class="plyr__loading-spinner"></div>
+                            <div class="plyr__loading-text">Loading...</div>
+                        </div>
+                    </div>
+                    <div id="player-message-area" style="display: none;"></div>
                 </div>
 
                 <div class="viewer-content">
@@ -3296,11 +3438,31 @@
                 dashPlayer.reset();
                 dashPlayer = null;
             }
+            // Clean up HLS instance
+            if (window._currentHls) {
+                try {
+                    window._currentHls.destroy();
+                    window._currentHls = null;
+                    console.log('🧹 Cleaned up HLS instance');
+                } catch (e) {
+                    console.warn('Failed to destroy HLS instance:', e);
+                }
+            }
 
             // Re-create the video element to ensure a clean state
             const playerContainer = document.querySelector('.player-container');
-            playerContainer.innerHTML = '<video id="player" playsinline controls crossorigin="anonymous"></video>';
+            playerContainer.innerHTML = `
+                <video id="player" playsinline controls crossorigin="anonymous"></video>
+                <div class="plyr__loading-overlay">
+                    <div>
+                        <div class="plyr__loading-spinner"></div>
+                        <div class="plyr__loading-text">Loading...</div>
+                    </div>
+                </div>
+                <div id="player-message-area" style="display: none;"></div>
+            `;
             elements.player = document.getElementById('player');
+            elements.playerMessageArea = document.getElementById('player-message-area');
 
 
             currentContentInfo = {
@@ -3425,6 +3587,7 @@
                 playerInstance.once('ready', event => {
                     setupViewerAndPlay();
                     addStretchButtonToPlayer();
+                    setupPlyrLoadingStates();
                     // Event listeners for fullscreen etc. should be attached here too, only once
                     playerInstance.on('enterfullscreen', () => {
                         if (screen.orientation && screen.orientation.lock) {
@@ -3474,6 +3637,9 @@
             
             console.log(`🎬 playUrl called with: ${url}`);
             console.log(`📋 Available servers:`, servers);
+            
+            // Store servers globally for fallback access
+            window.currentServers = servers;
 
             const playerContainer = document.querySelector('.player-container');
             let iframe = playerContainer.querySelector('iframe.external-content-iframe');
@@ -3482,6 +3648,17 @@
             if (dashPlayer) {
                 dashPlayer.reset();
                 dashPlayer = null;
+            }
+            
+            // Clean up HLS instance if switching content
+            if (window._currentHls) {
+                try {
+                    window._currentHls.destroy();
+                    window._currentHls = null;
+                    console.log('🧹 Cleaned up previous HLS instance');
+                } catch (e) {
+                    console.warn('Failed to destroy HLS instance:', e);
+                }
             }
 
             // Always stop Plyr if it's playing, before deciding what to do next.
@@ -3544,6 +3721,10 @@
                 console.log(`🎭 Loading embedded content: ${url}`);
                 elements.player.style.display = 'none'; // Hide Plyr player
                 
+                // Show loading state for embedded content
+                const embedType = getEmbedType(url);
+                updateLoadingStatus(`Loading ${embedType} Player...`);
+                
                 // Update dropdown spinner under description for multiple servers
                 if (servers && servers.length > 1) {
                     setTimeout(() => updateServerDropdown(servers, { url: url }), 50);
@@ -3572,6 +3753,10 @@
                 
                 // Handle iframe load events (non-blocking)
                 iframe.onload = () => {
+                    // Hide loading message when iframe loads successfully
+                    elements.playerMessageArea.style.display = 'none';
+                    console.log('✅ Embedded content loaded successfully');
+                    
                     // Store the onload handler for reuse when switching servers
                     iframe._onloadHandler = iframe.onload;
                 };
@@ -3667,6 +3852,10 @@
             const formatInfo = detectChannelFormat(url);
             console.log(`📺 Playing ${formatInfo.type} content (${formatInfo.quality}) with ${formatInfo.recommendedPlayer}`);
             
+            // Show format-specific loading message
+            const loadingMessage = getLoadingMessageForFormat(formatInfo, url);
+            updateLoadingStatus(loadingMessage);
+            
             // Determine MIME type based on format
             let mimeType = 'video/mp4'; // Default
             if (url.includes('.m3u8')) {
@@ -3677,6 +3866,10 @@
                 mimeType = 'video/x-msvideo';
             } else if (url.includes('.mkv')) {
                 mimeType = 'video/x-matroska';
+            } else if (url.includes('.mov')) {
+                mimeType = 'video/quicktime';
+            } else if (url.includes('.flv')) {
+                mimeType = 'video/x-flv';
             }
             
             // Ensure HLS support on browsers that need it
@@ -3689,6 +3882,12 @@
             }
 
             console.log(`🎯 Setting Plyr player source for direct link: ${url}`);
+            
+            // Show loading state before setting source
+            if (window.showPlyrLoading) {
+                window.showPlyrLoading(`Loading ${formatInfo.type} content...`);
+            }
+            
             playerInstance.source = {
                 type: 'video',
                 sources: [{
@@ -3700,26 +3899,9 @@
             // Ensure the video element preloads data for faster start
             try { elements.player.setAttribute('preload', 'auto'); } catch (e) {}
             
-            // If HLS is used and the browser lacks native support, bind Hls.js explicitly
+            // Enhanced HLS handling for M3U8 files
             if (mimeType === 'application/x-mpegURL') {
-                try {
-                    const video = elements.player;
-                    const canNativePlay = video.canPlayType('application/vnd.apple.mpegurl');
-                    if ((canNativePlay !== 'probably' && canNativePlay !== 'maybe') && window.Hls && window.Hls.isSupported && window.Hls.isSupported()) {
-                        if (window._currentHls) { try { window._currentHls.destroy(); } catch (_) {} }
-                        const hls = new Hls();
-                        window._currentHls = hls;
-                        hls.attachMedia(video);
-                        hls.on(Hls.Events.MEDIA_ATTACHED, () => {
-                            hls.loadSource(url);
-                        });
-                        hls.on(Hls.Events.MANIFEST_PARSED, () => {
-                            enhancedAutoplay(video, playerInstance);
-                        });
-                    }
-                } catch (e) {
-                    console.warn('HLS attach failed:', e);
-                }
+                await handleHLSPlayback(url, playerInstance, servers);
             }
             
             // Autoplay regular video content
@@ -3946,28 +4128,74 @@
             }
         }
         
-        // Try alternative MPD sources
-        async function tryAlternativeMPDSources(originalUrl, servers) {
+        // Enhanced fallback system for all media types
+        async function tryAlternativeSources(originalUrl, servers, preferredType = null) {
             if (!servers || servers.length <= 1) {
-                elements.playerMessageArea.textContent = 'No alternative sources available.';
+                console.warn('No alternative sources available - only one server or no servers');
+                // Try to find any other sources that might work
+                await tryUniversalFallback(originalUrl, servers);
                 return;
             }
             
-            // Try other MPD sources from the same server list
-            for (const server of servers) {
-                if (server.url !== originalUrl && server.url.includes('.mpd')) {
-                    try {
-                        updateLoadingStatus(`Trying alternative source: ${server.name || 'Unknown'}`);
+            console.log(`🔄 Trying alternative sources. Original: ${originalUrl}, Total servers: ${servers.length}`);
+            
+            // Filter out the failed URL and categorize remaining servers
+            const alternativeServers = servers.filter(server => server.url !== originalUrl);
+            
+            if (alternativeServers.length === 0) {
+                elements.playerMessageArea.textContent = 'No alternative servers available.';
+                elements.playerMessageArea.classList.add('error');
+                elements.playerMessageArea.style.display = 'block';
+                return;
+            }
+            
+            // Try servers in order of preference: same type first, then others
+            const sameTypeServers = [];
+            const differentTypeServers = [];
+            
+            alternativeServers.forEach(server => {
+                if (preferredType && server.url.includes(preferredType)) {
+                    sameTypeServers.push(server);
+                } else {
+                    differentTypeServers.push(server);
+                }
+            });
+            
+            // Try same type first, then different types
+            const serversToTry = [...sameTypeServers, ...differentTypeServers];
+            
+            for (const server of serversToTry) {
+                try {
+                    console.log(`🔄 Trying alternative server: ${server.name || 'Unknown'} (${server.url})`);
+                    updateLoadingStatus(`Trying alternative source: ${server.name || 'Unknown'}...`);
+                    
+                    // Use appropriate handler based on URL type
+                    if (server.url.includes('.mpd')) {
                         await handleMPDStream(server.url, servers);
-                        return;
-                    } catch (error) {
-                        console.warn('Alternative source failed:', server.url, error);
-                        continue;
+                    } else if (server.url.includes('.m3u8')) {
+                        await handleHLSPlayback(server.url, playerInstance, servers);
+                    } else {
+                        // Use playUrl for other types (embedded, direct links)
+                        await playUrl(server.url, servers);
                     }
+                    
+                    console.log(`✅ Successfully switched to alternative server: ${server.name || 'Unknown'}`);
+                    return; // Success, stop trying
+                    
+                } catch (error) {
+                    console.warn(`❌ Alternative server failed: ${server.name || 'Unknown'}`, error);
+                    continue; // Try next server
                 }
             }
             
-            updateLoadingStatus('All MPD sources failed. Please try again later.', true);
+            // If all alternatives failed
+            updateLoadingStatus('All alternative sources failed. Please try again later.', true);
+            console.error('❌ All alternative sources failed');
+        }
+
+        // Legacy function for MPD-specific fallback (now uses enhanced system)
+        async function tryAlternativeMPDSources(originalUrl, servers) {
+            await tryAlternativeSources(originalUrl, servers, '.mpd');
         }
         
         // Detect DRM protection in MPD manifest
@@ -4022,6 +4250,12 @@
             } else if (url.includes('.mkv')) {
                 formatInfo.type = 'MKV';
                 formatInfo.recommendedPlayer = 'Plyr';
+            } else if (url.includes('.mov')) {
+                formatInfo.type = 'MOV';
+                formatInfo.recommendedPlayer = 'Plyr';
+            } else if (url.includes('.flv')) {
+                formatInfo.type = 'FLV';
+                formatInfo.recommendedPlayer = 'Plyr';
             }
             
             // Detect if it's likely a live stream
@@ -4045,13 +4279,82 @@
             return formatInfo;
         }
 
+        // Get appropriate loading message for different media formats
+        function getLoadingMessageForFormat(formatInfo, url) {
+            const quality = formatInfo.quality !== 'unknown' ? ` (${formatInfo.quality})` : '';
+            const isLive = formatInfo.isLive ? 'Live ' : '';
+            
+            switch (formatInfo.type) {
+                case 'MPD':
+                    return `Loading ${isLive}MPD Stream${quality}...`;
+                case 'HLS':
+                    return `Loading ${isLive}HLS Stream${quality}...`;
+                case 'MP4':
+                    return `Loading ${isLive}MP4 Video${quality}...`;
+                case 'WebM':
+                    return `Loading ${isLive}WebM Video${quality}...`;
+                case 'AVI':
+                    return `Loading ${isLive}AVI Video${quality}...`;
+                case 'MKV':
+                    return `Loading ${isLive}MKV Video${quality}...`;
+                case 'MOV':
+                    return `Loading ${isLive}QuickTime Video${quality}...`;
+                case 'FLV':
+                    return `Loading ${isLive}FLV Video${quality}...`;
+                default:
+                    // Try to detect from URL
+                    if (url.includes('youtube.com') || url.includes('youtu.be')) {
+                        return 'Loading YouTube Video...';
+                    } else if (url.includes('drive.google.com')) {
+                        return 'Loading Google Drive Video...';
+                    } else if (url.includes('mega.nz')) {
+                        return 'Loading Mega Video...';
+                    } else if (formatInfo.isLive) {
+                        return `Loading ${isLive}Stream${quality}...`;
+                    } else {
+                        return `Loading Media Content${quality}...`;
+                    }
+            }
+        }
+
+        // Get embed type for loading messages
+        function getEmbedType(url) {
+            if (isVidsrcUrl(url)) return 'Vidsrc';
+            if (isVidjoyUrl(url)) return 'Vidjoy';
+            if (isVideasyUrl(url)) return 'Videasy';
+            if (isVidsrcMeUrl(url)) return 'Vidsrc.me';
+            if (isVidsrcToUrl(url)) return 'Vidsrc.to';
+            if (isVidsrcXyzUrl(url)) return 'Vidsrc.xyz';
+            if (isGoDrivePlayerUrl(url)) return 'GoDrive';
+            if (isVidLinkProUrl(url)) return 'VidLink';
+            if (is2EmbedUrl(url)) return '2Embed';
+            if (isEmbedSuUrl(url)) return 'Embed.su';
+            if (isAutoEmbedUrl(url)) return 'AutoEmbed';
+            return 'Embedded';
+        }
+
         // Show current playing status (like in shaka.html)
         function showPlayingStatus(channelName, status = 'Playing') {
             if (elements.playerMessageArea) {
                 elements.playerMessageArea.textContent = `${status}: ${channelName}`;
                 elements.playerMessageArea.style.display = 'block';
-                elements.playerMessageArea.style.color = '#4CAF50';
-                elements.playerMessageArea.style.backgroundColor = 'rgba(76, 175, 80, 0.1)';
+                
+                // Remove existing classes and add success class
+                elements.playerMessageArea.classList.remove('loading', 'error');
+                elements.playerMessageArea.classList.add('success');
+                
+                // Hide Plyr loading state
+                if (window.hidePlyrLoading) {
+                    window.hidePlyrLoading();
+                }
+                
+                // Auto-hide success message after 3 seconds
+                setTimeout(() => {
+                    if (elements.playerMessageArea.classList.contains('success')) {
+                        elements.playerMessageArea.style.display = 'none';
+                        elements.playerMessageArea.classList.remove('success');
+                    }
+                }, 3000);
             }
         }
 
@@ -4242,8 +4545,24 @@
                     playerInstance.pause();
                 }
                 
-                // Always call playUrl to ensure proper content loading regardless of server type
-                await playUrl(server.url, allServers);
+                // Clean up HLS instance when switching servers
+                if (window._currentHls && server.url.includes('.m3u8')) {
+                    try {
+                        window._currentHls.destroy();
+                        window._currentHls = null;
+                        console.log('🧹 Cleaned up HLS instance for server switch');
+                    } catch (e) {
+                        console.warn('Failed to destroy HLS instance:', e);
+                    }
+                }
+                
+                // Handle different server types appropriately
+                if (server.url.includes('.m3u8')) {
+                    await handleHLSPlayback(server.url, playerInstance, allServers);
+                } else {
+                    // Use playUrl for all other types (MPD, embedded, direct links)
+                    await playUrl(server.url, allServers);
+                }
                 
                 // Update current server tracking
                 window.currentServer = server;
@@ -4316,14 +4635,18 @@
             }, 3000);
         }
         
-        // Function to automatically try next server if current one fails
+        // Enhanced function to automatically try next server if current one fails
         async function tryNextServer(servers, currentServerIndex = 0) {
-            if (!servers || servers.length <= 1) return false;
+            if (!servers || servers.length <= 1) {
+                console.warn('Cannot try next server - insufficient servers available');
+                return false;
+            }
             
             const nextIndex = (currentServerIndex + 1) % servers.length;
             const nextServer = servers[nextIndex];
             
             try {
+                console.log(`🔄 Trying next server: ${nextServer.name || 'Unknown'} (${nextServer.url})`);
                 showServerSwitchFeedback(`Trying next server: ${nextServer.name || 'Unknown'}`);
                 await switchToServer(nextServer, servers);
                 return true;
@@ -4331,61 +4654,101 @@
                 console.error('Failed to switch to next server:', error);
                 if (nextIndex !== 0) { // Don't loop infinitely
                     return await tryNextServer(servers, nextIndex);
+                } else {
+                    // All servers failed, try universal fallback
+                    console.log('🔄 All servers failed, attempting universal fallback...');
+                    const currentUrl = servers[currentServerIndex]?.url;
+                    await tryUniversalFallback(currentUrl, servers);
+                    return false;
                 }
-                return false;
             }
         }
         
         // Server selector now uses a dropdown under description; no floating toggle shortcuts needed
         
-        // Automatic fallback between DRM and non-DRM sources with auto-Shaka loading
-        async function handleAutomaticFallback(originalUrl, servers, drmFailed = false) {
-            if (!servers || servers.length <= 1) {
-                elements.playerMessageArea.textContent = 'No alternative sources available for fallback.';
-                return false;
-            }
+        // Universal fallback for edge cases
+        async function tryUniversalFallback(originalUrl, servers) {
+            console.log('🔄 Attempting universal fallback...');
             
-            // If DRM failed, try non-DRM sources first
-            let fallbackServers = servers;
-            if (drmFailed) {
-                fallbackServers = servers.filter(s => !s.drm && !s.url.includes('.mpd'));
-                if (fallbackServers.length === 0) {
-                    fallbackServers = servers; // Fall back to all servers if no non-DRM available
-                }
-            }
-            
-            // Try alternative sources
-            for (const server of fallbackServers) {
-                if (server.url === originalUrl) continue;
+            // Even with one server, try different approaches
+            if (servers && servers.length > 0) {
+                const server = servers[0];
                 
                 try {
-                    elements.playerMessageArea.textContent = `Trying fallback source: ${server.name || 'Unknown'}`;
-                    
-                    if (server.url.includes('.mpd')) {
-                        // Auto-load Shaka Player for MPD fallback
-                        await autoLoadShakaPlayer(server.url, servers);
+                    // If original failed, try with different player approach
+                    if (server.url.includes('.m3u8')) {
+                        console.log('🔄 Retrying M3U8 with fallback method...');
+                        // Try native HLS first, then fallback
+                        const video = elements.player;
+                        const canNativePlay = video.canPlayType('application/vnd.apple.mpegurl');
+                        
+                        if (canNativePlay === 'probably' || canNativePlay === 'maybe') {
+                            playerInstance.source = {
+                                type: 'video',
+                                sources: [{
+                                    src: server.url,
+                                    type: 'application/x-mpegURL'
+                                }]
+                            };
+                        } else {
+                            // Force regular Plyr attempt
+                            playerInstance.source = {
+                                type: 'video',
+                                sources: [{
+                                    src: server.url,
+                                    type: 'application/x-mpegURL'
+                                }]
+                            };
+                        }
+                    } else if (server.url.includes('.mpd')) {
+                        console.log('🔄 Retrying MPD with simplified approach...');
+                        // Try without DRM first
+                        await playNonDRMMPD(server.url);
                     } else {
-                        // Try regular video source
+                        console.log('🔄 Retrying with basic Plyr...');
                         playerInstance.source = {
                             type: 'video',
                             sources: [{
                                 src: server.url,
-                                type: server.url.includes('m3u8') ? 'application/x-mpegURL' : 'video/mp4'
+                                type: 'video/mp4'
                             }]
                         };
                     }
                     
-                    console.log(`✅ Fallback successful: ${server.url}`);
-                    return true;
+                    console.log('✅ Universal fallback attempt completed');
                     
                 } catch (error) {
-                    console.warn(`⚠️ Fallback failed: ${server.url}`, error);
-                    continue;
+                    console.error('❌ Universal fallback failed:', error);
+                    elements.playerMessageArea.textContent = 'Unable to play this content. Please try another source.';
+                    elements.playerMessageArea.classList.add('error');
+                    elements.playerMessageArea.style.display = 'block';
                 }
+            } else {
+                elements.playerMessageArea.textContent = 'No sources available to play.';
+                elements.playerMessageArea.classList.add('error');
+                elements.playerMessageArea.style.display = 'block';
+            }
+        }
+
+        // Enhanced automatic fallback system
+        async function handleAutomaticFallback(originalUrl, servers, drmFailed = false) {
+            console.log(`🔄 Starting automatic fallback. DRM failed: ${drmFailed}, Servers: ${servers?.length || 0}`);
+            
+            if (!servers || servers.length === 0) {
+                elements.playerMessageArea.textContent = 'No sources available for fallback.';
+                elements.playerMessageArea.classList.add('error');
+                elements.playerMessageArea.style.display = 'block';
+                return false;
             }
             
-            elements.playerMessageArea.textContent = 'All fallback sources failed.';
-            return false;
+            // Use the enhanced fallback system
+            try {
+                await tryAlternativeSources(originalUrl, servers);
+                return true;
+            } catch (error) {
+                console.error('❌ Automatic fallback failed:', error);
+                return false;
+            }
         }
         
         // Auto-load Shaka Player for MPD streams
@@ -4723,18 +5086,98 @@
             }
         }
         
+        // Setup Plyr loading state management
+        function setupPlyrLoadingStates() {
+            if (!playerInstance || !playerInstance.elements) return;
+            
+            const playerContainer = document.querySelector('.player-container');
+            const loadingOverlay = playerContainer.querySelector('.plyr__loading-overlay');
+            const loadingText = loadingOverlay.querySelector('.plyr__loading-text');
+            
+            // Show loading state
+            function showPlyrLoading(message = 'Loading...') {
+                playerInstance.elements.container.classList.add('plyr--loading');
+                if (loadingText) loadingText.textContent = message;
+                console.log('🔄 Plyr loading state:', message);
+            }
+            
+            // Hide loading state
+            function hidePlyrLoading() {
+                playerInstance.elements.container.classList.remove('plyr--loading');
+                console.log('✅ Plyr loading completed');
+            }
+            
+            // Loading events for direct media links
+            playerInstance.on('loadstart', () => {
+                showPlyrLoading('Initializing media...');
+            });
+            
+            playerInstance.on('loadedmetadata', () => {
+                showPlyrLoading('Loading media data...');
+            });
+            
+            playerInstance.on('loadeddata', () => {
+                showPlyrLoading('Preparing playback...');
+            });
+            
+            playerInstance.on('canplay', () => {
+                hidePlyrLoading();
+                elements.playerMessageArea.style.display = 'none';
+            });
+            
+            playerInstance.on('canplaythrough', () => {
+                hidePlyrLoading();
+                elements.playerMessageArea.style.display = 'none';
+            });
+            
+            // Buffering events
+            playerInstance.on('waiting', () => {
+                showPlyrLoading('Buffering...');
+            });
+            
+            playerInstance.on('playing', () => {
+                hidePlyrLoading();
+                elements.playerMessageArea.style.display = 'none';
+            });
+            
+            // Error handling
+            playerInstance.on('error', (event) => {
+                hidePlyrLoading();
+                console.error('Plyr error:', event);
+            });
+            
+            // Seeking events
+            playerInstance.on('seeking', () => {
+                showPlyrLoading('Seeking...');
+            });
+            
+            playerInstance.on('seeked', () => {
+                hidePlyrLoading();
+            });
+            
+            // Store references for external access
+            window.showPlyrLoading = showPlyrLoading;
+            window.hidePlyrLoading = hidePlyrLoading;
+        }
+
         // Update loading status with proper indicators
         function updateLoadingStatus(message, isError = false) {
             if (elements.playerMessageArea) {
                 elements.playerMessageArea.textContent = message;
                 elements.playerMessageArea.style.display = 'block';
                 
+                // Remove existing classes
+                elements.playerMessageArea.classList.remove('loading', 'success', 'error');
+                
                 if (isError) {
-                    elements.playerMessageArea.style.color = '#ff5722';
-                    elements.playerMessageArea.style.backgroundColor = 'rgba(255, 87, 34, 0.1)';
+                    elements.playerMessageArea.classList.add('error');
                 } else {
-                    elements.playerMessageArea.style.color = '#ffffff';
-                    elements.playerMessageArea.style.backgroundColor = 'rgba(255, 255, 255, 0.1)';
+                    elements.playerMessageArea.classList.add('loading');
+                }
+                
+                // Also trigger Plyr loading state if available
+                if (window.showPlyrLoading && !isError) {
+                    window.showPlyrLoading(message);
                 }
             }
         }
@@ -4815,28 +5258,181 @@
             return url.includes('vidjoy.pro/embed');
         }
 
-        // Lightweight loader for Hls.js to play .m3u8 on browsers without native HLS
+        // Enhanced HLS playback handler for M3U8 files
+        async function handleHLSPlayback(url, playerInstance, servers = []) {
+            try {
+                console.log('🎬 Starting HLS playback for:', url);
+                
+                // Store servers globally for error handling
+                window.currentServers = servers;
+                
+                const video = elements.player;
+                
+                // Check for native HLS support (Safari, iOS)
+                const canNativePlay = video.canPlayType('application/vnd.apple.mpegurl');
+                const hasNativeSupport = canNativePlay === 'probably' || canNativePlay === 'maybe';
+                
+                if (hasNativeSupport) {
+                    console.log('✅ Using native HLS support');
+                    // Use native HLS support - just set the source normally
+                    playerInstance.source = {
+                        type: 'video',
+                        sources: [{
+                            src: url,
+                            type: 'application/x-mpegURL'
+                        }]
+                    };
+                    
+                    // Auto-play after a short delay
+                    setTimeout(() => {
+                        enhancedAutoplay(video, playerInstance);
+                    }, 500);
+                    
+                    return;
+                }
+                
+                // Load HLS.js for browsers without native support
+                console.log('🔄 Loading HLS.js for M3U8 playback...');
+                await loadHlsJsLibrary();
+                
+                if (!window.Hls || !window.Hls.isSupported()) {
+                    throw new Error('HLS.js is not supported in this browser');
+                }
+                
+                // Clean up any existing HLS instance
+                if (window._currentHls) {
+                    try {
+                        window._currentHls.destroy();
+                        console.log('🧹 Cleaned up previous HLS instance');
+                    } catch (e) {
+                        console.warn('Failed to destroy previous HLS instance:', e);
+                    }
+                }
+                
+                // Create new HLS instance
+                const hls = new Hls({
+                    debug: false,
+                    enableWorker: true,
+                    lowLatencyMode: true,
+                    backBufferLength: 90
+                });
+                
+                window._currentHls = hls;
+                
+                // Set up HLS event listeners
+                hls.on(Hls.Events.MEDIA_ATTACHED, () => {
+                    console.log('📺 HLS media attached, loading source...');
+                    hls.loadSource(url);
+                });
+                
+                hls.on(Hls.Events.MANIFEST_PARSED, (event, data) => {
+                    console.log('✅ HLS manifest parsed successfully', data);
+                    // Hide loading indicators
+                    if (window.hidePlyrLoading) {
+                        window.hidePlyrLoading();
+                    }
+                    elements.playerMessageArea.style.display = 'none';
+                    
+                    // Auto-play the stream
+                    enhancedAutoplay(video, playerInstance);
+                });
+                
+                hls.on(Hls.Events.LEVEL_LOADED, (event, data) => {
+                    console.log('📊 HLS level loaded:', data.details);
+                });
+                
+                hls.on(Hls.Events.ERROR, async (event, data) => {
+                    console.error('❌ HLS Error:', data);
+                    
+                    if (data.fatal) {
+                        switch (data.type) {
+                            case Hls.ErrorTypes.NETWORK_ERROR:
+                                console.log('🔄 Trying to recover from network error...');
+                                try {
+                                    hls.startLoad();
+                                } catch (e) {
+                                    console.error('Network recovery failed, trying alternative sources...');
+                                    // Get the servers from the current context if available
+                                    const servers = window.currentServers || [];
+                                    await tryAlternativeSources(url, servers, '.m3u8');
+                                }
+                                break;
+                            case Hls.ErrorTypes.MEDIA_ERROR:
+                                console.log('🔄 Trying to recover from media error...');
+                                try {
+                                    hls.recoverMediaError();
+                                } catch (e) {
+                                    console.error('Media recovery failed, trying alternative sources...');
+                                    const servers = window.currentServers || [];
+                                    await tryAlternativeSources(url, servers, '.m3u8');
+                                }
+                                break;
+                            default:
+                                console.error('💥 Fatal HLS error, cannot recover');
+                                hls.destroy();
+                                
+                                // Try alternative sources before giving up
+                                const servers = window.currentServers || [];
+                                if (servers.length > 1) {
+                                    console.log('🔄 Trying alternative sources after fatal HLS error...');
+                                    await tryAlternativeSources(url, servers, '.m3u8');
+                                } else {
+                                    elements.playerMessageArea.textContent = `HLS Error: ${data.details}`;
+                                    elements.playerMessageArea.classList.add('error');
+                                    elements.playerMessageArea.style.display = 'block';
+                                }
+                                break;
+                        }
+                    }
+                });
+                
+                // Attach HLS to video element
+                hls.attachMedia(video);
+                console.log('🔗 HLS.js attached to video element');
+                
+            } catch (error) {
+                console.error('❌ HLS playback failed:', error);
+                elements.playerMessageArea.textContent = `Failed to load HLS stream: ${error.message}`;
+                elements.playerMessageArea.classList.add('error');
+                elements.playerMessageArea.style.display = 'block';
+                
+                // Fallback: try regular Plyr playback
+                console.log('🔄 Falling back to regular Plyr playback...');
+                playerInstance.source = {
+                    type: 'video',
+                    sources: [{
+                        src: url,
+                        type: 'application/x-mpegURL'
+                    }]
+                };
+            }
+        }
+
+        // Load HLS.js library dynamically
+        async function loadHlsJsLibrary() {
+            if (window.Hls) {
+                return; // Already loaded
+            }
+            
+            return new Promise((resolve, reject) => {
+                const script = document.createElement('script');
+                script.src = 'https://cdn.jsdelivr.net/npm/hls.js@1.5.15/dist/hls.min.js';
+                script.onload = () => {
+                    console.log('✅ HLS.js library loaded successfully');
+                    resolve();
+                };
+                script.onerror = () => {
+                    console.error('❌ Failed to load HLS.js library');
+                    reject(new Error('Failed to load HLS.js'));
+                };
+                document.head.appendChild(script);
+            });
+        }
+
+        // Legacy function for compatibility
         async function loadHlsJsIfNeeded(sampleUrlForLog = '') {
             try {
-                const video = elements.player;
-                const canNativePlay = video.canPlayType('application/vnd.apple.mpegurl');
-                if (canNativePlay === 'probably' || canNativePlay === 'maybe') {
-                    return; // native support
-                }
-                if (!window.Hls) {
-                    await new Promise((resolve, reject) => {
-                        const script = document.createElement('script');
-                        script.src = 'https://cdn.jsdelivr.net/npm/hls.js@1.5.7/dist/hls.min.js';
-                        script.onload = resolve;
-                        script.onerror = reject;
-                        document.head.appendChild(script);
-                    });
-                }
-                if (window.Hls && !video._hlsBound) {
-                    // Simple hook: when Plyr sets an HLS source, the browser will fetch via video.src
-                    // If it fails, dev can fallback to custom Hls attachMedia. We keep it minimal.
-                    video._hlsBound = true;
-                }
+                await loadHlsJsLibrary();
                 console.log('Hls.js ready for HLS playback', sampleUrlForLog ? { url: sampleUrlForLog } : '');
             } catch (e) {
                 console.warn('Hls.js loader error:', e);
@@ -5075,18 +5671,20 @@
                         return;
                     }
                     
-                    // Handle regular video sources
+                    // Handle M3U8/HLS files with proper HLS.js integration
+                    if (optimalServer.url.includes('.m3u8')) {
+                        await handleHLSPlayback(optimalServer.url, playerInstance, servers);
+                        // Update dropdown for server switching
+                        updateServerDropdown(servers, optimalServer);
+                        return;
+                    }
+                    
+                    // Handle regular video sources (MP4, WebM, etc.)
                     const sources = servers.map(server => ({
                         src: server.url,
                         size: parseInt(server.name?.replace(/\D/g, '') || '0'),
-                        type: server.url.includes('m3u8') ? 'application/x-mpegURL' : 'video/mp4'
+                        type: 'video/mp4' // Only non-HLS sources should reach here
                     }));
-                    
-                    // If any source is HLS, ensure Hls.js is available
-                    const hasHls = sources.some(s => s.type === 'application/x-mpegURL');
-                    if (hasHls) {
-                        try { await loadHlsJsIfNeeded(optimalServer.url); } catch (e) { console.warn('Hls load failed', e); }
-                    }
 
                     playerInstance.source = {
                         type: 'video',
