@@ -4146,29 +4146,7 @@
             return selectedServer;
         }
         
-        // Function to restore Plyr player controls after server switching
-        function restorePlyrControls() {
-            setTimeout(() => {
-                if (playerInstance && playerInstance.elements && playerInstance.elements.container) {
-                    // Only ensure Plyr player is visible
-                    elements.player.style.display = 'block';
-                    
-                    // Hide any existing iframes
-                    const playerContainer = document.querySelector('.player-container');
-                    const iframe = playerContainer?.querySelector('iframe.external-content-iframe');
-                    if (iframe) {
-                        iframe.style.display = 'none';
-                    }
-                    
-                    // Gently trigger a resize event to ensure controls are properly positioned
-                    if (typeof Event !== 'undefined') {
-                        window.dispatchEvent(new Event('resize'));
-                    }
-                    
-                    console.log('🔧 Plyr controls restored after server switch');
-                }
-            }, 100); // Reduced timeout to be less aggressive
-        }
+
         
         // Hide server selector dropdown
         function hideServerSelectorDropdown() {
@@ -4233,21 +4211,7 @@
                     if (!isNaN(selectedIndex) && servers[selectedIndex]) {
                         const selectedServer = servers[selectedIndex];
                         console.log(`🔄 Switching to server: ${selectedServer.name || 'Unknown'}`);
-                        
-                        // Check if switching from embedded to direct content
-                        const isEmbeddedUrl = isVidsrcUrl(selectedServer.url) || isVidjoyUrl(selectedServer.url) || 
-                                            isVidsrcMeUrl(selectedServer.url) || isVidsrcToUrl(selectedServer.url) || 
-                                            isVidsrcXyzUrl(selectedServer.url) || isGoDrivePlayerUrl(selectedServer.url) || 
-                                            isVidLinkProUrl(selectedServer.url) || is2EmbedUrl(selectedServer.url) || 
-                                            isEmbedSuUrl(selectedServer.url) || isAutoEmbedUrl(selectedServer.url) || 
-                                            isMegaNzUrl(selectedServer.url) || isGoogleDriveUrl(selectedServer.url);
-                        
                         switchToServer(selectedServer, servers);
-                        
-                        // Only restore Plyr controls when switching to direct content (not embedded)
-                        if (!isEmbeddedUrl) {
-                            setTimeout(() => restorePlyrControls(), 200);
-                        }
                     }
                 });
             }
