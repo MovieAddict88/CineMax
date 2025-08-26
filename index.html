@@ -887,6 +887,18 @@
             height: 100%;
             border-radius: var(--radius);
         }
+        
+        /* Fix any potential Plyr control deformation */
+        .plyr__controls {
+            display: flex !important;
+            align-items: center !important;
+            height: auto !important;
+            flex-direction: row !important;
+        }
+        
+        .plyr__control {
+            flex-shrink: 0 !important;
+        }
 
         /* UPDATED: Viewer Content - YouTube Style Grid Layout */
         .viewer-content {
@@ -3513,6 +3525,14 @@
             
             // Initially hide server selector - it will be shown only if multiple servers are available
             hideServerSelectorDropdown();
+            
+            // Reset any potential Plyr deformation
+            if (playerInstance && playerInstance.elements && playerInstance.elements.container) {
+                // Trigger a resize to fix any layout issues
+                setTimeout(() => {
+                    window.dispatchEvent(new Event('resize'));
+                }, 100);
+            }
             
             elements.shareVideoBtn.removeEventListener('click', handleShareVideo);
             elements.shareVideoBtn.addEventListener('click', handleShareVideo);
