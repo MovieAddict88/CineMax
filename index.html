@@ -3637,6 +3637,9 @@
             
             console.log(`🎬 playUrl called with: ${url}`);
             console.log(`📋 Available servers:`, servers);
+            
+            // Store servers globally for fallback access
+            window.currentServers = servers;
 
             const playerContainer = document.querySelector('.player-container');
             let iframe = playerContainer.querySelector('iframe.external-content-iframe');
@@ -3898,7 +3901,7 @@
             
             // Enhanced HLS handling for M3U8 files
             if (mimeType === 'application/x-mpegURL') {
-                await handleHLSPlayback(url, playerInstance);
+                await handleHLSPlayback(url, playerInstance, servers);
             }
             
             // Autoplay regular video content
@@ -4125,28 +4128,74 @@
             }
         }
         
-        // Try alternative MPD sources
-        async function tryAlternativeMPDSources(originalUrl, servers) {
+        // Enhanced fallback system for all media types
+        async function tryAlternativeSources(originalUrl, servers, preferredType = null) {
             if (!servers || servers.length <= 1) {
-                elements.playerMessageArea.textContent = 'No alternative sources available.';
+                console.warn('No alternative sources available - only one server or no servers');
+                // Try to find any other sources that might work
+                await tryUniversalFallback(originalUrl, servers);
                 return;
             }
             
-            // Try other MPD sources from the same server list
-            for (const server of servers) {
-                if (server.url !== originalUrl && server.url.includes('.mpd')) {
-                    try {
-                        updateLoadingStatus(`Trying alternative source: ${server.name || 'Unknown'}`);
+            console.log(`🔄 Trying alternative sources. Original: ${originalUrl}, Total servers: ${servers.length}`);
+            
+            // Filter out the failed URL and categorize remaining servers
+            const alternativeServers = servers.filter(server => server.url !== originalUrl);
+            
+            if (alternativeServers.length === 0) {
+                elements.playerMessageArea.textContent = 'No alternative servers available.';
+                elements.playerMessageArea.classList.add('error');
+                elements.playerMessageArea.style.display = 'block';
+                return;
+            }
+            
+            // Try servers in order of preference: same type first, then others
+            const sameTypeServers = [];
+            const differentTypeServers = [];
+            
+            alternativeServers.forEach(server => {
+                if (preferredType && server.url.includes(preferredType)) {
+                    sameTypeServers.push(server);
+                } else {
+                    differentTypeServers.push(server);
+                }
+            });
+            
+            // Try same type first, then different types
+            const serversToTry = [...sameTypeServers, ...differentTypeServers];
+            
+            for (const server of serversToTry) {
+                try {
+                    console.log(`🔄 Trying alternative server: ${server.name || 'Unknown'} (${server.url})`);
+                    updateLoadingStatus(`Trying alternative source: ${server.name || 'Unknown'}...`);
+                    
+                    // Use appropriate handler based on URL type
+                    if (server.url.includes('.mpd')) {
                         await handleMPDStream(server.url, servers);
-                        return;
-                    } catch (error) {
-                        console.warn('Alternative source failed:', server.url, error);
-                        continue;
+                    } else if (server.url.includes('.m3u8')) {
+                        await handleHLSPlayback(server.url, playerInstance, servers);
+                    } else {
+                        // Use playUrl for other types (embedded, direct links)
+                        await playUrl(server.url, servers);
                     }
+                    
+                    console.log(`✅ Successfully switched to alternative server: ${server.name || 'Unknown'}`);
+                    return; // Success, stop trying
+                    
+                } catch (error) {
+                    console.warn(`❌ Alternative server failed: ${server.name || 'Unknown'}`, error);
+                    continue; // Try next server
                 }
             }
             
-            updateLoadingStatus('All MPD sources failed. Please try again later.', true);
+            // If all alternatives failed
+            updateLoadingStatus('All alternative sources failed. Please try again later.', true);
+            console.error('❌ All alternative sources failed');
+        }
+
+        // Legacy function for MPD-specific fallback (now uses enhanced system)
+        async function tryAlternativeMPDSources(originalUrl, servers) {
+            await tryAlternativeSources(originalUrl, servers, '.mpd');
         }
         
         // Detect DRM protection in MPD manifest
@@ -4509,7 +4558,7 @@
                 
                 // Handle different server types appropriately
                 if (server.url.includes('.m3u8')) {
-                    await handleHLSPlayback(server.url, playerInstance);
+                    await handleHLSPlayback(server.url, playerInstance, allServers);
                 } else {
                     // Use playUrl for all other types (MPD, embedded, direct links)
                     await playUrl(server.url, allServers);
@@ -4586,14 +4635,18 @@
             }, 3000);
         }
         
-        // Function to automatically try next server if current one fails
+        // Enhanced function to automatically try next server if current one fails
         async function tryNextServer(servers, currentServerIndex = 0) {
-            if (!servers || servers.length <= 1) return false;
+            if (!servers || servers.length <= 1) {
+                console.warn('Cannot try next server - insufficient servers available');
+                return false;
+            }
             
             const nextIndex = (currentServerIndex + 1) % servers.length;
             const nextServer = servers[nextIndex];
             
             try {
+                console.log(`🔄 Trying next server: ${nextServer.name || 'Unknown'} (${nextServer.url})`);
                 showServerSwitchFeedback(`Trying next server: ${nextServer.name || 'Unknown'}`);
                 await switchToServer(nextServer, servers);
                 return true;
@@ -4601,44 +4654,58 @@
                 console.error('Failed to switch to next server:', error);
                 if (nextIndex !== 0) { // Don't loop infinitely
                     return await tryNextServer(servers, nextIndex);
+                } else {
+                    // All servers failed, try universal fallback
+                    console.log('🔄 All servers failed, attempting universal fallback...');
+                    const currentUrl = servers[currentServerIndex]?.url;
+                    await tryUniversalFallback(currentUrl, servers);
+                    return false;
                 }
-                return false;
             }
         }
         
         // Server selector now uses a dropdown under description; no floating toggle shortcuts needed
         
-        // Automatic fallback between DRM and non-DRM sources with auto-Shaka loading
-        async function handleAutomaticFallback(originalUrl, servers, drmFailed = false) {
-            if (!servers || servers.length <= 1) {
-                elements.playerMessageArea.textContent = 'No alternative sources available for fallback.';
-                return false;
-            }
+        // Universal fallback for edge cases
+        async function tryUniversalFallback(originalUrl, servers) {
+            console.log('🔄 Attempting universal fallback...');
             
-            // If DRM failed, try non-DRM sources first
-            let fallbackServers = servers;
-            if (drmFailed) {
-                fallbackServers = servers.filter(s => !s.drm && !s.url.includes('.mpd'));
-                if (fallbackServers.length === 0) {
-                    fallbackServers = servers; // Fall back to all servers if no non-DRM available
-                }
-            }
-            
-            // Try alternative sources
-            for (const server of fallbackServers) {
-                if (server.url === originalUrl) continue;
+            // Even with one server, try different approaches
+            if (servers && servers.length > 0) {
+                const server = servers[0];
                 
                 try {
-                    elements.playerMessageArea.textContent = `Trying fallback source: ${server.name || 'Unknown'}`;
-                    
-                    if (server.url.includes('.mpd')) {
-                        // Auto-load Shaka Player for MPD fallback
-                        await autoLoadShakaPlayer(server.url, servers);
-                    } else if (server.url.includes('.m3u8')) {
-                        // Handle M3U8 files with proper HLS logic
-                        await handleHLSPlayback(server.url, playerInstance);
+                    // If original failed, try with different player approach
+                    if (server.url.includes('.m3u8')) {
+                        console.log('🔄 Retrying M3U8 with fallback method...');
+                        // Try native HLS first, then fallback
+                        const video = elements.player;
+                        const canNativePlay = video.canPlayType('application/vnd.apple.mpegurl');
+                        
+                        if (canNativePlay === 'probably' || canNativePlay === 'maybe') {
+                            playerInstance.source = {
+                                type: 'video',
+                                sources: [{
+                                    src: server.url,
+                                    type: 'application/x-mpegURL'
+                                }]
+                            };
+                        } else {
+                            // Force regular Plyr attempt
+                            playerInstance.source = {
+                                type: 'video',
+                                sources: [{
+                                    src: server.url,
+                                    type: 'application/x-mpegURL'
+                                }]
+                            };
+                        }
+                    } else if (server.url.includes('.mpd')) {
+                        console.log('🔄 Retrying MPD with simplified approach...');
+                        // Try without DRM first
+                        await playNonDRMMPD(server.url);
                     } else {
-                        // Try regular video source
+                        console.log('🔄 Retrying with basic Plyr...');
                         playerInstance.source = {
                             type: 'video',
                             sources: [{
@@ -4648,17 +4715,40 @@
                         };
                     }
                     
-                    console.log(`✅ Fallback successful: ${server.url}`);
-                    return true;
+                    console.log('✅ Universal fallback attempt completed');
                     
                 } catch (error) {
-                    console.warn(`⚠️ Fallback failed: ${server.url}`, error);
-                    continue;
+                    console.error('❌ Universal fallback failed:', error);
+                    elements.playerMessageArea.textContent = 'Unable to play this content. Please try another source.';
+                    elements.playerMessageArea.classList.add('error');
+                    elements.playerMessageArea.style.display = 'block';
                 }
+            } else {
+                elements.playerMessageArea.textContent = 'No sources available to play.';
+                elements.playerMessageArea.classList.add('error');
+                elements.playerMessageArea.style.display = 'block';
+            }
+        }
+
+        // Enhanced automatic fallback system
+        async function handleAutomaticFallback(originalUrl, servers, drmFailed = false) {
+            console.log(`🔄 Starting automatic fallback. DRM failed: ${drmFailed}, Servers: ${servers?.length || 0}`);
+            
+            if (!servers || servers.length === 0) {
+                elements.playerMessageArea.textContent = 'No sources available for fallback.';
+                elements.playerMessageArea.classList.add('error');
+                elements.playerMessageArea.style.display = 'block';
+                return false;
             }
             
-            elements.playerMessageArea.textContent = 'All fallback sources failed.';
-            return false;
+            // Use the enhanced fallback system
+            try {
+                await tryAlternativeSources(originalUrl, servers);
+                return true;
+            } catch (error) {
+                console.error('❌ Automatic fallback failed:', error);
+                return false;
+            }
         }
         
         // Auto-load Shaka Player for MPD streams
@@ -5169,9 +5259,13 @@
         }
 
         // Enhanced HLS playback handler for M3U8 files
-        async function handleHLSPlayback(url, playerInstance) {
+        async function handleHLSPlayback(url, playerInstance, servers = []) {
             try {
                 console.log('🎬 Starting HLS playback for:', url);
+                
+                // Store servers globally for error handling
+                window.currentServers = servers;
+                
                 const video = elements.player;
                 
                 // Check for native HLS support (Safari, iOS)
@@ -5247,25 +5341,46 @@
                     console.log('📊 HLS level loaded:', data.details);
                 });
                 
-                hls.on(Hls.Events.ERROR, (event, data) => {
+                hls.on(Hls.Events.ERROR, async (event, data) => {
                     console.error('❌ HLS Error:', data);
                     
                     if (data.fatal) {
                         switch (data.type) {
                             case Hls.ErrorTypes.NETWORK_ERROR:
                                 console.log('🔄 Trying to recover from network error...');
-                                hls.startLoad();
+                                try {
+                                    hls.startLoad();
+                                } catch (e) {
+                                    console.error('Network recovery failed, trying alternative sources...');
+                                    // Get the servers from the current context if available
+                                    const servers = window.currentServers || [];
+                                    await tryAlternativeSources(url, servers, '.m3u8');
+                                }
                                 break;
                             case Hls.ErrorTypes.MEDIA_ERROR:
                                 console.log('🔄 Trying to recover from media error...');
-                                hls.recoverMediaError();
+                                try {
+                                    hls.recoverMediaError();
+                                } catch (e) {
+                                    console.error('Media recovery failed, trying alternative sources...');
+                                    const servers = window.currentServers || [];
+                                    await tryAlternativeSources(url, servers, '.m3u8');
+                                }
                                 break;
                             default:
                                 console.error('💥 Fatal HLS error, cannot recover');
-                                elements.playerMessageArea.textContent = `HLS Error: ${data.details}`;
-                                elements.playerMessageArea.classList.add('error');
-                                elements.playerMessageArea.style.display = 'block';
                                 hls.destroy();
+                                
+                                // Try alternative sources before giving up
+                                const servers = window.currentServers || [];
+                                if (servers.length > 1) {
+                                    console.log('🔄 Trying alternative sources after fatal HLS error...');
+                                    await tryAlternativeSources(url, servers, '.m3u8');
+                                } else {
+                                    elements.playerMessageArea.textContent = `HLS Error: ${data.details}`;
+                                    elements.playerMessageArea.classList.add('error');
+                                    elements.playerMessageArea.style.display = 'block';
+                                }
                                 break;
                         }
                     }
@@ -5558,7 +5673,7 @@
                     
                     // Handle M3U8/HLS files with proper HLS.js integration
                     if (optimalServer.url.includes('.m3u8')) {
-                        await handleHLSPlayback(optimalServer.url, playerInstance);
+                        await handleHLSPlayback(optimalServer.url, playerInstance, servers);
                         // Update dropdown for server switching
                         updateServerDropdown(servers, optimalServer);
                         return;
