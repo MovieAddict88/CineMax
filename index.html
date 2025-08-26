@@ -3483,14 +3483,7 @@
                         }
                     });
                     
-                    // Add listener for source changes to restore controls
-                    playerInstance.on('loadstart', () => {
-                        console.log('🔄 Player source changing, will restore controls...');
-                        // Delay to ensure controls are properly restored after source change
-                        setTimeout(() => {
-                            restorePlyrControls();
-                        }, 500);
-                    });
+
                     playerInstance.on('exitfullscreen', () => {
                         if (screen.orientation && screen.orientation.unlock) {
                             screen.orientation.unlock();
@@ -4157,7 +4150,7 @@
         function restorePlyrControls() {
             setTimeout(() => {
                 if (playerInstance && playerInstance.elements && playerInstance.elements.container) {
-                    // Ensure Plyr player is visible
+                    // Only ensure Plyr player is visible
                     elements.player.style.display = 'block';
                     
                     // Hide any existing iframes
@@ -4167,43 +4160,14 @@
                         iframe.style.display = 'none';
                     }
                     
-                    // Force Plyr to refresh its UI and controls
-                    playerInstance.elements.container.style.display = 'block';
-                    
-                    // Ensure all controls are visible
-                    const controls = playerInstance.elements.controls;
-                    if (controls) {
-                        controls.style.display = 'block';
-                        controls.style.opacity = '1';
-                        controls.style.visibility = 'visible';
-                    }
-                    
-                    // Restore fullscreen and pip buttons specifically
-                    const fullscreenBtn = playerInstance.elements.buttons?.fullscreen;
-                    const pipBtn = playerInstance.elements.buttons?.pip;
-                    if (fullscreenBtn) {
-                        fullscreenBtn.style.display = 'block';
-                        fullscreenBtn.style.visibility = 'visible';
-                    }
-                    if (pipBtn) {
-                        pipBtn.style.display = 'block';
-                        pipBtn.style.visibility = 'visible';
-                    }
-                    
-                    // Trigger a resize event to ensure controls are properly positioned
+                    // Gently trigger a resize event to ensure controls are properly positioned
                     if (typeof Event !== 'undefined') {
                         window.dispatchEvent(new Event('resize'));
                     }
                     
-                    // Force controls to show by triggering a mouse event
-                    const playerElement = playerInstance.elements.container;
-                    if (playerElement) {
-                        playerElement.dispatchEvent(new MouseEvent('mousemove', { bubbles: true }));
-                    }
-                    
                     console.log('🔧 Plyr controls restored after server switch');
                 }
-            }, 300); // Increased timeout to ensure proper restoration
+            }, 100); // Reduced timeout to be less aggressive
         }
         
         // Hide server selector dropdown
@@ -4269,10 +4233,21 @@
                     if (!isNaN(selectedIndex) && servers[selectedIndex]) {
                         const selectedServer = servers[selectedIndex];
                         console.log(`🔄 Switching to server: ${selectedServer.name || 'Unknown'}`);
+                        
+                        // Check if switching from embedded to direct content
+                        const isEmbeddedUrl = isVidsrcUrl(selectedServer.url) || isVidjoyUrl(selectedServer.url) || 
+                                            isVidsrcMeUrl(selectedServer.url) || isVidsrcToUrl(selectedServer.url) || 
+                                            isVidsrcXyzUrl(selectedServer.url) || isGoDrivePlayerUrl(selectedServer.url) || 
+                                            isVidLinkProUrl(selectedServer.url) || is2EmbedUrl(selectedServer.url) || 
+                                            isEmbedSuUrl(selectedServer.url) || isAutoEmbedUrl(selectedServer.url) || 
+                                            isMegaNzUrl(selectedServer.url) || isGoogleDriveUrl(selectedServer.url);
+                        
                         switchToServer(selectedServer, servers);
                         
-                        // Restore Plyr controls after server switch for dropdown
-                        restorePlyrControls();
+                        // Only restore Plyr controls when switching to direct content (not embedded)
+                        if (!isEmbeddedUrl) {
+                            setTimeout(() => restorePlyrControls(), 200);
+                        }
                     }
                 });
             }
