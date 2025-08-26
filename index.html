@@ -1016,6 +1016,30 @@
             border-color: var(--youtube-red);
         }
 
+        .server-selector-dropdown {
+            margin-top: 8px; /* Minimal margin for space savings */
+        }
+        .server-selector-dropdown h4 {
+            font-size: 14px;
+            color: var(--light);
+            margin-bottom: 6px; /* Minimal margin */
+            font-weight: 600;
+        }
+        .server-selector {
+            width: 100%;
+            padding: 8px 10px; /* Slightly smaller padding than episode selector */
+            border-radius: 4px;
+            background-color: var(--youtube-dark-gray);
+            border: 1px solid var(--dark-3);
+            color: var(--light);
+            font-size: 13px; /* Slightly smaller font than episode selector */
+            cursor: pointer;
+        }
+        .server-selector:focus {
+            outline: none;
+            border-color: var(--youtube-red);
+        }
+
 
         .season-selector {
             display: none; /* JS handles visibility */
@@ -2467,6 +2491,13 @@
                             <select class="episode-selector" id="episode-selector">
                                 <!-- Episode options will be dynamically added -->
                             </select>
+                            <div class="server-selector-dropdown" id="server-selector-dropdown" style="display: none;">
+                                <h4>Server</h4>
+                                <select class="server-selector" id="server-selector">
+                                    <option value="">Select Server</option>
+                                    <!-- Server options will be dynamically added -->
+                                </select>
+                            </div>
                         </div>
 
                         <div class="season-selector" id="season-selector">
@@ -2608,6 +2639,8 @@
             playerServerSelector: document.getElementById('player-server-selector'),
             episodeSelectorContainer: document.getElementById('episode-selector-container'),
             episodeSelector: document.getElementById('episode-selector'),
+            serverSelectorDropdown: document.getElementById('server-selector-dropdown'),
+            serverSelector: document.getElementById('server-selector'),
             seasonSelector: document.getElementById('season-selector'),
             seasonsGrid: document.getElementById('seasons-grid'),
             relatedGrid: document.getElementById('related-grid'),
@@ -3550,9 +3583,9 @@
             if (isVidsrcUrl(url) || isVidjoyUrl(url) || isVidsrcMeUrl(url) || isVidsrcToUrl(url) || isVidsrcXyzUrl(url) || isGoDrivePlayerUrl(url) || isVidLinkProUrl(url) || is2EmbedUrl(url) || isEmbedSuUrl(url) || isAutoEmbedUrl(url)) {
                 elements.player.style.display = 'none'; // Hide Plyr player
                 
-                // Create universal server selector for multiple servers
+                // Create server selector dropdown for multiple servers
                 if (servers && servers.length > 1) {
-                    setTimeout(() => createUniversalServerSelector(servers, { url: url }), 100);
+                    setTimeout(() => createServerSelectorDropdown(servers, { url: url }), 100);
                 }
                 
                 if (!iframe) {
@@ -4097,6 +4130,68 @@
             console.log(`🎯 Selected optimal server: ${selectedServer.name || 'Unknown'} (MPD: ${selectedServer.isMPD}, DRM: ${selectedServer.hasDRMConfig})`);
             
             return selectedServer;
+        }
+        
+        // Create server selector dropdown in episode selector container
+        function createServerSelectorDropdown(servers, currentServer = null) {
+            // Hide existing universal server selectors
+            const existingUniversalSelector = document.getElementById('universal-server-selector');
+            if (existingUniversalSelector) {
+                existingUniversalSelector.style.display = 'none';
+            }
+            const existingEmbeddedSelector = document.getElementById('embedded-server-selector');
+            if (existingEmbeddedSelector) {
+                existingEmbeddedSelector.style.display = 'none';
+            }
+            const existingIndicator = document.getElementById('server-selector-indicator');
+            if (existingIndicator) {
+                existingIndicator.style.display = 'none';
+            }
+            
+            if (!servers || servers.length <= 1) {
+                // Hide server selector if only one or no servers
+                if (elements.serverSelectorDropdown) {
+                    elements.serverSelectorDropdown.style.display = 'none';
+                }
+                return;
+            }
+            
+            // Show and populate server selector dropdown
+            if (elements.serverSelectorDropdown && elements.serverSelector) {
+                elements.serverSelectorDropdown.style.display = 'block';
+                
+                // Clear existing options except the first default one
+                elements.serverSelector.innerHTML = '<option value="">Select Server</option>';
+                
+                // Add server options
+                servers.forEach((server, index) => {
+                    const option = document.createElement('option');
+                    option.value = index;
+                    option.textContent = server.name || `Server ${index + 1}`;
+                    
+                    // Mark current server as selected
+                    if (currentServer && server.url === currentServer.url) {
+                        option.selected = true;
+                    }
+                    
+                    elements.serverSelector.appendChild(option);
+                });
+                
+                // Remove existing event listeners and add new one
+                const newServerSelector = elements.serverSelector.cloneNode(true);
+                elements.serverSelector.parentNode.replaceChild(newServerSelector, elements.serverSelector);
+                elements.serverSelector = newServerSelector;
+                
+                // Add change event listener
+                elements.serverSelector.addEventListener('change', function() {
+                    const selectedIndex = parseInt(this.value);
+                    if (!isNaN(selectedIndex) && servers[selectedIndex]) {
+                        const selectedServer = servers[selectedIndex];
+                        console.log(`🔄 Switching to server: ${selectedServer.name || 'Unknown'}`);
+                        switchToServer(selectedServer, servers);
+                    }
+                });
+            }
         }
         
         // Create universal server selector for both Plyr and embedded sources
@@ -5773,9 +5868,9 @@
                         sources: sources,
                     };
                     
-                    // Create universal server selector for multiple servers
+                    // Create server selector dropdown for multiple servers
                     if (servers.length > 1) {
-                        createUniversalServerSelector(servers, optimalServer);
+                        createServerSelectorDropdown(servers, optimalServer);
                     }
                     
                     // Add error handling for automatic server switching
