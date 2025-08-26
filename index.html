@@ -3482,6 +3482,15 @@
                             });
                         }
                     });
+                    
+                    // Add listener for source changes to restore controls
+                    playerInstance.on('loadstart', () => {
+                        console.log('🔄 Player source changing, will restore controls...');
+                        // Delay to ensure controls are properly restored after source change
+                        setTimeout(() => {
+                            restorePlyrControls();
+                        }, 500);
+                    });
                     playerInstance.on('exitfullscreen', () => {
                         if (screen.orientation && screen.orientation.unlock) {
                             screen.orientation.unlock();
@@ -4144,6 +4153,59 @@
             return selectedServer;
         }
         
+        // Function to restore Plyr player controls after server switching
+        function restorePlyrControls() {
+            setTimeout(() => {
+                if (playerInstance && playerInstance.elements && playerInstance.elements.container) {
+                    // Ensure Plyr player is visible
+                    elements.player.style.display = 'block';
+                    
+                    // Hide any existing iframes
+                    const playerContainer = document.querySelector('.player-container');
+                    const iframe = playerContainer?.querySelector('iframe.external-content-iframe');
+                    if (iframe) {
+                        iframe.style.display = 'none';
+                    }
+                    
+                    // Force Plyr to refresh its UI and controls
+                    playerInstance.elements.container.style.display = 'block';
+                    
+                    // Ensure all controls are visible
+                    const controls = playerInstance.elements.controls;
+                    if (controls) {
+                        controls.style.display = 'block';
+                        controls.style.opacity = '1';
+                        controls.style.visibility = 'visible';
+                    }
+                    
+                    // Restore fullscreen and pip buttons specifically
+                    const fullscreenBtn = playerInstance.elements.buttons?.fullscreen;
+                    const pipBtn = playerInstance.elements.buttons?.pip;
+                    if (fullscreenBtn) {
+                        fullscreenBtn.style.display = 'block';
+                        fullscreenBtn.style.visibility = 'visible';
+                    }
+                    if (pipBtn) {
+                        pipBtn.style.display = 'block';
+                        pipBtn.style.visibility = 'visible';
+                    }
+                    
+                    // Trigger a resize event to ensure controls are properly positioned
+                    if (typeof Event !== 'undefined') {
+                        window.dispatchEvent(new Event('resize'));
+                    }
+                    
+                    // Force controls to show by triggering a mouse event
+                    const playerElement = playerInstance.elements.container;
+                    if (playerElement) {
+                        playerElement.dispatchEvent(new MouseEvent('mousemove', { bubbles: true }));
+                    }
+                    
+                    console.log('🔧 Plyr controls restored after server switch');
+                }
+            }, 300); // Increased timeout to ensure proper restoration
+        }
+        
         // Hide server selector dropdown
         function hideServerSelectorDropdown() {
             if (elements.serverSelectorDropdown) {
@@ -4208,6 +4270,9 @@
                         const selectedServer = servers[selectedIndex];
                         console.log(`🔄 Switching to server: ${selectedServer.name || 'Unknown'}`);
                         switchToServer(selectedServer, servers);
+                        
+                        // Restore Plyr controls after server switch for dropdown
+                        restorePlyrControls();
                     }
                 });
             }
