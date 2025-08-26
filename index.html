@@ -3418,8 +3418,9 @@
                         default: 720,
                         options: [1080, 720, 480, 360, 240],
                     },
-                    autoplay: false, // Start with autoplay disabled for better mobile compatibility
-                    muted: false, // Allow sound by default
+                    autoplay: true, // Enable autoplay for direct media links
+                    muted: true, // Start muted for autoplay compatibility
+                    preload: 'auto', // Preload media for faster start
                 });
 
                 playerInstance.once('ready', event => {
@@ -4090,37 +4091,97 @@
             }
         }
 
-        // Enhanced autoplay with mobile detection
+        // Enhanced autoplay with mobile detection and direct link support
         function enhancedAutoplay(videoElement, playerInstance = null) {
             // Check if it's a mobile device
             const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
             
-            if (isMobile) {
-                // On mobile, try muted autoplay first (more likely to work)
-                videoElement.muted = true;
-                videoElement.play().then(() => {
-                    console.log('✅ Mobile muted autoplay successful');
+            // Set preload attribute for better loading
+            try {
+                videoElement.setAttribute('preload', 'auto');
+                videoElement.setAttribute('crossorigin', 'anonymous');
+            } catch (e) {
+                console.warn('Failed to set video attributes:', e);
+            }
+            
+            // Function to attempt autoplay with multiple strategies
+            const attemptAutoplay = async () => {
+                try {
+                    // Strategy 1: Try muted autoplay first (most likely to work)
+                    videoElement.muted = true;
+                    await videoElement.play();
+                    console.log('✅ Muted autoplay successful');
+                    
                     // Unmute after successful autoplay
                     setTimeout(() => {
                         videoElement.muted = false;
-                    }, 100);
-                }).catch(error => {
-                    console.log('Mobile muted autoplay failed:', error);
-                    // Show play button for manual start
-                    showPlayButton();
+                        if (playerInstance) {
+                            playerInstance.muted = false;
+                        }
+                    }, 500);
+                    
+                } catch (error) {
+                    console.log('Muted autoplay failed:', error);
+                    
+                    // Strategy 2: Try with user interaction simulation
+                    try {
+                        videoElement.muted = false;
+                        await videoElement.play();
+                        console.log('✅ Unmuted autoplay successful');
+                    } catch (error2) {
+                        console.log('Unmuted autoplay failed:', error2);
+                        
+                        // Strategy 3: Try with Plyr player if available
+                        if (playerInstance && typeof playerInstance.play === 'function') {
+                            try {
+                                await playerInstance.play();
+                                console.log('✅ Plyr autoplay successful');
+                            } catch (error3) {
+                                console.log('Plyr autoplay failed:', error3);
+                                showPlayButton();
+                            }
+                        } else {
+                            showPlayButton();
+                        }
+                    }
+                }
+            };
+            
+            // Execute autoplay attempt
+            attemptAutoplay();
+        }
+
+        // Detect if URL is a direct media link
+        function isDirectMediaLink(url) {
+            const mediaExtensions = ['.mp4', '.mkv', '.m3u8', '.webm', '.ogg', '.avi', '.mov', '.wmv', '.flv'];
+            return mediaExtensions.some(ext => url.toLowerCase().includes(ext));
+        }
+
+        // Test if a direct media link is accessible
+        async function testMediaLink(url) {
+            try {
+                const response = await fetch(url, { 
+                    method: 'HEAD',
+                    mode: 'cors'
                 });
-            } else {
-                // On desktop, try normal autoplay
-                videoElement.play().then(() => {
-                    console.log('✅ Desktop autoplay successful');
-                }).catch(error => {
-                    console.log('Desktop autoplay failed:', error);
-                    showPlayButton();
-                });
+                return response.ok;
+            } catch (error) {
+                console.warn('Media link test failed:', error);
+                // If HEAD request fails, try GET request
+                try {
+                    const response = await fetch(url, { 
+                        method: 'GET',
+                        mode: 'cors'
+                    });
+                    return response.ok;
+                } catch (error2) {
+                    console.warn('Media link GET test also failed:', error2);
+                    return false;
+                }
             }
         }
 
-        // Enhanced server selection with universal DRM awareness
+        // Enhanced server selection with universal DRM awareness and link testing
         function selectOptimalServer(servers) {
             if (!servers || servers.length === 0) return null;
             
@@ -5054,15 +5115,42 @@
             return id;
         }
         
-        // Enhanced player source update with DRM awareness
+                // Enhanced player source update with DRM awareness and direct link support
         async function updatePlayerSource(servers) {
             if (!playerInstance) return;
+
+            console.log('🎬 updatePlayerSource called with servers:', servers);
+
+            // Add loading indicator for direct media links
+            const showLoadingMessage = (message) => {
+                if (elements.playerMessageArea) {
+                    elements.playerMessageArea.style.display = 'block';
+                    elements.playerMessageArea.textContent = message;
+                }
+                console.log('📺 Loading message:', message);
+            };
+
+            const hideLoadingMessage = () => {
+                if (elements.playerMessageArea) {
+                    elements.playerMessageArea.style.display = 'none';
+                }
+                console.log('✅ Loading complete');
+            };
 
             if (servers && servers.length > 0) {
                 // Use DRM-aware server selection
                 const optimalServer = selectOptimalServer(servers);
                 
                 if (optimalServer) {
+                    // Show loading message for direct media links
+                    showLoadingMessage('Loading media...');
+                    
+                    // Check if it's a direct media link
+                    if (isDirectMediaLink(optimalServer.url)) {
+                        console.log('🎬 Direct media link detected:', optimalServer.url);
+                        showLoadingMessage('Loading direct media...');
+                    }
+                    
                     // Check for special URLs first
                     if (isVidsrcUrl(optimalServer.url) || isVidjoyUrl(optimalServer.url) || isVideasyUrl(optimalServer.url) || isVidsrcMeUrl(optimalServer.url) || isVidsrcToUrl(optimalServer.url) || isVidsrcXyzUrl(optimalServer.url) || isGoDrivePlayerUrl(optimalServer.url) || isVidLinkProUrl(optimalServer.url) || is2EmbedUrl(optimalServer.url) || isEmbedSuUrl(optimalServer.url) || isAutoEmbedUrl(optimalServer.url) || isMegaNzUrl(optimalServer.url) || isGoogleDriveUrl(optimalServer.url)) {
                         playUrl(optimalServer.url, servers);
@@ -5075,12 +5163,29 @@
                         return;
                     }
                     
-                    // Handle regular video sources
-                    const sources = servers.map(server => ({
-                        src: server.url,
-                        size: parseInt(server.name?.replace(/\D/g, '') || '0'),
-                        type: server.url.includes('m3u8') ? 'application/x-mpegURL' : 'video/mp4'
-                    }));
+                    // Handle regular video sources with better MIME type detection
+                    const sources = servers.map(server => {
+                        let type = 'video/mp4'; // Default type
+                        
+                        // Detect MIME type based on file extension
+                        if (server.url.includes('m3u8')) {
+                            type = 'application/x-mpegURL';
+                        } else if (server.url.includes('mkv')) {
+                            type = 'video/x-matroska';
+                        } else if (server.url.includes('webm')) {
+                            type = 'video/webm';
+                        } else if (server.url.includes('ogg')) {
+                            type = 'video/ogg';
+                        } else if (server.url.includes('avi')) {
+                            type = 'video/x-msvideo';
+                        }
+                        
+                        return {
+                            src: server.url,
+                            size: parseInt(server.name?.replace(/\D/g, '') || '0'),
+                            type: type
+                        };
+                    });
                     
                     // If any source is HLS, ensure Hls.js is available
                     const hasHls = sources.some(s => s.type === 'application/x-mpegURL');
@@ -5088,17 +5193,54 @@
                         try { await loadHlsJsIfNeeded(optimalServer.url); } catch (e) { console.warn('Hls load failed', e); }
                     }
 
-                    playerInstance.source = {
-                        type: 'video',
-                        sources: sources,
-                    };
+                    // Set source with better error handling
+                    try {
+                        playerInstance.source = {
+                            type: 'video',
+                            sources: sources,
+                        };
+                        
+                        // Hide loading message after successful source setting
+                        hideLoadingMessage();
+                        
+                        // Add event listeners for better loading feedback
+                        elements.player.addEventListener('loadstart', () => {
+                            showLoadingMessage('Loading media...');
+                        }, { once: true });
+                        
+                        elements.player.addEventListener('canplay', () => {
+                            hideLoadingMessage();
+                        }, { once: true });
+                        
+                        elements.player.addEventListener('error', (e) => {
+                            console.error('Video loading error:', e);
+                            showLoadingMessage('Error loading media. Trying alternative source...');
+                        });
+                        
+                    } catch (error) {
+                        console.error('Failed to set player source:', error);
+                        showLoadingMessage('Failed to load media source');
+                    }
                     
-                    // Attempt autoplay after setting sources
+                    // Attempt autoplay after setting sources with better timing
                     setTimeout(() => {
                         if (playerInstance && typeof playerInstance.play === 'function') {
                             enhancedAutoplay(elements.player, playerInstance);
                         }
-                    }, 500);
+                    }, 1000); // Increased delay for better loading
+                    
+                    // Additional autoplay attempts with progressive delays
+                    setTimeout(() => {
+                        if (playerInstance && typeof playerInstance.play === 'function') {
+                            enhancedAutoplay(elements.player, playerInstance);
+                        }
+                    }, 2000);
+                    
+                    setTimeout(() => {
+                        if (playerInstance && typeof playerInstance.play === 'function') {
+                            enhancedAutoplay(elements.player, playerInstance);
+                        }
+                    }, 3000);
                     
                     // Update dropdown spinner under description for multiple servers
                     updateServerDropdown(servers, optimalServer);
