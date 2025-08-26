@@ -4464,6 +4464,9 @@
                             sources: sources,
                         };
                         
+                        // Ensure stretch button persists after source change
+                        addStretchButtonToPlayer();
+                        
                         // Play the selected server
                         playerInstance.play();
                     }
@@ -5373,6 +5376,9 @@
                             sources: sources,
                         };
                         
+                        // Ensure stretch button persists after source change
+                        addStretchButtonToPlayer();
+                        
                         // Play the selected server
                         playerInstance.play();
                     }
@@ -5862,6 +5868,9 @@
                         sources: sources,
                     };
                     
+                    // Ensure stretch button persists after source change
+                    addStretchButtonToPlayer();
+                    
                     // Update in-page server dropdown for multiple servers
                     updateServerDropdown(servers, optimalServer);
                     
@@ -6334,24 +6343,38 @@
             const controlsContainer = playerInstance.elements.controls;
             const settingsButton = controlsContainer.querySelector('button[data-plyr="settings"]');
 
-            // Create the button
-            const stretchButton = document.createElement('button');
-            stretchButton.type = 'button';
-            stretchButton.className = 'plyr__controls__item plyr__control';
-            stretchButton.innerHTML = '<i class="fas fa-expand-arrows-alt"></i>';
-            stretchButton.setAttribute('aria-label', 'Stretch');
+            // Reuse existing button if it already exists to avoid duplicates
+            let stretchButton = controlsContainer.querySelector('button[aria-label="Stretch"]');
+            if (!stretchButton) {
+                stretchButton = document.createElement('button');
+                stretchButton.type = 'button';
+                stretchButton.className = 'plyr__controls__item plyr__control';
+                stretchButton.innerHTML = '<i class="fas fa-expand-arrows-alt"></i>';
+                stretchButton.setAttribute('aria-label', 'Stretch');
 
-            // Add event listener
-            stretchButton.addEventListener('click', () => {
-                toggleStretch();
-                stretchButton.classList.toggle('active');
-            });
+                // Add event listener
+                stretchButton.addEventListener('click', () => {
+                    toggleStretch();
+                    stretchButton.classList.toggle('active');
+                });
 
-            // Insert before the settings button
-            if (settingsButton) {
-                settingsButton.parentNode.insertBefore(stretchButton, settingsButton);
+                // Insert before the settings button
+                if (settingsButton) {
+                    settingsButton.parentNode.insertBefore(stretchButton, settingsButton);
+                } else {
+                    controlsContainer.appendChild(stretchButton);
+                }
+            }
+
+            // Sync visual state and video fit
+            const videoElement = playerInstance.elements.container.querySelector('video');
+            if (videoElement) {
+                videoElement.style.objectFit = isStretched ? 'fill' : 'contain';
+            }
+            if (isStretched) {
+                stretchButton.classList.add('active');
             } else {
-                controlsContainer.appendChild(stretchButton);
+                stretchButton.classList.remove('active');
             }
         }
         
