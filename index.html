@@ -3438,6 +3438,16 @@
                 dashPlayer.reset();
                 dashPlayer = null;
             }
+            // Clean up HLS instance
+            if (window._currentHls) {
+                try {
+                    window._currentHls.destroy();
+                    window._currentHls = null;
+                    console.log('🧹 Cleaned up HLS instance');
+                } catch (e) {
+                    console.warn('Failed to destroy HLS instance:', e);
+                }
+            }
 
             // Re-create the video element to ensure a clean state
             const playerContainer = document.querySelector('.player-container');
@@ -3635,6 +3645,17 @@
             if (dashPlayer) {
                 dashPlayer.reset();
                 dashPlayer = null;
+            }
+            
+            // Clean up HLS instance if switching content
+            if (window._currentHls) {
+                try {
+                    window._currentHls.destroy();
+                    window._currentHls = null;
+                    console.log('🧹 Cleaned up previous HLS instance');
+                } catch (e) {
+                    console.warn('Failed to destroy HLS instance:', e);
+                }
             }
 
             // Always stop Plyr if it's playing, before deciding what to do next.
@@ -3875,26 +3896,9 @@
             // Ensure the video element preloads data for faster start
             try { elements.player.setAttribute('preload', 'auto'); } catch (e) {}
             
-            // If HLS is used and the browser lacks native support, bind Hls.js explicitly
+            // Enhanced HLS handling for M3U8 files
             if (mimeType === 'application/x-mpegURL') {
-                try {
-                    const video = elements.player;
-                    const canNativePlay = video.canPlayType('application/vnd.apple.mpegurl');
-                    if ((canNativePlay !== 'probably' && canNativePlay !== 'maybe') && window.Hls && window.Hls.isSupported && window.Hls.isSupported()) {
-                        if (window._currentHls) { try { window._currentHls.destroy(); } catch (_) {} }
-                        const hls = new Hls();
-                        window._currentHls = hls;
-                        hls.attachMedia(video);
-                        hls.on(Hls.Events.MEDIA_ATTACHED, () => {
-                            hls.loadSource(url);
-                        });
-                        hls.on(Hls.Events.MANIFEST_PARSED, () => {
-                            enhancedAutoplay(video, playerInstance);
-                        });
-                    }
-                } catch (e) {
-                    console.warn('HLS attach failed:', e);
-                }
+                await handleHLSPlayback(url, playerInstance);
             }
             
             // Autoplay regular video content
@@ -4492,8 +4496,24 @@
                     playerInstance.pause();
                 }
                 
-                // Always call playUrl to ensure proper content loading regardless of server type
-                await playUrl(server.url, allServers);
+                // Clean up HLS instance when switching servers
+                if (window._currentHls && server.url.includes('.m3u8')) {
+                    try {
+                        window._currentHls.destroy();
+                        window._currentHls = null;
+                        console.log('🧹 Cleaned up HLS instance for server switch');
+                    } catch (e) {
+                        console.warn('Failed to destroy HLS instance:', e);
+                    }
+                }
+                
+                // Handle different server types appropriately
+                if (server.url.includes('.m3u8')) {
+                    await handleHLSPlayback(server.url, playerInstance);
+                } else {
+                    // Use playUrl for all other types (MPD, embedded, direct links)
+                    await playUrl(server.url, allServers);
+                }
                 
                 // Update current server tracking
                 window.currentServer = server;
@@ -4614,13 +4634,16 @@
                     if (server.url.includes('.mpd')) {
                         // Auto-load Shaka Player for MPD fallback
                         await autoLoadShakaPlayer(server.url, servers);
+                    } else if (server.url.includes('.m3u8')) {
+                        // Handle M3U8 files with proper HLS logic
+                        await handleHLSPlayback(server.url, playerInstance);
                     } else {
                         // Try regular video source
                         playerInstance.source = {
                             type: 'video',
                             sources: [{
                                 src: server.url,
-                                type: server.url.includes('m3u8') ? 'application/x-mpegURL' : 'video/mp4'
+                                type: 'video/mp4'
                             }]
                         };
                     }
@@ -5145,28 +5168,156 @@
             return url.includes('vidjoy.pro/embed');
         }
 
-        // Lightweight loader for Hls.js to play .m3u8 on browsers without native HLS
+        // Enhanced HLS playback handler for M3U8 files
+        async function handleHLSPlayback(url, playerInstance) {
+            try {
+                console.log('🎬 Starting HLS playback for:', url);
+                const video = elements.player;
+                
+                // Check for native HLS support (Safari, iOS)
+                const canNativePlay = video.canPlayType('application/vnd.apple.mpegurl');
+                const hasNativeSupport = canNativePlay === 'probably' || canNativePlay === 'maybe';
+                
+                if (hasNativeSupport) {
+                    console.log('✅ Using native HLS support');
+                    // Use native HLS support - just set the source normally
+                    playerInstance.source = {
+                        type: 'video',
+                        sources: [{
+                            src: url,
+                            type: 'application/x-mpegURL'
+                        }]
+                    };
+                    
+                    // Auto-play after a short delay
+                    setTimeout(() => {
+                        enhancedAutoplay(video, playerInstance);
+                    }, 500);
+                    
+                    return;
+                }
+                
+                // Load HLS.js for browsers without native support
+                console.log('🔄 Loading HLS.js for M3U8 playback...');
+                await loadHlsJsLibrary();
+                
+                if (!window.Hls || !window.Hls.isSupported()) {
+                    throw new Error('HLS.js is not supported in this browser');
+                }
+                
+                // Clean up any existing HLS instance
+                if (window._currentHls) {
+                    try {
+                        window._currentHls.destroy();
+                        console.log('🧹 Cleaned up previous HLS instance');
+                    } catch (e) {
+                        console.warn('Failed to destroy previous HLS instance:', e);
+                    }
+                }
+                
+                // Create new HLS instance
+                const hls = new Hls({
+                    debug: false,
+                    enableWorker: true,
+                    lowLatencyMode: true,
+                    backBufferLength: 90
+                });
+                
+                window._currentHls = hls;
+                
+                // Set up HLS event listeners
+                hls.on(Hls.Events.MEDIA_ATTACHED, () => {
+                    console.log('📺 HLS media attached, loading source...');
+                    hls.loadSource(url);
+                });
+                
+                hls.on(Hls.Events.MANIFEST_PARSED, (event, data) => {
+                    console.log('✅ HLS manifest parsed successfully', data);
+                    // Hide loading indicators
+                    if (window.hidePlyrLoading) {
+                        window.hidePlyrLoading();
+                    }
+                    elements.playerMessageArea.style.display = 'none';
+                    
+                    // Auto-play the stream
+                    enhancedAutoplay(video, playerInstance);
+                });
+                
+                hls.on(Hls.Events.LEVEL_LOADED, (event, data) => {
+                    console.log('📊 HLS level loaded:', data.details);
+                });
+                
+                hls.on(Hls.Events.ERROR, (event, data) => {
+                    console.error('❌ HLS Error:', data);
+                    
+                    if (data.fatal) {
+                        switch (data.type) {
+                            case Hls.ErrorTypes.NETWORK_ERROR:
+                                console.log('🔄 Trying to recover from network error...');
+                                hls.startLoad();
+                                break;
+                            case Hls.ErrorTypes.MEDIA_ERROR:
+                                console.log('🔄 Trying to recover from media error...');
+                                hls.recoverMediaError();
+                                break;
+                            default:
+                                console.error('💥 Fatal HLS error, cannot recover');
+                                elements.playerMessageArea.textContent = `HLS Error: ${data.details}`;
+                                elements.playerMessageArea.classList.add('error');
+                                elements.playerMessageArea.style.display = 'block';
+                                hls.destroy();
+                                break;
+                        }
+                    }
+                });
+                
+                // Attach HLS to video element
+                hls.attachMedia(video);
+                console.log('🔗 HLS.js attached to video element');
+                
+            } catch (error) {
+                console.error('❌ HLS playback failed:', error);
+                elements.playerMessageArea.textContent = `Failed to load HLS stream: ${error.message}`;
+                elements.playerMessageArea.classList.add('error');
+                elements.playerMessageArea.style.display = 'block';
+                
+                // Fallback: try regular Plyr playback
+                console.log('🔄 Falling back to regular Plyr playback...');
+                playerInstance.source = {
+                    type: 'video',
+                    sources: [{
+                        src: url,
+                        type: 'application/x-mpegURL'
+                    }]
+                };
+            }
+        }
+
+        // Load HLS.js library dynamically
+        async function loadHlsJsLibrary() {
+            if (window.Hls) {
+                return; // Already loaded
+            }
+            
+            return new Promise((resolve, reject) => {
+                const script = document.createElement('script');
+                script.src = 'https://cdn.jsdelivr.net/npm/hls.js@1.5.15/dist/hls.min.js';
+                script.onload = () => {
+                    console.log('✅ HLS.js library loaded successfully');
+                    resolve();
+                };
+                script.onerror = () => {
+                    console.error('❌ Failed to load HLS.js library');
+                    reject(new Error('Failed to load HLS.js'));
+                };
+                document.head.appendChild(script);
+            });
+        }
+
+        // Legacy function for compatibility
         async function loadHlsJsIfNeeded(sampleUrlForLog = '') {
             try {
-                const video = elements.player;
-                const canNativePlay = video.canPlayType('application/vnd.apple.mpegurl');
-                if (canNativePlay === 'probably' || canNativePlay === 'maybe') {
-                    return; // native support
-                }
-                if (!window.Hls) {
-                    await new Promise((resolve, reject) => {
-                        const script = document.createElement('script');
-                        script.src = 'https://cdn.jsdelivr.net/npm/hls.js@1.5.7/dist/hls.min.js';
-                        script.onload = resolve;
-                        script.onerror = reject;
-                        document.head.appendChild(script);
-                    });
-                }
-                if (window.Hls && !video._hlsBound) {
-                    // Simple hook: when Plyr sets an HLS source, the browser will fetch via video.src
-                    // If it fails, dev can fallback to custom Hls attachMedia. We keep it minimal.
-                    video._hlsBound = true;
-                }
+                await loadHlsJsLibrary();
                 console.log('Hls.js ready for HLS playback', sampleUrlForLog ? { url: sampleUrlForLog } : '');
             } catch (e) {
                 console.warn('Hls.js loader error:', e);
@@ -5405,18 +5556,20 @@
                         return;
                     }
                     
-                    // Handle regular video sources
+                    // Handle M3U8/HLS files with proper HLS.js integration
+                    if (optimalServer.url.includes('.m3u8')) {
+                        await handleHLSPlayback(optimalServer.url, playerInstance);
+                        // Update dropdown for server switching
+                        updateServerDropdown(servers, optimalServer);
+                        return;
+                    }
+                    
+                    // Handle regular video sources (MP4, WebM, etc.)
                     const sources = servers.map(server => ({
                         src: server.url,
                         size: parseInt(server.name?.replace(/\D/g, '') || '0'),
-                        type: server.url.includes('m3u8') ? 'application/x-mpegURL' : 'video/mp4'
+                        type: 'video/mp4' // Only non-HLS sources should reach here
                     }));
-                    
-                    // If any source is HLS, ensure Hls.js is available
-                    const hasHls = sources.some(s => s.type === 'application/x-mpegURL');
-                    if (hasHls) {
-                        try { await loadHlsJsIfNeeded(optimalServer.url); } catch (e) { console.warn('Hls load failed', e); }
-                    }
 
                     playerInstance.source = {
                         type: 'video',
