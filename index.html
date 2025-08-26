@@ -3418,15 +3418,8 @@
                         default: 720,
                         options: [1080, 720, 480, 360, 240],
                     },
-                    autoplay: true, // Enable autoplay for better user experience
-                    muted: true, // Start muted to comply with autoplay policies
-                    preload: 'auto', // Preload media data
-                    playsinline: true, // Important for mobile devices
-                    hideControls: false,
-                    resetOnEnd: false,
-                    keyboard: { focused: true, global: true },
-                    tooltips: { controls: true, seek: true },
-                    captions: { active: false, language: 'auto', update: false }
+                    autoplay: false, // Start with autoplay disabled for better mobile compatibility
+                    muted: false, // Allow sound by default
                 });
 
                 playerInstance.once('ready', event => {
@@ -3670,124 +3663,86 @@
                 return;
             }
 
-            // Enhanced universal video format handling for Plyr
+            // Universal video format handling for Plyr
             const formatInfo = detectChannelFormat(url);
             console.log(`📺 Playing ${formatInfo.type} content (${formatInfo.quality}) with ${formatInfo.recommendedPlayer}`);
             
-            // Run comprehensive debugging for direct media links
-            if (url.includes('.mp4') || url.includes('.mkv') || url.includes('.m3u8') || 
-                url.includes('.webm') || url.includes('.avi') || url.includes('.mov') || url.includes('.flv')) {
-                debugMediaPlayback(url);
+            // Determine MIME type based on format
+            let mimeType = 'video/mp4'; // Default
+            if (url.includes('.m3u8')) {
+                mimeType = 'application/x-mpegURL';
+            } else if (url.includes('.webm')) {
+                mimeType = 'video/webm';
+            } else if (url.includes('.avi')) {
+                mimeType = 'video/x-msvideo';
+            } else if (url.includes('.mkv')) {
+                mimeType = 'video/x-matroska';
+            } else if (url.includes('.mov')) {
+                mimeType = 'video/quicktime';
+            } else if (url.includes('.flv')) {
+                mimeType = 'video/x-flv';
             }
             
-            // Test media format support and get MIME type
-            const mediaSupport = testMediaFormatSupport(url);
-            const mimeType = mediaSupport.mimeType;
-            
-            // Log format support information
-            if (!mediaSupport.supported) {
-                console.warn(`⚠️ Browser may not support ${mediaSupport.extension} format natively`);
-                updateLoadingStatus(`Format ${mediaSupport.extension.toUpperCase()} may not be supported. Trying anyway...`, false);
-            }
-            
-            // Enhanced HLS support with better error handling
+            // Ensure HLS support on browsers that need it
             if (mimeType === 'application/x-mpegURL') {
                 try {
                     await loadHlsJsIfNeeded(url);
                 } catch (e) {
-                    console.error('Failed to load Hls.js dynamically:', e);
-                    updateLoadingStatus('HLS playback not available. Please try a different source.', true);
-                    return;
+                    console.warn('Failed to load Hls.js dynamically:', e);
                 }
             }
 
             console.log(`🎯 Setting Plyr player source for direct link: ${url}`);
-            
-            // Set player source with enhanced configuration
             playerInstance.source = {
                 type: 'video',
                 sources: [{
                     src: url,
-                    type: mimeType,
-                    size: 1080 // Default quality
+                    type: mimeType
                 }]
             };
             
-            // Enhanced preload and autoload settings
-            try { 
-                elements.player.setAttribute('preload', 'auto'); 
-                elements.player.setAttribute('autoload', 'metadata');
-                elements.player.setAttribute('playsinline', 'true');
-            } catch (e) {
-                console.warn('Failed to set video attributes:', e);
-            }
+            // Ensure the video element preloads data for faster start
+            try { elements.player.setAttribute('preload', 'auto'); } catch (e) {}
             
-            // Enhanced HLS handling with better error recovery
+            // If HLS is used and the browser lacks native support, bind Hls.js explicitly
             if (mimeType === 'application/x-mpegURL') {
                 try {
                     const video = elements.player;
                     const canNativePlay = video.canPlayType('application/vnd.apple.mpegurl');
-                    const canNativePlayHLS = video.canPlayType('application/x-mpegURL');
-                    
-                    if ((canNativePlay !== 'probably' && canNativePlay !== 'maybe' && 
-                         canNativePlayHLS !== 'probably' && canNativePlayHLS !== 'maybe') && 
-                        window.Hls && window.Hls.isSupported && window.Hls.isSupported()) {
-                        
-                        // Clean up existing HLS instance
-                        if (window._currentHls) { 
-                            try { 
-                                window._currentHls.destroy(); 
-                            } catch (_) {} 
-                        }
-                        
-                        const hls = new Hls({
-                            enableWorker: true,
-                            lowLatencyMode: true,
-                            backBufferLength: 90
-                        });
+                    if ((canNativePlay !== 'probably' && canNativePlay !== 'maybe') && window.Hls && window.Hls.isSupported && window.Hls.isSupported()) {
+                        if (window._currentHls) { try { window._currentHls.destroy(); } catch (_) {} }
+                        const hls = new Hls();
                         window._currentHls = hls;
-                        
                         hls.attachMedia(video);
                         hls.on(Hls.Events.MEDIA_ATTACHED, () => {
-                            console.log('✅ HLS media attached, loading source...');
                             hls.loadSource(url);
                         });
                         hls.on(Hls.Events.MANIFEST_PARSED, () => {
-                            console.log('✅ HLS manifest parsed, attempting autoplay...');
                             enhancedAutoplay(video, playerInstance);
-                        });
-                        hls.on(Hls.Events.ERROR, (event, data) => {
-                            console.error('HLS error:', data);
-                            if (data.fatal) {
-                                updateLoadingStatus('HLS stream error. Please try a different source.', true);
-                            }
                         });
                     }
                 } catch (e) {
-                    console.error('HLS attach failed:', e);
+                    console.warn('HLS attach failed:', e);
                 }
             }
             
-            // Enhanced autoplay with multiple event listeners
-            const attemptAutoplay = () => {
+            // Autoplay regular video content
+            setTimeout(() => {
                 if (playerInstance && typeof playerInstance.play === 'function') {
                     enhancedAutoplay(elements.player, playerInstance);
                 }
-            };
+            }, 500);
             
-            // Try autoplay after a short delay
-            setTimeout(attemptAutoplay, 300);
-            
-            // Also attempt autoplay on various media events
-            const events = ['loadeddata', 'canplay', 'canplaythrough', 'loadedmetadata'];
-            events.forEach(event => {
-                try {
-                    elements.player.addEventListener(event, attemptAutoplay, { once: true });
-                } catch (_) {}
-            });
-            
-            // Fallback autoplay attempt
-            setTimeout(attemptAutoplay, 2000);
+            // Also attempt autoplay once the media is actually ready
+            try {
+                const onReadyToAutoplay = () => {
+                    if (playerInstance && typeof playerInstance.play === 'function') {
+                        enhancedAutoplay(elements.player, playerInstance);
+                    }
+                };
+                elements.player.addEventListener('loadeddata', onReadyToAutoplay, { once: true });
+                elements.player.addEventListener('canplay', onReadyToAutoplay, { once: true });
+            } catch (_) {}
             
             // Ensure server dropdown reflects current selection for direct links
             if (servers && servers.length > 1) {
@@ -4104,151 +4059,68 @@
             }
         }
 
-        // Enhanced manual play button when autoplay fails
+        // Show play button when autoplay fails
         function showPlayButton() {
             if (elements.playerMessageArea) {
                 elements.playerMessageArea.innerHTML = `
-                    <div style="text-align: center; padding: 20px; background: rgba(0,0,0,0.9); border-radius: 10px;">
-                        <div style="margin-bottom: 15px;">
-                            <i class="fas fa-play-circle" style="font-size: 48px; color: #ff5722;"></i>
-                        </div>
-                        <h3 style="margin: 0 0 10px 0; color: #ffffff;">Click to Start Playback</h3>
-                        <p style="margin: 0 0 20px 0; color: #cccccc; font-size: 14px;">
-                            Autoplay was blocked by your browser. Click the button below to start playing.
-                        </p>
+                    <div style="text-align: center; padding: 20px;">
+                        <p>Click to start playback:</p>
                         <button onclick="startPlayback()" style="
-                            background: linear-gradient(45deg, #ff5722, #ff7043); 
+                            background: #ff5722; 
                             color: white; 
                             border: none; 
-                            padding: 12px 30px; 
-                            border-radius: 25px; 
+                            padding: 10px 20px; 
+                            border-radius: 5px; 
                             cursor: pointer;
                             font-size: 16px;
-                            font-weight: bold;
-                            transition: all 0.3s ease;
-                            box-shadow: 0 4px 15px rgba(255, 87, 34, 0.3);
-                        " onmouseover="this.style.transform='scale(1.05)'" onmouseout="this.style.transform='scale(1)'">
-                            ▶️ Play Now
-                        </button>
-                        <div style="margin-top: 15px; font-size: 12px; color: #888888;">
-                            <i class="fas fa-info-circle"></i> 
-                            Tip: You can enable autoplay in your browser settings
-                        </div>
+                        ">▶️ Play</button>
                     </div>
                 `;
                 elements.playerMessageArea.style.display = 'block';
                 elements.playerMessageArea.style.color = '#ffffff';
-                elements.playerMessageArea.style.backgroundColor = 'transparent';
-                console.log('✅ Enhanced manual play button displayed');
+                elements.playerMessageArea.style.backgroundColor = 'rgba(255, 87, 34, 0.1)';
             }
         }
 
-        // Enhanced manual playback with better error handling
+        // Start playback manually
         function startPlayback() {
-            try {
-                console.log('🎯 Manual playback initiated');
-                
-                // Hide the manual play button
-                if (elements.playerMessageArea) {
-                    elements.playerMessageArea.style.display = 'none';
-                }
-                
-                if (window.currentShakaPlayer) {
-                    // For Shaka Player
-                    const video = elements.player;
-                    video.play().then(() => {
-                        console.log('✅ Manual Shaka Player playback successful');
-                    }).catch(error => {
-                        console.error('❌ Manual Shaka Player play failed:', error);
-                        showPlayButton(); // Show button again if failed
-                    });
-                } else if (playerInstance) {
-                    // For regular video player
-                    playerInstance.play().then(() => {
-                        console.log('✅ Manual Plyr playback successful');
-                    }).catch(error => {
-                        console.error('❌ Manual Plyr play failed:', error);
-                        showPlayButton(); // Show button again if failed
-                    });
-                } else if (elements.player) {
-                    // Direct video element fallback
-                    elements.player.play().then(() => {
-                        console.log('✅ Manual direct video playback successful');
-                    }).catch(error => {
-                        console.error('❌ Manual direct video play failed:', error);
-                        showPlayButton(); // Show button again if failed
-                    });
-                } else {
-                    console.error('❌ No player instance available for manual playback');
-                    showPlayButton();
-                }
-            } catch (error) {
-                console.error('❌ Manual playback error:', error);
-                showPlayButton();
+            if (window.currentShakaPlayer) {
+                // For Shaka Player
+                const video = elements.player;
+                video.play().catch(error => console.log('Manual play failed:', error));
+            } else if (playerInstance) {
+                // For regular video player
+                playerInstance.play().catch(error => console.log('Manual play failed:', error));
             }
         }
 
-        // Enhanced autoplay with browser policy detection and better error handling
+        // Enhanced autoplay with mobile detection
         function enhancedAutoplay(videoElement, playerInstance = null) {
-            // Detect browser autoplay policy
-            const autoplayPolicy = detectAutoplayPolicy();
+            // Check if it's a mobile device
+            const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
             
-            // Ensure video is ready to play
-            if (videoElement.readyState < 2) {
-                console.log('⏳ Video not ready, waiting for data...');
-                videoElement.addEventListener('loadeddata', () => {
-                    setTimeout(() => enhancedAutoplay(videoElement, playerInstance), 100);
-                }, { once: true });
-                return;
-            }
-            
-            // Set preload to auto for better loading
-            videoElement.preload = 'auto';
-            
-            // Ensure playsinline for mobile
-            videoElement.playsInline = true;
-            
-            const attemptAutoplay = (muted = false) => {
-                if (muted) {
-                    videoElement.muted = true;
-                }
-                
-                return videoElement.play().then(() => {
-                    console.log(`✅ ${muted ? 'Muted' : 'Unmuted'} autoplay successful`);
-                    
-                    // If muted autoplay succeeded and browser supports unmuted, try to unmute after a delay
-                    if (muted && autoplayPolicy.supportsUnmutedAutoplay && !autoplayPolicy.isMobile) {
-                        setTimeout(() => {
-                            videoElement.muted = false;
-                            videoElement.play().catch(() => {
-                                console.log('Failed to unmute after autoplay');
-                            });
-                        }, 1000);
-                    }
+            if (isMobile) {
+                // On mobile, try muted autoplay first (more likely to work)
+                videoElement.muted = true;
+                videoElement.play().then(() => {
+                    console.log('✅ Mobile muted autoplay successful');
+                    // Unmute after successful autoplay
+                    setTimeout(() => {
+                        videoElement.muted = false;
+                    }, 100);
                 }).catch(error => {
-                    console.log(`${muted ? 'Muted' : 'Unmuted'} autoplay failed:`, error);
-                    
-                    // If unmuted failed and browser supports muted autoplay, try muted autoplay
-                    if (!muted && autoplayPolicy.supportsMutedAutoplay) {
-                        console.log('🔄 Trying muted autoplay...');
-                        return attemptAutoplay(true);
-                    } else {
-                        // All attempts failed, show manual play button
-                        console.log('❌ All autoplay attempts failed, showing manual play button');
-                        showPlayButton();
-                    }
+                    console.log('Mobile muted autoplay failed:', error);
+                    // Show play button for manual start
+                    showPlayButton();
                 });
-            };
-            
-            // Start with appropriate autoplay strategy based on browser policy
-            if (autoplayPolicy.requiresUserInteraction || autoplayPolicy.isMobile) {
-                // Browsers that require user interaction or mobile devices: start with muted autoplay
-                console.log('📱 Using muted autoplay strategy for restrictive browser/mobile');
-                attemptAutoplay(true);
             } else {
-                // Desktop browsers that might support unmuted autoplay: try unmuted first
-                console.log('🖥️ Using unmuted autoplay strategy for desktop browser');
-                attemptAutoplay(false);
+                // On desktop, try normal autoplay
+                videoElement.play().then(() => {
+                    console.log('✅ Desktop autoplay successful');
+                }).catch(error => {
+                    console.log('Desktop autoplay failed:', error);
+                    showPlayButton();
+                });
             }
         }
 
@@ -4994,55 +4866,31 @@
             return url.includes('vidjoy.pro/embed');
         }
 
-        // Enhanced HLS loader with better error handling and fallback support
+        // Lightweight loader for Hls.js to play .m3u8 on browsers without native HLS
         async function loadHlsJsIfNeeded(sampleUrlForLog = '') {
             try {
                 const video = elements.player;
-                
-                // Check for native HLS support
                 const canNativePlay = video.canPlayType('application/vnd.apple.mpegurl');
-                const canNativePlayHLS = video.canPlayType('application/x-mpegURL');
-                
-                if (canNativePlay === 'probably' || canNativePlay === 'maybe' || 
-                    canNativePlayHLS === 'probably' || canNativePlayHLS === 'maybe') {
-                    console.log('✅ Browser has native HLS support');
-                    return; // native support available
+                if (canNativePlay === 'probably' || canNativePlay === 'maybe') {
+                    return; // native support
                 }
-                
-                console.log('📡 Browser lacks native HLS support, loading Hls.js...');
-                
-                // Load Hls.js if not already loaded
                 if (!window.Hls) {
                     await new Promise((resolve, reject) => {
                         const script = document.createElement('script');
                         script.src = 'https://cdn.jsdelivr.net/npm/hls.js@1.5.7/dist/hls.min.js';
-                        script.onload = () => {
-                            console.log('✅ Hls.js loaded successfully');
-                            resolve();
-                        };
-                        script.onerror = (error) => {
-                            console.error('❌ Failed to load Hls.js:', error);
-                            reject(new Error('Failed to load Hls.js'));
-                        };
+                        script.onload = resolve;
+                        script.onerror = reject;
                         document.head.appendChild(script);
                     });
                 }
-                
-                // Ensure Hls.js is properly initialized
-                if (window.Hls && window.Hls.isSupported && window.Hls.isSupported()) {
-                    if (!video._hlsBound) {
-                        video._hlsBound = true;
-                        console.log('✅ Hls.js bound to video element');
-                    }
-                } else {
-                    console.warn('⚠️ Hls.js not supported in this browser');
+                if (window.Hls && !video._hlsBound) {
+                    // Simple hook: when Plyr sets an HLS source, the browser will fetch via video.src
+                    // If it fails, dev can fallback to custom Hls attachMedia. We keep it minimal.
+                    video._hlsBound = true;
                 }
-                
-                console.log('🎯 Hls.js ready for HLS playback', sampleUrlForLog ? { url: sampleUrlForLog } : '');
+                console.log('Hls.js ready for HLS playback', sampleUrlForLog ? { url: sampleUrlForLog } : '');
             } catch (e) {
-                console.error('❌ Hls.js loader error:', e);
-                // Show user-friendly error message
-                updateLoadingStatus('HLS playback not supported in this browser. Please try a different browser.', true);
+                console.warn('Hls.js loader error:', e);
             }
         }
 
