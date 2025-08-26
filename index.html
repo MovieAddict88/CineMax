@@ -1017,22 +1017,26 @@
         }
 
         .server-selector-dropdown {
-            margin-top: 8px; /* Minimal margin for space savings */
+            display: none; /* JS handles visibility */
+            margin-bottom: 15px; /* Consistent with other containers */
+            background-color: var(--youtube-gray); /* Match other containers */
+            border-radius: var(--radius);
+            padding: 12px; /* Slightly smaller padding for compactness */
         }
         .server-selector-dropdown h4 {
             font-size: 14px;
             color: var(--light);
-            margin-bottom: 6px; /* Minimal margin */
+            margin-bottom: 8px; /* Minimal margin */
             font-weight: 600;
         }
         .server-selector {
             width: 100%;
-            padding: 8px 10px; /* Slightly smaller padding than episode selector */
+            padding: 8px 10px; /* Compact padding */
             border-radius: 4px;
             background-color: var(--youtube-dark-gray);
             border: 1px solid var(--dark-3);
             color: var(--light);
-            font-size: 13px; /* Slightly smaller font than episode selector */
+            font-size: 13px; /* Slightly smaller font for compactness */
             cursor: pointer;
         }
         .server-selector:focus {
@@ -2486,18 +2490,19 @@
                             Description will appear here...
                         </div>
 
+                        <div class="server-selector-dropdown" id="server-selector-dropdown" style="display: none;">
+                            <h4>Server</h4>
+                            <select class="server-selector" id="server-selector">
+                                <option value="">Select Server</option>
+                                <!-- Server options will be dynamically added -->
+                            </select>
+                        </div>
+
                         <div class="episode-selector-container" id="episode-selector-container">
                             <h3>Select Episode</h3>
                             <select class="episode-selector" id="episode-selector">
                                 <!-- Episode options will be dynamically added -->
                             </select>
-                            <div class="server-selector-dropdown" id="server-selector-dropdown" style="display: none;">
-                                <h4>Server</h4>
-                                <select class="server-selector" id="server-selector">
-                                    <option value="">Select Server</option>
-                                    <!-- Server options will be dynamically added -->
-                                </select>
-                            </div>
                         </div>
 
                         <div class="season-selector" id="season-selector">
