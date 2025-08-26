@@ -3572,39 +3572,40 @@
                 });
             };
 
-            if (!playerInstance) {
-                playerInstance = new Plyr('#player', {
-                    controls: ['play-large', 'play', 'progress', 'current-time', 'mute', 'volume', 'captions', 'settings', 'pip', 'fullscreen'],
-                    youtube: { noCookie: true, rel: 0, showinfo: 0, iv_load_policy: 3 },
-                    quality: {
-                        default: 720,
-                        options: [1080, 720, 480, 360, 240],
-                    },
-                    autoplay: false, // Start with autoplay disabled for better mobile compatibility
-                    muted: false, // Allow sound by default
-                });
+            // Always create a new Plyr instance for clean state
+            playerInstance = new Plyr('#player', {
+                controls: ['play-large', 'play', 'progress', 'current-time', 'mute', 'volume', 'captions', 'settings', 'pip', 'fullscreen'],
+                youtube: { noCookie: true, rel: 0, showinfo: 0, iv_load_policy: 3 },
+                quality: {
+                    default: 720,
+                    options: [1080, 720, 480, 360, 240],
+                },
+                autoplay: false, // Start with autoplay disabled for better mobile compatibility
+                muted: false, // Allow sound by default
+            });
 
-                playerInstance.once('ready', event => {
-                    setupViewerAndPlay();
-                    addStretchButtonToPlayer();
-                    setupPlyrLoadingStates();
-                    // Event listeners for fullscreen etc. should be attached here too, only once
-                    playerInstance.on('enterfullscreen', () => {
-                        if (screen.orientation && screen.orientation.lock) {
-                            screen.orientation.lock('landscape').catch(error => {
-                                console.log('Orientation lock failed: ', error);
-                            });
-                        }
-                    });
-                    playerInstance.on('exitfullscreen', () => {
-                        if (screen.orientation && screen.orientation.unlock) {
-                            screen.orientation.unlock();
-                        }
-                        if (elements.searchContainer) {
-                            elements.searchContainer.classList.remove('show');
-                        }
-                    });
+            playerInstance.once('ready', event => {
+                console.log('🎬 Plyr player ready, setting up loading states...');
+                setupViewerAndPlay();
+                addStretchButtonToPlayer();
+                setupPlyrLoadingStates(); // Always setup loading states for new instance
+                // Event listeners for fullscreen etc. should be attached here too, only once
+                playerInstance.on('enterfullscreen', () => {
+                    if (screen.orientation && screen.orientation.lock) {
+                        screen.orientation.lock('landscape').catch(error => {
+                            console.log('Orientation lock failed: ', error);
+                        });
+                    }
                 });
+                playerInstance.on('exitfullscreen', () => {
+                    if (screen.orientation && screen.orientation.unlock) {
+                        screen.orientation.unlock();
+                    }
+                    if (elements.searchContainer) {
+                        elements.searchContainer.classList.remove('show');
+                    }
+                });
+            });
 
                 document.addEventListener('fullscreenchange', () => {
                     if (document.fullscreenElement && document.fullscreenElement.classList.contains('external-content-iframe')) {
@@ -3898,6 +3899,14 @@
             
             // Ensure the video element preloads data for faster start
             try { elements.player.setAttribute('preload', 'auto'); } catch (e) {}
+            
+            // Safety timeout to hide loading if events don't fire
+            setTimeout(() => {
+                if (window.hidePlyrLoading && elements.player && elements.player.readyState >= 3) {
+                    console.log('📺 Safety timeout: hiding loading state for ready media');
+                    window.hidePlyrLoading();
+                }
+            }, 5000);
             
             // Enhanced HLS handling for M3U8 files
             if (mimeType === 'application/x-mpegURL') {
@@ -4559,8 +4568,16 @@
                 // Handle different server types appropriately
                 if (server.url.includes('.m3u8')) {
                     await handleHLSPlayback(server.url, playerInstance, allServers);
+                } else if (server.url.includes('.mpd')) {
+                    await handleMPDStream(server.url, allServers);
                 } else {
-                    // Use playUrl for all other types (MPD, embedded, direct links)
+                    // For direct links, show loading state immediately
+                    if (window.showPlyrLoading && (server.url.includes('.mp4') || server.url.includes('.mkv') || server.url.includes('.webm') || server.url.includes('.avi'))) {
+                        const formatInfo = detectChannelFormat(server.url);
+                        window.showPlyrLoading(`Switching to ${formatInfo.type} server...`);
+                    }
+                    
+                    // Use playUrl for embedded and direct links
                     await playUrl(server.url, allServers);
                 }
                 
@@ -5088,7 +5105,12 @@
         
         // Setup Plyr loading state management
         function setupPlyrLoadingStates() {
-            if (!playerInstance || !playerInstance.elements) return;
+            if (!playerInstance || !playerInstance.elements) {
+                console.warn('Cannot setup Plyr loading states - player not ready');
+                return;
+            }
+            
+            console.log('🔧 Setting up Plyr loading states...');
             
             const playerContainer = document.querySelector('.player-container');
             const loadingOverlay = playerContainer.querySelector('.plyr__loading-overlay');
@@ -5096,68 +5118,106 @@
             
             // Show loading state
             function showPlyrLoading(message = 'Loading...') {
-                playerInstance.elements.container.classList.add('plyr--loading');
-                if (loadingText) loadingText.textContent = message;
-                console.log('🔄 Plyr loading state:', message);
+                if (playerInstance && playerInstance.elements && playerInstance.elements.container) {
+                    playerInstance.elements.container.classList.add('plyr--loading');
+                    if (loadingText) loadingText.textContent = message;
+                    console.log('🔄 Plyr loading state:', message);
+                }
             }
             
             // Hide loading state
             function hidePlyrLoading() {
-                playerInstance.elements.container.classList.remove('plyr--loading');
-                console.log('✅ Plyr loading completed');
+                if (playerInstance && playerInstance.elements && playerInstance.elements.container) {
+                    playerInstance.elements.container.classList.remove('plyr--loading');
+                    console.log('✅ Plyr loading completed');
+                }
+            }
+            
+            // Remove any existing loading event listeners to prevent duplicates
+            if (playerInstance._loadingEventsSetup) {
+                console.log('🔄 Loading events already setup, skipping...');
+                // Update global references
+                window.showPlyrLoading = showPlyrLoading;
+                window.hidePlyrLoading = hidePlyrLoading;
+                return;
             }
             
             // Loading events for direct media links
             playerInstance.on('loadstart', () => {
+                console.log('📺 Plyr loadstart event');
                 showPlyrLoading('Initializing media...');
             });
             
             playerInstance.on('loadedmetadata', () => {
+                console.log('📺 Plyr loadedmetadata event');
                 showPlyrLoading('Loading media data...');
             });
             
             playerInstance.on('loadeddata', () => {
+                console.log('📺 Plyr loadeddata event');
                 showPlyrLoading('Preparing playback...');
             });
             
             playerInstance.on('canplay', () => {
+                console.log('📺 Plyr canplay event');
                 hidePlyrLoading();
                 elements.playerMessageArea.style.display = 'none';
             });
             
             playerInstance.on('canplaythrough', () => {
+                console.log('📺 Plyr canplaythrough event');
                 hidePlyrLoading();
                 elements.playerMessageArea.style.display = 'none';
             });
             
             // Buffering events
             playerInstance.on('waiting', () => {
+                console.log('📺 Plyr waiting event (buffering)');
                 showPlyrLoading('Buffering...');
             });
             
             playerInstance.on('playing', () => {
+                console.log('📺 Plyr playing event');
                 hidePlyrLoading();
                 elements.playerMessageArea.style.display = 'none';
             });
             
             // Error handling
             playerInstance.on('error', (event) => {
+                console.log('📺 Plyr error event');
                 hidePlyrLoading();
                 console.error('Plyr error:', event);
             });
             
             // Seeking events
             playerInstance.on('seeking', () => {
+                console.log('📺 Plyr seeking event');
                 showPlyrLoading('Seeking...');
             });
             
             playerInstance.on('seeked', () => {
+                console.log('📺 Plyr seeked event');
                 hidePlyrLoading();
             });
+            
+            // Mark events as setup
+            playerInstance._loadingEventsSetup = true;
             
             // Store references for external access
             window.showPlyrLoading = showPlyrLoading;
             window.hidePlyrLoading = hidePlyrLoading;
+            
+            // Debug function for troubleshooting
+            window.debugPlyrLoadingState = () => {
+                console.log('🔍 Plyr Loading State Debug:');
+                console.log('  - Player Instance:', !!playerInstance);
+                console.log('  - Player Elements:', !!playerInstance?.elements);
+                console.log('  - Player Container:', !!playerInstance?.elements?.container);
+                console.log('  - Loading Class:', playerInstance?.elements?.container?.classList?.contains('plyr--loading'));
+                console.log('  - Video Ready State:', elements.player?.readyState);
+                console.log('  - Video Source:', elements.player?.src || elements.player?.currentSrc);
+                console.log('  - Events Setup:', !!playerInstance?._loadingEventsSetup);
+            };
         }
 
         // Update loading status with proper indicators
@@ -5685,6 +5745,12 @@
                         size: parseInt(server.name?.replace(/\D/g, '') || '0'),
                         type: 'video/mp4' // Only non-HLS sources should reach here
                     }));
+
+                    // Show loading state before setting source
+                    if (window.showPlyrLoading) {
+                        const formatInfo = detectChannelFormat(optimalServer.url);
+                        window.showPlyrLoading(`Loading ${formatInfo.type} content...`);
+                    }
 
                     playerInstance.source = {
                         type: 'video',
