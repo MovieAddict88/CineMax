@@ -2910,6 +2910,10 @@
                     localStorage.setItem('cineCrazeDataCache', JSON.stringify(cineData));
                     localStorage.setItem('cineCrazeDataTimestamp', Date.now().toString());
                     console.log("✅ Base playlist loaded. Rendering UI now, background merge will continue...");
+                    try {
+                        const existingError = document.getElementById('data-error-overlay');
+                        if (existingError) existingError.remove();
+                    } catch {}
 
                     // 2) Background: fetch remaining shards sequentially and merge, without blocking UI
                     Promise.allSettled([
@@ -2927,6 +2931,10 @@
                                 localStorage.setItem('cineCrazeDataCache', JSON.stringify(cineData));
                                 localStorage.setItem('cineCrazeDataTimestamp', Date.now().toString());
                                 console.log(`🎉 Background merged ${datasets.length} additional shard(s)`);
+                                try {
+                                    const existingError = document.getElementById('data-error-overlay');
+                                    if (existingError) existingError.remove();
+                                } catch {}
                                 // Re-render UI to include newly merged content without blocking UX
                                 try {
                                     renderCarousel();
@@ -2951,6 +2959,10 @@
                     try {
                         cineData = JSON.parse(cachedData);
                         console.log("✅ Loaded data from cache");
+                        try {
+                            const existingError = document.getElementById('data-error-overlay');
+                            if (existingError) existingError.remove();
+                        } catch {}
                         return;
                     } catch (err) {
                         console.warn("⚠️ Cache parsing failed:", err);
@@ -2962,33 +2974,37 @@
                 console.error("❌ All data sources failed:", err);
                 elements.loadingSpinner.style.display = 'none';
 
-                const errorMessage = document.createElement('div');
-                errorMessage.style.cssText = `
-                    position: fixed;
-                    top: 50%;
-                    left: 50%;
-                    transform: translate(-50%, -50%);
-                    background: var(--youtube-gray);
-                    padding: 20px;
-                    border-radius: 8px;
-                    text-align: center;
-                    z-index: 10000;
-                    max-width: 400px;
-                `;
-                errorMessage.innerHTML = `
-                    <h3>⚠️ Data Loading Failed</h3>
-                    <p>Unable to load content data. Please check your internet connection and try again.</p>
-                    <button onclick="this.parentElement.remove(); fetchData();" style="
-                        background: var(--primary);
-                        color: white;
-                        border: none;
-                        padding: 10px 20px;
-                        border-radius: 4px;
-                        cursor: pointer;
-                        margin-top: 10px;
-                    ">Retry</button>
-                `;
-                document.body.appendChild(errorMessage);
+                // Only show the error dialog if no data is present at all
+                if (!cineData || !Array.isArray(cineData.Categories) || cineData.Categories.length === 0) {
+                    const errorMessage = document.createElement('div');
+                    errorMessage.id = 'data-error-overlay';
+                    errorMessage.style.cssText = `
+                        position: fixed;
+                        top: 50%;
+                        left: 50%;
+                        transform: translate(-50%, -50%);
+                        background: var(--youtube-gray);
+                        padding: 20px;
+                        border-radius: 8px;
+                        text-align: center;
+                        z-index: 10000;
+                        max-width: 400px;
+                    `;
+                    errorMessage.innerHTML = `
+                        <h3>⚠️ Data Loading Failed</h3>
+                        <p>Unable to load content data. Please check your internet connection and try again.</p>
+                        <button onclick="this.parentElement.remove(); fetchData();" style="
+                            background: var(--primary);
+                            color: white;
+                            border: none;
+                            padding: 10px 20px;
+                            border-radius: 4px;
+                            cursor: pointer;
+                            margin-top: 10px;
+                        ">Retry</button>
+                    `;
+                    document.body.appendChild(errorMessage);
+                }
             } finally {
                 elements.loadingSpinner.style.display = 'none';
             }
