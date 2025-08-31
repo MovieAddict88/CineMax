@@ -2799,63 +2799,64 @@
         async function fetchData() {
             try {
                 elements.loadingSpinner.style.display = 'block';
-                
-                // Primary source
-                const primaryUrl = "https://github.com/MovieAddict88/Movie-Source/raw/main/playlist.json";
-                
-                // Fallback sources
-                const fallbackUrls = [
-                    "https://raw.githubusercontent.com/MovieAddict88/Movie-Source/main/playlist.json",
-                    "https://cdn.jsdelivr.net/gh/MovieAddict88/Movie-Source@main/playlist.json",
-                    "./playlist.json", // Local fallback
-                    "./data/playlist.json" // Alternative local path
+
+                const playlistUrls = [
+                    "https://github.com/MovieAddict88/Movie-Source/raw/main/playlist.json",
+                    "https://github.com/MovieAddict88/Movie-Source/raw/main/playlist1.json",
+                    "https://github.com/MovieAddict88/Movie-Source/raw/main/playlist2.json"
                 ];
-                
-                // Try primary source first
-                try {
-                    const response = await fetch(primaryUrl + "?t=" + new Date().getTime());
-                    if (response.ok) {
-                        cineData = await response.json();
-                        // Cache the successful data
-                        localStorage.setItem('cineCrazeDataCache', JSON.stringify(cineData));
-                        localStorage.setItem('cineCrazeDataTimestamp', Date.now().toString());
-                        console.log("✅ Loaded data from primary source");
-                        return;
+
+                const promises = playlistUrls.map(url => fetch(url + "?t=" + new Date().getTime()).then(res => {
+                    if (!res.ok) {
+                        throw new Error(`Failed to fetch ${url}`);
                     }
-                } catch (err) {
-                    console.warn("⚠️ Primary source failed, trying fallbacks:", err);
-                }
-                
-                // Try fallback sources
-                for (const fallbackUrl of fallbackUrls) {
-                    try {
-                        console.log(`🔄 Trying fallback: ${fallbackUrl}`);
-                        const response = await fetch(fallbackUrl + "?t=" + new Date().getTime());
-                        if (response.ok) {
-                            cineData = await response.json();
-                            console.log(`✅ Loaded data from fallback: ${fallbackUrl}`);
-                            return;
+                    return res.json();
+                }));
+
+                const results = await Promise.allSettled(promises);
+
+                const successfulFetches = results
+                    .filter(result => result.status === 'fulfilled')
+                    .map(result => result.value);
+
+                if (successfulFetches.length > 0) {
+                    const mergedData = { Categories: [] };
+
+                    successfulFetches.forEach(data => {
+                        if (data.Categories) {
+                            data.Categories.forEach(newCategory => {
+                                const existingCategory = mergedData.Categories.find(
+                                    c => c.MainCategory === newCategory.MainCategory
+                                );
+                                if (existingCategory) {
+                                    existingCategory.Entries = existingCategory.Entries.concat(newCategory.Entries);
+                                } else {
+                                    mergedData.Categories.push(newCategory);
+                                }
+                            });
                         }
-                    } catch (err) {
-                        console.warn(`⚠️ Fallback failed: ${fallbackUrl}`, err);
-                        continue;
+                    });
+
+                    cineData = mergedData;
+                    localStorage.setItem('cineCrazeDataCache', JSON.stringify(cineData));
+                    localStorage.setItem('cineCrazeDataTimestamp', Date.now().toString());
+                    console.log(`✅ Loaded and merged data from ${successfulFetches.length} sources`);
+                } else {
+                    // If all remote fetches fail, try to load from cache
+                    const cachedData = localStorage.getItem('cineCrazeDataCache');
+                    if (cachedData) {
+                        try {
+                            cineData = JSON.parse(cachedData);
+                            console.log("✅ Loaded data from cache");
+                        } catch (err) {
+                            console.warn("⚠️ Cache parsing failed:", err);
+                            throw new Error("All data sources failed, including cache.");
+                        }
+                    } else {
+                        throw new Error("All data sources failed and no cache available.");
                     }
                 }
-                
-                // If all sources fail, try to load from localStorage cache
-                const cachedData = localStorage.getItem('cineCrazeDataCache');
-                if (cachedData) {
-                    try {
-                        cineData = JSON.parse(cachedData);
-                        console.log("✅ Loaded data from cache");
-                        return;
-                    } catch (err) {
-                        console.warn("⚠️ Cache parsing failed:", err);
-                    }
-                }
-                
-                throw new Error("All data sources failed");
-                
+
             } catch (err) {
                 console.error("❌ All data sources failed:", err);
                 elements.loadingSpinner.style.display = 'none';
