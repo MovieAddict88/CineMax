@@ -2972,8 +2972,8 @@
                                 })
                                 .map(u => deriveMirrorUrls(u));
                         } else {
-                            // Fallback: probe numeric shards playlist1..playlist10
-                            const maxProbe = 10;
+                            // Fallback: probe numeric shards playlist1..playlist50
+                            const maxProbe = 50;
                             for (let idx = 1; idx <= maxProbe; idx++) {
                                 const file = `playlist${idx}.json`;
                                 const candidates = [
