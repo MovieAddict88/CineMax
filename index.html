@@ -2795,54 +2795,127 @@
             });
         }
         
-        // Enhanced data fetching with multiple fallback sources
+        // Enhanced data fetching with multi-source aggregation and fallbacks
         async function fetchData() {
             try {
                 elements.loadingSpinner.style.display = 'block';
-                
-                // Primary source
-                const primaryUrl = "https://github.com/MovieAddict88/Movie-Source/raw/main/playlist.json";
-                
-                // Fallback sources
-                const fallbackUrls = [
-                    "https://raw.githubusercontent.com/MovieAddict88/Movie-Source/main/playlist.json",
-                    "https://cdn.jsdelivr.net/gh/MovieAddict88/Movie-Source@main/playlist.json",
-                    "./playlist.json", // Local fallback
-                    "./data/playlist.json" // Alternative local path
+
+                // Build candidate URL lists for each playlist shard
+                const playlistCandidates = [
+                    [
+                        "https://github.com/MovieAddict88/Movie-Source/raw/main/playlist.json",
+                        "https://raw.githubusercontent.com/MovieAddict88/Movie-Source/main/playlist.json",
+                        "https://cdn.jsdelivr.net/gh/MovieAddict88/Movie-Source@main/playlist.json",
+                        "./playlist.json",
+                        "./data/playlist.json"
+                    ],
+                    [
+                        "https://github.com/MovieAddict88/Movie-Source/raw/main/playlist1.json",
+                        "https://raw.githubusercontent.com/MovieAddict88/Movie-Source/main/playlist1.json",
+                        "https://cdn.jsdelivr.net/gh/MovieAddict88/Movie-Source@main/playlist1.json",
+                        "./playlist1.json",
+                        "./data/playlist1.json"
+                    ],
+                    [
+                        "https://github.com/MovieAddict88/Movie-Source/raw/main/playlist2.json",
+                        "https://raw.githubusercontent.com/MovieAddict88/Movie-Source/main/playlist2.json",
+                        "https://cdn.jsdelivr.net/gh/MovieAddict88/Movie-Source@main/playlist2.json",
+                        "./playlist2.json",
+                        "./data/playlist2.json"
+                    ]
                 ];
-                
-                // Try primary source first
-                try {
-                    const response = await fetch(primaryUrl + "?t=" + new Date().getTime());
-                    if (response.ok) {
-                        cineData = await response.json();
-                        // Cache the successful data
+
+                const fetchJsonWithCacheBust = async (url) => {
+                    const response = await fetch(url + "?t=" + new Date().getTime());
+                    if (!response.ok) throw new Error(`HTTP ${response.status}`);
+                    return response.json();
+                };
+
+                const fetchFirstAvailable = async (urls) => {
+                    for (const url of urls) {
+                        try {
+                            const data = await fetchJsonWithCacheBust(url);
+                            console.log(`✅ Loaded data from: ${url}`);
+                            return data;
+                        } catch (err) {
+                            console.warn(`⚠️ Failed source: ${url}`, err);
+                            continue;
+                        }
+                    }
+                    return null;
+                };
+
+                const normalizeMainCategory = (name) => {
+                    if (!name) return 'other';
+                    const n = String(name).toLowerCase();
+                    if (n.includes('movie')) return 'movie';
+                    if (n.includes('series')) return 'series';
+                    if (n.includes('live')) return 'live';
+                    return n;
+                };
+
+                const mergeDatasets = (datasets) => {
+                    if (!datasets || datasets.length === 0) return null;
+
+                    const preferredOrder = ['movie', 'series', 'live'];
+                    const mergedByKey = new Map();
+                    const seenTitleByKey = new Map();
+
+                    for (const data of datasets) {
+                        const categories = Array.isArray(data && data.Categories) ? data.Categories : [];
+                        for (const category of categories) {
+                            const key = normalizeMainCategory(category && category.MainCategory);
+                            const targetCategory = mergedByKey.get(key) || {
+                                MainCategory: category && category.MainCategory ? category.MainCategory : key,
+                                Entries: []
+                            };
+                            const seen = seenTitleByKey.get(key) || new Set(
+                                targetCategory.Entries.map(e => (e && e.Title ? e.Title.toLowerCase().trim() : ''))
+                            );
+
+                            const entries = Array.isArray(category && category.Entries) ? category.Entries : [];
+                            for (const entry of entries) {
+                                const titleId = entry && entry.Title ? entry.Title.toLowerCase().trim() : '';
+                                if (!titleId || seen.has(titleId)) continue;
+                                targetCategory.Entries.push(entry);
+                                seen.add(titleId);
+                            }
+
+                            mergedByKey.set(key, targetCategory);
+                            seenTitleByKey.set(key, seen);
+                        }
+                    }
+
+                    const orderedCategories = [];
+                    for (const key of preferredOrder) {
+                        if (mergedByKey.has(key)) orderedCategories.push(mergedByKey.get(key));
+                    }
+                    for (const [key, value] of mergedByKey) {
+                        if (!preferredOrder.includes(key)) orderedCategories.push(value);
+                    }
+
+                    return {
+                        ...(datasets[0] || {}),
+                        Categories: orderedCategories
+                    };
+                };
+
+                // Fetch each shard (playlist, playlist1, playlist2) in parallel
+                const results = await Promise.all(playlistCandidates.map(fetchFirstAvailable));
+                const successfulDatasets = results.filter(Boolean);
+
+                if (successfulDatasets.length > 0) {
+                    const merged = mergeDatasets(successfulDatasets);
+                    if (merged && Array.isArray(merged.Categories) && merged.Categories.length > 0) {
+                        cineData = merged;
                         localStorage.setItem('cineCrazeDataCache', JSON.stringify(cineData));
                         localStorage.setItem('cineCrazeDataTimestamp', Date.now().toString());
-                        console.log("✅ Loaded data from primary source");
+                        console.log(`🎉 Combined data from ${successfulDatasets.length} source(s)`);
                         return;
                     }
-                } catch (err) {
-                    console.warn("⚠️ Primary source failed, trying fallbacks:", err);
                 }
-                
-                // Try fallback sources
-                for (const fallbackUrl of fallbackUrls) {
-                    try {
-                        console.log(`🔄 Trying fallback: ${fallbackUrl}`);
-                        const response = await fetch(fallbackUrl + "?t=" + new Date().getTime());
-                        if (response.ok) {
-                            cineData = await response.json();
-                            console.log(`✅ Loaded data from fallback: ${fallbackUrl}`);
-                            return;
-                        }
-                    } catch (err) {
-                        console.warn(`⚠️ Fallback failed: ${fallbackUrl}`, err);
-                        continue;
-                    }
-                }
-                
-                // If all sources fail, try to load from localStorage cache
+
+                // Fallback: try cached data if no live sources worked
                 const cachedData = localStorage.getItem('cineCrazeDataCache');
                 if (cachedData) {
                     try {
@@ -2853,14 +2926,12 @@
                         console.warn("⚠️ Cache parsing failed:", err);
                     }
                 }
-                
-                throw new Error("All data sources failed");
-                
+
+                throw new Error("All playlist sources failed");
             } catch (err) {
                 console.error("❌ All data sources failed:", err);
                 elements.loadingSpinner.style.display = 'none';
-                
-                // Show user-friendly error message
+
                 const errorMessage = document.createElement('div');
                 errorMessage.style.cssText = `
                     position: fixed;
