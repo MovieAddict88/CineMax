@@ -2800,46 +2800,49 @@
             try {
                 elements.loadingSpinner.style.display = 'block';
 
-                // Build candidate URL lists for each playlist shard
-                const playlistCandidates = [
-                    [
-                        "https://github.com/MovieAddict88/Movie-Source/raw/main/playlist.json",
-                        "https://raw.githubusercontent.com/MovieAddict88/Movie-Source/main/playlist.json",
-                        "https://cdn.jsdelivr.net/gh/MovieAddict88/Movie-Source@main/playlist.json",
-                        "./playlist.json",
-                        "./data/playlist.json"
-                    ],
-                    [
-                        "https://github.com/MovieAddict88/Movie-Source/raw/main/playlist1.json",
-                        "https://raw.githubusercontent.com/MovieAddict88/Movie-Source/main/playlist1.json",
-                        "https://cdn.jsdelivr.net/gh/MovieAddict88/Movie-Source@main/playlist1.json",
-                        "./playlist1.json",
-                        "./data/playlist1.json"
-                    ],
-                    [
-                        "https://github.com/MovieAddict88/Movie-Source/raw/main/playlist2.json",
-                        "https://raw.githubusercontent.com/MovieAddict88/Movie-Source/main/playlist2.json",
-                        "https://cdn.jsdelivr.net/gh/MovieAddict88/Movie-Source@main/playlist2.json",
-                        "./playlist2.json",
-                        "./data/playlist2.json"
-                    ]
+                // Build prioritized URL lists for each playlist shard (prefer raw.githubusercontent.com)
+                const shard0Urls = [
+                    "https://raw.githubusercontent.com/MovieAddict88/Movie-Source/main/playlist.json",
+                    "https://cdn.jsdelivr.net/gh/MovieAddict88/Movie-Source@main/playlist.json",
+                    "https://github.com/MovieAddict88/Movie-Source/raw/main/playlist.json",
+                    "./playlist.json",
+                    "./data/playlist.json"
+                ];
+                const shard1Urls = [
+                    "https://raw.githubusercontent.com/MovieAddict88/Movie-Source/main/playlist1.json",
+                    "https://cdn.jsdelivr.net/gh/MovieAddict88/Movie-Source@main/playlist1.json",
+                    "https://github.com/MovieAddict88/Movie-Source/raw/main/playlist1.json",
+                    "./playlist1.json",
+                    "./data/playlist1.json"
+                ];
+                const shard2Urls = [
+                    "https://raw.githubusercontent.com/MovieAddict88/Movie-Source/main/playlist2.json",
+                    "https://cdn.jsdelivr.net/gh/MovieAddict88/Movie-Source@main/playlist2.json",
+                    "https://github.com/MovieAddict88/Movie-Source/raw/main/playlist2.json",
+                    "./playlist2.json",
+                    "./data/playlist2.json"
                 ];
 
-                const fetchJsonWithCacheBust = async (url) => {
-                    const response = await fetch(url + "?t=" + new Date().getTime());
-                    if (!response.ok) throw new Error(`HTTP ${response.status}`);
-                    return response.json();
+                const fetchJsonWithTimeout = async (url, timeoutMs = 10000) => {
+                    const controller = new AbortController();
+                    const timerId = setTimeout(() => controller.abort(), timeoutMs);
+                    try {
+                        const response = await fetch(url + "?t=" + new Date().getTime(), { signal: controller.signal });
+                        if (!response.ok) throw new Error(`HTTP ${response.status}`);
+                        return await response.json();
+                    } finally {
+                        clearTimeout(timerId);
+                    }
                 };
 
-                const fetchFirstAvailable = async (urls) => {
+                const fetchFirstAvailable = async (urls, timeoutMsPerUrl = 8000) => {
                     for (const url of urls) {
                         try {
-                            const data = await fetchJsonWithCacheBust(url);
+                            const data = await fetchJsonWithTimeout(url, timeoutMsPerUrl);
                             console.log(`✅ Loaded data from: ${url}`);
                             return data;
                         } catch (err) {
                             console.warn(`⚠️ Failed source: ${url}`, err);
-                            continue;
                         }
                     }
                     return null;
@@ -2900,19 +2903,46 @@
                     };
                 };
 
-                // Fetch each shard (playlist, playlist1, playlist2) in parallel
-                const results = await Promise.all(playlistCandidates.map(fetchFirstAvailable));
-                const successfulDatasets = results.filter(Boolean);
+                // 1) Fast path: load base shard first to show UI quickly
+                const baseData = await fetchFirstAvailable(shard0Urls, 8000);
+                if (baseData && Array.isArray(baseData.Categories) && baseData.Categories.length > 0) {
+                    cineData = baseData;
+                    localStorage.setItem('cineCrazeDataCache', JSON.stringify(cineData));
+                    localStorage.setItem('cineCrazeDataTimestamp', Date.now().toString());
+                    console.log("✅ Base playlist loaded. Rendering UI now, background merge will continue...");
 
-                if (successfulDatasets.length > 0) {
-                    const merged = mergeDatasets(successfulDatasets);
-                    if (merged && Array.isArray(merged.Categories) && merged.Categories.length > 0) {
-                        cineData = merged;
-                        localStorage.setItem('cineCrazeDataCache', JSON.stringify(cineData));
-                        localStorage.setItem('cineCrazeDataTimestamp', Date.now().toString());
-                        console.log(`🎉 Combined data from ${successfulDatasets.length} source(s)`);
-                        return;
-                    }
+                    // 2) Background: fetch remaining shards sequentially and merge, without blocking UI
+                    Promise.allSettled([
+                        (async () => fetchFirstAvailable(shard1Urls, 12000))(),
+                        (async () => fetchFirstAvailable(shard2Urls, 12000))()
+                    ]).then(results => {
+                        try {
+                            const datasets = results
+                                .map(r => (r.status === 'fulfilled' ? r.value : null))
+                                .filter(Boolean);
+                            if (datasets.length === 0) return;
+                            const merged = mergeDatasets([cineData, ...datasets]);
+                            if (merged && Array.isArray(merged.Categories) && merged.Categories.length > 0) {
+                                cineData = merged;
+                                localStorage.setItem('cineCrazeDataCache', JSON.stringify(cineData));
+                                localStorage.setItem('cineCrazeDataTimestamp', Date.now().toString());
+                                console.log(`🎉 Background merged ${datasets.length} additional shard(s)`);
+                                // Re-render UI to include newly merged content without blocking UX
+                                try {
+                                    renderCarousel();
+                                    updateCarousel();
+                                    renderContentFilters();
+                                    renderContent();
+                                } catch (rerenderErr) {
+                                    console.warn('⚠️ Background re-render failed:', rerenderErr);
+                                }
+                            }
+                        } catch (mergeErr) {
+                            console.warn('⚠️ Background merge failed:', mergeErr);
+                        }
+                    }).catch(err => console.warn('⚠️ Background shard load error:', err));
+
+                    return; // Return early so UI can render
                 }
 
                 // Fallback: try cached data if no live sources worked
