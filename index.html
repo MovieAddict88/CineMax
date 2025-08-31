@@ -2808,20 +2808,46 @@
                     "./playlist.json",
                     "./data/playlist.json"
                 ];
-                const shard1Urls = [
-                    "https://raw.githubusercontent.com/MovieAddict88/Movie-Source/main/playlist1.json",
-                    "https://cdn.jsdelivr.net/gh/MovieAddict88/Movie-Source@main/playlist1.json",
-                    "https://github.com/MovieAddict88/Movie-Source/raw/main/playlist1.json",
-                    "./playlist1.json",
-                    "./data/playlist1.json"
-                ];
-                const shard2Urls = [
-                    "https://raw.githubusercontent.com/MovieAddict88/Movie-Source/main/playlist2.json",
-                    "https://cdn.jsdelivr.net/gh/MovieAddict88/Movie-Source@main/playlist2.json",
-                    "https://github.com/MovieAddict88/Movie-Source/raw/main/playlist2.json",
-                    "./playlist2.json",
-                    "./data/playlist2.json"
-                ];
+                // Helper to derive mirror URLs from a GitHub/Raw URL plus local variants
+                const deriveMirrorUrls = (inputUrl) => {
+                    const urls = new Set();
+                    if (!inputUrl || typeof inputUrl !== 'string') return [];
+                    urls.add(inputUrl);
+                    try {
+                        const fileName = inputUrl.split('/').pop();
+                        if (fileName && fileName.endsWith('.json')) {
+                            urls.add(`./${fileName}`);
+                            urls.add(`./data/${fileName}`);
+                        }
+                        // Convert github.com/.../raw/... to raw.githubusercontent and jsDelivr
+                        if (inputUrl.includes('github.com/')) {
+                            const parts = inputUrl.split('github.com/')[1].split('/');
+                            const owner = parts[0];
+                            const repo = parts[1];
+                            const branchIdx = parts.indexOf('raw') + 1;
+                            const branch = branchIdx > 0 ? parts[branchIdx] : 'main';
+                            const pathStart = parts.indexOf(branch) + 1;
+                            const filePath = parts.slice(pathStart).join('/');
+                            if (owner && repo && branch && filePath) {
+                                urls.add(`https://raw.githubusercontent.com/${owner}/${repo}/${branch}/${filePath}`);
+                                urls.add(`https://cdn.jsdelivr.net/gh/${owner}/${repo}@${branch}/${filePath}`);
+                            }
+                        }
+                        // Convert raw.githubusercontent URLs to jsDelivr
+                        if (inputUrl.includes('raw.githubusercontent.com/')) {
+                            const rest = inputUrl.split('raw.githubusercontent.com/')[1].split('/');
+                            const owner = rest[0];
+                            const repo = rest[1];
+                            const branch = rest[2];
+                            const filePath = rest.slice(3).join('/');
+                            if (owner && repo && branch && filePath) {
+                                urls.add(`https://cdn.jsdelivr.net/gh/${owner}/${repo}@${branch}/${filePath}`);
+                                urls.add(`https://github.com/${owner}/${repo}/raw/${branch}/${filePath}`);
+                            }
+                        }
+                    } catch (_) { /* ignore */ }
+                    return Array.from(urls);
+                };
 
                 const fetchJsonWithTimeout = async (url, timeoutMs = 10000) => {
                     const controller = new AbortController();
@@ -2915,27 +2941,85 @@
                         if (existingError) existingError.remove();
                     } catch {}
 
-                    // 2) Background: fetch remaining shards sequentially and merge, without blocking UI
-                    Promise.allSettled([
-                        (async () => fetchFirstAvailable(shard1Urls, 12000))(),
-                        (async () => fetchFirstAvailable(shard2Urls, 12000))()
-                    ]).then(results => {
+                    // 2) Background: discover and fetch remaining shards with concurrency limit
+                    (async () => {
+                        const manifestCandidates = [
+                            "https://raw.githubusercontent.com/MovieAddict88/Movie-Source/main/playlist-manifest.json",
+                            "https://cdn.jsdelivr.net/gh/MovieAddict88/Movie-Source@main/playlist-manifest.json",
+                            "https://github.com/MovieAddict88/Movie-Source/raw/main/playlist-manifest.json",
+                            "./playlist-manifest.json",
+                            "./data/playlist-manifest.json"
+                        ];
+
+                        // Try to load a manifest that lists all shard URLs
+                        let manifestList = null;
                         try {
-                            const datasets = results
-                                .map(r => (r.status === 'fulfilled' ? r.value : null))
-                                .filter(Boolean);
-                            if (datasets.length === 0) return;
-                            const merged = mergeDatasets([cineData, ...datasets]);
+                            const manifest = await fetchFirstAvailable(manifestCandidates, 6000);
+                            if (manifest && Array.isArray(manifest)) {
+                                manifestList = manifest
+                                    .map(item => typeof item === 'string' ? item : (item && item.url))
+                                    .filter(Boolean);
+                            }
+                        } catch (_) { /* ignore */ }
+
+                        // Build list of candidate URL arrays per shard
+                        let shardUrlLists = [];
+                        if (manifestList && manifestList.length > 0) {
+                            const baseFileNames = new Set(["playlist.json", "playlist0.json"]);
+                            shardUrlLists = manifestList
+                                .filter(u => {
+                                    try { const fn = u.split('/').pop(); return fn && !baseFileNames.has(fn); } catch { return true; }
+                                })
+                                .map(u => deriveMirrorUrls(u));
+                        } else {
+                            // Fallback: probe numeric shards playlist1..playlist10
+                            const maxProbe = 10;
+                            for (let idx = 1; idx <= maxProbe; idx++) {
+                                const file = `playlist${idx}.json`;
+                                const candidates = [
+                                    `https://raw.githubusercontent.com/MovieAddict88/Movie-Source/main/${file}`,
+                                    `https://cdn.jsdelivr.net/gh/MovieAddict88/Movie-Source@main/${file}`,
+                                    `https://github.com/MovieAddict88/Movie-Source/raw/main/${file}`,
+                                    `./${file}`,
+                                    `./data/${file}`
+                                ];
+                                shardUrlLists.push(candidates);
+                            }
+                        }
+
+                        // Concurrency-limited fetch of shards
+                        const mapWithConcurrency = async (items, mapper, concurrency = 2) => {
+                            const results = new Array(items.length);
+                            let next = 0;
+                            const workers = Array.from({ length: Math.min(concurrency, items.length) }, async () => {
+                                while (true) {
+                                    const i = next++;
+                                    if (i >= items.length) break;
+                                    try { results[i] = await mapper(items[i]); } catch (_) { results[i] = null; }
+                                }
+                            });
+                            await Promise.all(workers);
+                            return results;
+                        };
+
+                        try {
+                            const datasets = await mapWithConcurrency(
+                                shardUrlLists,
+                                (urls) => fetchFirstAvailable(urls, 12000),
+                                2
+                            );
+                            const successful = datasets.filter(Boolean);
+                            if (successful.length === 0) return;
+                            const merged = mergeDatasets([cineData, ...successful]);
                             if (merged && Array.isArray(merged.Categories) && merged.Categories.length > 0) {
                                 cineData = merged;
                                 localStorage.setItem('cineCrazeDataCache', JSON.stringify(cineData));
                                 localStorage.setItem('cineCrazeDataTimestamp', Date.now().toString());
-                                console.log(`🎉 Background merged ${datasets.length} additional shard(s)`);
+                                console.log(`🎉 Background merged ${successful.length} additional shard(s)`);
                                 try {
                                     const existingError = document.getElementById('data-error-overlay');
                                     if (existingError) existingError.remove();
                                 } catch {}
-                                // Re-render UI to include newly merged content without blocking UX
                                 try {
                                     renderCarousel();
                                     updateCarousel();
@@ -2948,7 +3032,7 @@
                         } catch (mergeErr) {
                             console.warn('⚠️ Background merge failed:', mergeErr);
                         }
-                    }).catch(err => console.warn('⚠️ Background shard load error:', err));
+                    })().catch(err => console.warn('⚠️ Background shard load error:', err));
 
                     return; // Return early so UI can render
                 }
