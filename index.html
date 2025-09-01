@@ -2968,7 +2968,7 @@
                     return Array.from(urls);
                 };
 
-                const fetchJsonWithTimeout = async (url, timeoutMs = 10000) => {
+                const fetchJsonWithTimeout = async (url, timeoutMs = 15000) => {
                     const controller = new AbortController();
                     const timerId = setTimeout(() => controller.abort(), timeoutMs);
                     try {
@@ -3048,12 +3048,41 @@
                     };
                 };
 
+                // Cache helpers: only update if new dataset is same or larger
+                const getDatasetSize = (data) => {
+                    if (!data || !Array.isArray(data.Categories)) return 0;
+                    let total = 0;
+                    for (const cat of data.Categories) {
+                        const len = Array.isArray(cat && cat.Entries) ? cat.Entries.length : 0;
+                        total += len;
+                    }
+                    return total;
+                };
+                const maybeUpdateCache = (data) => {
+                    try {
+                        const existing = localStorage.getItem('cineCrazeDataCache');
+                        if (!existing) {
+                            localStorage.setItem('cineCrazeDataCache', JSON.stringify(data));
+                            localStorage.setItem('cineCrazeDataTimestamp', Date.now().toString());
+                            return true;
+                        }
+                        const parsed = JSON.parse(existing);
+                        const newSize = getDatasetSize(data);
+                        const oldSize = getDatasetSize(parsed);
+                        if (newSize >= oldSize) {
+                            localStorage.setItem('cineCrazeDataCache', JSON.stringify(data));
+                            localStorage.setItem('cineCrazeDataTimestamp', Date.now().toString());
+                            return true;
+                        }
+                    } catch (_) { /* ignore cache errors */ }
+                    return false;
+                };
+
                 // 1) Fast path: load base shard first to show UI quickly
-                const baseData = await fetchFirstAvailable(shard0Urls, 8000);
+                const baseData = await fetchFirstAvailable(shard0Urls, 20000);
                 if (baseData && Array.isArray(baseData.Categories) && baseData.Categories.length > 0) {
                     cineData = baseData;
-                    localStorage.setItem('cineCrazeDataCache', JSON.stringify(cineData));
-                    localStorage.setItem('cineCrazeDataTimestamp', Date.now().toString());
+                    maybeUpdateCache(cineData);
                     console.log("✅ Base playlist loaded. Rendering UI now, background merge will continue...");
                     try {
                         const existingError = document.getElementById('data-error-overlay');
@@ -3132,8 +3161,7 @@
                             const merged = mergeDatasets([cineData, ...successful]);
                             if (merged && Array.isArray(merged.Categories) && merged.Categories.length > 0) {
                                 cineData = merged;
-                                localStorage.setItem('cineCrazeDataCache', JSON.stringify(cineData));
-                                localStorage.setItem('cineCrazeDataTimestamp', Date.now().toString());
+                                maybeUpdateCache(cineData);
                                 console.log(`🎉 Background merged ${successful.length} additional shard(s)`);
                                 try {
                                     const existingError = document.getElementById('data-error-overlay');
@@ -3216,8 +3244,7 @@
 
                     if (baselineFromManifest && Array.isArray(baselineFromManifest.Categories) && baselineFromManifest.Categories.length > 0) {
                         cineData = baselineFromManifest;
-                        localStorage.setItem('cineCrazeDataCache', JSON.stringify(cineData));
-                        localStorage.setItem('cineCrazeDataTimestamp', Date.now().toString());
+                        maybeUpdateCache(cineData);
                         try {
                             const existingError = document.getElementById('data-error-overlay');
                             if (existingError) existingError.remove();
@@ -3253,8 +3280,7 @@
                                 const merged = mergeDatasets([cineData, ...successful]);
                                 if (merged && Array.isArray(merged.Categories) && merged.Categories.length > 0) {
                                     cineData = merged;
-                                    localStorage.setItem('cineCrazeDataCache', JSON.stringify(cineData));
-                                    localStorage.setItem('cineCrazeDataTimestamp', Date.now().toString());
+                                    maybeUpdateCache(cineData);
                                     console.log(`🎉 Background merged ${successful.length} additional shard(s)`);
                                     try {
                                         const existingError = document.getElementById('data-error-overlay');
