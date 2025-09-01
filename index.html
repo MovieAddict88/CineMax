@@ -3059,7 +3059,21 @@
 
                     let shardUrlLists = [];
                     if (manifestList && manifestList.length > 0) {
-                        shardUrlLists = manifestList.map(u => deriveMirrorUrls(u));
+                        // Prioritize playlist.json as baseline if present in the manifest
+                        const preferred = [];
+                        const others = [];
+                        for (const u of manifestList) {
+                            try {
+                                const fn = u.split('/').pop();
+                                if (fn && (fn.toLowerCase() === 'playlist.json' || fn.toLowerCase() === 'playlist0.json')) {
+                                    preferred.push(u);
+                                } else {
+                                    others.push(u);
+                                }
+                            } catch { others.push(u); }
+                        }
+                        const ordered = [...preferred, ...others];
+                        shardUrlLists = ordered.map(u => deriveMirrorUrls(u));
                     } else {
                         // Fallback: probe numeric shards playlist1..playlist50 to find a baseline
                         const maxProbe = 50;
