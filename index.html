@@ -2800,6 +2800,125 @@
             try {
                 elements.loadingSpinner.style.display = 'block';
 
+                // Instant path: if cached combined data exists, render it immediately for stability
+                try {
+                    const cachedData = localStorage.getItem('cineCrazeDataCache');
+                    if (cachedData) {
+                        try {
+                            const parsed = JSON.parse(cachedData);
+                            if (parsed && Array.isArray(parsed.Categories) && parsed.Categories.length > 0) {
+                                cineData = parsed;
+                                try {
+                                    const existingError = document.getElementById('data-error-overlay');
+                                    if (existingError) existingError.remove();
+                                } catch {}
+
+                                // Kick off background refresh without blocking UI
+                                (async () => {
+                                    try {
+                                        // Try to refresh base and shards, then merge into current cineData
+                                        const baseDataBG = await fetchFirstAvailable([
+                                            "https://raw.githubusercontent.com/MovieAddict88/Movie-Source/main/playlist.json",
+                                            "https://cdn.jsdelivr.net/gh/MovieAddict88/Movie-Source@main/playlist.json",
+                                            "https://github.com/MovieAddict88/Movie-Source/raw/main/playlist.json",
+                                            "./playlist.json",
+                                            "./data/playlist.json"
+                                        ], 8000);
+
+                                        const manifestCandidatesBG = [
+                                            "https://raw.githubusercontent.com/MovieAddict88/Movie-Source/main/playlist-manifest.json",
+                                            "https://cdn.jsdelivr.net/gh/MovieAddict88/Movie-Source@main/playlist-manifest.json",
+                                            "https://github.com/MovieAddict88/Movie-Source/raw/main/playlist-manifest.json",
+                                            "./playlist-manifest.json",
+                                            "./data/playlist-manifest.json"
+                                        ];
+                                        let manifestListBG = null;
+                                        try {
+                                            const manifestBG = await fetchFirstAvailable(manifestCandidatesBG, 6000);
+                                            if (manifestBG && Array.isArray(manifestBG)) {
+                                                manifestListBG = manifestBG
+                                                    .map(item => typeof item === 'string' ? item : (item && item.url))
+                                                    .filter(Boolean);
+                                            }
+                                        } catch (_) { /* ignore */ }
+
+                                        let shardUrlListsBG = [];
+                                        if (manifestListBG && manifestListBG.length > 0) {
+                                            // Prioritize playlist.json first
+                                            const preferredBG = [];
+                                            const othersBG = [];
+                                            for (const u of manifestListBG) {
+                                                try {
+                                                    const fn = u.split('/').pop();
+                                                    if (fn && (fn.toLowerCase() === 'playlist.json' || fn.toLowerCase() === 'playlist0.json')) {
+                                                        preferredBG.push(u);
+                                                    } else {
+                                                        othersBG.push(u);
+                                                    }
+                                                } catch { othersBG.push(u); }
+                                            }
+                                            const orderedBG = [...preferredBG, ...othersBG];
+                                            shardUrlListsBG = orderedBG.map(u => deriveMirrorUrls(u));
+                                        } else {
+                                            // Probe numeric shards as fallback
+                                            const maxProbeBG = 50;
+                                            for (let idx = 1; idx <= maxProbeBG; idx++) {
+                                                const file = `playlist${idx}.json`;
+                                                shardUrlListsBG.push([
+                                                    `https://raw.githubusercontent.com/MovieAddict88/Movie-Source/main/${file}`,
+                                                    `https://cdn.jsdelivr.net/gh/MovieAddict88/Movie-Source@main/${file}`,
+                                                    `https://github.com/MovieAddict88/Movie-Source/raw/main/${file}`,
+                                                    `./${file}`,
+                                                    `./data/${file}`
+                                                ]);
+                                            }
+                                        }
+
+                                        const mapWithConcurrencyBG = async (items, mapper, concurrency = 2) => {
+                                            const results = new Array(items.length);
+                                            let next = 0;
+                                            const workers = Array.from({ length: Math.min(concurrency, items.length) }, async () => {
+                                                while (true) {
+                                                    const i = next++;
+                                                    if (i >= items.length) break;
+                                                    try { results[i] = await mapper(items[i]); } catch (_) { results[i] = null; }
+                                                }
+                                            });
+                                            await Promise.all(workers);
+                                            return results;
+                                        };
+
+                                        const datasetsBG = await mapWithConcurrencyBG(
+                                            shardUrlListsBG,
+                                            (urls) => fetchFirstAvailable(urls, 12000),
+                                            2
+                                        );
+                                        const successfulBG = datasetsBG.filter(Boolean);
+                                        const mergedBG = mergeDatasets([
+                                            cineData,
+                                            ...(baseDataBG ? [baseDataBG] : []),
+                                            ...successfulBG
+                                        ]);
+                                        if (mergedBG && Array.isArray(mergedBG.Categories) && mergedBG.Categories.length > 0) {
+                                            cineData = mergedBG;
+                                            localStorage.setItem('cineCrazeDataCache', JSON.stringify(cineData));
+                                            localStorage.setItem('cineCrazeDataTimestamp', Date.now().toString());
+                                            try {
+                                                renderCarousel();
+                                                updateCarousel();
+                                                renderContentFilters();
+                                                renderContent();
+                                            } catch {}
+                                        }
+                                    } catch (_) { /* ignore background errors */ }
+                                })();
+
+                                return; // render from cache now; network refresh continues in background
+                            }
+                        } catch (_) { /* ignore */ }
+                    }
+                } catch (_) { /* ignore cache path errors */ }
+
                 // Build prioritized URL lists for each playlist shard (prefer raw.githubusercontent.com)
                 const shard0Urls = [
                     "https://raw.githubusercontent.com/MovieAddict88/Movie-Source/main/playlist.json",
