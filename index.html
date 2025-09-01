@@ -3037,6 +3037,116 @@
                     return; // Return early so UI can render
                 }
 
+                // If base shard failed, try manifest to pick a baseline shard
+                try {
+                    const manifestCandidates = [
+                        "https://raw.githubusercontent.com/MovieAddict88/Movie-Source/main/playlist-manifest.json",
+                        "https://cdn.jsdelivr.net/gh/MovieAddict88/Movie-Source@main/playlist-manifest.json",
+                        "https://github.com/MovieAddict88/Movie-Source/raw/main/playlist-manifest.json",
+                        "./playlist-manifest.json",
+                        "./data/playlist-manifest.json"
+                    ];
+
+                    let manifestList = null;
+                    try {
+                        const manifest = await fetchFirstAvailable(manifestCandidates, 6000);
+                        if (manifest && Array.isArray(manifest)) {
+                            manifestList = manifest
+                                .map(item => typeof item === 'string' ? item : (item && item.url))
+                                .filter(Boolean);
+                        }
+                    } catch (_) { /* ignore */ }
+
+                    let shardUrlLists = [];
+                    if (manifestList && manifestList.length > 0) {
+                        shardUrlLists = manifestList.map(u => deriveMirrorUrls(u));
+                    } else {
+                        // Fallback: probe numeric shards playlist1..playlist50 to find a baseline
+                        const maxProbe = 50;
+                        for (let idx = 1; idx <= maxProbe; idx++) {
+                            const file = `playlist${idx}.json`;
+                            shardUrlLists.push([
+                                `https://raw.githubusercontent.com/MovieAddict88/Movie-Source/main/${file}`,
+                                `https://cdn.jsdelivr.net/gh/MovieAddict88/Movie-Source@main/${file}`,
+                                `https://github.com/MovieAddict88/Movie-Source/raw/main/${file}`,
+                                `./${file}`,
+                                `./data/${file}`
+                            ]);
+                        }
+                    }
+
+                    let baselineFromManifest = null;
+                    for (const urls of shardUrlLists) {
+                        baselineFromManifest = await fetchFirstAvailable(urls, 8000);
+                        if (baselineFromManifest && baselineFromManifest.Categories && baselineFromManifest.Categories.length > 0) break;
+                    }
+
+                    if (baselineFromManifest && Array.isArray(baselineFromManifest.Categories) && baselineFromManifest.Categories.length > 0) {
+                        cineData = baselineFromManifest;
+                        localStorage.setItem('cineCrazeDataCache', JSON.stringify(cineData));
+                        localStorage.setItem('cineCrazeDataTimestamp', Date.now().toString());
+                        try {
+                            const existingError = document.getElementById('data-error-overlay');
+                            if (existingError) existingError.remove();
+                        } catch {}
+
+                        // Start background loading of remaining shards with concurrency limit
+                        (async () => {
+                            // If manifest exists, use its list; otherwise reuse shardUrlLists (numeric probe)
+                            const backgroundLists = shardUrlLists;
+
+                            const mapWithConcurrency = async (items, mapper, concurrency = 2) => {
+                                const results = new Array(items.length);
+                                let next = 0;
+                                const workers = Array.from({ length: Math.min(concurrency, items.length) }, async () => {
+                                    while (true) {
+                                        const i = next++;
+                                        if (i >= items.length) break;
+                                        try { results[i] = await mapper(items[i]); } catch (_) { results[i] = null; }
+                                    }
+                                });
+                                await Promise.all(workers);
+                                return results;
+                            };
+
+                            try {
+                                const datasets = await mapWithConcurrency(
+                                    backgroundLists,
+                                    (urls) => fetchFirstAvailable(urls, 12000),
+                                    2
+                                );
+                                const successful = datasets.filter(Boolean);
+                                if (successful.length === 0) return;
+                                const merged = mergeDatasets([cineData, ...successful]);
+                                if (merged && Array.isArray(merged.Categories) && merged.Categories.length > 0) {
+                                    cineData = merged;
+                                    localStorage.setItem('cineCrazeDataCache', JSON.stringify(cineData));
+                                    localStorage.setItem('cineCrazeDataTimestamp', Date.now().toString());
+                                    console.log(`🎉 Background merged ${successful.length} additional shard(s)`);
+                                    try {
+                                        const existingError = document.getElementById('data-error-overlay');
+                                        if (existingError) existingError.remove();
+                                    } catch {}
+                                    try {
+                                        renderCarousel();
+                                        updateCarousel();
+                                        renderContentFilters();
+                                        renderContent();
+                                    } catch (rerenderErr) {
+                                        console.warn('⚠️ Background re-render failed:', rerenderErr);
+                                    }
+                                }
+                            } catch (mergeErr) {
+                                console.warn('⚠️ Background merge failed:', mergeErr);
+                            }
+                        })().catch(err => console.warn('⚠️ Background shard load error:', err));
+
+                        return; // Baseline from manifest set; let UI render
+                    }
+                } catch (err) {
+                    console.warn('⚠️ Manifest baseline attempt failed:', err);
+                }
+
                 // Fallback: try cached data if no live sources worked
                 const cachedData = localStorage.getItem('cineCrazeDataCache');
                 if (cachedData) {
