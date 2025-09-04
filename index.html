@@ -2795,54 +2795,123 @@
             });
         }
         
+        // Helpers for segmented playlist fetching
+        const MAX_PLAYLIST_SEGMENTS = 50; // safety cap
+        function getBasePathFromUrl(url) {
+            if (!url) return '';
+            const lastSlashIndex = url.lastIndexOf('/');
+            return lastSlashIndex >= 0 ? url.substring(0, lastSlashIndex + 1) : url;
+        }
+        function replaceFileName(url, fileName) {
+            return getBasePathFromUrl(url) + fileName;
+        }
+        function withCacheBuster(url) {
+            const separator = url.includes('?') ? '&' : '?';
+            return url + separator + 't=' + new Date().getTime();
+        }
+        async function tryFetchJson(url) {
+            try {
+                const response = await fetch(withCacheBuster(url));
+                if (!response.ok) return null;
+                return await response.json();
+            } catch (err) {
+                console.warn('tryFetchJson failed for', url, err);
+                return null;
+            }
+        }
+        function mergeCineDataSegments(segments) {
+            if (!Array.isArray(segments) || segments.length === 0) return null;
+            const categoryNameToCategory = new Map();
+            const categoryNameToSeenTitles = new Map();
+            for (const segment of segments) {
+                if (!segment || !Array.isArray(segment.Categories)) continue;
+                for (const category of segment.Categories) {
+                    if (!category || !category.MainCategory || !Array.isArray(category.Entries)) continue;
+                    const key = String(category.MainCategory);
+                    if (!categoryNameToCategory.has(key)) {
+                        categoryNameToCategory.set(key, { MainCategory: category.MainCategory, Entries: [] });
+                        categoryNameToSeenTitles.set(key, new Set());
+                    }
+                    const targetCategory = categoryNameToCategory.get(key);
+                    const seen = categoryNameToSeenTitles.get(key);
+                    for (const entry of category.Entries) {
+                        const title = entry && entry.Title ? String(entry.Title) : null;
+                        if (!title) continue;
+                        if (seen.has(title)) continue;
+                        seen.add(title);
+                        targetCategory.Entries.push(entry);
+                    }
+                }
+            }
+            return { Categories: Array.from(categoryNameToCategory.values()) };
+        }
+        async function tryFetchSegmented(basePlaylistUrl) {
+            const segments = [];
+            let foundAny = false;
+            for (let i = 1; i <= MAX_PLAYLIST_SEGMENTS; i++) {
+                const numberedUrl = replaceFileName(basePlaylistUrl, `playlist${i}.json`);
+                let data = await tryFetchJson(numberedUrl);
+                if (!data) {
+                    const dashedUrl = replaceFileName(basePlaylistUrl, `playlist-${i}.json`);
+                    data = await tryFetchJson(dashedUrl);
+                }
+                if (!data) {
+                    if (!foundAny) {
+                        return null;
+                    } else {
+                        break;
+                    }
+                }
+                foundAny = true;
+                segments.push(data);
+            }
+            if (!foundAny) return null;
+            return mergeCineDataSegments(segments);
+        }
+        
         // Enhanced data fetching with multiple fallback sources
         async function fetchData() {
             try {
                 elements.loadingSpinner.style.display = 'block';
                 
-                // Primary source
                 const primaryUrl = "https://github.com/MovieAddict88/Movie-Source/raw/main/playlist.json";
-                
-                // Fallback sources
                 const fallbackUrls = [
                     "https://raw.githubusercontent.com/MovieAddict88/Movie-Source/main/playlist.json",
                     "https://cdn.jsdelivr.net/gh/MovieAddict88/Movie-Source@main/playlist.json",
-                    "./playlist.json", // Local fallback
-                    "./data/playlist.json" // Alternative local path
+                    "./playlist.json",
+                    "./data/playlist.json"
                 ];
                 
-                // Try primary source first
-                try {
-                    const response = await fetch(primaryUrl + "?t=" + new Date().getTime());
-                    if (response.ok) {
-                        cineData = await response.json();
-                        // Cache the successful data
-                        localStorage.setItem('cineCrazeDataCache', JSON.stringify(cineData));
-                        localStorage.setItem('cineCrazeDataTimestamp', Date.now().toString());
-                        console.log("✅ Loaded data from primary source");
-                        return;
-                    }
-                } catch (err) {
-                    console.warn("⚠️ Primary source failed, trying fallbacks:", err);
-                }
-                
-                // Try fallback sources
-                for (const fallbackUrl of fallbackUrls) {
+                const allCandidateUrls = [primaryUrl, ...fallbackUrls];
+                for (const candidate of allCandidateUrls) {
                     try {
-                        console.log(`🔄 Trying fallback: ${fallbackUrl}`);
-                        const response = await fetch(fallbackUrl + "?t=" + new Date().getTime());
-                        if (response.ok) {
-                            cineData = await response.json();
-                            console.log(`✅ Loaded data from fallback: ${fallbackUrl}`);
+                        console.log(`🔎 Trying segmented playlists from: ${getBasePathFromUrl(candidate)}`);
+                        const segmented = await tryFetchSegmented(candidate);
+                        if (segmented && segmented.Categories && segmented.Categories.length > 0) {
+                            cineData = segmented;
+                            localStorage.setItem('cineCrazeDataCache', JSON.stringify(cineData));
+                            localStorage.setItem('cineCrazeDataTimestamp', Date.now().toString());
+                            console.log(`✅ Loaded segmented data from base: ${getBasePathFromUrl(candidate)}`);
                             return;
                         }
                     } catch (err) {
-                        console.warn(`⚠️ Fallback failed: ${fallbackUrl}`, err);
-                        continue;
+                        console.warn(`⚠️ Segmented fetch failed for ${candidate}`, err);
+                    }
+                    try {
+                        console.log(`🔄 Trying monolithic playlist: ${candidate}`);
+                        const response = await fetch(withCacheBuster(candidate));
+                        if (response.ok) {
+                            cineData = await response.json();
+                            localStorage.setItem('cineCrazeDataCache', JSON.stringify(cineData));
+                            localStorage.setItem('cineCrazeDataTimestamp', Date.now().toString());
+                            console.log(`✅ Loaded data from: ${candidate}`);
+                            return;
+                        }
+                    } catch (err) {
+                        console.warn(`⚠️ Monolithic fetch failed for ${candidate}`, err);
                     }
                 }
                 
-                // If all sources fail, try to load from localStorage cache
                 const cachedData = localStorage.getItem('cineCrazeDataCache');
                 if (cachedData) {
                     try {
@@ -2860,7 +2929,6 @@
                 console.error("❌ All data sources failed:", err);
                 elements.loadingSpinner.style.display = 'none';
                 
-                // Show user-friendly error message
                 const errorMessage = document.createElement('div');
                 errorMessage.style.cssText = `
                     position: fixed;
