@@ -2377,6 +2377,9 @@
             <button class="mobile-search-btn" id="mobile-search-btn">
                 <i class="fas fa-search"></i>
             </button>
+            <button class="theme-toggle" id="refresh-btn" title="Refresh Data">
+                <i class="fas fa-sync-alt"></i>
+            </button>
             <button class="theme-toggle" id="theme-toggle">
                 <i class="fas fa-moon"></i>
             </button>
@@ -2689,6 +2692,25 @@
                     request.onerror = event => {
                         console.error('Error setting data in DB:', event.target.errorCode);
                         reject('Error setting data in DB: ' + event.target.errorCode);
+                    };
+                });
+            },
+            clear: function(db) {
+                return new Promise((resolve, reject) => {
+                    if (!db) {
+                        reject("Database connection is not available.");
+                        return;
+                    }
+                    const transaction = db.transaction([STORE_NAME], 'readwrite');
+                    const store = transaction.objectStore(STORE_NAME);
+                    const request = store.clear();
+                    request.onsuccess = () => {
+                        console.log("IndexedDB store cleared.");
+                        resolve();
+                    };
+                    request.onerror = event => {
+                        console.error('Error clearing DB store:', event.target.errorCode);
+                        reject('Error clearing DB store: ' + event.target.errorCode);
                     };
                 });
             }
@@ -6303,6 +6325,43 @@
 
         // Setup event listeners
         function setupEventListeners() {
+            // Refresh button
+            const refreshBtn = document.getElementById('refresh-btn');
+            if (refreshBtn) {
+                refreshBtn.addEventListener('click', async () => {
+                    if (!confirm("Are you sure you want to clear the local cache and refresh all data from the server? This may take a few minutes.")) {
+                        return;
+                    }
+
+                    try {
+                        console.log("Clearing cache and reloading...");
+                        const db = await dbUtil.open();
+                        await dbUtil.clear(db);
+                        db.close();
+
+                        const notificationBar = document.getElementById('notification-bar');
+                        const notificationMessage = document.getElementById('notification-message');
+                        notificationMessage.textContent = "Cache cleared successfully! Reloading the latest data from the server...";
+                        notificationBar.style.display = 'flex';
+                        // Adjust header position after the notification bar is rendered
+                        setTimeout(() => {
+                            const header = document.querySelector('header');
+                            if (notificationBar.offsetHeight > 0) {
+                                header.style.top = `${notificationBar.offsetHeight}px`;
+                            }
+                        }, 100);
+
+                        setTimeout(() => {
+                            window.location.reload();
+                        }, 2000);
+
+                    } catch (error) {
+                        console.error("Failed to clear cache:", error);
+                        alert("There was an error clearing the cache. Please try clearing your browser's site data manually.");
+                    }
+                });
+            }
+
             // Theme toggle
             elements.themeToggle.addEventListener('click', toggleTheme);
 
