@@ -3587,6 +3587,15 @@
             elements.dislikeBtn.addEventListener('click', handleDislike);
         }
         
+        function getAutoplayUrl(url) {
+            if (!url) return '';
+            const separator = url.includes('?') ? '&' : '?';
+            if (url.includes('vidfast.pro')) {
+                return url + separator + 'autoPlay=true';
+            }
+            return url + separator + 'autoplay=true';
+        }
+
         // Play URL with YouTube and Vidsrc support
         async function playUrl(url, servers = []) {
             if (!url || !playerInstance) return;
@@ -3612,7 +3621,7 @@
             if (isGoogleDriveUrl(url)) {
                 const fileId = extractGoogleDriveId(url);
                 if (fileId) {
-                    const embedUrl = `https://drive.google.com/file/d/${fileId}/preview`;
+                    let embedUrl = `https://drive.google.com/file/d/${fileId}/preview`;
                     elements.player.style.display = 'none'; // Hide Plyr player
                     if (!iframe) {
                         iframe = document.createElement('iframe');
@@ -3628,7 +3637,7 @@
                         iframe.setAttribute('sandbox', 'allow-scripts allow-same-origin allow-presentation allow-forms');
                         playerContainer.appendChild(iframe);
                     }
-                    iframe.src = embedUrl;
+                    iframe.src = getAutoplayUrl(embedUrl);
                     iframe.style.display = 'block';
                     return;
                 }
@@ -3650,7 +3659,8 @@
                     iframe.setAttribute('sandbox', 'allow-scripts allow-same-origin allow-presentation allow-forms');
                     playerContainer.appendChild(iframe);
                 }
-                iframe.src = url.replace('/file/', '/embed/');
+                const embedUrl = url.replace('/file/', '/embed/');
+                iframe.src = getAutoplayUrl(embedUrl);
                 iframe.style.display = 'block';
                 return;
             }
@@ -3679,7 +3689,7 @@
                 
                 // Load iframe immediately for auto-play
                 iframe.style.display = 'block';
-                iframe.src = url;
+                iframe.src = getAutoplayUrl(url);
                 
                 // Handle iframe load events (non-blocking)
                 iframe.onload = () => {
@@ -3695,7 +3705,7 @@
                     if (currentIndex < servers.length - 1) {
                         const nextServer = servers[currentIndex + 1];
                         console.log('Trying next server:', nextServer.name);
-                        iframe.src = nextServer.url;
+                        iframe.src = getAutoplayUrl(nextServer.url);
                     }
                 };
                 
