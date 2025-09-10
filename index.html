@@ -3529,22 +3529,25 @@
             // --- Parental Controls Logic ---
             const parentalSettings = JSON.parse(localStorage.getItem('parentalControlsSettings'));
             const parentalControlsEnabled = parentalSettings && parentalSettings.enabled;
-            const allowedRatings = parentalControlsEnabled ? parentalSettings.allowedRatings : null;
-            // --- End Parental Controls Logic ---
+            const allowedRatings = parentalControlsEnabled ? parentalSettings.allowedRatings : [];
 
             // Filter content from the master cache, not the live data source
             let filteredContent = cachedContent.filter(entry => {
-                const categoryMatch = category === 'all' || (entry.type && entry.type.toLowerCase().includes(category));
+                const categoryMatch = category === 'all' || (entry.type && category.toLowerCase().includes(entry.type.toLowerCase()));
                 const genreMatch = genre === 'all' || (entry.SubCategory && entry.SubCategory.toLowerCase().includes(genre));
                 const countryMatch = country === 'all' || (entry.Country && entry.Country.toLowerCase().includes(country));
                 const yearMatch = year === 'all' || (entry.Year && entry.Year.toString() === year);
 
                 // --- Parental Rating Match ---
                 let parentalRatingMatch = true;
-                if (parentalControlsEnabled && Array.isArray(allowedRatings)) {
-                    const contentRating = entry.parentalRating || 'G';
-                    if (!allowedRatings.includes(contentRating)) {
-                        parentalRatingMatch = false;
+                if (parentalControlsEnabled) {
+                    if (entry.type === 'live') {
+                        parentalRatingMatch = true; // Always show live TV
+                    } else if (allowedRatings.length > 0) {
+                        const contentRating = entry.parenting || 'G'; // Use 'parenting' field, default to 'G'
+                        parentalRatingMatch = allowedRatings.includes(contentRating);
+                    } else { // No ratings selected
+                        parentalRatingMatch = false; // Hide all non-live content
                     }
                 }
                 // --- End Parental Rating Match ---
