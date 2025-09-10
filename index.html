@@ -7096,10 +7096,28 @@
                 return;
             }
 
+            const parentalSettings = JSON.parse(localStorage.getItem('parentalControlsSettings'));
+            const parentalControlsEnabled = parentalSettings && parentalSettings.enabled;
+            const allowedRatings = parentalControlsEnabled ? parentalSettings.allowedRatings : [];
+
+            let searchableContent = cachedContent;
+            if (parentalControlsEnabled) {
+                searchableContent = cachedContent.filter(entry => {
+                    if (entry.type === 'live') {
+                        return true;
+                    }
+                    if (allowedRatings.length > 0) {
+                        const contentRating = entry.parenting || 'G';
+                        return allowedRatings.includes(contentRating);
+                    }
+                    return false;
+                });
+            }
+
             const results = [];
 
-            // Search through cached content
-            cachedContent.forEach(item => {
+            // Search through filtered content
+            searchableContent.forEach(item => {
                 if (item.Title.toLowerCase().includes(query)) {
                     results.push({
                         title: item.Title,
