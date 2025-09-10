@@ -3544,8 +3544,8 @@
                     if (entry.type === 'live') {
                         parentalRatingMatch = true; // Always show live TV
                     } else if (allowedRatings.length > 0) {
-                        const contentRating = entry.parenting || 'G'; // Use 'parenting' field, default to 'G'
-                        parentalRatingMatch = allowedRatings.includes(contentRating);
+                        const contentRating = entry.parentalRating;
+                        parentalRatingMatch = contentRating && allowedRatings.includes(contentRating);
                     } else { // No ratings selected
                         parentalRatingMatch = false; // Hide all non-live content
                     }
@@ -7107,8 +7107,8 @@
                         return true;
                     }
                     if (allowedRatings.length > 0) {
-                        const contentRating = entry.parenting || 'G';
-                        return allowedRatings.includes(contentRating);
+                        const contentRating = entry.parentalRating;
+                        return contentRating && allowedRatings.includes(contentRating);
                     }
                     return false;
                 });
