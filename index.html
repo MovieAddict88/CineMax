@@ -1369,6 +1369,167 @@
             padding: 20px;
         }
 
+        #parental-controls-modal .modal-content {
+            max-width: 400px;
+        }
+
+        #parental-controls-modal input[type="password"],
+        #parental-controls-modal input[type="checkbox"] {
+            margin: 10px 0;
+        }
+
+        #parental-controls-modal .btn {
+            margin-top: 10px;
+        }
+
+        /* --- Parental Controls Modal --- */
+        #parental-controls-modal .modal-content {
+            background-color: var(--dark-2);
+            border: 1px solid var(--dark-3);
+            box-shadow: 0 8px 24px rgba(0,0,0,0.5);
+            max-width: 420px;
+            text-align: center;
+        }
+        #parental-controls-modal .modal-header {
+            border-bottom: 1px solid var(--dark-3);
+            padding: 15px 25px;
+        }
+        #parental-controls-modal .modal-title {
+            font-size: 20px;
+        }
+        #parental-controls-modal .modal-body {
+            padding: 25px;
+        }
+        #parental-controls-modal h4 {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+        #parental-controls-modal p {
+            color: var(--gray);
+            margin-bottom: 20px;
+        }
+        .pin-label {
+            margin-top: 20px;
+        }
+        .pin-input-container {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin-bottom: 25px;
+        }
+        .pin-digit {
+            width: 50px;
+            height: 60px;
+            text-align: center;
+            font-size: 24px;
+            font-weight: 700;
+            border-radius: var(--radius);
+            border: 2px solid var(--dark-3);
+            background-color: var(--youtube-dark-gray);
+            color: var(--light);
+            -moz-appearance: textfield;
+        }
+        .pin-digit:focus {
+            outline: none;
+            border-color: var(--youtube-red);
+            box-shadow: 0 0 0 3px rgba(229, 9, 20, 0.5);
+        }
+        .setting-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px 0;
+            border-bottom: 1px solid var(--dark-3);
+        }
+        .setting-row:last-of-type {
+            border-bottom: none;
+        }
+        .setting-row span, .setting-row label {
+            font-size: 16px;
+            color: var(--light-2);
+        }
+        .modal-actions {
+            display: flex;
+            justify-content: flex-end;
+            gap: 15px;
+            margin-top: 25px;
+        }
+        #parental-controls-modal .btn-primary {
+            background-color: var(--youtube-red);
+            border: none;
+            color: white;
+            padding: 12px 20px;
+            border-radius: var(--radius);
+            cursor: pointer;
+            transition: var(--transition);
+        }
+        #parental-controls-modal .btn-primary:hover {
+            background-color: var(--primary-dark);
+        }
+        #parental-controls-modal .btn-secondary {
+            background: none;
+            border: 1px solid var(--gray);
+            color: var(--gray);
+        }
+        #parental-controls-modal .btn-secondary:hover {
+            background: var(--dark-3);
+            color: var(--light);
+            border-color: var(--light);
+        }
+
+        /* --- Toggle Switch --- */
+        .switch {
+          position: relative;
+          display: inline-block;
+          width: 50px;
+          height: 28px;
+        }
+        .switch input {
+          opacity: 0;
+          width: 0;
+          height: 0;
+        }
+        .slider {
+          position: absolute;
+          cursor: pointer;
+          top: 0;
+          left: 0;
+          right: 0;
+          bottom: 0;
+          background-color: var(--dark-3);
+          -webkit-transition: .4s;
+          transition: .4s;
+        }
+        .slider:before {
+          position: absolute;
+          content: "";
+          height: 20px;
+          width: 20px;
+          left: 4px;
+          bottom: 4px;
+          background-color: white;
+          -webkit-transition: .4s;
+          transition: .4s;
+        }
+        input:checked + .slider {
+          background-color: var(--youtube-red);
+        }
+        input:focus + .slider {
+          box-shadow: 0 0 1px var(--youtube-red);
+        }
+        input:checked + .slider:before {
+          -webkit-transform: translateX(22px);
+          -ms-transform: translateX(22px);
+          transform: translateX(22px);
+        }
+        .slider.round {
+          border-radius: 34px;
+        }
+        .slider.round:before {
+          border-radius: 50%;
+        }
+
         /* Footer */
         footer {
             background-color: var(--youtube-dark);
@@ -2383,6 +2544,9 @@
             <button class="theme-toggle" id="theme-toggle">
                 <i class="fas fa-moon"></i>
             </button>
+            <button class="theme-toggle" id="parental-controls-btn" title="Parental Controls">
+                <i class="fas fa-user-shield"></i>
+            </button>
             <div class="user-profile">
                 <i class="fas fa-user"></i>
             </div>
@@ -2626,6 +2790,70 @@
         </div>
     </footer>
 
+    <!-- Parental Controls Modal -->
+    <div id="parental-controls-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title">Parental Controls</h3>
+                <span class="close-modal" id="close-parental-controls-modal">&times;</span>
+            </div>
+            <div class="modal-body">
+                <div id="pin-setup-view" style="display: none;">
+                    <h4>Set a PIN</h4>
+                    <p>Create a 4-digit PIN to manage settings.</p>
+                    <div class="pin-input-container" id="pin-set-container">
+                        <input type="text" class="pin-digit" maxlength="1" inputmode="numeric" pattern="[0-9]*">
+                        <input type="text" class="pin-digit" maxlength="1" inputmode="numeric" pattern="[0-9]*">
+                        <input type="text" class="pin-digit" maxlength="1" inputmode="numeric" pattern="[0-9]*">
+                        <input type="text" class="pin-digit" maxlength="1" inputmode="numeric" pattern="[0-9]*">
+                    </div>
+                    <h4 class="pin-label">Confirm PIN</h4>
+                    <div class="pin-input-container" id="pin-confirm-container">
+                        <input type="text" class="pin-digit" maxlength="1" inputmode="numeric" pattern="[0-9]*">
+                        <input type="text" class="pin-digit" maxlength="1" inputmode="numeric" pattern="[0-9]*">
+                        <input type="text" class="pin-digit" maxlength="1" inputmode="numeric" pattern="[0-9]*">
+                        <input type="text" class="pin-digit" maxlength="1" inputmode="numeric" pattern="[0-9]*">
+                    </div>
+                    <button id="save-pin-btn" class="btn btn-primary">Save PIN</button>
+                </div>
+                <div id="pin-entry-view" style="display: none;">
+                    <h4>Enter PIN</h4>
+                    <p>Enter your PIN to unlock settings.</p>
+                    <div class="pin-input-container" id="pin-enter-container">
+                        <input type="text" class="pin-digit" maxlength="1" inputmode="numeric" pattern="[0-9]*">
+                        <input type="text" class="pin-digit" maxlength="1" inputmode="numeric" pattern="[0-9]*">
+                        <input type="text" class="pin-digit" maxlength="1" inputmode="numeric" pattern="[0-9]*">
+                        <input type="text" class="pin-digit" maxlength="1" inputmode="numeric" pattern="[0-9]*">
+                    </div>
+                    <button id="submit-pin-btn" class="btn btn-primary">Submit</button>
+                </div>
+                <div id="parental-settings-view" style="display: none;">
+                    <div class="setting-row">
+                        <span>Enable Content Filtering</span>
+                        <label class="switch">
+                            <input type="checkbox" id="parental-enabled-toggle">
+                            <span class="slider round"></span>
+                        </label>
+                    </div>
+                    <div class="setting-row">
+                        <label for="parental-rating-modal-filter">Maximum Rating</label>
+                        <select id="parental-rating-modal-filter" class="filter-select">
+                            <option value="G">G</option>
+                            <option value="PG">PG</option>
+                            <option value="PG-13">PG-13</option>
+                            <option value="R">R</option>
+                            <option value="NC-17">NC-17</option>
+                        </select>
+                    </div>
+                    <div class="modal-actions">
+                        <button id="change-pin-btn" class="btn btn-secondary">Change PIN</button>
+                        <button id="save-parental-settings-btn" class="btn btn-primary">Save Settings</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <script src="https://cdn.plyr.io/3.7.8/plyr.js"></script>
     <script src="https://cdn.dashjs.org/latest/dash.all.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/shaka-player/4.3.7/shaka-player.compiled.js"></script>
@@ -2786,7 +3014,19 @@
             nextEpisodeBtn: null,
             hamburgerBtn: document.getElementById('hamburger-btn'),
             mobileFiltersMenu: document.querySelector('.mobile-filters-menu'),
-            stretchBtn: document.getElementById('stretch-btn')
+            stretchBtn: document.getElementById('stretch-btn'),
+            parentalControlsBtn: document.getElementById('parental-controls-btn'),
+            parentalControlsModal: document.getElementById('parental-controls-modal'),
+            closeParentalControlsModal: document.getElementById('close-parental-controls-modal'),
+            pinSetupView: document.getElementById('pin-setup-view'),
+            savePinBtn: document.getElementById('save-pin-btn'),
+            pinEntryView: document.getElementById('pin-entry-view'),
+            submitPinBtn: document.getElementById('submit-pin-btn'),
+            parentalSettingsView: document.getElementById('parental-settings-view'),
+            parentalEnabledToggle: document.getElementById('parental-enabled-toggle'),
+            parentalRatingModalFilter: document.getElementById('parental-rating-modal-filter'),
+            saveParentalSettingsBtn: document.getElementById('save-parental-settings-btn'),
+            changePinBtn: document.getElementById('change-pin-btn')
         };
         
         // State
@@ -3269,6 +3509,14 @@
             const year = elements.yearFilter.value;
             const sortBy = elements.sortFilter.value;
 
+            // --- Parental Controls Logic ---
+            const parentalSettings = JSON.parse(localStorage.getItem('parentalControlsSettings'));
+            const parentalControlsEnabled = parentalSettings && parentalSettings.enabled;
+            const maxRating = parentalControlsEnabled ? parentalSettings.maxRating : null;
+            const ratingOrder = ['G', 'PG', 'PG-13', 'R', 'NC-17'];
+            const maxRatingIndex = maxRating ? ratingOrder.indexOf(maxRating) : -1;
+            // --- End Parental Controls Logic ---
+
             // Filter content
             cineData.Categories.forEach(cat => {
                 if (category === 'all' || cat.MainCategory.toLowerCase().includes(category)) {
@@ -3280,7 +3528,21 @@
                             (entry.Country && entry.Country.toLowerCase().includes(country));
                         const yearMatch = year === 'all' || (entry.Year && entry.Year.toString() === year);
 
-                        if (genreMatch && countryMatch && yearMatch) {
+                        // --- Parental Rating Match ---
+                        let parentalRatingMatch = true; // Default to true (content is allowed)
+                        if (parentalControlsEnabled && maxRatingIndex !== -1) {
+                            // Use the content's rating, or default to 'G' if it's missing
+                            const contentRating = entry.parentalRating || 'G';
+                            const contentRatingIndex = ratingOrder.indexOf(contentRating);
+
+                            // If the content's rating is not in our list or is higher than the max allowed, block it
+                            if (contentRatingIndex === -1 || contentRatingIndex > maxRatingIndex) {
+                                parentalRatingMatch = false;
+                            }
+                        }
+                        // --- End Parental Rating Match ---
+
+                        if (genreMatch && countryMatch && yearMatch && parentalRatingMatch) {
                             currentContent.push({
                                 ...entry,
                                 type: cat.MainCategory.toLowerCase().includes('movie') ? 'movie' :
@@ -6407,6 +6669,107 @@
                 renderContent(category);
             });
 
+            // Parental Controls Modal
+            elements.parentalControlsBtn.addEventListener('click', () => {
+                const pin = localStorage.getItem('parentalPin');
+                if (pin) {
+                    elements.pinEntryView.style.display = 'block';
+                    elements.pinSetupView.style.display = 'none';
+                    elements.parentalSettingsView.style.display = 'none';
+                } else {
+                    elements.pinSetupView.style.display = 'block';
+                    elements.pinEntryView.style.display = 'none';
+                    elements.parentalSettingsView.style.display = 'none';
+                }
+                elements.parentalControlsModal.style.display = 'flex';
+            });
+
+            elements.closeParentalControlsModal.addEventListener('click', () => {
+                elements.parentalControlsModal.style.display = 'none';
+            });
+
+            // --- New PIN Input Logic ---
+            function setupPinInput(containerId) {
+                const container = document.getElementById(containerId);
+                const inputs = [...container.querySelectorAll('.pin-digit')];
+
+                inputs.forEach((input, index) => {
+                    input.addEventListener('input', (e) => {
+                        // Automatically move to the next input
+                        if (input.value && index < inputs.length - 1) {
+                            inputs[index + 1].focus();
+                        }
+                    });
+
+                    input.addEventListener('keydown', (e) => {
+                        // Move to previous input on backspace if current input is empty
+                        if (e.key === "Backspace" && !input.value && index > 0) {
+                            inputs[index - 1].focus();
+                        }
+                    });
+
+                    // Handle pasting
+                    input.addEventListener('paste', (e) => {
+                        e.preventDefault();
+                        const pasteData = e.clipboardData.getData('text');
+                        if (pasteData.length === inputs.length) {
+                            inputs.forEach((pInput, i) => {
+                                pInput.value = pasteData[i] || '';
+                            });
+                            inputs[inputs.length - 1].focus();
+                        }
+                    });
+                });
+            }
+
+            function getPinFromContainer(containerId) {
+                const container = document.getElementById(containerId);
+                const inputs = [...container.querySelectorAll('.pin-digit')];
+                return inputs.map(input => input.value).join('');
+            }
+
+            function clearPinContainer(containerId) {
+                const container = document.getElementById(containerId);
+                const inputs = [...container.querySelectorAll('.pin-digit')];
+                inputs.forEach(input => input.value = '');
+                if (inputs.length > 0) {
+                    inputs[0].focus();
+                }
+            }
+            // --- End New PIN Input Logic ---
+
+            elements.savePinBtn.addEventListener('click', () => {
+                const pin = getPinFromContainer('pin-set-container');
+                const confirmPin = getPinFromContainer('pin-confirm-container');
+                if (pin.length === 4 && pin === confirmPin) {
+                    localStorage.setItem('parentalPin', pin);
+                    alert('PIN saved successfully!');
+                    elements.pinSetupView.style.display = 'none';
+                    clearPinContainer('pin-set-container');
+                    clearPinContainer('pin-confirm-container');
+                    elements.parentalSettingsView.style.display = 'block';
+                    loadParentalControlSettings(); // Load settings when view is shown for the first time
+                } else {
+                    alert('PINs do not match or are not 4 digits long.');
+                    clearPinContainer('pin-set-container');
+                    clearPinContainer('pin-confirm-container');
+                }
+            });
+
+            elements.submitPinBtn.addEventListener('click', () => {
+                const pin = localStorage.getItem('parentalPin');
+                const enteredPin = getPinFromContainer('pin-enter-container');
+                if (pin === enteredPin) {
+                    elements.pinEntryView.style.display = 'none';
+                    clearPinContainer('pin-enter-container');
+                    elements.parentalSettingsView.style.display = 'block';
+                    loadParentalControlSettings(); // Load settings when view is shown
+                } else {
+                    alert('Incorrect PIN.');
+                    clearPinContainer('pin-enter-container');
+                }
+            });
+
             elements.countryFilter.addEventListener('change', () => {
                 const activeNavItem = document.querySelector('.nav-item.active');
                 const category = activeNavItem ? activeNavItem.dataset.category : 'all';
@@ -6424,6 +6787,43 @@
                 const category = activeNavItem ? activeNavItem.dataset.category : 'all';
                 renderContent(category);
             });
+
+            // --- Parental Controls Settings Logic ---
+
+            function loadParentalControlSettings() {
+                const settings = JSON.parse(localStorage.getItem('parentalControlsSettings'));
+                if (settings) {
+                    elements.parentalEnabledToggle.checked = settings.enabled;
+                    elements.parentalRatingModalFilter.value = settings.maxRating;
+                } else {
+                    // Default settings if none are saved
+                    elements.parentalEnabledToggle.checked = false;
+                    elements.parentalRatingModalFilter.value = 'NC-17';
+                }
+            }
+
+            elements.saveParentalSettingsBtn.addEventListener('click', () => {
+                const settings = {
+                    enabled: elements.parentalEnabledToggle.checked,
+                    maxRating: elements.parentalRatingModalFilter.value
+                };
+                localStorage.setItem('parentalControlsSettings', JSON.stringify(settings));
+                alert('Parental control settings saved!');
+                elements.parentalControlsModal.style.display = 'none';
+                // Re-render content to apply filters immediately
+                const activeNavItem = document.querySelector('.nav-item.active');
+                const category = activeNavItem ? activeNavItem.dataset.category : 'all';
+                renderContent(category);
+            });
+
+            elements.changePinBtn.addEventListener('click', () => {
+                elements.parentalSettingsView.style.display = 'none';
+                clearPinContainer('pin-set-container');
+                clearPinContainer('pin-confirm-container');
+                elements.pinSetupView.style.display = 'block';
+            });
+
+            // --- End Parental Controls Settings Logic ---
 
             // Search functionality
             elements.searchInput.addEventListener('input', debounce(handleSearch, 300));
@@ -6576,6 +6976,11 @@
             elements.stretchBtn.addEventListener('click', () => {
                 toggleStretch();
             });
+
+            // Initialize PIN inputs
+            setupPinInput('pin-set-container');
+            setupPinInput('pin-confirm-container');
+            setupPinInput('pin-enter-container');
         }
         
         // Function to create and add the stretch button to Plyr controls
