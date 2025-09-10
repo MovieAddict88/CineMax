@@ -2835,15 +2835,15 @@
                             <span class="slider round"></span>
                         </label>
                     </div>
-                    <div class="setting-row">
-                        <label for="parental-rating-modal-filter">Maximum Rating</label>
-                        <select id="parental-rating-modal-filter" class="filter-select">
-                            <option value="G">G</option>
-                            <option value="PG">PG</option>
-                            <option value="PG-13">PG-13</option>
-                            <option value="R">R</option>
-                            <option value="NC-17">NC-17</option>
-                        </select>
+                    <div class="setting-row ratings-container">
+                        <span>Allowed Ratings</span>
+                        <div id="ratings-checkbox-group">
+                            <label class="rating-label"><input type="checkbox" class="rating-checkbox" value="G"> G</label>
+                            <label class="rating-label"><input type="checkbox" class="rating-checkbox" value="PG"> PG</label>
+                            <label class="rating-label"><input type="checkbox" class="rating-checkbox" value="PG-13"> PG-13</label>
+                            <label class="rating-label"><input type="checkbox" class="rating-checkbox" value="R"> R</label>
+                            <label class="rating-label"><input type="checkbox" class="rating-checkbox" value="NC-17"> NC-17</label>
+                        </div>
                     </div>
                     <div class="modal-actions">
                         <button id="change-pin-btn" class="btn btn-secondary">Change PIN</button>
@@ -3024,7 +3024,6 @@
             submitPinBtn: document.getElementById('submit-pin-btn'),
             parentalSettingsView: document.getElementById('parental-settings-view'),
             parentalEnabledToggle: document.getElementById('parental-enabled-toggle'),
-            parentalRatingModalFilter: document.getElementById('parental-rating-modal-filter'),
             saveParentalSettingsBtn: document.getElementById('save-parental-settings-btn'),
             changePinBtn: document.getElementById('change-pin-btn')
         };
@@ -3497,13 +3496,31 @@
         
         // Render content based on filters
         function renderContent(category = 'all') {
-            if (!cineData || !cineData.Categories) return;
+            // This check is important. We can't filter if the master cache is empty.
+            if (!cachedContent || cachedContent.length === 0) {
+                // If cineData exists, it means this is the first run.
+                // We should populate the cache first.
+                if (cineData && cineData.Categories) {
+                    let allContent = [];
+                    cineData.Categories.forEach(cat => {
+                        cat.Entries.forEach(entry => {
+                            allContent.push({
+                                ...entry,
+                                type: cat.MainCategory.toLowerCase().includes('movie') ? 'movie' :
+                                      cat.MainCategory.toLowerCase().includes('series') ? 'series' : 'live'
+                            });
+                        });
+                    });
+                    cachedContent = [...allContent]; // Populate the master cache
+                } else {
+                    return; // Can't do anything if there's no data
+                }
+            }
 
             // Reset pagination
             currentPage = 1;
-            currentContent = [];
 
-            // Get selected category
+            // Get selected filters
             const genre = elements.genreFilter.value.toLowerCase();
             const country = elements.countryFilter.value.toLowerCase();
             const year = elements.yearFilter.value;
@@ -3512,62 +3529,44 @@
             // --- Parental Controls Logic ---
             const parentalSettings = JSON.parse(localStorage.getItem('parentalControlsSettings'));
             const parentalControlsEnabled = parentalSettings && parentalSettings.enabled;
-            const maxRating = parentalControlsEnabled ? parentalSettings.maxRating : null;
-            const ratingOrder = ['G', 'PG', 'PG-13', 'R', 'NC-17'];
-            const maxRatingIndex = maxRating ? ratingOrder.indexOf(maxRating) : -1;
+            const allowedRatings = parentalControlsEnabled ? parentalSettings.allowedRatings : null;
             // --- End Parental Controls Logic ---
 
-            // Filter content
-            cineData.Categories.forEach(cat => {
-                if (category === 'all' || cat.MainCategory.toLowerCase().includes(category)) {
-                    cat.Entries.forEach(entry => {
-                        // Check genre and country filters
-                        const genreMatch = genre === 'all' ||
-                            (entry.SubCategory && entry.SubCategory.toLowerCase().includes(genre));
-                        const countryMatch = country === 'all' ||
-                            (entry.Country && entry.Country.toLowerCase().includes(country));
-                        const yearMatch = year === 'all' || (entry.Year && entry.Year.toString() === year);
+            // Filter content from the master cache, not the live data source
+            let filteredContent = cachedContent.filter(entry => {
+                const categoryMatch = category === 'all' || (entry.type && entry.type.toLowerCase().includes(category));
+                const genreMatch = genre === 'all' || (entry.SubCategory && entry.SubCategory.toLowerCase().includes(genre));
+                const countryMatch = country === 'all' || (entry.Country && entry.Country.toLowerCase().includes(country));
+                const yearMatch = year === 'all' || (entry.Year && entry.Year.toString() === year);
 
-                        // --- Parental Rating Match ---
-                        let parentalRatingMatch = true; // Default to true (content is allowed)
-                        if (parentalControlsEnabled && maxRatingIndex !== -1) {
-                            // Use the content's rating, or default to 'G' if it's missing
-                            const contentRating = entry.parentalRating || 'G';
-                            const contentRatingIndex = ratingOrder.indexOf(contentRating);
-
-                            // If the content's rating is not in our list or is higher than the max allowed, block it
-                            if (contentRatingIndex === -1 || contentRatingIndex > maxRatingIndex) {
-                                parentalRatingMatch = false;
-                            }
-                        }
-                        // --- End Parental Rating Match ---
-
-                        if (genreMatch && countryMatch && yearMatch && parentalRatingMatch) {
-                            currentContent.push({
-                                ...entry,
-                                type: cat.MainCategory.toLowerCase().includes('movie') ? 'movie' :
-                                    cat.MainCategory.toLowerCase().includes('series') ? 'series' : 'live'
-                            });
-                        }
-                    });
+                // --- Parental Rating Match ---
+                let parentalRatingMatch = true;
+                if (parentalControlsEnabled && Array.isArray(allowedRatings)) {
+                    const contentRating = entry.parentalRating || 'G';
+                    if (!allowedRatings.includes(contentRating)) {
+                        parentalRatingMatch = false;
+                    }
                 }
+                // --- End Parental Rating Match ---
+
+                return categoryMatch && genreMatch && countryMatch && yearMatch && parentalRatingMatch;
             });
 
-            // Shuffle content on initial load
+            // Shuffle content on initial load of the entire page
             if (isInitialLoad) {
-                currentContent = shuffleArray(currentContent);
+                filteredContent = shuffleArray(filteredContent);
                 isInitialLoad = false;
             }
-            // Apply sorting if not initial load
+            // Apply sorting for all subsequent filtering actions
             else {
-                currentContent = sortContent(currentContent, sortBy);
+                filteredContent = sortContent(filteredContent, sortBy);
             }
+
+            // Set the currentContent to the newly filtered list
+            currentContent = filteredContent;
 
             // Calculate total pages
             totalPages = Math.ceil(currentContent.length / ITEMS_PER_PAGE);
-
-            // Cache filtered content
-            cachedContent = [...currentContent];
 
             // Render content
             renderCurrentView();
@@ -6794,18 +6793,25 @@
                 const settings = JSON.parse(localStorage.getItem('parentalControlsSettings'));
                 if (settings) {
                     elements.parentalEnabledToggle.checked = settings.enabled;
-                    elements.parentalRatingModalFilter.value = settings.maxRating;
+                    const allowedRatings = settings.allowedRatings || [];
+                    document.querySelectorAll('.rating-checkbox').forEach(checkbox => {
+                        checkbox.checked = allowedRatings.includes(checkbox.value);
+                    });
                 } else {
                     // Default settings if none are saved
                     elements.parentalEnabledToggle.checked = false;
-                    elements.parentalRatingModalFilter.value = 'NC-17';
+                    // By default, check all ratings
+                    document.querySelectorAll('.rating-checkbox').forEach(checkbox => {
+                        checkbox.checked = true;
+                    });
                 }
             }
 
             elements.saveParentalSettingsBtn.addEventListener('click', () => {
+                const allowedRatings = [...document.querySelectorAll('.rating-checkbox:checked')].map(cb => cb.value);
                 const settings = {
                     enabled: elements.parentalEnabledToggle.checked,
-                    maxRating: elements.parentalRatingModalFilter.value
+                    allowedRatings: allowedRatings
                 };
                 localStorage.setItem('parentalControlsSettings', JSON.stringify(settings));
                 alert('Parental control settings saved!');
