@@ -1981,6 +1981,10 @@ jobs:
                         <label>Rating (IMDB)</label>
                         <input type="number" id="manual-rating" min="0" max="10" step="0.1">
                     </div>
+                    <div class="form-group">
+                        <label>Parental Rating</label>
+                        <input type="text" id="manual-parental-rating" placeholder="e.g., PG-13">
+                    </div>
                 </div>
 
                 <div class="form-group">
@@ -3592,6 +3596,7 @@ const TWOTWOEMBED_BASE = 'https://2embed.cc/embed';
              const movieData = await fetchTMDB(`/movie/${tmdbId}`);
              const credits = await fetchTMDB(`/movie/${tmdbId}/credits`);
              const videos = await fetchTMDB(`/movie/${tmdbId}/videos`);
+             const releaseDates = await fetchTMDB(`/movie/${tmdbId}/release_dates`);
              
              if (!movieData) throw new Error('Failed to fetch movie data');
 
@@ -3634,7 +3639,7 @@ const TWOTWOEMBED_BASE = 'https://2embed.cc/embed';
                  comment: true,
                  playas: "video",
                  description: movieData.overview || "No description available",
-                 classification: getRatingClassification(movieData.adult),
+                 parentalRating: getMovieCertification(releaseDates),
                  year: movieData.release_date?.substring(0, 4) || "Unknown",
                  duration: formatDuration(movieData.runtime),
                  rating: movieData.vote_average || 0,
@@ -3662,6 +3667,7 @@ const TWOTWOEMBED_BASE = 'https://2embed.cc/embed';
                 Rating: Math.round(movie.rating),
                 Duration: movie.duration,
                 Year: parseInt(movie.year),
+                 parentalRating: movie.parentalRating,
                 Servers: movie.sources.map(source => ({
                     name: source.name || source.title,
                     url: source.url
@@ -4057,6 +4063,7 @@ const TWOTWOEMBED_BASE = 'https://2embed.cc/embed';
             const seriesData = await fetchTMDB(`/tv/${tmdbId}`);
             const credits = await fetchTMDB(`/tv/${tmdbId}/credits`);
             const videos = await fetchTMDB(`/tv/${tmdbId}/videos`);
+            const contentRatings = await fetchTMDB(`/tv/${tmdbId}/content_ratings`);
             
             if (!seriesData) throw new Error('Failed to fetch series data');
 
@@ -4142,7 +4149,7 @@ const TWOTWOEMBED_BASE = 'https://2embed.cc/embed';
                 comment: true,
                 playas: "video",
                 description: seriesData.overview || "No description available",
-                classification: getRatingClassification(seriesData.adult),
+                 parentalRating: getTVCertification(contentRatings),
                 year: seriesData.first_air_date?.substring(0, 4) || "Unknown",
                 duration: formatDuration(seriesData.episode_run_time?.[0]),
                 rating: seriesData.vote_average || 0,
@@ -4168,6 +4175,7 @@ const TWOTWOEMBED_BASE = 'https://2embed.cc/embed';
                 Thumbnail: series.image,
                 Rating: Math.round(series.rating),
                 Year: parseInt(series.year),
+                 parentalRating: series.parentalRating,
                 Seasons: seasons.map(season => ({
                     Season: season.id,
                     SeasonPoster: series.image,
@@ -4218,6 +4226,39 @@ const TWOTWOEMBED_BASE = 'https://2embed.cc/embed';
             if (type === 'm3u8' || type === 'dash') return 'play';  // Live TV/streams = play only
             if (type === 'video') return 'both';     // Direct video files = both downloadable & playable
             return 'both';  // Default for direct links
+        }
+
+        function getTVCertification(contentRatings) {
+            if (!contentRatings || !contentRatings.results) return 'N/A';
+            const usRating = contentRatings.results.find(r => r.iso_3166_1 === 'US');
+            if (usRating && usRating.rating) {
+                return usRating.rating;
+            }
+            if (contentRatings.results.length > 0 && contentRatings.results[0].rating) {
+                return contentRatings.results[0].rating;
+            }
+            return 'N/A';
+        }
+
+        function getMovieCertification(releaseDates) {
+            if (!releaseDates || !releaseDates.results) return 'N/A';
+            const usRelease = releaseDates.results.find(r => r.iso_3166_1 === 'US');
+            if (usRelease && usRelease.release_dates) {
+                const theatrical = usRelease.release_dates.find(rd => rd.type === 3 || rd.type === 4);
+                if (theatrical && theatrical.certification) {
+                    return theatrical.certification;
+                }
+            }
+            for (const result of releaseDates.results) {
+                if (result.release_dates) {
+                    for (const rd of result.release_dates) {
+                        if (rd.certification) {
+                            return rd.certification;
+                        }
+                    }
+                }
+            }
+            return 'N/A';
         }
 
         function getRatingClassification(adult) {
@@ -4458,6 +4499,7 @@ const TWOTWOEMBED_BASE = 'https://2embed.cc/embed';
             const title = document.getElementById('manual-title').value.trim();
             const subcategory = document.getElementById('manual-subcategory').value;
             const country = document.getElementById('manual-country').value.trim();
+            const parentalRating = document.getElementById('manual-parental-rating').value.trim();
             
             if (!title) {
                 showStatus('warning', 'Please enter a title');
@@ -4494,6 +4536,7 @@ const TWOTWOEMBED_BASE = 'https://2embed.cc/embed';
                 Poster: document.getElementById('manual-image').value || '',
                 Thumbnail: document.getElementById('manual-image').value || '',
                 Rating: parseInt(document.getElementById('manual-rating').value) || 0,
+                parentalRating: parentalRating,
                 Servers: servers
             };
 
@@ -4545,6 +4588,7 @@ const TWOTWOEMBED_BASE = 'https://2embed.cc/embed';
             document.getElementById('manual-year').value = '';
             document.getElementById('manual-rating').value = '';
             document.getElementById('manual-country').value = '';
+            document.getElementById('manual-parental-rating').value = '';
             
             // Reset sources to one empty item
             document.getElementById('manual-sources').innerHTML = `
@@ -5815,7 +5859,7 @@ Proceed with removal?`;
                          alt="${item.title}" loading="lazy">
                     <div class="info">
                         <div class="title">${item.title}</div>
-                        <div class="meta">${item.year || 'Unknown'} • ${item.type?.toUpperCase()} • Rating: ${item.rating || 'N/A'}</div>
+                        <div class="meta">${item.year || 'Unknown'} • ${item.parentalRating || 'N/A'} • ${item.type?.toUpperCase()} • Rating: ${item.rating || 'N/A'}</div>
                         <div class="meta">Category: ${item.category} • SubCategory: ${item.SubCategory || 'N/A'}</div>
                         <div class="meta">Servers: ${item.sources?.length || 0}</div>
                         <div style="margin-top: 10px;">
@@ -5951,6 +5995,10 @@ Proceed with removal?`;
                     <input type="number" id="edit-rating" min="0" max="10" step="0.1" value="${content.Rating || ''}">
                 </div>
                 <div class="form-group">
+                    <label>Parental Rating</label>
+                    <input type="text" id="edit-parental-rating" placeholder="e.g., PG-13" value="${content.parentalRating || ''}">
+                </div>
+                <div class="form-group">
                     <label>Servers</label>
                     <div id="edit-servers" class="server-list">
                         ${serversHTML}
@@ -6011,6 +6059,7 @@ Proceed with removal?`;
             const description = document.getElementById('edit-description').value;
             const year = document.getElementById('edit-year').value;
             const rating = parseInt(document.getElementById('edit-rating').value);
+            const parentalRating = document.getElementById('edit-parental-rating').value;
             
             // Find and update content
             currentData.Categories.forEach(cat => {
@@ -6021,6 +6070,7 @@ Proceed with removal?`;
                         entry.Description = description;
                         if (year) entry.Year = parseInt(year);
                         entry.Rating = rating;
+                        entry.parentalRating = parentalRating;
                         
                         // Update servers
                         const serverInputs = document.querySelectorAll('#edit-servers .server-item');
@@ -8299,4 +8349,4 @@ Proceed with removal?`;
         }
     </script>
 </body>
-</html
+</html>
