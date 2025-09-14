@@ -1369,6 +1369,267 @@
             padding: 20px;
         }
 
+        /* Parental Controls Styles */
+        .parental-controls-content, .pin-entry-content {
+            max-width: 500px;
+        }
+        .ratings-select-content {
+            max-width: 400px;
+        }
+        .parental-control-pin-section {
+            text-align: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid var(--dark-3);
+        }
+        .pin-display-container {
+            margin: 20px 0;
+        }
+        .pin-display, .pin-display-input {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-bottom: 10px;
+        }
+        .pin-display .pin-dot, .pin-display-input .pin-dot {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background-color: var(--dark-3);
+            border: 2px solid var(--gray);
+            transition: all 0.2s ease;
+        }
+        .pin-display .pin-dot.filled, .pin-display-input .pin-dot.filled {
+            background-color: var(--youtube-red);
+            border-color: var(--youtube-red);
+        }
+        .pin-status-text, .pin-status-text-input {
+            min-height: 20px;
+            color: var(--youtube-light-gray);
+        }
+        .pin-pad, .pin-pad-input {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 20px;
+            max-width: 300px;
+            margin: 20px auto;
+        }
+        .pin-pad .pin-btn, .pin-pad-input .pin-btn {
+            width: 70px;
+            height: 70px;
+            border-radius: 50%;
+            border: none;
+            background-color: var(--youtube-red);
+            color: white;
+            font-size: 28px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .pin-pad .pin-btn:hover, .pin-pad-input .pin-btn:hover {
+            background-color: var(--primary-dark);
+            transform: scale(1.05);
+        }
+        .pin-pad .pin-btn.backspace, .pin-pad-input .pin-btn.backspace {
+            background-color: transparent;
+            font-size: 24px;
+        }
+        .parental-control-setting-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px 0;
+            border-bottom: 1px solid var(--dark-3);
+        }
+        .parental-control-setting-item:last-child {
+            border-bottom: none;
+        }
+        .parental-control-setting-item h4 {
+            margin: 0 0 5px;
+            font-size: 16px;
+            color: var(--light);
+        }
+        .parental-control-setting-item p {
+            margin: 0;
+            font-size: 14px;
+            color: var(--gray);
+        }
+        .ratings-summary {
+            font-style: italic;
+            margin-top: 5px !important;
+            font-size: 13px !important;
+            color: var(--youtube-light-gray) !important;
+            max-width: 250px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        .parental-btn, .parental-btn-secondary {
+            padding: 10px 20px;
+            border-radius: var(--radius);
+            border: none;
+            cursor: pointer;
+            font-weight: 600;
+            transition: var(--transition);
+        }
+        .parental-btn {
+            background-color: var(--youtube-red);
+            color: white;
+        }
+        .parental-btn:hover {
+            background-color: var(--primary-dark);
+        }
+        .parental-btn-secondary {
+            background-color: var(--youtube-gray);
+            color: var(--light);
+        }
+        .parental-btn-secondary:hover {
+            background-color: var(--dark-3);
+        }
+
+        /* Toggle Switch */
+        .switch {
+            position: relative;
+            display: inline-block;
+            width: 60px;
+            height: 34px;
+            flex-shrink: 0;
+        }
+        .switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: var(--dark-3);
+            transition: .4s;
+        }
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 26px;
+            width: 26px;
+            left: 4px;
+            bottom: 4px;
+            background-color: white;
+            transition: .4s;
+        }
+        input:checked + .slider {
+            background-color: var(--youtube-red);
+        }
+        input:focus + .slider {
+            box-shadow: 0 0 1px var(--youtube-red);
+        }
+        input:checked + .slider:before {
+            transform: translateX(26px);
+        }
+        .slider.round {
+            border-radius: 34px;
+        }
+        .slider.round:before {
+            border-radius: 50%;
+        }
+
+        /* Ratings Select Modal */
+        .ratings-select-content .modal-body {
+            max-height: 50vh;
+            overflow-y: auto;
+        }
+        #ratings-checkbox-container {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+        .rating-category-title {
+            font-weight: 700;
+            font-size: 18px;
+            color: var(--youtube-red);
+            margin-top: 10px;
+            margin-bottom: 5px;
+            padding-bottom: 5px;
+            border-bottom: 1px solid var(--dark-3);
+        }
+        .rating-checkbox-label {
+            display: block;
+            position: relative;
+            padding-left: 35px;
+            cursor: pointer;
+            font-size: 16px;
+            -webkit-user-select: none;
+            -moz-user-select: none;
+            -ms-user-select: none;
+            user-select: none;
+        }
+        .rating-checkbox-label input {
+            position: absolute;
+            opacity: 0;
+            cursor: pointer;
+            height: 0;
+            width: 0;
+        }
+        .checkmark {
+            position: absolute;
+            top: 0;
+            left: 0;
+            height: 25px;
+            width: 25px;
+            background-color: var(--dark-3);
+            border-radius: 4px;
+            border: 1px solid var(--gray);
+        }
+        .rating-checkbox-label:hover input ~ .checkmark {
+            background-color: var(--dark-2);
+        }
+        .rating-checkbox-label input:checked ~ .checkmark {
+            background-color: var(--youtube-red);
+            border-color: var(--youtube-red);
+        }
+        .checkmark:after {
+            content: "";
+            position: absolute;
+            display: none;
+        }
+        .rating-checkbox-label input:checked ~ .checkmark:after {
+            display: block;
+        }
+        .rating-checkbox-label .checkmark:after {
+            left: 9px;
+            top: 5px;
+            width: 5px;
+            height: 10px;
+            border: solid white;
+            border-width: 0 3px 3px 0;
+            -webkit-transform: rotate(45deg);
+            -ms-transform: rotate(45deg);
+            transform: rotate(45deg);
+        }
+        .ratings-select-content .modal-footer {
+            padding: 20px;
+            display: flex;
+            justify-content: flex-end;
+            gap: 15px;
+            border-top: 1px solid var(--dark-3);
+        }
+
+        /* PIN Entry Modal */
+        .pin-entry-content .modal-body {
+            text-align: center;
+        }
+        .pin-entry-actions {
+            display: flex;
+            justify-content: space-evenly;
+            margin-top: 20px;
+        }
+
         /* Footer */
         footer {
             background-color: var(--youtube-dark);
@@ -2571,6 +2832,89 @@
             <span>Live</span>
         </a>
     </nav>
+    <!-- Parental Controls Modals -->
+    <div id="parental-controls-modal" class="modal">
+        <div class="modal-content parental-controls-content">
+            <div class="modal-header">
+                <h2 class="modal-title">Parental Controls</h2>
+                <button class="close-modal" id="close-parental-controls-modal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="parental-control-pin-section">
+                    <h3>Set a 4-digit PIN to restrict access</h3>
+                    <div class="pin-display-container">
+                        <div class="pin-display">
+                            <span class="pin-dot"></span><span class="pin-dot"></span><span class="pin-dot"></span><span class="pin-dot"></span>
+                        </div>
+                        <p class="pin-status-text"></p>
+                    </div>
+                    <div class="pin-pad">
+                        <!-- PIN pad buttons will be generated by JS -->
+                    </div>
+                    <button id="reset-pin-btn" class="parental-btn">Reset PIN</button>
+                </div>
+                <div class="parental-control-setting-item">
+                    <div>
+                        <h4>Content Restrictions</h4>
+                        <p>Select which content ratings are allowed.</p>
+                        <p id="allowed-ratings-display" class="ratings-summary">All ratings allowed</p>
+                    </div>
+                    <button id="change-ratings-btn" class="parental-btn-secondary">Change</button>
+                </div>
+                <div class="parental-control-setting-item">
+                    <div>
+                        <h4>Unrated Content</h4>
+                        <p>Allow content without a rating to be played.</p>
+                    </div>
+                    <label class="switch">
+                        <input type="checkbox" id="unrated-content-toggle">
+                        <span class="slider round"></span>
+                    </label>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="ratings-select-modal" class="modal">
+        <div class="modal-content ratings-select-content">
+            <div class="modal-header">
+                <h3 class="modal-title">Select Allowed Ratings</h3>
+            </div>
+            <div class="modal-body" id="ratings-checkbox-container">
+                <!-- Checkboxes will be generated by JS -->
+            </div>
+            <div class="modal-footer">
+                <button class="parental-btn-secondary" id="cancel-ratings-btn">Cancel</button>
+                <button class="parental-btn" id="ok-ratings-btn">OK</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="pin-entry-modal" class="modal">
+        <div class="modal-content pin-entry-content">
+             <div class="modal-header">
+                <h3 class="modal-title" id="pin-entry-title">Enter Parental Control PIN</h3>
+                <button class="close-modal" id="close-pin-entry-modal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="pin-display-container">
+                    <div class="pin-display-input">
+                        <span class="pin-dot"></span><span class="pin-dot"></span><span class="pin-dot"></span><span class="pin-dot"></span>
+                    </div>
+                    <p class="pin-status-text-input"></p>
+                </div>
+                <div class="pin-pad-input">
+                    <!-- PIN pad buttons will be generated by JS -->
+                </div>
+                <div class="pin-entry-actions">
+                     <button class="parental-btn-secondary" id="cancel-pin-entry-btn">Cancel</button>
+                     <button class="parental-btn" id="ok-pin-entry-btn">OK</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- End Parental Controls Modals -->
+
     <!-- Footer -->
     <footer>
         <div class="footer-content">
@@ -2600,6 +2944,7 @@
                     <a href="#">Help Center</a>
                     <a href="#">Terms of Service</a>
                     <a href="#">Privacy Policy</a>
+                    <a href="#" id="parental-controls-link">Parental Controls</a>
                 </div>
             </div>
 
@@ -2786,7 +3131,33 @@
             nextEpisodeBtn: null,
             hamburgerBtn: document.getElementById('hamburger-btn'),
             mobileFiltersMenu: document.querySelector('.mobile-filters-menu'),
-            stretchBtn: document.getElementById('stretch-btn')
+            stretchBtn: document.getElementById('stretch-btn'),
+
+            // Parental Controls
+            parentalControlsLink: document.getElementById('parental-controls-link'),
+            parentalControlsModal: document.getElementById('parental-controls-modal'),
+            closeParentalControlsModal: document.getElementById('close-parental-controls-modal'),
+            pinDisplay: document.querySelector('.pin-display'),
+            pinStatusText: document.querySelector('.pin-status-text'),
+            pinPad: document.querySelector('.pin-pad'),
+            resetPinBtn: document.getElementById('reset-pin-btn'),
+            changeRatingsBtn: document.getElementById('change-ratings-btn'),
+            allowedRatingsDisplay: document.getElementById('allowed-ratings-display'),
+            unratedContentToggle: document.getElementById('unrated-content-toggle'),
+
+            ratingsSelectModal: document.getElementById('ratings-select-modal'),
+            ratingsCheckboxContainer: document.getElementById('ratings-checkbox-container'),
+            cancelRatingsBtn: document.getElementById('cancel-ratings-btn'),
+            okRatingsBtn: document.getElementById('ok-ratings-btn'),
+
+            pinEntryModal: document.getElementById('pin-entry-modal'),
+            closePinEntryModal: document.getElementById('close-pin-entry-modal'),
+            pinEntryTitle: document.getElementById('pin-entry-title'),
+            pinDisplayInput: document.querySelector('.pin-display-input'),
+            pinStatusTextInput: document.querySelector('.pin-status-text-input'),
+            pinPadInput: document.querySelector('.pin-pad-input'),
+            cancelPinEntryBtn: document.getElementById('cancel-pin-entry-btn'),
+            okPinEntryBtn: document.getElementById('ok-pin-entry-btn')
         };
         
         // State
@@ -2800,6 +3171,17 @@
         let currentSeason = null;
         let currentSeries = null;
         let isStretched = false;
+
+        // Parental Controls State
+        let parentalControls = {
+            pin: null,
+            allowedRatings: [],
+            allowUnrated: true
+        };
+        let currentPinInput = "";
+        let pinEntryCallback = null; // To store what to do after successful PIN entry
+        let isSettingPin = false;
+        let tempPin = '';
         
         // Function to shuffle an array
         function shuffleArray(array) {
@@ -2900,6 +3282,7 @@
 
         // Initialize the app
         function init() {
+            setupParentalControls(); // Setup parental controls first
             createEpisodeNavigationButtons(); // Create buttons before they might be needed
             fetchData().then(() => {
                 renderCarousel();
@@ -3280,7 +3663,7 @@
                             (entry.Country && entry.Country.toLowerCase().includes(country));
                         const yearMatch = year === 'all' || (entry.Year && entry.Year.toString() === year);
 
-                        if (genreMatch && countryMatch && yearMatch) {
+                        if (genreMatch && countryMatch && yearMatch && isContentAllowed(entry)) {
                             currentContent.push({
                                 ...entry,
                                 type: cat.MainCategory.toLowerCase().includes('movie') ? 'movie' :
@@ -3531,6 +3914,20 @@
         
         // Open viewer for content
         function openViewer(content) {
+            // Parental Control Check
+            if (!isContentAllowed(content)) {
+                elements.pinEntryTitle.textContent = "Enter PIN to Watch";
+                showModal(elements.pinEntryModal);
+                pinEntryCallback = () => {
+                    // Temporarily bypass the check for this one time
+                    openViewerInternal(content);
+                };
+                return; // Stop execution until PIN is entered
+            }
+            openViewerInternal(content);
+        }
+
+        function openViewerInternal(content) {
             if (playerInstance) {
                 playerInstance.destroy();
                 playerInstance = null;
@@ -6747,6 +7144,299 @@
                 }
             });
         }
+
+        // --- Parental Control Logic ---
+
+        const ALL_RATINGS = {
+            "Movies": ["G", "PG", "PG-13", "R", "NC-17"],
+            "TV Shows": ["TV-Y", "TV-Y7", "TV-G", "TV-PG", "TV-14", "TV-MA"],
+            "Philippines": ["SPG", "R-13", "R-16", "R-18"]
+        };
+
+        function setupParentalControls() {
+            loadParentalControls();
+            generatePinPad(elements.pinPad, handlePinPadClick);
+            generatePinPad(elements.pinPadInput, handlePinEntryPinPadClick);
+            generateRatingsCheckboxes();
+            attachParentalEventListeners();
+            updateParentalControlsUI();
+        }
+
+        function loadParentalControls() {
+            const savedSettings = JSON.parse(localStorage.getItem('parentalControls'));
+            if (savedSettings) {
+                parentalControls = savedSettings;
+                if (!Array.isArray(parentalControls.allowedRatings)) {
+                    parentalControls.allowedRatings = [...ALL_RATINGS.Movies, ...ALL_RATINGS["TV Shows"], ...ALL_RATINGS.Philippines];
+                }
+            } else {
+                // Default settings if nothing is saved
+                parentalControls.allowedRatings = [...ALL_RATINGS.Movies, ...ALL_RATINGS["TV Shows"], ...ALL_RATINGS.Philippines];
+            }
+        }
+
+        function saveParentalControls() {
+            localStorage.setItem('parentalControls', JSON.stringify(parentalControls));
+            updateParentalControlsUI();
+        }
+
+        function generatePinPad(container, handler) {
+            container.innerHTML = '';
+            const buttons = [1, 2, 3, 4, 5, 6, 7, 8, 9, 'backspace', 0, ''];
+            buttons.forEach(val => {
+                const btn = document.createElement('button');
+                btn.className = 'pin-btn';
+                if (typeof val === 'number') {
+                    btn.textContent = val;
+                    btn.addEventListener('click', () => handler(val));
+                } else if (val === 'backspace') {
+                    btn.innerHTML = '<i class="fas fa-backspace"></i>';
+                    btn.classList.add('backspace');
+                    btn.addEventListener('click', () => handler('backspace'));
+                } else {
+                    btn.style.visibility = 'hidden';
+                }
+                container.appendChild(btn);
+            });
+        }
+
+        function generateRatingsCheckboxes() {
+            const container = elements.ratingsCheckboxContainer;
+            container.innerHTML = '';
+            for (const category in ALL_RATINGS) {
+                const title = document.createElement('h4');
+                title.className = 'rating-category-title';
+                title.textContent = category;
+                container.appendChild(title);
+
+                ALL_RATINGS[category].forEach(rating => {
+                    const label = document.createElement('label');
+                    label.className = 'rating-checkbox-label';
+                    label.textContent = rating;
+
+                    const input = document.createElement('input');
+                    input.type = 'checkbox';
+                    input.value = rating;
+                    input.checked = parentalControls.allowedRatings.includes(rating);
+
+                    const span = document.createElement('span');
+                    span.className = 'checkmark';
+
+                    label.appendChild(input);
+                    label.appendChild(span);
+                    container.appendChild(label);
+                });
+            }
+        }
+
+        function updatePinDisplay(displayElement, pin) {
+            const dots = displayElement.querySelectorAll('.pin-dot');
+            dots.forEach((dot, index) => {
+                if (index < pin.length) {
+                    dot.classList.add('filled');
+                } else {
+                    dot.classList.remove('filled');
+                }
+            });
+        }
+
+        function updateParentalControlsUI() {
+            elements.unratedContentToggle.checked = parentalControls.allowUnrated;
+            if (parentalControls.pin) {
+                elements.pinStatusText.textContent = "PIN is set. To change it, reset it first.";
+            } else {
+                elements.pinStatusText.textContent = "Enter a new 4-digit PIN.";
+            }
+            const allRatings = [...ALL_RATINGS.Movies, ...ALL_RATINGS["TV Shows"], ...ALL_RATINGS.Philippines];
+            if (parentalControls.allowedRatings.length >= allRatings.length) {
+                elements.allowedRatingsDisplay.textContent = 'All ratings allowed';
+            } else if (parentalControls.allowedRatings.length === 0) {
+                elements.allowedRatingsDisplay.textContent = 'No ratings allowed';
+            } else {
+                elements.allowedRatingsDisplay.textContent = parentalControls.allowedRatings.join(', ');
+            }
+        }
+
+        function showModal(modalElement) {
+            modalElement.style.display = 'flex';
+        }
+
+        function hideModal(modalElement) {
+            modalElement.style.display = 'none';
+        }
+
+        function openParentalControls() {
+            if (parentalControls.pin) {
+                elements.pinEntryTitle.textContent = "Enter PIN to Open Settings";
+                showModal(elements.pinEntryModal);
+                pinEntryCallback = () => {
+                    hideModal(elements.pinEntryModal);
+                    showModal(elements.parentalControlsModal);
+                };
+            } else {
+                showModal(elements.parentalControlsModal);
+            }
+        }
+
+        function handlePinPadClick(value) {
+            if (parentalControls.pin) {
+                elements.pinStatusText.textContent = "PIN is already set. Reset it to change.";
+                return;
+            }
+
+            if (value === 'backspace') {
+                currentPinInput = currentPinInput.slice(0, -1);
+            } else if (currentPinInput.length < 4) {
+                currentPinInput += value;
+            }
+
+            updatePinDisplay(elements.pinDisplay, currentPinInput);
+
+            if (currentPinInput.length === 4) {
+                if (!isSettingPin) {
+                    isSettingPin = true;
+                    tempPin = currentPinInput;
+                    elements.pinStatusText.textContent = 'Confirm your new PIN.';
+                    currentPinInput = '';
+                    setTimeout(() => updatePinDisplay(elements.pinDisplay, ''), 200);
+                } else {
+                    if (currentPinInput === tempPin) {
+                        parentalControls.pin = tempPin;
+                        saveParentalControls();
+                        elements.pinStatusText.textContent = 'PIN set successfully!';
+                        isSettingPin = false;
+                        tempPin = '';
+                        currentPinInput = '';
+                         setTimeout(() => {
+                           hideModal(elements.parentalControlsModal);
+                        }, 1500);
+                    } else {
+                        elements.pinStatusText.textContent = 'PINs do not match. Try again.';
+                        isSettingPin = false;
+                        tempPin = '';
+                        currentPinInput = '';
+                        setTimeout(() => {
+                            updatePinDisplay(elements.pinDisplay, '');
+                            elements.pinStatusText.textContent = 'Enter a new 4-digit PIN.';
+                        }, 2000);
+                    }
+                }
+            }
+        }
+
+        function handlePinEntryPinPadClick(value) {
+            if (value === 'backspace') {
+                currentPinInput = currentPinInput.slice(0, -1);
+            } else if (currentPinInput.length < 4) {
+                currentPinInput += value;
+            }
+            updatePinDisplay(elements.pinDisplayInput, currentPinInput);
+        }
+
+        function verifyPin() {
+            if (currentPinInput === parentalControls.pin) {
+                elements.pinStatusTextInput.textContent = 'PIN Correct!';
+                setTimeout(() => {
+                    hideModal(elements.pinEntryModal);
+                    if (pinEntryCallback) {
+                        pinEntryCallback();
+                    }
+                    resetPinEntry();
+                }, 500);
+            } else {
+                elements.pinStatusTextInput.textContent = 'Incorrect PIN. Please try again.';
+                currentPinInput = '';
+                setTimeout(() => {
+                    updatePinDisplay(elements.pinDisplayInput, '');
+                }, 1000);
+            }
+        }
+
+        function resetPinEntry() {
+            currentPinInput = '';
+            pinEntryCallback = null;
+            updatePinDisplay(elements.pinDisplayInput, '');
+            elements.pinStatusTextInput.textContent = '';
+        }
+
+        function handleSaveRatings() {
+            const selectedRatings = [];
+            const checkboxes = elements.ratingsCheckboxContainer.querySelectorAll('input[type="checkbox"]:checked');
+            checkboxes.forEach(checkbox => {
+                selectedRatings.push(checkbox.value);
+            });
+            parentalControls.allowedRatings = selectedRatings;
+            saveParentalControls();
+            hideModal(elements.ratingsSelectModal);
+        }
+
+        function attachParentalEventListeners() {
+            elements.parentalControlsLink.addEventListener('click', (e) => {
+                e.preventDefault();
+                openParentalControls();
+            });
+            elements.closeParentalControlsModal.addEventListener('click', () => hideModal(elements.parentalControlsModal));
+
+            elements.changeRatingsBtn.addEventListener('click', () => {
+                // Refresh checkboxes before showing
+                generateRatingsCheckboxes();
+                showModal(elements.ratingsSelectModal);
+            });
+
+            elements.okRatingsBtn.addEventListener('click', handleSaveRatings);
+            elements.cancelRatingsBtn.addEventListener('click', () => hideModal(elements.ratingsSelectModal));
+
+            elements.unratedContentToggle.addEventListener('change', () => {
+                parentalControls.allowUnrated = elements.unratedContentToggle.checked;
+                saveParentalControls();
+            });
+
+            elements.resetPinBtn.addEventListener('click', () => {
+                pinEntryCallback = () => {
+                    parentalControls.pin = null;
+                    currentPinInput = '';
+                    isSettingPin = false;
+                    tempPin = '';
+                    saveParentalControls();
+                    updatePinDisplay(elements.pinDisplay, '');
+                    elements.pinStatusText.textContent = 'PIN has been reset. Enter a new PIN.';
+                    hideModal(elements.pinEntryModal);
+                    showModal(elements.parentalControlsModal);
+                };
+                elements.pinEntryTitle.textContent = "Enter PIN to Reset";
+                showModal(elements.pinEntryModal);
+            });
+
+            // PIN Entry Modal Listeners
+            elements.okPinEntryBtn.addEventListener('click', verifyPin);
+            elements.cancelPinEntryBtn.addEventListener('click', () => {
+                hideModal(elements.pinEntryModal);
+                resetPinEntry();
+            });
+            elements.closePinEntryModal.addEventListener('click', () => {
+                hideModal(elements.pinEntryModal);
+                resetPinEntry();
+            });
+        }
+
+        function isContentAllowed(item) {
+            // If no PIN is set, all content is allowed.
+            if (!parentalControls.pin) {
+                return true;
+            }
+
+            const rating = item.parentalRating; // Corrected field name based on user feedback
+
+            if (!rating || rating.trim() === '') {
+                // This is unrated content
+                return parentalControls.allowUnrated;
+            }
+
+            // Check if the item's rating is in the allowed list
+            return parentalControls.allowedRatings.includes(rating);
+        }
+
+        // --- End Parental Control Logic ---
 
         // Initialize the app
         document.addEventListener('DOMContentLoaded', () => {
