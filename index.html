@@ -2292,6 +2292,162 @@
 
     </style>
     <style id="server-selector-mobile-css">
+        /* Comments Section Styles */
+        .comments-section {
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 1px solid var(--youtube-gray);
+        }
+
+        .comments-header {
+            margin-bottom: 20px;
+        }
+
+        .comments-header h3 {
+            font-size: 18px;
+            color: var(--light);
+        }
+
+        .add-comment {
+            display: flex;
+            align-items: flex-start;
+            gap: 15px;
+            margin-bottom: 25px;
+        }
+
+        .add-comment img {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+        }
+
+        .add-comment textarea {
+            flex: 1;
+            background-color: transparent;
+            border: none;
+            border-bottom: 1px solid var(--youtube-light-gray);
+            color: var(--light);
+            font-size: 15px;
+            padding: 10px 0;
+            resize: none;
+            transition: border-color 0.3s;
+        }
+
+        .add-comment textarea:focus {
+            outline: none;
+            border-bottom: 2px solid var(--youtube-red);
+        }
+
+        .add-comment textarea:disabled {
+            cursor: not-allowed;
+        }
+
+        #comment-submit-btn {
+            background-color: var(--youtube-gray);
+            color: var(--light);
+            border: none;
+            padding: 10px 18px;
+            border-radius: 20px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        #comment-submit-btn:hover:not(:disabled) {
+            background-color: var(--youtube-red);
+        }
+
+        #comment-submit-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .comment-item {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .comment-item img {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+        }
+
+        .comment-content {
+            flex: 1;
+        }
+
+        .comment-author {
+            font-weight: 600;
+            font-size: 14px;
+            margin-right: 8px;
+        }
+
+        .comment-timestamp {
+            font-size: 12px;
+            color: var(--youtube-light-gray);
+        }
+
+        .comment-text {
+            margin-top: 5px;
+            font-size: 15px;
+            line-height: 1.5;
+        }
+
+        .user-auth-container {
+            position: relative;
+        }
+
+        #login-btn {
+            background-color: var(--youtube-red);
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 4px;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        #user-profile-info {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            cursor: pointer;
+        }
+
+        #user-profile-info img {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+        }
+
+        #user-profile-dropdown {
+            display: none;
+            position: absolute;
+            top: 50px;
+            right: 0;
+            background-color: var(--youtube-dark-gray);
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+            width: 150px;
+            z-index: 1002;
+        }
+
+        #user-profile-dropdown button {
+            display: block;
+            width: 100%;
+            padding: 12px 15px;
+            background: none;
+            border: none;
+            color: var(--light);
+            text-align: left;
+            cursor: pointer;
+        }
+
+        #user-profile-dropdown button:hover {
+            background-color: var(--youtube-gray);
+        }
+
         @media (max-width: 768px) {
             #universal-server-selector {
                 min-width: 120px !important;
@@ -2383,8 +2539,15 @@
             <button class="theme-toggle" id="theme-toggle">
                 <i class="fas fa-moon"></i>
             </button>
-            <div class="user-profile">
-                <i class="fas fa-user"></i>
+            <div class="user-auth-container" id="user-auth-container">
+                <button id="login-btn">Login</button>
+                <div id="user-profile-info" style="display: none;">
+                    <img id="user-avatar" src="" alt="User Avatar">
+                    <span id="user-name"></span>
+                </div>
+                <div id="user-profile-dropdown">
+                    <button id="logout-btn">Logout</button>
+                </div>
             </div>
             <button class="hamburger-btn" id="hamburger-btn">
                 <i class="fas fa-bars"></i>
@@ -2521,6 +2684,23 @@
                             Description will appear here...
                         </div>
 
+                        <!-- Comments Section -->
+                        <div class="comments-section" id="comments-section">
+                            <div class="comments-header">
+                                <h3 id="comment-count">0 Comments</h3>
+                            </div>
+                            <div class="add-comment">
+                                <img src="https://via.placeholder.com/40x40.png?text=User" alt="Your avatar" id="comment-user-avatar">
+                                <div style="width:100%; display: flex; flex-direction: column; align-items: flex-end;">
+                                  <textarea id="comment-input" placeholder="Add a public comment..." disabled rows="1"></textarea>
+                                  <button id="comment-submit-btn" disabled>Comment</button>
+                                </div>
+                            </div>
+                            <div id="comments-list">
+                                <!-- Comments will be dynamically inserted here -->
+                            </div>
+                        </div>
+
                         <div class="server-selector-container" id="server-selector-container">
                             <h3>Select Server</h3>
                             <select class="server-selector" id="server-selector"></select>
@@ -2629,6 +2809,184 @@
     <script src="https://cdn.plyr.io/3.7.8/plyr.js"></script>
     <script src="https://cdn.dashjs.org/latest/dash.all.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/shaka-player/4.3.7/shaka-player.compiled.js"></script>
+    
+    <!-- Firebase SDKs -->
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore-compat.js"></script>
+
+    <script>
+        // --- Firebase Configuration & Authentication ---
+
+        // TODO: Replace with your own Firebase project configuration
+        // For Firebase JS SDK v7.20.0 and later, measurementId is optional
+const firebaseConfig = {
+  apiKey: "AIzaSyCB_PiSnFtNyrryNE2ZuULNdbX_RS3EiL8",
+  authDomain: "cinecraze-b5360.firebaseapp.com",
+  projectId: "cinecraze-b5360",
+  storageBucket: "cinecraze-b5360.firebasestorage.app",
+  messagingSenderId: "559888692977",
+  appId: "1:559888692977:web:47f6d3e9a4f8184b701b50",
+  measurementId: "G-751R0RYZSJ"
+};
+
+        // Initialize Firebase
+        firebase.initializeApp(firebaseConfig);
+        const auth = firebase.auth();
+        const db = firebase.firestore();
+        const googleProvider = new firebase.auth.GoogleAuthProvider();
+
+        // DOM Elements for Auth
+        const loginBtn = document.getElementById('login-btn');
+        const logoutBtn = document.getElementById('logout-btn');
+        const userAuthContainer = document.getElementById('user-auth-container');
+        const userProfileInfo = document.getElementById('user-profile-info');
+        const userAvatar = document.getElementById('user-avatar');
+        const userName = document.getElementById('user-name');
+        const userProfileDropdown = document.getElementById('user-profile-dropdown');
+        
+        // DOM Elements for Comments
+        const commentInput = document.getElementById('comment-input');
+        const commentSubmitBtn = document.getElementById('comment-submit-btn');
+        const commentUserAvatar = document.getElementById('comment-user-avatar');
+
+        // Sign in with Google
+        function signInWithGoogle() {
+            auth.signInWithPopup(googleProvider).catch(error => {
+                console.error("Authentication Error:", error);
+                alert("Failed to sign in. Please try again.");
+            });
+        }
+
+        // Sign out
+        function signOut() {
+            auth.signOut();
+        }
+
+        // Auth state listener
+        auth.onAuthStateChanged(user => {
+            if (user) {
+                // User is signed in
+                loginBtn.style.display = 'none';
+                userProfileInfo.style.display = 'flex';
+                userAvatar.src = user.photoURL || 'https://via.placeholder.com/40x40.png?text=User';
+                userName.textContent = user.displayName;
+                
+                commentInput.disabled = false;
+                commentSubmitBtn.disabled = false;
+                commentInput.placeholder = "Add a public comment...";
+                commentUserAvatar.src = user.photoURL || 'https://via.placeholder.com/40x40.png?text=User';
+
+            } else {
+                // User is signed out
+                loginBtn.style.display = 'block';
+                userProfileInfo.style.display = 'none';
+                userProfileDropdown.style.display = 'none'; // Hide dropdown on logout
+                
+                commentInput.disabled = true;
+                commentSubmitBtn.disabled = true;
+                commentInput.placeholder = "Please log in to comment.";
+                commentUserAvatar.src = 'https://via.placeholder.com/40x40.png?text=User';
+            }
+        });
+
+        // Event Listeners
+        loginBtn.addEventListener('click', signInWithGoogle);
+        logoutBtn.addEventListener('click', signOut);
+
+        userProfileInfo.addEventListener('click', () => {
+            const isDropdownVisible = userProfileDropdown.style.display === 'block';
+            userProfileDropdown.style.display = isDropdownVisible ? 'none' : 'block';
+        });
+
+        // Close dropdown if clicked outside
+        document.addEventListener('click', (event) => {
+            if (userAuthContainer && !userAuthContainer.contains(event.target)) {
+                userProfileDropdown.style.display = 'none';
+            }
+        });
+
+        // --- Firestore Comments Functionality ---
+        let unsubscribeComments = null; // To keep track of the real-time listener
+
+        // Post a comment
+        async function postComment() {
+            const contentId = currentContentInfo.id;
+            const text = commentInput.value.trim();
+            const user = auth.currentUser;
+
+            if (!user || !text || !contentId) {
+                return;
+            }
+
+            commentSubmitBtn.disabled = true;
+
+            try {
+                await db.collection('comments').doc(contentId).collection('messages').add({
+                    text: text,
+                    userId: user.uid,
+                    userName: user.displayName,
+                    userPhotoURL: user.photoURL,
+                    timestamp: firebase.firestore.FieldValue.serverTimestamp()
+                });
+                commentInput.value = ''; // Clear input on success
+            } catch (error) {
+                console.error("Error posting comment:", error);
+                alert("Failed to post comment. Please try again.");
+            } finally {
+                commentSubmitBtn.disabled = false;
+            }
+        }
+
+        // Load and listen for comments
+        function loadComments(contentId) {
+            if (unsubscribeComments) {
+                unsubscribeComments(); // Stop listening to previous content's comments
+            }
+
+            const commentsList = document.getElementById('comments-list');
+            const commentCount = document.getElementById('comment-count');
+
+            const commentsQuery = db.collection('comments').doc(contentId).collection('messages').orderBy('timestamp', 'desc');
+
+            unsubscribeComments = commentsQuery.onSnapshot(snapshot => {
+                commentsList.innerHTML = ''; // Clear old comments
+                commentCount.textContent = `${snapshot.size} Comment${snapshot.size === 1 ? '' : 's'}`;
+                
+                if (snapshot.empty) {
+                    commentsList.innerHTML = '<p style="color: var(--gray);">Be the first to comment!</p>';
+                    return;
+                }
+
+                snapshot.forEach(doc => {
+                    const comment = doc.data();
+                    const commentEl = document.createElement('div');
+                    commentEl.className = 'comment-item';
+                    
+                    const timestamp = comment.timestamp ? comment.timestamp.toDate().toLocaleString() : 'Just now';
+
+                    commentEl.innerHTML = `
+                        <img src="${comment.userPhotoURL || 'https://via.placeholder.com/40x40.png?text=User'}" alt="${comment.userName}">
+                        <div class="comment-content">
+                            <div>
+                                <span class="comment-author">${comment.userName}</span>
+                                <span class="comment-timestamp">${timestamp}</span>
+                            </div>
+                            <p class="comment-text">${comment.text}</p>
+                        </div>
+                    `;
+                    commentsList.appendChild(commentEl);
+                });
+            }, error => {
+                console.error("Error loading comments:", error);
+                commentsList.innerHTML = '<p style="color: var(--danger);">Could not load comments.</p>';
+            });
+        }
+        
+        commentSubmitBtn.addEventListener('click', postComment);
+
+    </script>
+
     <script>
         if ('scrollRestoration' in history) {
             history.scrollRestoration = 'manual';
@@ -3531,6 +3889,9 @@
         
         // Open viewer for content
         function openViewer(content) {
+            // Load comments for the new content
+            loadComments(content.Title);
+
             if (playerInstance) {
                 playerInstance.destroy();
                 playerInstance = null;
@@ -6164,6 +6525,12 @@
         
         // Close viewer (UI and state update part)
         function closeViewerInternalLogic() {
+            // Stop listening to comments when viewer is closed
+            if (unsubscribeComments) {
+                unsubscribeComments();
+                unsubscribeComments = null;
+            }
+
             // Show browse sections
             document.querySelector('.carousel').style.display = 'block';
             document.querySelector('.filters-section').style.display = 'block';
