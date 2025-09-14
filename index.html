@@ -430,6 +430,86 @@
             cursor: pointer;
         }
 
+        /* Toggle Switch for Parental Controls */
+        .toggle-switch {
+            position: relative;
+            display: inline-block;
+            width: 60px;
+            height: 34px;
+        }
+        .toggle-switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: var(--dark-3);
+            transition: .4s;
+            border-radius: 34px;
+        }
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 26px;
+            width: 26px;
+            left: 4px;
+            bottom: 4px;
+            background-color: white;
+            transition: .4s;
+            border-radius: 50%;
+        }
+        input:checked + .slider {
+            background-color: var(--youtube-red);
+        }
+        input:checked + .slider:before {
+            transform: translateX(26px);
+        }
+        .form-group {
+            margin-bottom: 20px;
+        }
+        .form-group label {
+            display: block;
+            margin-bottom: 10px;
+            font-weight: 500;
+        }
+        #parental-pin, #pin-input {
+             width: 100%;
+            padding: 10px 15px;
+            border-radius: 30px;
+            border: none;
+            background-color: var(--youtube-gray);
+            color: var(--light);
+            font-size: 16px;
+            transition: var(--transition);
+        }
+        #parental-pin:focus, #pin-input:focus {
+            outline: none;
+            background-color: var(--dark-3);
+            box-shadow: 0 0 0 2px var(--youtube-red);
+        }
+        .btn {
+            background-color: var(--youtube-red);
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            border-radius: 30px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            display: inline-block;
+            text-align: center;
+            margin-top: 10px;
+        }
+        .btn:hover {
+            background-color: var(--primary-dark);
+        }
+
         .autocomplete-container {
             position: relative;
         }
@@ -2383,6 +2463,9 @@
             <button class="theme-toggle" id="theme-toggle">
                 <i class="fas fa-moon"></i>
             </button>
+            <button class="theme-toggle" id="parental-controls-btn" title="Parental Controls">
+                <i class="fas fa-shield-alt"></i>
+            </button>
             <div class="user-profile">
                 <i class="fas fa-user"></i>
             </div>
@@ -2551,6 +2634,19 @@
             </div>
         </div>
     </main>
+
+    <!-- Parental Controls Modal -->
+    <div id="parental-controls-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title">Parental Controls</h2>
+                <button id="close-parental-modal" class="close-modal">&times;</button>
+            </div>
+            <div class="modal-body" id="parental-modal-body">
+                <!-- Content will be either PIN entry or the settings form -->
+            </div>
+        </div>
+    </div>
 
     <!-- Bottom Navigation Bar -->
     <nav class="bottom-nav">
@@ -3530,7 +3626,19 @@
         }
         
         // Open viewer for content
-        function openViewer(content) {
+        async function openViewer(content) {
+            // Fetch rating first
+            const tmdbId = getTmdbId(content);
+            const rating = await fetchContentRating(tmdbId, content.type);
+            content.ratingMPAA = rating;
+            console.log(`Content: ${content.Title}, TMDB ID: ${tmdbId}, Rating: ${rating}`);
+
+            // --- Parental Control Check ---
+            if (parentalControls.isBlocked(content)) {
+                alert('This content is restricted due to your parental control settings.');
+                return; // Stop the function here
+            }
+
             if (playerInstance) {
                 playerInstance.destroy();
                 playerInstance = null;
@@ -7166,6 +7274,243 @@ playerInstance.on('ready', event => {
     addPipButtonToPlayer();
 });
         // --- End Stretch Functionality ---
+
+        // --- Parental Controls ---
+        const TMDB_API_KEY = 'ec926176bf467b3f7735e3154238c161';
+        const TMDB_BASE_URL = 'https://api.themoviedb.org/3';
+
+        function getTmdbId(content) {
+            if (!content || !content.Servers) return null;
+            // Prioritize URLs that explicitly contain the TMDB ID structure
+            const patterns = [
+                /vidsrc\.(?:net|me|pro|win|to|xyz)\/(?:embed|movie|tv)\/(?:movie|tv)\/(\d+)/,
+                /vidjoy\.pro\/embed\/(?:movie|tv)\/(\d+)/,
+                /multiembed\.mov\/directstream\.php\?video_id=(\d+)/,
+                /embed\.su\/embed\/(?:movie|tv)\/(\d+)/,
+                /autoembed\.cc\/embed\/(?:movie|tv)\/(\d+)/,
+                /moviesapi\.club\/(?:movie|tv)\/(\d+)/,
+                /dbgo\.fun\/(?:movie|tv)\/(\d+)/,
+                /hdtoday\.tv\/embed\/(?:movie|tv)\/(\d+)/,
+                /vidcloud\.to\/embed\/(?:movie|tv)\/(\d+)/,
+                /player\.videasy\.net\/(?:movie|tv)\/(\d+)/,
+                /vidfast\.pro\/(?:movie|tv)\/(\d+)/,
+                /godriveplayer\.com\/embed\/(\d+)/,
+                /2embed\.cc\/embed\/(\d+)/,
+                /vidlink\.pro\/(?:movie|tv)\/(\d+)/
+            ];
+
+            for (const server of content.Servers) {
+                const url = server.url;
+                if (!url) continue;
+                for (const pattern of patterns) {
+                    const match = url.match(pattern);
+                    if (match && match[1]) {
+                        return match[1];
+                    }
+                }
+            }
+            return null; // Return null if no ID is found
+        }
+
+        async function fetchContentRating(tmdbId, type) {
+            if (!tmdbId) return 'N/A';
+            const endpoint = type === 'movie' ? `/movie/${tmdbId}/release_dates` : `/tv/${tmdbId}/content_ratings`;
+            const url = `${TMDB_BASE_URL}${endpoint}?api_key=${TMDB_API_KEY}`;
+            try {
+                const response = await fetch(url);
+                if (!response.ok) return 'N/A';
+                const data = await response.json();
+                if (type === 'movie') {
+                    const usRelease = data.results.find(r => r.iso_3166_1 === 'US');
+                    if (!usRelease) return 'N/A';
+                    const ratedRelease = usRelease.release_dates.find(rd => rd.certification && rd.certification !== "");
+                    return ratedRelease ? ratedRelease.certification : 'N/A';
+                } else { // type === 'tv'
+                    const usRating = data.results.find(r => r.iso_3166_1 === 'US');
+                    return usRating ? usRating.rating : 'N/A';
+                }
+            } catch (error) {
+                console.error('Error fetching content rating:', error);
+                return 'N/A';
+            }
+        }
+
+        const parentalControls = {
+            modal: null,
+            modalBody: null,
+            openBtn: null,
+            closeBtn: null,
+            ratingLevels: {
+                'G': 1, 'TV-G': 1,
+                'PG': 2, 'TV-PG': 2,
+                'PG-13': 3, 'TV-14': 3,
+                'R': 4, 'TV-MA': 4,
+                'NC-17': 5,
+                'NR': 0, 'Unrated': 0, 'N/A': 0,
+            },
+            config: {
+                enabled: false,
+                pin: null,
+                allowedRatingLevel: 5 // Corresponds to NC-17/Allow All by default
+            },
+
+            init() {
+                // Assign elements now that the DOM is ready
+                this.modal = document.getElementById('parental-controls-modal');
+                this.modalBody = document.getElementById('parental-modal-body');
+                this.openBtn = document.getElementById('parental-controls-btn');
+                this.closeBtn = document.getElementById('close-parental-modal');
+
+                this.loadSettings();
+
+                if (this.openBtn) {
+                    this.openBtn.addEventListener('click', () => this.openModal());
+                }
+                if (this.closeBtn) {
+                    this.closeBtn.addEventListener('click', () => this.closeModal());
+                }
+                if (this.modal) {
+                    // Close modal if clicking outside of it
+                    this.modal.addEventListener('click', (e) => {
+                        if (e.target === this.modal) {
+                            this.closeModal();
+                        }
+                    });
+                }
+            },
+
+            loadSettings() {
+                const savedSettings = localStorage.getItem('parentalControls');
+                if (savedSettings) {
+                    const parsed = JSON.parse(savedSettings);
+                    // Simple migration for old setting format
+                    if (parsed.rating && !parsed.allowedRatingLevel) {
+                        parsed.allowedRatingLevel = 5; // Default to allow all
+                        delete parsed.rating;
+                    }
+                    this.config = parsed;
+                }
+            },
+
+            saveSettings() {
+                localStorage.setItem('parentalControls', JSON.stringify(this.config));
+                alert('Parental control settings saved.');
+                this.closeModal();
+            },
+
+            isBlocked(content) {
+                if (!this.config.enabled) {
+                    return false; // Controls are off, nothing is blocked.
+                }
+
+                const contentRating = content.ratingMPAA || 'N/A';
+                const contentLevel = this.ratingLevels[contentRating] ?? 0; // Default to 0 (unrestricted) if rating is unknown
+                const allowedLevel = this.config.allowedRatingLevel;
+
+                // Block if the content's rating level is strictly greater than what's allowed.
+                return contentLevel > allowedLevel;
+            },
+
+            openModal() {
+                this.modal.style.display = 'flex';
+                if (this.config.pin) {
+                    this.showPinEntryView();
+                } else {
+                    this.showSettingsFormView();
+                }
+            },
+
+            closeModal() {
+                this.modal.style.display = 'none';
+                this.modalBody.innerHTML = ''; // Clear body
+            },
+
+            showPinEntryView() {
+                this.modalBody.innerHTML = `
+                    <div id="pin-entry-view">
+                        <h3>Enter PIN</h3>
+                        <p>Please enter your PIN to manage settings.</p>
+                        <input type="password" id="pin-input" maxlength="4" pattern="\\d{4}" inputmode="numeric" autocomplete="one-time-code">
+                        <button id="pin-submit-btn" class="btn">Submit</button>
+                        <p id="pin-error" style="color: var(--danger); display: none; margin-top: 10px;">Incorrect PIN.</p>
+                    </div>
+                `;
+                document.getElementById('pin-submit-btn').addEventListener('click', () => this.verifyPin());
+                document.getElementById('pin-input').addEventListener('keyup', (e) => {
+                    if (e.key === 'Enter') this.verifyPin();
+                });
+            },
+
+            verifyPin() {
+                const pinInput = document.getElementById('pin-input');
+                const pinError = document.getElementById('pin-error');
+                if (pinInput.value === this.config.pin) {
+                    this.showSettingsFormView();
+                } else {
+                    pinError.style.display = 'block';
+                    pinInput.value = '';
+                }
+            },
+
+            showSettingsFormView() {
+                this.modalBody.innerHTML = `
+                    <div id="settings-form-view">
+                        <div class="form-group">
+                            <label for="parental-toggle">Enable Parental Controls</label>
+                            <label class="toggle-switch">
+                                <input type="checkbox" id="parental-toggle">
+                                <span class="slider"></span>
+                            </label>
+                        </div>
+                        <div class="form-group">
+                            <label for="parental-pin">Set/Change 4-Digit PIN</label>
+                            <input type="password" id="parental-pin" placeholder="Enter a 4-digit PIN" maxlength="4" pattern="\\d{4}" inputmode="numeric" autocomplete="new-password">
+                        </div>
+                        <div class="form-group">
+                            <label for="parental-rating">Allowed Content Rating</label>
+                            <select id="parental-rating" class="filter-select">
+                                <option value="5">Allow All (NC-17 & Unrated)</option>
+                                <option value="4">R (Restricted) & below</option>
+                                <option value="3">PG-13 (Parents Strongly Cautioned) & below</option>
+                                <option value="2">PG (Parental Guidance Suggested) & below</option>
+                                <option value="1">G (General Audiences)</option>
+                            </select>
+                        </div>
+                        <button id="parental-save-btn" class="btn">Save Settings</button>
+                    </div>
+                `;
+
+                // Populate form with current settings
+                document.getElementById('parental-toggle').checked = this.config.enabled;
+                document.getElementById('parental-rating').value = this.config.allowedRatingLevel;
+
+                // Add event listener for save button
+                document.getElementById('parental-save-btn').addEventListener('click', () => {
+                    this.config.enabled = document.getElementById('parental-toggle').checked;
+                    const newPin = document.getElementById('parental-pin').value;
+                    if (newPin && /^\d{4}$/.test(newPin)) {
+                        this.config.pin = newPin;
+                    } else if (newPin) {
+                        alert("PIN must be 4 digits.");
+                        return;
+                    }
+                    this.config.allowedRatingLevel = parseInt(document.getElementById('parental-rating').value, 10);
+                    this.saveSettings();
+                });
+            }
+        };
+
+        document.addEventListener('DOMContentLoaded', () => {
+            // Initialize Shaka Player polyfills
+            if (window.shaka) {
+                shaka.polyfill.installAll();
+                console.log('✅ Shaka Player polyfills installed');
+            }
+
+            init();
+            fetchNotification();
+            parentalControls.init(); // Initialize Parental Controls after DOM is ready
+        });
 
     </script>
 
