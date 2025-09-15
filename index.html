@@ -2729,6 +2729,10 @@
                 <!-- List view will be dynamically added here -->
             </div>
 
+            <div class="content-grid" id="watch-later-grid" style="display: none;">
+                <!-- Watch Later items will be dynamically added here -->
+            </div>
+
             <!-- Loading Spinner -->
             <div class="loading-spinner" id="loading-spinner"></div>
 
@@ -2774,6 +2778,7 @@
                                     <button class="action-btn" id="like-btn"><i class="fas fa-thumbs-up"></i> <span id="like-count-span">24K</span></button>
                                     <button class="action-btn" id="dislike-btn"><i class="fas fa-thumbs-down"></i> <span id="dislike-count-span">1K</span></button>
                                     <button class="action-btn" id="share-video-btn"><i class="fas fa-share"></i> <span>Share</span></button>
+                                    <button class="action-btn" id="watch-later-btn"><i class="fas fa-clock"></i> <span>Watch Later</span></button>
                                 </div>
                             </div>
                         </div>
@@ -2830,6 +2835,10 @@
         <a href="#" class="nav-item" data-category="live">
             <i class="fas fa-broadcast-tower"></i>
             <span>Live</span>
+        </a>
+        <a href="#" class="nav-item" data-category="watch-later">
+            <i class="fas fa-clock"></i>
+            <span>Watch Later</span>
         </a>
     </nav>
     <!-- Parental Controls Modals -->
@@ -2981,8 +2990,9 @@
 
         // --- IndexedDB Caching ---
         const DB_NAME = 'CineCrazeDB';
-        const DB_VERSION = 1;
+        const DB_VERSION = 2;
         const STORE_NAME = 'playlistStore';
+        const WATCH_LATER_STORE_NAME = 'watchLaterStore';
         const PLAYLIST_KEY = 'mainPlaylist';
 
         const dbUtil = {
@@ -2993,6 +3003,9 @@
                         const db = event.target.result;
                         if (!db.objectStoreNames.contains(STORE_NAME)) {
                             db.createObjectStore(STORE_NAME, { keyPath: 'id' });
+                        }
+                        if (!db.objectStoreNames.contains(WATCH_LATER_STORE_NAME)) {
+                            db.createObjectStore(WATCH_LATER_STORE_NAME, { keyPath: 'id' });
                         }
                     };
                     request.onsuccess = event => {
@@ -3062,6 +3075,93 @@
         };
 
         // Configuration
+        const watchLaterDbUtil = {
+            open: function() {
+                return new Promise((resolve, reject) => {
+                    const request = indexedDB.open(DB_NAME, DB_VERSION);
+                    request.onsuccess = event => {
+                        resolve(event.target.result);
+                    };
+                    request.onerror = event => {
+                        console.error('IndexedDB error:', event.target.errorCode);
+                        reject('IndexedDB error: ' + event.target.errorCode);
+                    };
+                });
+            },
+            get: function(db, key) {
+                return new Promise((resolve, reject) => {
+                    if (!db) {
+                        reject("Database connection is not available.");
+                        return;
+                    }
+                    const transaction = db.transaction([WATCH_LATER_STORE_NAME], 'readonly');
+                    const store = transaction.objectStore(WATCH_LATER_STORE_NAME);
+                    const request = store.get(key);
+                    request.onsuccess = event => {
+                        resolve(event.target.result);
+                    };
+                    request.onerror = event => {
+                        console.error('Error getting data from DB:', event.target.errorCode);
+                        reject('Error getting data from DB: ' + event.target.errorCode);
+                    };
+                });
+            },
+            set: function(db, value) {
+                return new Promise((resolve, reject) => {
+                    if (!db) {
+                        reject("Database connection is not available.");
+                        return;
+                    }
+                    const transaction = db.transaction([WATCH_LATER_STORE_NAME], 'readwrite');
+                    const store = transaction.objectStore(WATCH_LATER_STORE_NAME);
+                    const request = store.put(value);
+                    request.onsuccess = event => {
+                        resolve(event.target.result);
+                    };
+                    request.onerror = event => {
+                        console.error('Error setting data in DB:', event.target.errorCode);
+                        reject('Error setting data in DB: ' + event.target.errorCode);
+                    };
+                });
+            },
+            delete: function(db, key) {
+                return new Promise((resolve, reject) => {
+                    if (!db) {
+                        reject("Database connection is not available.");
+                        return;
+                    }
+                    const transaction = db.transaction([WATCH_LATER_STORE_NAME], 'readwrite');
+                    const store = transaction.objectStore(WATCH_LATER_STORE_NAME);
+                    const request = store.delete(key);
+                    request.onsuccess = event => {
+                        resolve(event.target.result);
+                    };
+                    request.onerror = event => {
+                        console.error('Error deleting data from DB:', event.target.errorCode);
+                        reject('Error deleting data from DB: ' + event.target.errorCode);
+                    };
+                });
+            },
+            getAll: function(db) {
+                return new Promise((resolve, reject) => {
+                    if (!db) {
+                        reject("Database connection is not available.");
+                        return;
+                    }
+                    const transaction = db.transaction([WATCH_LATER_STORE_NAME], 'readonly');
+                    const store = transaction.objectStore(WATCH_LATER_STORE_NAME);
+                    const request = store.getAll();
+                    request.onsuccess = event => {
+                        resolve(event.target.result);
+                    };
+                    request.onerror = event => {
+                        console.error('Error getting all data from DB:', event.target.errorCode);
+                        reject('Error getting all data from DB: ' + event.target.errorCode);
+                    };
+                });
+            }
+        };
+
         const ITEMS_PER_PAGE = 20;
         const LAZY_LOAD_THRESHOLD = 100; // px from bottom to trigger load
         const PLACEHOLDER_IMAGE_URL = 'https://movie-fcs.fwh.is/cinecraze/cinecraze.png';
@@ -3085,6 +3185,7 @@
             viewToggleBtn: document.getElementById('view-toggle-btn'),
             contentGrid: document.getElementById('content-grid'),
             contentList: document.getElementById('content-list'),
+            watchLaterGrid: document.getElementById('watch-later-grid'),
             genreFilter: document.getElementById('genre-filter'),
             countryFilter: document.getElementById('country-filter'),
             yearFilter: document.getElementById('year-filter'),
@@ -3639,12 +3740,27 @@
         }
         
         // Render content based on filters
-        function renderContent(category = 'all') {
+        async function renderContent(category = 'all') {
             if (!cineData || !cineData.Categories) return;
 
             // Reset pagination
             currentPage = 1;
             currentContent = [];
+
+            if (category === 'watch-later') {
+                const db = await watchLaterDbUtil.open();
+                const watchLaterItems = await watchLaterDbUtil.getAll(db);
+                db.close();
+                currentContent = watchLaterItems.map(item => ({ ...item, type: item.type || 'movie' }));
+
+                totalPages = Math.ceil(currentContent.length / ITEMS_PER_PAGE);
+                cachedContent = [...currentContent];
+                currentView = 'watch-later'; // Set the view
+                renderCurrentView();
+                renderPaginationControls();
+                setupLazyLoading();
+                return;
+            }
 
             // Get selected category
             const genre = elements.genreFilter.value.toLowerCase();
@@ -3700,50 +3816,36 @@
 
         // Render the current view (grid or list)
         function renderCurrentView() {
-            if (currentView === 'grid') {
-                renderGridView();
-            } else {
-                renderListView();
-            }
-        }
-
-        // Render grid view with pagination
-        function renderGridView() {
-            elements.contentGrid.innerHTML = '';
-
-            // Get items for current page
-            const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
-            const endIndex = startIndex + ITEMS_PER_PAGE;
-            const itemsToRender = currentContent.slice(startIndex, endIndex);
-
-            itemsToRender.forEach(item => {
-                const card = createContentCard(item, 'grid');
-                elements.contentGrid.appendChild(card);
-            });
-
-            // Show the grid view
-            elements.contentGrid.style.display = 'grid';
-            elements.contentList.style.display = 'none';
-            setupLazyLoading();
-        }
-
-        // Render list view with pagination
-        function renderListView() {
-            elements.contentList.innerHTML = '';
-
-            // Get items for current page
-            const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
-            const endIndex = startIndex + ITEMS_PER_PAGE;
-            const itemsToRender = currentContent.slice(startIndex, endIndex);
-
-            itemsToRender.forEach(item => {
-                const card = createContentCard(item, 'list');
-                elements.contentList.appendChild(card);
-            });
-
-            // Show the list view
             elements.contentGrid.style.display = 'none';
-            elements.contentList.style.display = 'flex';
+            elements.contentList.style.display = 'none';
+            elements.watchLaterGrid.style.display = 'none';
+
+            let container;
+            let viewClass = 'grid';
+
+            if (currentView === 'watch-later') {
+                container = elements.watchLaterGrid;
+                container.style.display = 'grid';
+            } else if (currentView === 'grid') {
+                container = elements.contentGrid;
+                container.style.display = 'grid';
+            } else { // list
+                container = elements.contentList;
+                container.style.display = 'flex';
+                viewClass = 'list';
+            }
+
+            container.innerHTML = '';
+
+            const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
+            const endIndex = startIndex + ITEMS_PER_PAGE;
+            const itemsToRender = currentContent.slice(startIndex, endIndex);
+
+            itemsToRender.forEach(item => {
+                const card = createContentCard(item, viewClass);
+                container.appendChild(card);
+            });
+
             setupLazyLoading();
         }
         
@@ -3943,14 +4045,7 @@
             elements.player = document.getElementById('player');
 
 
-            currentContentInfo = {
-                id: content.Title,
-                title: content.Title,
-                type: content.type,
-                description: content.Description,
-                poster: content.Poster || content.Thumbnail,
-                Servers: content.Servers
-            };
+            currentContentInfo = content;
 
             incrementViewCount(content.Title);
             history.pushState({ page: 'viewer', contentId: content.Title }, 'View Content', '#viewer');
@@ -4100,11 +4195,18 @@
             window.scrollTo(0, 0);
             elements.shareVideoBtn.removeEventListener('click', handleShareVideo);
             elements.shareVideoBtn.addEventListener('click', handleShareVideo);
-            updateLikeDislikeUI(currentContentInfo.id);
+            updateLikeDislikeUI(currentContentInfo.Title);
             elements.likeBtn.removeEventListener('click', handleLike);
             elements.likeBtn.addEventListener('click', handleLike);
             elements.dislikeBtn.removeEventListener('click', handleDislike);
             elements.dislikeBtn.addEventListener('click', handleDislike);
+
+            const watchLaterBtn = document.getElementById('watch-later-btn');
+            if (watchLaterBtn) {
+                watchLaterBtn.removeEventListener('click', toggleWatchLater);
+                watchLaterBtn.addEventListener('click', toggleWatchLater);
+                updateWatchLaterButton(currentContentInfo.Title);
+            }
         }
         
         function getAutoplayUrl(url) {
@@ -6781,7 +6883,7 @@
             // Filter changes
             const navItems = document.querySelectorAll('.nav-item');
             navItems.forEach(item => {
-                item.addEventListener('click', (e) => {
+                item.addEventListener('click', async (e) => {
                     e.preventDefault();
                     const category = item.dataset.category;
 
@@ -6790,7 +6892,7 @@
                         history.replaceState({ page: 'browse' }, 'Browse Content', window.location.pathname + window.location.search);
                     }
 
-                    renderContent(category);
+                    await renderContent(category);
 
                     // Update active class
                     navItems.forEach(nav => nav.classList.remove('active'));
@@ -6882,7 +6984,10 @@
 
             // Back button in viewer
             elements.backButton.addEventListener('click', function() {
-                history.back(); // This will trigger the popstate event
+                // Directly close the viewer UI to ensure predictability for scripts
+                closeViewerInternalLogic();
+                // Update history state to reflect the change
+                history.pushState({ page: 'browse' }, 'Browse Content', window.location.pathname + window.location.search);
             });
 
             // Enhanced mobile back button support
@@ -7653,13 +7758,13 @@
         }
 
         async function handleShareVideo() {
-            if (!currentContentInfo || !currentContentInfo.title) {
+            if (!currentContentInfo || !currentContentInfo.Title) {
                 console.warn("No content info to share.");
                 return;
             }
 
-            let shareTitle = currentContentInfo.title;
-            let shareText = `Watch "${currentContentInfo.title}" on CineCraze!`;
+            let shareTitle = currentContentInfo.Title;
+            let shareText = `Watch "${currentContentInfo.Title}" on CineCraze!`;
             const shareUrl = window.location.href; // The URL of the current page
 
             // If it's a series and a specific episode is selected, use episode details
@@ -7751,8 +7856,8 @@
         }
 
         function handleLike() {
-            if (!currentContentInfo || !currentContentInfo.id) return;
-            const contentId = currentContentInfo.id;
+            if (!currentContentInfo || !currentContentInfo.Title) return;
+            const contentId = currentContentInfo.Title;
             let interactions = getVideoInteractions(contentId);
 
             if (interactions.userAction === 'liked') {
@@ -7768,8 +7873,8 @@
         }
 
         function handleDislike() {
-            if (!currentContentInfo || !currentContentInfo.id) return;
-            const contentId = currentContentInfo.id;
+            if (!currentContentInfo || !currentContentInfo.Title) return;
+            const contentId = currentContentInfo.Title;
             let interactions = getVideoInteractions(contentId);
 
             if (interactions.userAction === 'disliked') {
@@ -7784,6 +7889,42 @@
             updateLikeDislikeUI(contentId);
         }
         // --- End Like/Dislike Functionality ---
+
+        // --- Watch Later Functionality ---
+        async function toggleWatchLater() {
+            if (!currentContentInfo || !currentContentInfo.Title) return;
+            const contentId = currentContentInfo.Title;
+            const db = await watchLaterDbUtil.open();
+            const existing = await watchLaterDbUtil.get(db, contentId);
+
+            if (existing) {
+                await watchLaterDbUtil.delete(db, contentId);
+                console.log('Removed from Watch Later:', contentId);
+            } else {
+                // Ensure the object we store has an 'id' property for the keyPath
+                const itemToStore = { ...currentContentInfo, id: contentId };
+                await watchLaterDbUtil.set(db, itemToStore);
+                console.log('Added to Watch Later:', contentId);
+            }
+            db.close();
+            updateWatchLaterButton(contentId);
+        }
+
+        async function updateWatchLaterButton(contentId) {
+            const watchLaterBtn = document.getElementById('watch-later-btn');
+            if (!watchLaterBtn) return;
+
+            const db = await watchLaterDbUtil.open();
+            const existing = await watchLaterDbUtil.get(db, contentId);
+            db.close();
+
+            if (existing) {
+                watchLaterBtn.classList.add('active');
+            } else {
+                watchLaterBtn.classList.remove('active');
+            }
+        }
+        // --- End Watch Later Functionality ---
 
         // --- View Counter Functionality ---
         const VIEW_COUNTS_KEY = 'cineCrazeViewCounts';
