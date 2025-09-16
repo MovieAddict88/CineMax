@@ -3079,6 +3079,15 @@
             open: function() {
                 return new Promise((resolve, reject) => {
                     const request = indexedDB.open(DB_NAME, DB_VERSION);
+                    request.onupgradeneeded = event => {
+                        const db = event.target.result;
+                        if (!db.objectStoreNames.contains(STORE_NAME)) {
+                            db.createObjectStore(STORE_NAME, { keyPath: 'id' });
+                        }
+                        if (!db.objectStoreNames.contains(WATCH_LATER_STORE_NAME)) {
+                            db.createObjectStore(WATCH_LATER_STORE_NAME, { keyPath: 'id' });
+                        }
+                    };
                     request.onsuccess = event => {
                         resolve(event.target.result);
                     };
@@ -3743,11 +3752,14 @@
         async function renderContent(category = 'all') {
             if (!cineData || !cineData.Categories) return;
 
+            const filtersSection = document.querySelector('.filters-section');
+
             // Reset pagination
             currentPage = 1;
             currentContent = [];
 
             if (category === 'watch-later') {
+                filtersSection.style.display = 'none'; // Hide filters for Watch Later
                 const db = await watchLaterDbUtil.open();
                 const watchLaterItems = await watchLaterDbUtil.getAll(db);
                 db.close();
@@ -3760,6 +3772,8 @@
                 renderPaginationControls();
                 setupLazyLoading();
                 return;
+            } else {
+                filtersSection.style.display = 'block'; // Show filters for other categories
             }
 
             // Get selected category
@@ -4193,19 +4207,34 @@
 
             elements.viewerPage.style.display = 'block';
             window.scrollTo(0, 0);
-            elements.shareVideoBtn.removeEventListener('click', handleShareVideo);
-            elements.shareVideoBtn.addEventListener('click', handleShareVideo);
-            updateLikeDislikeUI(currentContentInfo.Title);
-            elements.likeBtn.removeEventListener('click', handleLike);
-            elements.likeBtn.addEventListener('click', handleLike);
-            elements.dislikeBtn.removeEventListener('click', handleDislike);
-            elements.dislikeBtn.addEventListener('click', handleDislike);
+            const newShareHandler = () => handleShareVideo(content);
+            if (elements.shareVideoBtn._shareHandler) {
+                elements.shareVideoBtn.removeEventListener('click', elements.shareVideoBtn._shareHandler);
+            }
+            elements.shareVideoBtn.addEventListener('click', newShareHandler);
+            elements.shareVideoBtn._shareHandler = newShareHandler;
+
+            updateLikeDislikeUI(content.Title);
+
+            const newLikeHandler = () => handleLike(content);
+            if(elements.likeBtn._likeHandler) elements.likeBtn.removeEventListener('click', elements.likeBtn._likeHandler);
+            elements.likeBtn.addEventListener('click', newLikeHandler);
+            elements.likeBtn._likeHandler = newLikeHandler;
+
+            const newDislikeHandler = () => handleDislike(content);
+            if(elements.dislikeBtn._dislikeHandler) elements.dislikeBtn.removeEventListener('click', elements.dislikeBtn._dislikeHandler);
+            elements.dislikeBtn.addEventListener('click', newDislikeHandler);
+            elements.dislikeBtn._dislikeHandler = newDislikeHandler;
 
             const watchLaterBtn = document.getElementById('watch-later-btn');
             if (watchLaterBtn) {
-                watchLaterBtn.removeEventListener('click', toggleWatchLater);
-                watchLaterBtn.addEventListener('click', toggleWatchLater);
-                updateWatchLaterButton(currentContentInfo.Title);
+                const newToggleHandler = () => toggleWatchLater(content);
+                if (watchLaterBtn._toggleHandler) {
+                    watchLaterBtn.removeEventListener('click', watchLaterBtn._toggleHandler);
+                }
+                watchLaterBtn.addEventListener('click', newToggleHandler);
+                watchLaterBtn._toggleHandler = newToggleHandler;
+                updateWatchLaterButton(content.Title);
             }
         }
         
@@ -7891,9 +7920,9 @@
         // --- End Like/Dislike Functionality ---
 
         // --- Watch Later Functionality ---
-        async function toggleWatchLater() {
-            if (!currentContentInfo || !currentContentInfo.Title) return;
-            const contentId = currentContentInfo.Title;
+        async function toggleWatchLater(content) {
+            if (!content || !content.Title) return;
+            const contentId = content.Title;
             const db = await watchLaterDbUtil.open();
             const existing = await watchLaterDbUtil.get(db, contentId);
 
@@ -7902,7 +7931,7 @@
                 console.log('Removed from Watch Later:', contentId);
             } else {
                 // Ensure the object we store has an 'id' property for the keyPath
-                const itemToStore = { ...currentContentInfo, id: contentId };
+                const itemToStore = { ...content, id: contentId };
                 await watchLaterDbUtil.set(db, itemToStore);
                 console.log('Added to Watch Later:', contentId);
             }
