@@ -8107,6 +8107,7 @@
             await watchLaterDbUtil.delete(db, contentId);
             db.close();
             console.log('Removed from Watch Later:', contentId);
+            watchLaterItemsSet.delete(contentId); // Sync the cache
             await renderContent('watch-later');
         }
         // --- End Watch Later Functionality ---
