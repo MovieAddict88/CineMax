@@ -2729,6 +2729,10 @@
                 <!-- List view will be dynamically added here -->
             </div>
 
+            <div class="content-grid" id="watch-later-grid" style="display: none;">
+                <!-- Watch Later items will be dynamically added here -->
+            </div>
+
             <!-- Loading Spinner -->
             <div class="loading-spinner" id="loading-spinner"></div>
 
@@ -2774,6 +2778,7 @@
                                     <button class="action-btn" id="like-btn"><i class="fas fa-thumbs-up"></i> <span id="like-count-span">24K</span></button>
                                     <button class="action-btn" id="dislike-btn"><i class="fas fa-thumbs-down"></i> <span id="dislike-count-span">1K</span></button>
                                     <button class="action-btn" id="share-video-btn"><i class="fas fa-share"></i> <span>Share</span></button>
+                                    <button class="action-btn" id="watch-later-btn"><i class="fas fa-clock"></i> <span>Watch Later</span></button>
                                 </div>
                             </div>
                         </div>
@@ -2830,6 +2835,10 @@
         <a href="#" class="nav-item" data-category="live">
             <i class="fas fa-broadcast-tower"></i>
             <span>Live</span>
+        </a>
+        <a href="#" class="nav-item" data-category="watch-later">
+            <i class="fas fa-clock"></i>
+            <span>Watch Later</span>
         </a>
     </nav>
     <!-- Parental Controls Modals -->
@@ -2981,8 +2990,9 @@
 
         // --- IndexedDB Caching ---
         const DB_NAME = 'CineCrazeDB';
-        const DB_VERSION = 1;
+        const DB_VERSION = 2;
         const STORE_NAME = 'playlistStore';
+        const watchLaterStore = 'watchLaterStore';
         const PLAYLIST_KEY = 'mainPlaylist';
 
         const dbUtil = {
@@ -2993,6 +3003,9 @@
                         const db = event.target.result;
                         if (!db.objectStoreNames.contains(STORE_NAME)) {
                             db.createObjectStore(STORE_NAME, { keyPath: 'id' });
+                        }
+                        if (!db.objectStoreNames.contains(watchLaterStore)) {
+                            db.createObjectStore(watchLaterStore, { keyPath: 'id' });
                         }
                     };
                     request.onsuccess = event => {
@@ -3062,6 +3075,63 @@
         };
 
         // Configuration
+// ✅ IndexedDB Utility for Watch Later
+const watchLaterDbUtil = {
+  open: function () {
+    return new Promise((resolve, reject) => {
+      const request = indexedDB.open("CineCrazeDB", 1);
+      request.onupgradeneeded = (e) => {
+        const db = e.target.result;
+        if (!db.objectStoreNames.contains("watchLater")) {
+          db.createObjectStore("watchLater", { keyPath: "id" });
+        }
+      };
+      request.onsuccess = (e) => resolve(e.target.result);
+      request.onerror = (e) => reject(e);
+    });
+  },
+
+  set: function (db, item) {
+    return new Promise((resolve, reject) => {
+      const tx = db.transaction("watchLater", "readwrite");
+      const store = tx.objectStore("watchLater");
+      const req = store.put(item);
+      req.onsuccess = () => resolve(true);
+      req.onerror = (e) => reject(e);
+    });
+  },
+
+  get: function (db, id) {
+    return new Promise((resolve, reject) => {
+      const tx = db.transaction("watchLater", "readonly");
+      const store = tx.objectStore("watchLater");
+      const req = store.get(id);
+      req.onsuccess = () => resolve(req.result);
+      req.onerror = (e) => reject(e);
+    });
+  },
+
+  getAll: function (db) {
+    return new Promise((resolve, reject) => {
+      const tx = db.transaction("watchLater", "readonly");
+      const store = tx.objectStore("watchLater");
+      const req = store.getAll();
+      req.onsuccess = () => resolve(req.result);
+      req.onerror = (e) => reject(e);
+    });
+  },
+
+  delete: function (db, id) {
+    return new Promise((resolve, reject) => {
+      const tx = db.transaction("watchLater", "readwrite");
+      const store = tx.objectStore("watchLater");
+      const req = store.delete(id);
+      req.onsuccess = () => resolve(true);
+      req.onerror = (e) => reject(e);
+    });
+  },
+};
+
         const ITEMS_PER_PAGE = 20;
         const LAZY_LOAD_THRESHOLD = 100; // px from bottom to trigger load
         const PLACEHOLDER_IMAGE_URL = 'https://movie-fcs.fwh.is/cinecraze/cinecraze.png';
@@ -3085,6 +3155,7 @@
             viewToggleBtn: document.getElementById('view-toggle-btn'),
             contentGrid: document.getElementById('content-grid'),
             contentList: document.getElementById('content-list'),
+            watchLaterGrid: document.getElementById('watch-later-grid'),
             genreFilter: document.getElementById('genre-filter'),
             countryFilter: document.getElementById('country-filter'),
             yearFilter: document.getElementById('year-filter'),
@@ -3639,111 +3710,149 @@
         }
         
         // Render content based on filters
-        function renderContent(category = 'all') {
+        async function renderContent(category = 'all') {
             if (!cineData || !cineData.Categories) return;
+
+            const filtersSection = document.querySelector('.filters-section');
 
             // Reset pagination
             currentPage = 1;
             currentContent = [];
 
-            // Get selected category
-            const genre = elements.genreFilter.value.toLowerCase();
-            const country = elements.countryFilter.value.toLowerCase();
-            const year = elements.yearFilter.value;
-            const sortBy = elements.sortFilter.value;
+if (category === 'watch-later') {
+    // Hide filters in watch-later view
+    filtersSection.style.display = 'none';
 
-            // Filter content
-            cineData.Categories.forEach(cat => {
-                if (category === 'all' || cat.MainCategory.toLowerCase().includes(category)) {
-                    cat.Entries.forEach(entry => {
-                        // Check genre and country filters
-                        const genreMatch = genre === 'all' ||
-                            (entry.SubCategory && entry.SubCategory.toLowerCase().includes(genre));
-                        const countryMatch = country === 'all' ||
-                            (entry.Country && entry.Country.toLowerCase().includes(country));
-                        const yearMatch = year === 'all' || (entry.Year && entry.Year.toString() === year);
+    const db = await watchLaterDbUtil.open();
+    let rawItems = await watchLaterDbUtil.getAll(db);
+    db.close();
 
-                        if (genreMatch && countryMatch && yearMatch && isContentAllowed(entry)) {
-                            currentContent.push({
-                                ...entry,
-                                type: cat.MainCategory.toLowerCase().includes('movie') ? 'movie' :
-                                    cat.MainCategory.toLowerCase().includes('series') ? 'series' : 'live'
-                            });
-                        }
-                    });
-                }
-            });
+    // Normalize possible shapes that might be in the store:
+    // - plain content objects
+    // - wrapper objects { id, data: [...] } (from other code patterns)
+    // - accidental full playlist objects (we'll skip those)
+    if (!rawItems) rawItems = [];
+    if (!Array.isArray(rawItems)) rawItems = [rawItems];
 
-            // Shuffle content on initial load
-            if (isInitialLoad) {
-                currentContent = shuffleArray(currentContent);
-                isInitialLoad = false;
-            }
-            // Apply sorting if not initial load
-            else {
-                currentContent = sortContent(currentContent, sortBy);
-            }
+    const normalized = [];
+    rawItems.forEach(entry => {
+        if (!entry) return;
 
-            // Calculate total pages
-            totalPages = Math.ceil(currentContent.length / ITEMS_PER_PAGE);
-
-            // Cache filtered content
-            cachedContent = [...currentContent];
-
-            // Render content
-            renderCurrentView();
-            renderPaginationControls();
-
-            // Re-initialize lazy loading for the new content
-            setupLazyLoading();
+        // If someone stored an array directly
+        if (Array.isArray(entry)) {
+            normalized.push(...entry);
+            return;
         }
+
+        // If entry is a wrapper with .data array
+        if (entry.data && Array.isArray(entry.data)) {
+            normalized.push(...entry.data);
+            return;
+        }
+
+        // If entry looks like a full playlist (has Categories), skip it
+        if (entry.data && entry.data.Categories) {
+            console.warn('Skipping playlist-like object found in watch-later store', entry);
+            return;
+        }
+        if (entry.Categories) {
+            console.warn('Skipping playlist-like object found in watch-later store', entry);
+            return;
+        }
+
+        // If it already looks like a content object (has Title) — keep it
+        if (entry.Title || entry.title) {
+            normalized.push(entry);
+            return;
+        }
+
+        // Try common wrapper properties
+        if (entry.value && (entry.value.Title || entry.value.title)) {
+            normalized.push(entry.value);
+            return;
+        }
+        if (entry.item && (entry.item.Title || entry.item.title)) {
+            normalized.push(entry.item);
+            return;
+        }
+
+        // Give up on unknown shapes
+    });
+
+    // Deduplicate by Title / id
+    const seen = new Set();
+    const unique = [];
+    for (const it of normalized) {
+        const key = (it.id || it.Title || it.title || '').toString();
+        if (!key) continue;
+        if (seen.has(key)) continue;
+        seen.add(key);
+        unique.push(it);
+    }
+
+    currentContent = unique.map(item => ({ ...item, type: item.type || 'movie' }));
+
+    // If empty — show friendly message instead of Home grid
+    if (currentContent.length === 0) {
+        elements.contentGrid.style.display = 'none';
+        elements.contentList.style.display = 'none';
+        elements.watchLaterGrid.style.display = 'block';
+        elements.watchLaterGrid.innerHTML = `
+            <div class="empty-message" style="text-align:center;padding:40px;">
+                <h2>No items in Watch Later</h2>
+                <p>Click the <strong>Watch Later</strong> button on any movie/show to save it here.</p>
+            </div>
+        `;
+        totalPages = 0;
+        cachedContent = [];
+        currentView = 'watch-later';
+        renderPaginationControls();
+        return;
+    }
+
+    // Normal rendering path
+    totalPages = Math.ceil(currentContent.length / ITEMS_PER_PAGE);
+    cachedContent = [...currentContent];
+    currentView = 'watch-later';
+    renderCurrentView();
+    renderPaginationControls();
+    setupLazyLoading();
+    return;
+}
+
 
         // Render the current view (grid or list)
         function renderCurrentView() {
-            if (currentView === 'grid') {
-                renderGridView();
-            } else {
-                renderListView();
-            }
-        }
-
-        // Render grid view with pagination
-        function renderGridView() {
-            elements.contentGrid.innerHTML = '';
-
-            // Get items for current page
-            const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
-            const endIndex = startIndex + ITEMS_PER_PAGE;
-            const itemsToRender = currentContent.slice(startIndex, endIndex);
-
-            itemsToRender.forEach(item => {
-                const card = createContentCard(item, 'grid');
-                elements.contentGrid.appendChild(card);
-            });
-
-            // Show the grid view
-            elements.contentGrid.style.display = 'grid';
-            elements.contentList.style.display = 'none';
-            setupLazyLoading();
-        }
-
-        // Render list view with pagination
-        function renderListView() {
-            elements.contentList.innerHTML = '';
-
-            // Get items for current page
-            const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
-            const endIndex = startIndex + ITEMS_PER_PAGE;
-            const itemsToRender = currentContent.slice(startIndex, endIndex);
-
-            itemsToRender.forEach(item => {
-                const card = createContentCard(item, 'list');
-                elements.contentList.appendChild(card);
-            });
-
-            // Show the list view
             elements.contentGrid.style.display = 'none';
-            elements.contentList.style.display = 'flex';
+            elements.contentList.style.display = 'none';
+            elements.watchLaterGrid.style.display = 'none';
+
+            let container;
+            let viewClass = 'grid';
+
+            if (currentView === 'watch-later') {
+                container = elements.watchLaterGrid;
+                container.style.display = 'grid';
+            } else if (currentView === 'grid') {
+                container = elements.contentGrid;
+                container.style.display = 'grid';
+            } else { // list
+                container = elements.contentList;
+                container.style.display = 'flex';
+                viewClass = 'list';
+            }
+
+            container.innerHTML = '';
+
+            const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
+            const endIndex = startIndex + ITEMS_PER_PAGE;
+            const itemsToRender = currentContent.slice(startIndex, endIndex);
+
+            itemsToRender.forEach(item => {
+                const card = createContentCard(item, viewClass);
+                container.appendChild(card);
+            });
+
             setupLazyLoading();
         }
         
@@ -3943,14 +4052,7 @@
             elements.player = document.getElementById('player');
 
 
-            currentContentInfo = {
-                id: content.Title,
-                title: content.Title,
-                type: content.type,
-                description: content.Description,
-                poster: content.Poster || content.Thumbnail,
-                Servers: content.Servers
-            };
+            currentContentInfo = content;
 
             incrementViewCount(content.Title);
             history.pushState({ page: 'viewer', contentId: content.Title }, 'View Content', '#viewer');
@@ -4098,13 +4200,35 @@
 
             elements.viewerPage.style.display = 'block';
             window.scrollTo(0, 0);
-            elements.shareVideoBtn.removeEventListener('click', handleShareVideo);
-            elements.shareVideoBtn.addEventListener('click', handleShareVideo);
-            updateLikeDislikeUI(currentContentInfo.id);
-            elements.likeBtn.removeEventListener('click', handleLike);
-            elements.likeBtn.addEventListener('click', handleLike);
-            elements.dislikeBtn.removeEventListener('click', handleDislike);
-            elements.dislikeBtn.addEventListener('click', handleDislike);
+            const newShareHandler = () => handleShareVideo(content);
+            if (elements.shareVideoBtn._shareHandler) {
+                elements.shareVideoBtn.removeEventListener('click', elements.shareVideoBtn._shareHandler);
+            }
+            elements.shareVideoBtn.addEventListener('click', newShareHandler);
+            elements.shareVideoBtn._shareHandler = newShareHandler;
+
+            updateLikeDislikeUI(content.Title);
+
+            const newLikeHandler = () => handleLike(content);
+            if(elements.likeBtn._likeHandler) elements.likeBtn.removeEventListener('click', elements.likeBtn._likeHandler);
+            elements.likeBtn.addEventListener('click', newLikeHandler);
+            elements.likeBtn._likeHandler = newLikeHandler;
+
+            const newDislikeHandler = () => handleDislike(content);
+            if(elements.dislikeBtn._dislikeHandler) elements.dislikeBtn.removeEventListener('click', elements.dislikeBtn._dislikeHandler);
+            elements.dislikeBtn.addEventListener('click', newDislikeHandler);
+            elements.dislikeBtn._dislikeHandler = newDislikeHandler;
+
+            const watchLaterBtn = document.getElementById('watch-later-btn');
+            if (watchLaterBtn) {
+                const newToggleHandler = () => toggleWatchLater(content);
+                if (watchLaterBtn._toggleHandler) {
+                    watchLaterBtn.removeEventListener('click', watchLaterBtn._toggleHandler);
+                }
+                watchLaterBtn.addEventListener('click', newToggleHandler);
+                watchLaterBtn._toggleHandler = newToggleHandler;
+                updateWatchLaterButton(content.Title);
+            }
         }
         
         function getAutoplayUrl(url) {
@@ -6781,7 +6905,7 @@
             // Filter changes
             const navItems = document.querySelectorAll('.nav-item');
             navItems.forEach(item => {
-                item.addEventListener('click', (e) => {
+                item.addEventListener('click', async (e) => {
                     e.preventDefault();
                     const category = item.dataset.category;
 
@@ -6790,7 +6914,7 @@
                         history.replaceState({ page: 'browse' }, 'Browse Content', window.location.pathname + window.location.search);
                     }
 
-                    renderContent(category);
+                    await renderContent(category);
 
                     // Update active class
                     navItems.forEach(nav => nav.classList.remove('active'));
@@ -6882,7 +7006,10 @@
 
             // Back button in viewer
             elements.backButton.addEventListener('click', function() {
-                history.back(); // This will trigger the popstate event
+                // Directly close the viewer UI to ensure predictability for scripts
+                closeViewerInternalLogic();
+                // Update history state to reflect the change
+                history.pushState({ page: 'browse' }, 'Browse Content', window.location.pathname + window.location.search);
             });
 
             // Enhanced mobile back button support
@@ -7653,13 +7780,13 @@
         }
 
         async function handleShareVideo() {
-            if (!currentContentInfo || !currentContentInfo.title) {
+            if (!currentContentInfo || !currentContentInfo.Title) {
                 console.warn("No content info to share.");
                 return;
             }
 
-            let shareTitle = currentContentInfo.title;
-            let shareText = `Watch "${currentContentInfo.title}" on CineCraze!`;
+            let shareTitle = currentContentInfo.Title;
+            let shareText = `Watch "${currentContentInfo.Title}" on CineCraze!`;
             const shareUrl = window.location.href; // The URL of the current page
 
             // If it's a series and a specific episode is selected, use episode details
@@ -7751,8 +7878,8 @@
         }
 
         function handleLike() {
-            if (!currentContentInfo || !currentContentInfo.id) return;
-            const contentId = currentContentInfo.id;
+            if (!currentContentInfo || !currentContentInfo.Title) return;
+            const contentId = currentContentInfo.Title;
             let interactions = getVideoInteractions(contentId);
 
             if (interactions.userAction === 'liked') {
@@ -7768,8 +7895,8 @@
         }
 
         function handleDislike() {
-            if (!currentContentInfo || !currentContentInfo.id) return;
-            const contentId = currentContentInfo.id;
+            if (!currentContentInfo || !currentContentInfo.Title) return;
+            const contentId = currentContentInfo.Title;
             let interactions = getVideoInteractions(contentId);
 
             if (interactions.userAction === 'disliked') {
@@ -7784,6 +7911,62 @@
             updateLikeDislikeUI(contentId);
         }
         // --- End Like/Dislike Functionality ---
+
+        // --- Watch Later Functionality ---
+// --- Watch Later Functionality ---
+// --- Watch Later Functionality ---
+async function toggleWatchLater(content) {
+    if (!content) return;
+
+    // Use a consistent unique id (prefer content.id, fallback to Title)
+    const contentId = content.id || content.Title;
+    if (!contentId) {
+        console.warn("No valid ID for content:", content);
+        return;
+    }
+
+    const db = await watchLaterDbUtil.open();
+    const existing = await watchLaterDbUtil.get(db, contentId);
+
+    if (existing) {
+        await watchLaterDbUtil.delete(db, contentId);
+        console.log("❌ Removed from Watch Later:", contentId);
+    } else {
+        // store the full object and ensure it has an 'id' field for the keyPath
+        const itemToStore = { ...content, id: contentId };
+        await watchLaterDbUtil.set(db, itemToStore);
+        console.log("✅ Added to Watch Later:", itemToStore);
+    }
+
+    db.close();
+
+    // update the viewer button state if viewer is open
+    updateWatchLaterButton(contentId);
+
+    // If the user is currently viewing the Watch Later tab, refresh its content immediately
+    if (currentView === "watch-later") {
+        // re-render the watch later view so changes appear without a full reload
+        await renderContent("watch-later");
+    }
+}
+
+
+
+        async function updateWatchLaterButton(contentId) {
+            const watchLaterBtn = document.getElementById('watch-later-btn');
+            if (!watchLaterBtn) return;
+
+            const db = await watchLaterDbUtil.open();
+            const existing = await watchLaterDbUtil.get(db, contentId);
+            db.close();
+
+            if (existing) {
+                watchLaterBtn.classList.add('active');
+            } else {
+                watchLaterBtn.classList.remove('active');
+            }
+        }
+        // --- End Watch Later Functionality ---
 
         // --- View Counter Functionality ---
         const VIEW_COUNTS_KEY = 'cineCrazeViewCounts';
