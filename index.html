@@ -613,6 +613,37 @@
             transform: scale(1.1);
         }
 
+        .card-watch-later-btn {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: rgba(0, 0, 0, 0.7);
+            border: none;
+            color: white;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            font-size: 14px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: var(--transition);
+            z-index: 3;
+        }
+        .card-watch-later-btn:hover {
+            background: var(--primary);
+            transform: scale(1.1);
+        }
+
+        .card-watch-later-btn.active {
+            background: var(--primary);
+        }
+
+        .card-watch-later-btn.active:hover {
+            background: var(--primary-dark);
+        }
+
         .card-info {
             padding: 15px;
         }
@@ -2801,7 +2832,6 @@
                                     <button class="action-btn" id="like-btn"><i class="fas fa-thumbs-up"></i> <span id="like-count-span">24K</span></button>
                                     <button class="action-btn" id="dislike-btn"><i class="fas fa-thumbs-down"></i> <span id="dislike-count-span">1K</span></button>
                                     <button class="action-btn" id="share-video-btn"><i class="fas fa-share"></i> <span>Share</span></button>
-                                    <button class="action-btn" id="watch-later-btn"><i class="fas fa-clock"></i> <span>Watch Later</span></button>
                                 </div>
                             </div>
                         </div>
@@ -3308,6 +3338,7 @@
         let currentSeason = null;
         let currentSeries = null;
         let isStretched = false;
+        let watchLaterItemsSet = new Set();
 
         // Parental Controls State
         let parentalControls = {
@@ -3418,7 +3449,17 @@
         }
 
         // Initialize the app
-        function init() {
+        async function init() {
+            // Cache watch later items
+            try {
+                const db = await watchLaterDbUtil.open();
+                const watchLaterItems = await watchLaterDbUtil.getAll(db);
+                db.close();
+                watchLaterItemsSet = new Set(watchLaterItems.map(item => item.id));
+            } catch (error) {
+                console.error("Failed to cache watch later items:", error);
+            }
+
             setupParentalControls(); // Setup parental controls first
             createEpisodeNavigationButtons(); // Create buttons before they might be needed
             fetchData().then(() => {
@@ -3914,8 +3955,12 @@
             }
 
             let deleteBtn = '';
+            let watchLaterIcon = '';
             if (currentView === 'watch-later') {
                 deleteBtn = `<button class="delete-watch-later-btn" data-id="${item.id}"><i class="fas fa-trash"></i></button>`;
+            } else {
+                const isActive = watchLaterItemsSet.has(item.Title);
+                watchLaterIcon = `<button class="card-watch-later-btn ${isActive ? 'active' : ''}" data-id="${item.Title.replace(/\s+/g, '-').toLowerCase()}"><i class="fas fa-clock"></i></button>`;
             }
 
             card.innerHTML = `
@@ -3923,6 +3968,7 @@
                     <img data-src="${item.Thumbnail || item.Poster}" alt="${item.Title}" class="lazy-image" loading="lazy" onerror="this.onerror=null; this.src='${PLACEHOLDER_IMAGE_URL}';">
                     ${badge}
                     ${deleteBtn}
+                    ${watchLaterIcon}
                 </div>
                 <div class="card-info">
                     <h3 class="card-title">${item.Title}</h3>
@@ -3948,6 +3994,14 @@
                     e.stopPropagation(); // prevent card click
                     deleteFromWatchLater(item.id);
                 });
+            } else {
+                const watchLaterBtn = card.querySelector('.card-watch-later-btn');
+                if (watchLaterBtn) {
+                    watchLaterBtn.addEventListener('click', (e) => {
+                        e.stopPropagation(); // prevent card click
+                        toggleWatchLater(item, e.currentTarget);
+                    });
+                }
             }
 
             card.addEventListener('click', () => openViewer(item));
@@ -7967,7 +8021,7 @@
         // --- End Like/Dislike Functionality ---
 
         // --- Watch Later Functionality ---
-        async function toggleWatchLater(content) {
+        async function toggleWatchLater(content, buttonElement) {
             if (!content || !content.Title) return;
             const contentId = content.Title;
             const db = await watchLaterDbUtil.open();
@@ -7976,11 +8030,15 @@
             if (existing) {
                 await watchLaterDbUtil.delete(db, contentId);
                 alert(`"${content.Title}" removed from Watch Later.`);
+                watchLaterItemsSet.delete(contentId);
+                if (buttonElement) buttonElement.classList.remove('active');
             } else {
                 // Ensure the object we store has an 'id' property for the keyPath
                 const itemToStore = { ...content, id: contentId };
                 await watchLaterDbUtil.set(db, itemToStore);
                 alert(`"${content.Title}" added to Watch Later.`);
+                watchLaterItemsSet.add(contentId);
+                if (buttonElement) buttonElement.classList.add('active');
             }
             db.close();
             updateWatchLaterButton(contentId);
