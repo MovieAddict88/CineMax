@@ -613,7 +613,7 @@
             transform: scale(1.1);
         }
 
-        .card-watch-later-btn {
+        .content-card.grid .card-watch-later-btn {
             position: absolute;
             top: 10px;
             right: 10px;
@@ -631,21 +631,60 @@
             transition: var(--transition);
             z-index: 3;
         }
-        .card-watch-later-btn:hover {
+        .content-card.grid .card-watch-later-btn:hover {
             background: var(--primary);
             transform: scale(1.1);
         }
 
-        .card-watch-later-btn.active {
+        .content-card.grid .card-watch-later-btn.active {
             background: var(--primary);
         }
 
-        .card-watch-later-btn.active:hover {
+        .content-card.grid .card-watch-later-btn.active:hover {
             background: var(--primary-dark);
         }
 
         .card-info {
             padding: 15px;
+        }
+
+        .card-title-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            gap: 10px;
+        }
+
+        .content-card.list .card-title-container {
+            align-items: center;
+        }
+
+        .content-card.list .card-watch-later-btn {
+            background: none;
+            border: 1px solid var(--gray);
+            color: var(--gray);
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            font-size: 12px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: var(--transition);
+            flex-shrink: 0;
+        }
+
+        .content-card.list .card-watch-later-btn:hover {
+            background: var(--primary-dark);
+            color: white;
+            border-color: var(--primary-dark);
+        }
+
+        .content-card.list .card-watch-later-btn.active {
+            background: var(--primary);
+            color: white;
+            border-color: var(--primary);
         }
 
 .content-card.grid .card-info {
@@ -3968,10 +4007,13 @@
                     <img data-src="${item.Thumbnail || item.Poster}" alt="${item.Title}" class="lazy-image" loading="lazy" onerror="this.onerror=null; this.src='${PLACEHOLDER_IMAGE_URL}';">
                     ${badge}
                     ${deleteBtn}
-                    ${watchLaterIcon}
+                    ${viewType === 'grid' ? watchLaterIcon : ''}
                 </div>
                 <div class="card-info">
-                    <h3 class="card-title">${item.Title}</h3>
+                    <div class="card-title-container">
+                        <h3 class="card-title">${item.Title}</h3>
+                        ${viewType === 'list' ? watchLaterIcon : ''}
+                    </div>
                     <div class="card-meta">
                         ${generateStarRating(item.Rating)}
                         ${viewType === 'list' ? 
