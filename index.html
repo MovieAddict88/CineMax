@@ -590,6 +590,29 @@
             background-color: var(--live-badge);
         }
 
+        .delete-watch-later-btn {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: rgba(229, 9, 20, 0.8);
+            border: none;
+            color: white;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            font-size: 14px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: var(--transition);
+            z-index: 3;
+        }
+        .delete-watch-later-btn:hover {
+            background: var(--primary-dark);
+            transform: scale(1.1);
+        }
+
         .card-info {
             padding: 15px;
         }
@@ -3118,37 +3141,41 @@
             set: function(db, value) {
                 return new Promise((resolve, reject) => {
                     if (!db) {
-                        reject("Database connection is not available.");
-                        return;
+                        return reject("Database connection is not available.");
                     }
-                    const transaction = db.transaction([WATCH_LATER_STORE_NAME], 'readwrite');
-                    const store = transaction.objectStore(WATCH_LATER_STORE_NAME);
-                    const request = store.put(value);
-                    request.onsuccess = event => {
-                        resolve(event.target.result);
-                    };
-                    request.onerror = event => {
-                        console.error('Error setting data in DB:', event.target.errorCode);
-                        reject('Error setting data in DB: ' + event.target.errorCode);
-                    };
+                    try {
+                        const transaction = db.transaction([WATCH_LATER_STORE_NAME], 'readwrite');
+                        transaction.oncomplete = () => {
+                            resolve();
+                        };
+                        transaction.onerror = () => {
+                            reject(transaction.error);
+                        };
+                        const store = transaction.objectStore(WATCH_LATER_STORE_NAME);
+                        store.put(value);
+                    } catch (error) {
+                        reject(error);
+                    }
                 });
             },
             delete: function(db, key) {
                 return new Promise((resolve, reject) => {
                     if (!db) {
-                        reject("Database connection is not available.");
-                        return;
+                        return reject("Database connection is not available.");
                     }
-                    const transaction = db.transaction([WATCH_LATER_STORE_NAME], 'readwrite');
-                    const store = transaction.objectStore(WATCH_LATER_STORE_NAME);
-                    const request = store.delete(key);
-                    request.onsuccess = event => {
-                        resolve(event.target.result);
-                    };
-                    request.onerror = event => {
-                        console.error('Error deleting data from DB:', event.target.errorCode);
-                        reject('Error deleting data from DB: ' + event.target.errorCode);
-                    };
+                    try {
+                        const transaction = db.transaction([WATCH_LATER_STORE_NAME], 'readwrite');
+                        transaction.oncomplete = () => {
+                            resolve();
+                        };
+                        transaction.onerror = () => {
+                            reject(transaction.error);
+                        };
+                        const store = transaction.objectStore(WATCH_LATER_STORE_NAME);
+                        store.delete(key);
+                    } catch (error) {
+                        reject(error);
+                    }
                 });
             },
             getAll: function(db) {
@@ -3773,6 +3800,12 @@
                 setupLazyLoading();
                 return;
             } else {
+                const icon = elements.viewToggleBtn.querySelector('i');
+                if (icon.classList.contains('fa-list')) {
+                    currentView = 'list';
+                } else {
+                    currentView = 'grid';
+                }
                 filtersSection.style.display = 'block'; // Show filters for other categories
             }
 
@@ -3880,10 +3913,16 @@
                 badge = '<div class="card-badge badge-live">LIVE</div>';
             }
 
+            let deleteBtn = '';
+            if (currentView === 'watch-later') {
+                deleteBtn = `<button class="delete-watch-later-btn" data-id="${item.id}"><i class="fas fa-trash"></i></button>`;
+            }
+
             card.innerHTML = `
                 <div class="card-img">
                     <img data-src="${item.Thumbnail || item.Poster}" alt="${item.Title}" class="lazy-image" loading="lazy" onerror="this.onerror=null; this.src='${PLACEHOLDER_IMAGE_URL}';">
                     ${badge}
+                    ${deleteBtn}
                 </div>
                 <div class="card-info">
                     <h3 class="card-title">${item.Title}</h3>
@@ -3902,6 +3941,14 @@
                     ${viewType === 'list' ? `<p class="card-description">${item.Description || ''}</p>` : ''}
                 </div>
             `;
+
+            if (currentView === 'watch-later') {
+                const btn = card.querySelector('.delete-watch-later-btn');
+                btn.addEventListener('click', (e) => {
+                    e.stopPropagation(); // prevent card click
+                    deleteFromWatchLater(item.id);
+                });
+            }
 
             card.addEventListener('click', () => openViewer(item));
             return card;
@@ -7928,12 +7975,12 @@
 
             if (existing) {
                 await watchLaterDbUtil.delete(db, contentId);
-                console.log('Removed from Watch Later:', contentId);
+                alert(`"${content.Title}" removed from Watch Later.`);
             } else {
                 // Ensure the object we store has an 'id' property for the keyPath
                 const itemToStore = { ...content, id: contentId };
                 await watchLaterDbUtil.set(db, itemToStore);
-                console.log('Added to Watch Later:', contentId);
+                alert(`"${content.Title}" added to Watch Later.`);
             }
             db.close();
             updateWatchLaterButton(contentId);
@@ -7952,6 +7999,15 @@
             } else {
                 watchLaterBtn.classList.remove('active');
             }
+        }
+
+        async function deleteFromWatchLater(contentId) {
+            if (!contentId) return;
+            const db = await watchLaterDbUtil.open();
+            await watchLaterDbUtil.delete(db, contentId);
+            db.close();
+            console.log('Removed from Watch Later:', contentId);
+            await renderContent('watch-later');
         }
         // --- End Watch Later Functionality ---
 
