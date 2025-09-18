@@ -4411,110 +4411,61 @@
             elements.playerMessageArea.style.display = 'none';
             elements.playerMessageArea.textContent = '';
 
+            const isEmbed = isGoogleDriveUrl(url) || isMegaNzUrl(url) || isVidsrcUrl(url) || isVidjoyUrl(url) || isVidsrcMeUrl(url) || isVidsrcToUrl(url) || isVidsrcXyzUrl(url) || isGoDrivePlayerUrl(url) || isVidLinkProUrl(url) || is2EmbedUrl(url) || isEmbedSuUrl(url) || isAutoEmbedUrl(url) || isVideasyUrl(url);
 
-            if (isGoogleDriveUrl(url)) {
-                const fileId = extractGoogleDriveId(url);
-                if (fileId) {
-                    let embedUrl = `https://drive.google.com/file/d/${fileId}/preview`;
-                    elements.player.style.display = 'none'; // Hide Plyr player
-                    if (!iframe) {
-                        iframe = document.createElement('iframe');
-                        iframe.className = 'external-content-iframe';
-                        iframe.style.position = 'absolute';
-                        iframe.style.top = '0';
-                        iframe.style.left = '0';
-                        iframe.style.width = '100%';
-                        iframe.style.height = '100%';
-                        iframe.style.border = 'none';
-                        iframe.setAttribute('allowfullscreen', '');
-                        iframe.setAttribute('allow', 'autoplay; encrypted-media; picture-in-picture');
-                        iframe.setAttribute('sandbox', 'allow-scripts allow-same-origin allow-presentation allow-forms');
-                        playerContainer.appendChild(iframe);
-                    }
-                    iframe.src = getAutoplayUrl(embedUrl);
-                    iframe.style.display = 'block';
-                    return;
-                }
-            }
+            if (isEmbed) {
+                // Switching TO an embed source
+                elements.player.style.display = 'none'; // Hide native player
 
-            if (isMegaNzUrl(url)) {
-                elements.player.style.display = 'none'; // Hide Plyr player
-                if (!iframe) {
-                    iframe = document.createElement('iframe');
-                    iframe.className = 'external-content-iframe';
-                    iframe.style.position = 'absolute';
-                    iframe.style.top = '0';
-                    iframe.style.left = '0';
-                    iframe.style.width = '100%';
-                    iframe.style.height = '100%';
-                    iframe.style.border = 'none';
-                    iframe.setAttribute('allowfullscreen', '');
-                    iframe.setAttribute('allow', 'autoplay; encrypted-media; picture-in-picture');
-                    iframe.setAttribute('sandbox', 'allow-scripts allow-same-origin allow-presentation allow-forms');
-                    playerContainer.appendChild(iframe);
+                // If an iframe already exists, remove it to ensure a clean state
+                if (iframe) {
+                    iframe.src = 'about:blank'; // Stop content
+                    iframe.remove();
                 }
-                const embedUrl = url.replace('/file/', '/embed/');
+
+                // Create a new iframe for the embedded content
+                iframe = document.createElement('iframe');
+                iframe.className = 'external-content-iframe';
+                iframe.style.position = 'absolute';
+                iframe.style.top = '0';
+                iframe.style.left = '0';
+                iframe.style.width = '100%';
+                iframe.style.height = '100%';
+                iframe.style.border = 'none';
+                iframe.setAttribute('allowfullscreen', '');
+                iframe.setAttribute('allow', 'autoplay; encrypted-media; picture-in-picture');
+                iframe.setAttribute('sandbox', 'allow-scripts allow-same-origin allow-presentation allow-forms');
+                playerContainer.appendChild(iframe);
+
+                let embedUrl = url;
+                if (isGoogleDriveUrl(url)) {
+                    const fileId = extractGoogleDriveId(url);
+                    if (fileId) embedUrl = `https://drive.google.com/file/d/${fileId}/preview`;
+                } else if (isMegaNzUrl(url)) {
+                    embedUrl = url.replace('/file/', '/embed/');
+                }
+
                 iframe.src = getAutoplayUrl(embedUrl);
-                iframe.style.display = 'block';
-                return;
-            }
-
-            if (isVidsrcUrl(url) || isVidjoyUrl(url) || isVidsrcMeUrl(url) || isVidsrcToUrl(url) || isVidsrcXyzUrl(url) || isGoDrivePlayerUrl(url) || isVidLinkProUrl(url) || is2EmbedUrl(url) || isEmbedSuUrl(url) || isAutoEmbedUrl(url) || isVideasyUrl(url)) {
-                elements.player.style.display = 'none'; // Hide Plyr player
                 
                 // Update in-page server dropdown for multiple servers
                 if (servers && servers.length > 1) {
                     setTimeout(() => updateServerDropdown(servers, { url: url }), 100);
                 }
-                
-                if (!iframe) {
-                    iframe = document.createElement('iframe');
-                    iframe.className = 'external-content-iframe';
-                    iframe.style.position = 'absolute';
-                    iframe.style.top = '0';
-                    iframe.style.left = '0';
-                    iframe.style.width = '100%';
-                    iframe.style.height = '100%';
-                    iframe.style.border = 'none';
-                    iframe.setAttribute('allowfullscreen', '');
-                    iframe.setAttribute('allow', 'autoplay; encrypted-media; picture-in-picture');
-                    playerContainer.appendChild(iframe);
-                }
-                
-                // Load iframe immediately for auto-play
-                iframe.style.display = 'block';
-                iframe.src = getAutoplayUrl(url);
-                
-                // Handle iframe load events (non-blocking)
-                iframe.onload = () => {
-                    // Store the onload handler for reuse when switching servers
-                    iframe._onloadHandler = iframe.onload;
-                };
-                
-                iframe.onerror = () => {
-                    console.warn('Iframe failed to load:', url);
-                    
-                    // Try next server automatically (non-blocking)
-                    const currentIndex = servers.findIndex(s => s.url === url);
-                    if (currentIndex < servers.length - 1) {
-                        const nextServer = servers[currentIndex + 1];
-                        console.log('Trying next server:', nextServer.name);
-                        iframe.src = getAutoplayUrl(nextServer.url);
-                    }
-                };
-                
-                return;
+
+                return; // Exit function after handling embed
             } else {
-                // If it's not a Vidsrc or Vidjoy URL, hide the iframe if it exists
+                // This is a direct link, ensure no iframe is present
                 if (iframe) {
-                    iframe.style.display = 'none';
-                    iframe.src = 'about:blank'; // Clear the iframe src
+                    iframe.style.display = 'none'; // Hide it immediately
+                    iframe.src = 'about:blank';    // Stop any loading/playing
+                    iframe.remove();                // Remove from DOM
                 }
                 
-                // Hide embedded server selector when switching to non-embedded sources
-                hideEmbeddedServerSelector();
+                // Show Plyr player
+                elements.player.style.display = 'block';
                 
-                elements.player.style.display = 'block'; // Show Plyr player
+                // Hide any selectors specific to embedded players
+                hideEmbeddedServerSelector();
             }
 
             // Check if it's a YouTube URL
@@ -5306,55 +5257,86 @@
         }
         
         // Function to switch between servers
-        async function switchToServer(server, allServers) {
-            try {
-                // Stop current playback
-                if (playerInstance) {
-                    playerInstance.pause();
-                }
-                
-                // Check if this is an embedded source
-                if (isVidsrcUrl(server.url) || isVidjoyUrl(server.url) || isVidsrcMeUrl(server.url) || 
-                    isVidsrcToUrl(server.url) || isVidsrcXyzUrl(server.url) || isGoDrivePlayerUrl(server.url) || 
-                    isVidLinkProUrl(server.url) || is2EmbedUrl(server.url) || isEmbedSuUrl(server.url) || 
-                    isAutoEmbedUrl(server.url) || isVideasyUrl(server.url) || isMegaNzUrl(server.url) || isGoogleDriveUrl(server.url)) {
-                    
-                    // Switch to embedded player
-                    await playUrl(server.url, allServers);
-                } else {
-                    // Switch to Plyr player
-                    if (playerInstance) {
-                        // Update player source
-                        const sources = allServers.map(s => ({
-                            src: s.url,
-                            size: parseInt(s.name?.replace(/\D/g, '') || '0'),
-                            type: s.url.includes('m3u8') ? 'application/x-mpegURL' : 'video/mp4'
-                        }));
-                        
-                        playerInstance.source = {
-                            type: 'video',
-                            sources: sources,
-                        };
-                        
-                        // Ensure stretch button persists after source change
-                        addStretchButtonToPlayer();
-                        
-                        // Play the selected server
-                        playerInstance.play();
-                    }
-                }
-                
-                // Update current server tracking
-                window.currentServer = server;
-                if (elements.serverSelector) {
-                    elements.serverSelector.value = server.url;
-                }
-                
-            } catch (error) {
-                console.error('Error switching to server:', error);
-                showServerSwitchFeedback('Error switching server', 'error');
-            }
+async function switchToServer(server, allServers) {
+    try {
+        // Stop current playback more reliably
+        if (playerInstance) {
+            playerInstance.pause();
+            playerInstance.stop();
         }
+        
+        // Reset Shaka Player if it exists
+        if (window.currentShakaPlayer) {
+            window.currentShakaPlayer.destroy();
+            window.currentShakaPlayer = null;
+        }
+        
+        // Remove any existing embedded iframes
+        const playerContainer = document.querySelector('.player-container');
+        const existingIframe = playerContainer.querySelector('iframe.external-content-iframe');
+        if (existingIframe) {
+            existingIframe.remove();
+        }
+        
+        // Always show the Plyr player initially
+        elements.player.style.display = 'block';
+        
+        // Check if this is an embedded source
+        const isEmbed = isVidsrcUrl(server.url) || isVidjoyUrl(server.url) || 
+                       isVidsrcMeUrl(server.url) || isVidsrcToUrl(server.url) || 
+                       isVidsrcXyzUrl(server.url) || isGoDrivePlayerUrl(server.url) || 
+                       isVidLinkProUrl(server.url) || is2EmbedUrl(server.url) || 
+                       isEmbedSuUrl(server.url) || isAutoEmbedUrl(server.url) || 
+                       isVideasyUrl(server.url) || isMegaNzUrl(server.url) || 
+                       isGoogleDriveUrl(server.url);
+
+        if (isEmbed) {
+            // Hide Plyr player for embedded content
+            elements.player.style.display = 'none';
+            
+            // Create iframe for embedded content
+            const iframe = document.createElement('iframe');
+            iframe.className = 'external-content-iframe';
+            iframe.style.cssText = `
+                position: absolute;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                border: none;
+            `;
+            iframe.setAttribute('allowfullscreen', '');
+            iframe.setAttribute('allow', 'autoplay; encrypted-media; picture-in-picture');
+            
+            let embedUrl = server.url;
+            if (isGoogleDriveUrl(server.url)) {
+                const fileId = extractGoogleDriveId(server.url);
+                if (fileId) embedUrl = `https://drive.google.com/file/d/${fileId}/preview`;
+            } else if (isMegaNzUrl(server.url)) {
+                embedUrl = server.url.replace('/file/', '/embed/');
+            }
+            
+            iframe.src = getAutoplayUrl(embedUrl);
+            playerContainer.appendChild(iframe);
+        } else {
+            // For direct links, use the standard player
+            await playUrl(server.url, allServers);
+        }
+        
+        // Update current server tracking
+        window.currentServer = server;
+        if (elements.serverSelector) {
+            elements.serverSelector.value = server.url;
+        }
+        
+        // Show feedback to user
+        showServerSwitchFeedback(server.name || `Server ${allServers.indexOf(server) + 1}`);
+        
+    } catch (error) {
+        console.error('Error switching to server:', error);
+        showServerSwitchFeedback('Error switching server', 'error');
+    }
+}
         
         // Enhanced function to show server switch feedback
         function showServerSwitchFeedback(message, type = 'success') {
@@ -6222,57 +6204,7 @@
                 playerContainer.appendChild(indicatorButton);
             }
         }
-        
-        // Function to switch between servers
-        async function switchToServer(server, allServers) {
-            try {
-                // Stop current playback
-                if (playerInstance) {
-                    playerInstance.pause();
-                }
-                
-                // Check if this is an embedded source
-                if (isVidsrcUrl(server.url) || isVidjoyUrl(server.url) || isVidsrcMeUrl(server.url) || 
-                    isVidsrcToUrl(server.url) || isVidsrcXyzUrl(server.url) || isGoDrivePlayerUrl(server.url) || 
-                    isVidLinkProUrl(server.url) || is2EmbedUrl(server.url) || isEmbedSuUrl(server.url) || 
-                    isAutoEmbedUrl(server.url) || isVideasyUrl(server.url) || isMegaNzUrl(server.url) || isGoogleDriveUrl(server.url)) {
-                    
-                    // Switch to embedded player
-                    await playUrl(server.url, allServers);
-                } else {
-                    // Switch to Plyr player
-                    if (playerInstance) {
-                        // Update player source
-                        const sources = allServers.map(s => ({
-                            src: s.url,
-                            size: parseInt(s.name?.replace(/\D/g, '') || '0'),
-                            type: s.url.includes('m3u8') ? 'application/x-mpegURL' : 'video/mp4'
-                        }));
-                        
-                        playerInstance.source = {
-                            type: 'video',
-                            sources: sources,
-                        };
-                        
-                        // Ensure stretch button persists after source change
-                        addStretchButtonToPlayer();
-                        
-                        // Play the selected server
-                        playerInstance.play();
-                    }
-                }
-                
-                // Update current server tracking
-                window.currentServer = server;
-                if (elements.serverSelector) {
-                    elements.serverSelector.value = server.url;
-                }
-                
-            } catch (error) {
-                console.error('Error switching to server:', error);
-                showServerSwitchFeedback('Error switching server', 'error');
-            }
-        }
+
         
         // Enhanced function to show server switch feedback
         function showServerSwitchFeedback(message, type = 'success') {
