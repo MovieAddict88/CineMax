@@ -1,4 +1,4 @@
-     <!DOCTYPE html>
+      <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -4411,7 +4411,7 @@
             elements.playerMessageArea.style.display = 'none';
             elements.playerMessageArea.textContent = '';
 
-            const isEmbed = isGoogleDriveUrl(url) || isMegaNzUrl(url) || isVidsrcUrl(url) || isVidjoyUrl(url) || isVidsrcMeUrl(url) || isVidsrcToUrl(url) || isVidsrcXyzUrl(url) || isGoDrivePlayerUrl(url) || isVidLinkProUrl(url) || is2EmbedUrl(url) || isEmbedSuUrl(url) || isAutoEmbedUrl(url) || isVideasyUrl(url);
+            const isEmbed = isGoogleDriveUrl(url) || isMegaNzUrl(url) || isVidsrcUrl(url) || isVidjoyUrl(url) || isVidsrcMeUrl(url) || isVidsrcToUrl(url) || isVidsrcXyzUrl(url) || isGoDrivePlayerUrl(url) || isVidLinkProUrl(url) || is2EmbedUrl(url) || isEmbedSuUrl(url) || isAutoEmbedUrl(url) || isVideasyUrl(url) || isVidfastEmbedUrl(url) || isVidplusUrl(url);
 
             if (isEmbed) {
                 // Switching TO an embed source
@@ -4443,6 +4443,10 @@
                     if (fileId) embedUrl = `https://drive.google.com/file/d/${fileId}/preview`;
                 } else if (isMegaNzUrl(url)) {
                     embedUrl = url.replace('/file/', '/embed/');
+                } else if (isVidfastEmbedUrl(url)) {
+                    embedUrl = url.replace('/movie/', '/embed/movie/').replace('/tv/', '/embed/tv/');
+                } else if (isVidplusUrl(url)) {
+                    embedUrl = url.replace('https://vidplus.to', 'https://player.vidplus.to').replace('/movie/', '/embed/movie/').replace('/tv/', '/embed/tv/');
                 }
 
                 iframe.src = getAutoplayUrl(embedUrl);
@@ -5952,6 +5956,18 @@ async function switchToServer(server, allServers) {
         function isVideasyUrl(url) {
             if (!url) return false;
             return url.includes('videasy');
+        }
+        
+        // Check if URL is a Vidfast that needs /embed/ path
+        function isVidfastEmbedUrl(url) {
+            if (!url) return false;
+            return url.includes('vidfast.net') || url.includes('vidfast.to');
+        }
+        
+        // Check if URL is Vidplus
+        function isVidplusUrl(url) {
+            if (!url) return false;
+            return url.includes('vidplus.to');
         }
         
         // Create universal server selector for both Plyr and embedded sources
@@ -8119,4 +8135,4 @@ playerInstance.on('ready', event => {
     </script>
 
 </body>
-</ht
+</h
