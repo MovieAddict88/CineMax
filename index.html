@@ -7,6 +7,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flag-icon-css@4.1.7/css/flag-icons.min.css">
     <link rel="stylesheet" href="https://cdn.plyr.io/3.7.8/plyr.css">
+    <link rel="stylesheet" href="animations.css">
     <style>
         /* Notification Bar Styles */
         .notification-bar {
@@ -2868,9 +2869,43 @@
                                     <span id="viewer-date"><i class="fas fa-calendar"></i> Jan 15, 2023</span>
                                 </div>
                                 <div class="video-actions">
-                                    <button class="action-btn" id="like-btn"><i class="fas fa-thumbs-up"></i> <span id="like-count-span">24K</span></button>
-                                    <button class="action-btn" id="dislike-btn"><i class="fas fa-thumbs-down"></i> <span id="dislike-count-span">1K</span></button>
-                                    <button class="action-btn" id="share-video-btn"><i class="fas fa-share"></i> <span>Share</span></button>
+                                    <div class="like-dislike-container">
+                                        <div class="icons-box">
+                                            <label class="icons">
+                                                <span class="btn-label">
+                                                    <input class="input-box" type="checkbox" id="like-checkbox" name="like-checkbox">
+                                                    <span class="like-text-content" id="like-count-span">24K</span>
+                                                    <i id="icon-like-regular" class="fas fa-thumbs-up"></i>
+                                                    <i id="icon-like-solid" class="fas fa-thumbs-up"></i>
+                                                    <div class="fireworks">
+                                                        <div class="checked-like-fx"></div>
+                                                    </div>
+                                                </span>
+                                            </label>
+                                            <label class="icons">
+                                                <span class="btn-label">
+                                                    <input class="input-box" type="checkbox" id="dislike-checkbox" name="dislike-checkbox">
+                                                    <i id="icon-dislike-regular" class="fas fa-thumbs-down"></i>
+                                                    <i id="icon-dislike-solid" class="fas fa-thumbs-down"></i>
+                                                    <span class="dislike-text-content" id="dislike-count-span">1K</span>
+                                                    <div class="fireworks">
+                                                        <div class="checked-dislike-fx"></div>
+                                                    </div>
+                                                </span>
+                                            </label>
+                                            <label class="icons">
+                                                <span class="btn-label">
+                                                    <input class="input-box" type="checkbox" id="share-checkbox" name="share-checkbox">
+                                                    <i id="icon-share-regular" class="fas fa-share"></i>
+                                                    <i id="icon-share-solid" class="fas fa-share"></i>
+                                                    <span class="share-text-content">Share</span>
+                                                    <div class="fireworks">
+                                                        <div class="checked-share-fx"></div>
+                                                    </div>
+                                                </span>
+                                            </label>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -3321,9 +3356,9 @@
             searchContainer: document.querySelector('.search-container'),
             backButton: document.getElementById('back-button'),
             loadingSpinner: document.getElementById('loading-spinner'),
-            shareVideoBtn: document.getElementById('share-video-btn'),
-            likeBtn: document.getElementById('like-btn'),
-            dislikeBtn: document.getElementById('dislike-btn'),
+            likeCheckbox: document.getElementById('like-checkbox'),
+            dislikeCheckbox: document.getElementById('dislike-checkbox'),
+            shareCheckbox: document.getElementById('share-checkbox'),
             likeCountSpan: document.getElementById('like-count-span'),
             dislikeCountSpan: document.getElementById('dislike-count-span'),
             progressBarContainer: document.getElementById('progress-bar-container'),
@@ -4350,24 +4385,34 @@
 
             elements.viewerPage.style.display = 'block';
             window.scrollTo(0, 0);
-            const newShareHandler = () => handleShareVideo(content);
-            if (elements.shareVideoBtn._shareHandler) {
-                elements.shareVideoBtn.removeEventListener('click', elements.shareVideoBtn._shareHandler);
-            }
-            elements.shareVideoBtn.addEventListener('click', newShareHandler);
-            elements.shareVideoBtn._shareHandler = newShareHandler;
 
+            // --- Correct Event Listener Setup for Checkboxes ---
             updateLikeDislikeUI(content.Title);
 
-            const newLikeHandler = () => handleLike(content);
-            if(elements.likeBtn._likeHandler) elements.likeBtn.removeEventListener('click', elements.likeBtn._likeHandler);
-            elements.likeBtn.addEventListener('click', newLikeHandler);
-            elements.likeBtn._likeHandler = newLikeHandler;
+            // Remove old listeners and add new ones to prevent duplicates.
+            // The 'change' event is used for checkboxes.
+            const setupListener = (element, handler) => {
+                if (!element) return; // Guard against null elements
+                if (element._changeHandler) {
+                    element.removeEventListener('change', element._changeHandler);
+                }
+                element._changeHandler = handler;
+                element.addEventListener('change', element._changeHandler);
+            };
 
-            const newDislikeHandler = () => handleDislike(content);
-            if(elements.dislikeBtn._dislikeHandler) elements.dislikeBtn.removeEventListener('click', elements.dislikeBtn._dislikeHandler);
-            elements.dislikeBtn.addEventListener('click', newDislikeHandler);
-            elements.dislikeBtn._dislikeHandler = newDislikeHandler;
+            // The handler functions (handleLike, handleDislike, handleShareVideo)
+            // already use the global `currentContentInfo`, so we don't need to pass `content`.
+            setupListener(elements.likeCheckbox, handleLike);
+            setupListener(elements.dislikeCheckbox, handleDislike);
+            setupListener(elements.shareCheckbox, () => {
+                handleShareVideo();
+                // Uncheck the share box immediately after action for better UX
+                setTimeout(() => {
+                    if (elements.shareCheckbox) {
+                        elements.shareCheckbox.checked = false;
+                    }
+                }, 500);
+            });
 
             const watchLaterBtn = document.getElementById('watch-later-btn');
             if (watchLaterBtn) {
@@ -7959,20 +8004,19 @@ async function switchToServer(server, allServers) {
         }
 
         function updateLikeDislikeUI(contentId) {
-            if (!elements.likeBtn || !elements.dislikeBtn) return; // Ensure elements are present
+            const likeCheckbox = document.getElementById('like-checkbox');
+            const dislikeCheckbox = document.getElementById('dislike-checkbox');
+            const likeCountSpan = document.getElementById('like-count-span');
+            const dislikeCountSpan = document.getElementById('dislike-count-span');
 
-            const interactions = getVideoInteractions(contentId); // Get fresh data
-            elements.likeCountSpan.textContent = formatCount(interactions.likes);
-            elements.dislikeCountSpan.textContent = formatCount(interactions.dislikes);
+            if (!likeCheckbox || !dislikeCheckbox || !likeCountSpan || !dislikeCountSpan) return;
 
-            elements.likeBtn.classList.remove('active');
-            elements.dislikeBtn.classList.remove('active');
+            const interactions = getVideoInteractions(contentId);
+            likeCountSpan.textContent = formatCount(interactions.likes);
+            dislikeCountSpan.textContent = formatCount(interactions.dislikes);
 
-            if (interactions.userAction === 'liked') {
-                elements.likeBtn.classList.add('active');
-            } else if (interactions.userAction === 'disliked') {
-                elements.dislikeBtn.classList.add('active');
-            }
+            likeCheckbox.checked = interactions.userAction === 'liked';
+            dislikeCheckbox.checked = interactions.userAction === 'disliked';
         }
 
         function handleLike() {
